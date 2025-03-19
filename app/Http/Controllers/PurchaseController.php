@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Course;
+use App\Models\Purchase;
+use Illuminate\Http\Request;
+
+class PurchaseController extends Controller
+{
+    /**
+     * Обработать покупку курса.
+     *
+     * @param Request $request
+     * @param Course $course
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request, Course $course)
+    {
+        // Валидируем входные данные
+        $validated = $request->validate([
+            'user_id' => 'required|integer',
+            'payment_method' => 'required|in:card,sbp',
+            'payment_details' => 'nullable|json',
+        ]);
+
+        // Если payment_details пришёл как массив или объект
+        if (is_array($validated['payment_details']) || is_object($validated['payment_details'])) {
+            $validated['payment_details'] = json_encode($validated['payment_details']);
+        }
+
+        // Создаём покупку
+        $purchase = Purchase::create([
+            'user_id' => $validated['user_id'], // <-- Берём из запроса
+            'course_id' => $course->id,         // <-- Берём из параметра URL (Route Model Binding)
+            'payment_method' => $validated['payment_method'],
+            'payment_details' => $validated['payment_details'],
+            'status' => 'completed', // Или 'pending'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'purchase' => $purchase,
+            'message' => 'Курс успешно куплен'
+        ], 201);
+    }
+}
+
