@@ -23,6 +23,7 @@ class Course extends Model
         'teachers',
         'language',
         'direction',
+        'upgradequalification',
         'card_image',
         'description_image',
     ];

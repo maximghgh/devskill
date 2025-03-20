@@ -22,6 +22,7 @@ class CreateCoursesTable extends Migration
             $table->json('teachers')->nullable();
             $table->json('language');
             $table->string('direction')->nullable();
+            $table->integer('upgradequalification')->default(0);
             $table->string('card_image')->nullable();
             $table->string('description_image')->nullable();
             $table->timestamps();

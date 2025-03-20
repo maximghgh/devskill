@@ -23,11 +23,15 @@ class CourseController extends Controller
             'teachers'            => 'nullable|json', // ожидаем JSON-строку с массивом ID преподавателей
             'language'            => 'required|string', // язык программирования
             'direction'           => 'nullable|string',
+            'upgradequalification' => 'required|in:0,1',
             'cardImage'           => 'nullable|file|image|max:5120', // до 5 МБ
             'descriptionImage'    => 'nullable|file|image|max:5120',
         ]);
 
+        // $data['upgrade_qualification'] = $data['upgradeQualification'] === '1' ? true : false;
         // Преобразуем данные Editor.js из строки в массив, если нужно
+        $data['language'] = json_decode($request->input('language'), true);
+
         $data['editorData'] = json_decode($data['editorData'], true);
 
         // Преобразуем поле teachers из JSON в массив, если оно передано
@@ -61,6 +65,7 @@ class CourseController extends Controller
             'teachers'           => $data['teachers'] ?? null,
             'language'           => $data['language'],
             'direction'          => $data['direction'] ?? null,
+            'upgradequalification'=> $data['upgradequalification'] ?? null,
             'card_image'         => $data['card_image'] ?? null,
             'description_image'  => $data['description_image'] ?? null,
         ];
@@ -75,65 +80,103 @@ class CourseController extends Controller
         ], 201);
     }
     public function update(Request $request, $id)
-{
-    // Если нужно отладить — посмотрите, какие поля реально приходят:
-    // dd($request->all());
+    {
+        // Если нужно отладить — посмотрите, какие поля реально приходят:
+        // dd($request->all());
 
+        $course = Course::findOrFail($id);
+
+        // Валидация
+        $validated = $request->validate([
+            'cardTitle'           => 'nullable|string|max:255',
+            'courseName'          => 'required|string|max:255',
+            'price'               => 'required|numeric',
+            'duration'            => 'required|string',
+            'description'         => 'nullable|string',
+            'hours'               => 'nullable|integer',
+            'simulators'          => 'nullable|integer',
+            'difficulty'          => 'required|string',
+            'teachers'            => 'nullable|json',
+            // Если раньше использовалось поле language, его можно заменить или оставить для обратной совместимости
+            // 'language'          => 'required|string',
+            'language'   => 'nullable|json', // ожидаем JSON-строку
+            'selectedDirection'   => 'nullable|integer',
+            'upgradequalification'=> 'required|in:0,1',
+            'cardImage'           => 'nullable|file|image|max:5120',
+            'descriptionImage'    => 'nullable|image|max:2048',
+            'editorData'          => 'required', // Если нужно editorData
+        ]);
+
+
+        if (!empty($validated['language'])) {
+            $validated['language'] = json_decode($validated['language'], true);
+        }
+        
+        $validated['teachers'] = json_decode($validated['teachers'], true);
+        // Если editorData приходит как JSON-строка
+        if ($request->has('editorData')) {
+            $validated['editorData'] = json_decode($request->input('editorData'), true);
+        }
+
+        // Обновляем поля
+        $course->card_title   = $validated['cardTitle'] ?? null;
+        $course->course_name  = $validated['courseName'];
+        $course->price        = $validated['price'];
+        $course->duration     = $validated['duration'];
+        $course->description  = $validated['description'] ?? $course->description;
+        $course->hours        = $validated['hours'] ?? $course->hours;
+        $course->simulators   = $validated['simulators'] ?? $course->simulators;
+        $course->difficulty   = $validated['difficulty'];
+        $course->language     = $validated['language'];
+
+        // Если используется новое поле для языков (selectedLanguages), декодируем его и сохраняем в поле language
+        // if (isset($validated['selectedLanguages'])) {
+        //     $course->language = json_decode($validated['selectedLanguages'], true);
+        // }
+
+        // Обновляем направление, если передано
+        if (isset($validated['selectedDirection'])) {
+            $course->direction = $validated['selectedDirection'];
+        }
+
+        // Обновляем поле повышения квалификации
+        $course->upgradequalification = $validated['upgradequalification'];
+
+
+        if (isset($validated['editorData'])) {
+            $course->editor_data = $validated['editorData'];
+        }
+
+        // Обработка файлов, если есть
+        if ($request->hasFile('cardImage')) {
+            $path = $request->file('cardImage')->store('courses', 'public');
+            $course->card_image = $path;
+        }
+        if ($request->hasFile('descriptionImage')) {
+            $path = $request->file('descriptionImage')->store('courses', 'public');
+            $course->description_image = $path;
+        }
+
+        $course->save();
+
+        return response()->json([
+            'success' => true,
+            'course'  => $course,
+        ]);
+    }
+
+    public function destroy($id)
+{
+    // Ищем курс по id
     $course = Course::findOrFail($id);
 
-    // Валидация
-    $validated = $request->validate([
-        'cardTitle'        => 'nullable|string|max:255',
-        'courseName'       => 'required|string|max:255',
-        'price'            => 'required|numeric',
-        'duration'         => 'required|string',
-        'description'      => 'nullable|string',
-        'hours'            => 'nullable|integer',
-        'simulators'       => 'nullable|integer',
-        'difficulty'       => 'required|string',
-        'teachers' => 'nullable|json',
-        'language'         => 'required|string',
-        'cardImage'        => 'nullable|file|image|max:5120',
-        'descriptionImage' => 'nullable|image|max:2048',
-        'editorData'       => 'required', // Если нужно editorData
-    ]);
+    // Удаляем курс
+    $course->delete();
 
-    $validated['teachers'] = json_decode($validated['teachers'], true);
-    // Если editorData приходит как JSON-строка
-    if ($request->has('editorData')) {
-        $validated['editorData'] = json_decode($request->input('editorData'), true);
-    }
-
-    // Обновляем поля
-    $course->card_title   = $validated['cardTitle'] ?? null;
-    $course->course_name  = $validated['courseName'];
-    $course->price        = $validated['price'];
-    $course->duration     = $validated['duration'];
-    $course->description  = $validated['description'] ?? $course->description;
-    $course->hours        = $validated['hours'] ?? $course->hours;
-    $course->simulators   = $validated['simulators'] ?? $course->simulators;
-    $course->difficulty   = $validated['difficulty'];
-    $course->language     = $validated['language'];
-
-    if (isset($validated['editorData'])) {
-        $course->editor_data = $validated['editorData'];
-    }
-
-    // Обработка файлов, если есть
-    if ($request->hasFile('cardImage')) {
-        $path = $request->file('cardImage')->store('courses', 'public');
-        $course->card_image = $path;
-    }
-    if ($request->hasFile('descriptionImage')) {
-        $path = $request->file('descriptionImage')->store('courses', 'public');
-        $course->description_image = $path;
-    }
-
-    $course->save();
-
+    // Возвращаем ответ
     return response()->json([
         'success' => true,
-        'course'  => $course,
+        'message' => 'Курс успешно удалён.'
     ]);
 }
 

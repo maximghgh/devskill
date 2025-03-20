@@ -51,10 +51,13 @@ Route::post('/courses/{id}', [CourseController::class, 'update']);
 Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/courses', [CourseController::class, 'category']);
 
-
+// Удаление курса 
+Route::delete('/courses/{id}', [CourseController::class, 'destroy']);
 
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/profile', [ProfileController::class, 'updateProfile']);
+Route::patch('/users/{id}', [UserController::class, 'update']);
+Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
 // Верефикация по email
 Route::get('/emails/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
