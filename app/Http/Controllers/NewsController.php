@@ -16,7 +16,6 @@ class NewsController extends Controller
         $news = News::orderBy('created_at', 'desc')->get();
         return response()->json($news);
     }
-
     // Получение детальной информации о новости с комментариями
     public function show($id)
     {
@@ -35,8 +34,6 @@ class NewsController extends Controller
 
         return response()->json($news);
     }
-
-
     // Создание новой новости
     public function store(Request $request)
     {
@@ -61,7 +58,6 @@ class NewsController extends Controller
         $news = News::create($data);
         return response()->json($news, 201);
     }
-
     // Обновление существующей новости
     public function update(Request $request, $id)
     {
@@ -90,8 +86,7 @@ class NewsController extends Controller
         $news->update($data);
         return response()->json($news);
     }
-
-    // Удаление новости
+   //Удаления новости
     public function destroy($id)
     {
         $news = News::findOrFail($id);

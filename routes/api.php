@@ -71,10 +71,19 @@ Route::post('/register', [AuthController::class, 'register']);
 // Добавление категорий обучения(языков программирования)
 Route::post('/languages', [LanguageController::class, 'store']);
 Route::get('/languages', [LanguageController::class, 'index']);
+// Обновление языка программирования
+Route::patch('/languages/{id}', [LanguageController::class, 'update']);
+// Удаление языка программирования
+Route::delete('/languages/{id}', [LanguageController::class, 'destroy']);
 
 // Добавление категорий направления
 Route::post('/directions', [DirectionController::class, 'store']);
 Route::get('/directions', [DirectionController::class, 'index']);
+// Обновление направления
+Route::patch('/directions/{id}', [DirectionController::class, 'update']);
+// Удаление направления
+Route::delete('/directions/{id}', [DirectionController::class, 'destroy']);
+
 
 // Добавление частых вопросов
 Route::post('/faqs', [FaqController::class, 'store']);
@@ -83,7 +92,7 @@ Route::get('/faqs', [FaqController::class, 'index']);
 Route::get('/news', [NewsController::class, 'index']);
 Route::get('/news/{id}', [NewsController::class, 'show']);
 Route::post('/news', [NewsController::class, 'store']);
-Route::put('/news/{id}', [NewsController::class, 'update']);
+Route::patch('/news/{id}', [NewsController::class, 'update']);
 Route::delete('/news/{id}', [NewsController::class, 'destroy']);
 
 

@@ -30,4 +30,30 @@ class DirectionController extends Controller
         $directions = Direction::all();
         return response()->json($directions);
     }
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $direction = Direction::findOrFail($id);
+        $direction->name = $validated['name'];
+        $direction->save();
+
+        return response()->json([
+            'success' => true,
+            'direction' => $direction,
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $direction = Direction::findOrFail($id);
+        $direction->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Направление успешно удалено',
+        ]);
+    }
 }
