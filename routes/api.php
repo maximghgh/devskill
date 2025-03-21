@@ -14,7 +14,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ConsultationController;
-
+use App\Http\Controllers\CourseCommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +94,15 @@ Route::get('/news/{id}', [NewsController::class, 'show']);
 Route::post('/news', [NewsController::class, 'store']);
 Route::patch('/news/{id}', [NewsController::class, 'update']);
 Route::delete('/news/{id}', [NewsController::class, 'destroy']);
+
+//комментарии у курсов
+Route::get('/courses/{course}/comments', [CourseCommentController::class, 'index']);
+Route::post('/courses/{course}/comments', [CourseCommentController::class, 'store']);
+Route::patch('/course-comments/{comment}', [CourseCommentController::class, 'update']);
+Route::delete('/course-comments/{comment}', [CourseCommentController::class, 'destroy']);
+
+Route::post('/courses/{course}/comments/{comment}/like', [CourseCommentController::class, 'likeComment']);
+Route::post('/courses/{course}/comments/{comment}/dislike', [CourseCommentController::class, 'dislikeComment']);
 
 
 Route::get('/news-single/{id}', [NewsController::class, 'show']);

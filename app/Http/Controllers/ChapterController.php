@@ -44,7 +44,7 @@ class ChapterController extends Controller
             'type'  => 'required|in:video,text,task,terms,quiz',
             'content' => 'nullable', // Массив или объект
             'video_url' => 'nullable|string',
-            // ...
+            'correct_answer' => 'nullable|string', // <-- добавили
         ]);
 
         $validated['topic_id'] = $topicId;

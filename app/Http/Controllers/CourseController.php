@@ -182,8 +182,12 @@ class CourseController extends Controller
 
     public function show($id)
     {
-        $course = Course::findOrFail($id); 
-        // Если записи нет, Laravel автоматически вернет 404
+        $course = Course::withCount('topics')->findOrFail($id);
+        // $course = Course::findOrFail($id); 
+        // // Если записи нет, Laravel автоматически вернет 404
+        // if (is_string($course->teachers)) {
+        //     $course->teachers = json_decode($course->teachers, true);
+        // }
         if (is_string($course->teachers)) {
             $course->teachers = json_decode($course->teachers, true);
         }
@@ -202,6 +206,7 @@ class CourseController extends Controller
     
     public function index()
     {
+        
         return response()->json(Course::all(), 200);
     }
     public function category(Request $request)

@@ -32,55 +32,41 @@
                         <div class="course__content">
                             <h2>Курсы</h2>
                             <div class="course__cards">
-                                <div
-                                    class="course__card course__card_bg-cyan course__card_bg1"
+                                <!-- Перебираем только те курсы, у которых upgradequalification = 1 -->
+                                <div class="course__card"
+                                    v-for="course in upgradeCourses"
+                                    :key="course.id"
+                                    :class="difficultyBgClass[course.difficulty]" 
                                 >
-                                    <div class="course__card-image">
-                                        <img src="img/logo_c++.png" />
-                                    </div>
-                                    <div class="course__card-title">C++</div>
-                                    <div class="course__card-desc">Базовый</div>
-                                    <div class="course__card-price">
-                                        <span>5000 P</span>
-                                        <del>8900 P</del>
-                                    </div>
-                                    <div class="course__card-buttons">
-                                        <a
-                                            href="#"
-                                            class="button button_transparent"
-                                            >Подробнее</a
-                                        >
-                                        <a
-                                            href="#"
-                                            class="button button_white button_white-card"
-                                            >Купить</a
-                                        >
-                                    </div>
+                                <div class="course__card-image">
+                                    <img
+                                        :src="
+                                            course.card_image
+                                                ? course.card_image
+                                                : '/img/logo_placeholder.png'
+                                        "
+                                        alt="Изображение курса"
+                                    />
                                 </div>
-                                <div
-                                    class="course__card course__card_bg-green course__card_bg2"
-                                >
-                                    <div class="course__card-image">
-                                        <img src="img/logo_python.png" />
-                                    </div>
-                                    <div class="course__card-title">Phyton</div>
-                                    <div class="course__card-desc">Базовый</div>
-                                    <div class="course__card-price">
-                                        <span>5000 P</span>
-                                        <del>8900 P</del>
-                                    </div>
-                                    <div class="course__card-buttons">
-                                        <a
-                                            href="#"
-                                            class="button button_transparent"
-                                            >Подробнее</a
-                                        >
-                                        <a
-                                            href="#"
-                                            class="button button_white button_white-card"
-                                            >Купить</a
-                                        >
-                                    </div>
+                                <div class="course__card-title">
+                                    {{ course.course_name }}
+                                </div>
+                                <div class="course__card-desc">
+                                    {{ difficultyTranslation[course.difficulty] }}
+                                </div>
+                                <div class="course__card-price">
+                                    <span>{{ course.price }} P</span>
+                                    <!-- Пример «старой цены» -->
+                                    <del>{{ Math.round(course.price * 1.5) }} P</del>
+                                </div>
+                                <div class="course__card-buttons">
+                                    <a
+                                        :href="`/cpp/${course.id}`"
+                                        class="button button_transparent"
+                                        >Подробнее</a
+                                    >
+                                    <a href="#" class="button button_white button_white-card">Купить</a>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -89,32 +75,19 @@
                 <section class="course-content__teachers">
                     <h2>Наши преподаватели</h2>
                     <div class="course-content__teacher">
+                        <!-- Перебираем преподавателей -->
                         <div
-                            class="course-content__teacher-one course-content__teacher-one_column"
+                        class="course-content__teacher-one course-content__teacher-one_column"
+                        v-for="teacher in teachers"
+                        :key="teacher.id"
                         >
-                            <img src="img/teacher.jpg" />
-                            <div class="course-content__teacher-info">
-                                <p>Иванов Иван Иванович</p>
-                                <p>Доцент кафедры ИВТ, ИжГТУ</p>
-                            </div>
+                        <!-- Если у преподавателя есть собственное изображение, используем его, иначе — стандартное -->
+                        <img :src="teacher.image || 'img/teacher.jpg'" alt="Teacher Image" />
+                        <div class="course-content__teacher-info">
+                            <p>{{ teacher.name }}</p>
+                            <!-- Если у преподавателя есть должность, выводим её, иначе — дефолтное значение -->
+                            <p>{{ teacher.position || "Доцент кафедры ИВТ, ИжГТУ" }}</p>
                         </div>
-                        <div
-                            class="course-content__teacher-one course-content__teacher-one_column"
-                        >
-                            <img src="img/teacher.jpg" />
-                            <div class="course-content__teacher-info">
-                                <p>Иванов Иван Иванович</p>
-                                <p>Доцент кафедры ИВТ, ИжГТУ</p>
-                            </div>
-                        </div>
-                        <div
-                            class="course-content__teacher-one course-content__teacher-one_column"
-                        >
-                            <img src="img/teacher.jpg" />
-                            <div class="course-content__teacher-info">
-                                <p>Иванов Иван Иванович</p>
-                                <p>Доцент кафедры ИВТ, ИжГТУ</p>
-                            </div>
                         </div>
                     </div>
                 </section>
@@ -301,76 +274,144 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import axios from "axios";
 
+/* =====================================
+   1. FAQ (вопрос-ответ)
+===================================== */
 const questions = ref([]);
 
 function toggleAnswer(index) {
-    questions.value[index].isOpen = !questions.value[index].isOpen;
+  questions.value[index].isOpen = !questions.value[index].isOpen;
 }
 
 async function loadFaqs() {
-    try {
-        const response = await axios.get("/api/faqs");
-        // Проверим, что приходит
-        console.log("Полученные FAQ:", response.data);
-        // Дополнительно добавим флаг isOpen
-        questions.value = response.data.map((item) => ({
-            ...item,
-            isOpen: false,
-        }));
-    } catch (error) {
-        console.error("Ошибка при загрузке FAQ:", error);
-    }
+  try {
+    const response = await axios.get("/api/faqs");
+    console.log("Полученные FAQ:", response.data);
+    // Добавляем флаг isOpen для анимации раскрытия
+    questions.value = response.data.map((item) => ({
+      ...item,
+      isOpen: false,
+    }));
+  } catch (error) {
+    console.error("Ошибка при загрузке FAQ:", error);
+  }
 }
-
-onMounted(() => {
-    loadFaqs();
-});
 
 function beforeEnter(el) {
+  el.style.height = "0";
+  el.style.opacity = "0";
+}
+function enter(el, done) {
+  const height = el.scrollHeight;
+  el.style.transition = "height 0.4s ease, opacity 0.4s ease";
+  requestAnimationFrame(() => {
+    el.style.height = height + "px";
+    el.style.opacity = "1";
+  });
+  el.addEventListener("transitionend", done);
+}
+function afterEnter(el) {
+  el.style.height = "auto";
+}
+function beforeLeave(el) {
+  el.style.height = el.scrollHeight + "px";
+  el.style.opacity = "1";
+}
+function leave(el, done) {
+  el.style.transition = "height 0.4s ease, opacity 0.4s ease";
+  requestAnimationFrame(() => {
     el.style.height = "0";
     el.style.opacity = "0";
+  });
+  el.addEventListener("transitionend", done);
 }
-
-function enter(el, done) {
-    // Вычисляем полную высоту содержимого
-    const height = el.scrollHeight;
-    el.style.transition = "height 0.4s ease, opacity 0.4s ease";
-    // Используем requestAnimationFrame для корректного запуска анимации
-    requestAnimationFrame(() => {
-        el.style.height = height + "px";
-        el.style.opacity = "1";
-    });
-    el.addEventListener("transitionend", done);
-}
-
-function afterEnter(el) {
-    // После анимации сбрасываем высоту, чтобы при изменении контента не было ограничений
-    el.style.height = "auto";
-}
-
-function beforeLeave(el) {
-    el.style.height = el.scrollHeight + "px";
-    el.style.opacity = "1";
-}
-
-function leave(el, done) {
-    el.style.transition = "height 0.4s ease, opacity 0.4s ease";
-    requestAnimationFrame(() => {
-        el.style.height = "0";
-        el.style.opacity = "0";
-    });
-    el.addEventListener("transitionend", done);
-}
-
 function afterLeave(el) {
-    // Можно добавить очистку или сброс, если потребуется
+  // можно очистить стили, если нужно
 }
+
+/* =====================================
+   2. Пользователи и преподаватели
+===================================== */
+const users = ref([]);
+
+// Вычисляемый массив преподавателей (пользователи с role === 2)
+const teachers = computed(() => {
+  return users.value.filter(user => user.role === 2);
+});
+
+async function loadUsers() {
+  try {
+    const response = await axios.get("/api/users");
+    users.value = response.data;
+  } catch (error) {
+    console.error("Ошибка при загрузке пользователей:", error);
+  }
+}
+
+/* =====================================
+   3. Курсы (upgradequalification)
+===================================== */
+const allCourses = ref([]);
+
+// Фильтруем только те курсы, у которых upgradequalification = 1
+const upgradeCourses = computed(() => {
+  return allCourses.value.filter(course => course.upgradequalification === 1);
+});
+
+async function loadCourses() {
+  try {
+    const response = await axios.get("/api/courses");
+    allCourses.value = response.data;
+  } catch (error) {
+    console.error("Ошибка при загрузке курсов:", error);
+  }
+}
+
+/* =====================================
+   4. Маппинг сложности курсов
+===================================== */
+const difficultyBgClass = { 
+  basic: "block-info_bg-cyan",
+  middle: "block-info_bg-fiolet",
+  advanced: "block-info_bg-orange",
+  mixed: "block-info_bg-green",
+};
+
+const difficultyTranslation = {
+  basic: "Начинающий",
+  middle: "Средний",
+  advanced: "Продвинутый",
+  mixed: "Смешанный",
+};
+
+/* =====================================
+   5. onMounted: загрузка всех данных
+===================================== */
+onMounted(() => {
+  loadFaqs();
+  loadUsers();
+  loadCourses();
+});
 </script>
 
+
 <style scoped>
+.block-info_bg-cyan {
+    background-color: #698dc9;
+}
+.block-info_bg-fiolet {
+    background-color: #727dcc;
+}
+.block-info_bg-orange {
+    background-color: #d48a66;
+}
+.block-info_bg-green {
+    background-color: #5bcaa7;
+}
+
 /* Контейнер */
 .questions__inner {
     padding: 0 10px;

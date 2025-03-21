@@ -19,6 +19,7 @@ class Chapter extends Model
         'content',
         'video_url',
         'order',
+        'correct_answer',
     ];
 
     protected $casts = [

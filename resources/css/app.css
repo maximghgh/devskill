@@ -249,7 +249,7 @@ nav a:hover {border-bottom: 1px solid #000;}
 .offer_main {background-image: url('http://127.0.0.1:8000/img/bg_offer.jpg');}
 
 .offer_about {
-    background-image: url('http://127.0.0.1:8000/assets/img/bg_about.jpg');
+    background-image: url('http://127.0.0.1:8000/img/bg_about.jpg');
 }
 .offer_training {background-image: url('http://127.0.0.1:8000/img/bg_training.jpg');}
 .offer__inner_main {}

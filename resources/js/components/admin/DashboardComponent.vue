@@ -1006,7 +1006,6 @@
                                     </form>
                                 </div>
                             </div>
-
                             <!-- Другие блоки (аналитика, FAQ, и т.д.) -->
                             <div v-else-if="item.id === 'news'">
                               <table v-if="newsItems.length" class="light-push-table">

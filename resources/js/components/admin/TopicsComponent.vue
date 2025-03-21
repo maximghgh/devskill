@@ -55,7 +55,7 @@
                     Текст
                 </button>
                 <button @click="selectType('task')" class="type-button">
-                    Тест
+                    Задания
                 </button>
                 <button @click="selectType('terms')" class="type-button">
                     Термины
@@ -104,6 +104,8 @@
 
                 <!-- Для теста -->
                 <div v-else-if="selectedType === 'task'" class="form-group">
+                    <label class="form-label">Поле для правильного ответа:</label>
+                    <textarea v-model="newChapter.correct_answer" class="correct-answer-textarea" placeholder="Введите правильный ответ"></textarea>
                     <label class="form-label">Редактор теста:</label>
                     <div id="editor-task" class="editor-container"></div>
                 </div>
@@ -150,9 +152,10 @@ const selectedType = ref("");
 
 // Данные новой главы
 const newChapter = ref({
-  title: "",
-  video_url: "",
-  content: null,
+  title: "", // <-- поле для названия главы
+  video_url: "", // <-- поле для url видео
+  content: null, // <-- поле для editor.js
+  correct_answer: "" // <-- поле для правильного ответа
 });
 
 // Экземпляр Editor.js
@@ -235,6 +238,7 @@ function selectType(type) {
     title: "",
     video_url: "",
     content: null,
+    correct_answer: ""
   };
 }
 
@@ -270,6 +274,7 @@ async function submitChapter() {
       title: "",
       video_url: "",
       content: null,
+      correct_answer: ""
     };
     if (editorInstance) {
       editorInstance.destroy();
@@ -291,6 +296,16 @@ function goBack() {
 </script>
 
 <style scoped>
+.correct-answer-textarea {
+  min-height: 120px;   /* Можно отрегулировать под нужный размер */
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;    /* Позволяет вертикально растягивать поле */
+  font-size: 14px;
+}
 .block__info{
     position: relative;
     display: flex;

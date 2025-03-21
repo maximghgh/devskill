@@ -29,6 +29,8 @@ class CreateChaptersTable extends Migration
             
             // Поле для сортировки глав внутри темы (необязательно)
             $table->integer('order')->default(0);
+
+            $table->string('correct_answer')->nullable();
             
             $table->timestamps();
         });
