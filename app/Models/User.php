@@ -20,6 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'country',
         'password',
+        'photo',
     ];
     protected $hidden = [
          // поле, которое хотим скрыть

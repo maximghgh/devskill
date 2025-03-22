@@ -92,36 +92,33 @@ class TopicController extends Controller
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $topicId)
     {
-        $topic = Topic::findOrFail($id);
+        $topic = Topic::findOrFail($topicId);
 
-        $request->validate([
-            'title'       => 'required|string|max:255',
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'order'       => 'nullable|integer',
+            'order' => 'nullable|integer',
         ]);
 
-        $topic->update($request->all());
+        $topic->update($validated);
 
-        return redirect()->route('admin.topics.index', ['course' => $topic->course_id])
-                         ->with('success', 'Тема успешно обновлена');
+        return response()->json([
+            'success' => true,
+            'topic'   => $topic
+        ]);
     }
 
-    /**
-     * Удалить тему.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy($id)
+    public function destroy($topicId)
     {
-        $topic = Topic::findOrFail($id);
-        $courseId = $topic->course_id;
+        $topic = Topic::findOrFail($topicId);
         $topic->delete();
 
-        return redirect()->route('admin.topics.index', ['course' => $courseId])
-                         ->with('success', 'Тема успешно удалена');
+        return response()->json([
+            'success' => true,
+            'message' => 'Тема удалена'
+        ]);
     }
     // AdminCourseController.php
     public function show(Course $course)

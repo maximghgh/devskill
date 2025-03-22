@@ -13,7 +13,7 @@ class UserController extends Controller
     public function index()
     {
         // Получаем всех пользователей
-        $users = User::select('id', 'name', 'email', 'phone', 'country', 'role', 'birthday', 'created_at')
+        $users = User::select('id', 'name', 'email', 'phone', 'country', 'role', 'birthday', 'created_at', 'photo')
                      ->orderBy('id', 'asc')
                      ->get();
 
@@ -89,6 +89,32 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Пользователь успешно удалён'
+        ]);
+    }
+    public function updateAvatar(Request $request, $id)
+    {
+        // Находим пользователя по ID
+        $user = User::findOrFail($id);
+
+        // Валидируем файл
+        $request->validate([
+            'file' => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048',
+        ]);
+
+        // Если файл передан
+        if ($request->hasFile('file')) {
+            // Сохраняем файл в storage/app/public/avatars
+            $path = $request->file('file')->store('avatars', 'public');
+            // В поле photo пишем путь, например "avatars/xxxxxx.jpg"
+            $user->photo = $path;
+        }
+
+        // Сохраняем изменения
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'user'    => $user,
         ]);
     }
 

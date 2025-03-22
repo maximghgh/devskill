@@ -570,6 +570,15 @@ onMounted(() => {
 
 
 <style scoped>
+@media (max-width: 991px) {
+    .content__img_big{
+        width: 100%;
+        height: 100%;
+    }
+}
+.ce-block__content{
+  max-width: unset !important;
+}
 .comment__one_respond {
     margin: 0 0 35px 90px;
 }

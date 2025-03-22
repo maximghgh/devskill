@@ -82,7 +82,10 @@
                         :key="teacher.id"
                         >
                         <!-- Если у преподавателя есть собственное изображение, используем его, иначе — стандартное -->
-                        <img :src="teacher.image || 'img/teacher.jpg'" alt="Teacher Image" />
+                        <img
+                            :src="teacher.photo ? `/storage/${teacher.photo}` : 'img/teacher.jpg'"
+                            alt="Teacher Image" class="avatar__teacher"
+                        />
                         <div class="course-content__teacher-info">
                             <p>{{ teacher.name }}</p>
                             <!-- Если у преподавателя есть должность, выводим её, иначе — дефолтное значение -->
@@ -399,6 +402,11 @@ onMounted(() => {
 
 
 <style scoped>
+.avatar__teacher{
+    width: 129px;
+    height: 129px;
+    border-radius: 50%;
+}
 .block-info_bg-cyan {
     background-color: #698dc9;
 }

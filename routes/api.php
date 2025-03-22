@@ -15,7 +15,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\CourseCommentController;
-
+use App\Http\Controllers\TopicController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -58,6 +58,9 @@ Route::get('/users', [UserController::class, 'index']);
 Route::post('/profile', [ProfileController::class, 'updateProfile']);
 Route::patch('/users/{id}', [UserController::class, 'update']);
 Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+// добаваление авы
+Route::post('/users/{id}/photo', [UserController::class, 'updateAvatar']);
 
 // Верефикация по email
 Route::get('/emails/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
@@ -127,3 +130,17 @@ Route::post('/{course}/purchase', [PurchaseController::class, 'store'])->name('p
 Route::post('/{course}/consultation', [ConsultationController::class, 'store'])->name('consultations.store');
 
 Route::get('/course/{courseId}/topics', [CourseController::class, 'getTopics']);
+
+Route::prefix('admin/course/{course}')->group(function () {
+    // Получить список тем курса
+    Route::get('/topics', [TopicController::class, 'index'])->name('admin.topics.index');
+    // Создать новую тему для курса
+    Route::post('/topics', [TopicController::class, 'store'])->name('admin.topics.store');
+});
+
+Route::prefix('admin/topics')->group(function () {
+    // PATCH /admin/topics/{topic}
+    Route::patch('/{topic}', [TopicController::class, 'update']);
+    // DELETE /admin/topics/{topic}
+    Route::delete('/{topic}', [TopicController::class, 'destroy']);
+});

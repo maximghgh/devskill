@@ -73,12 +73,15 @@
                 </section>
                 <section class="course">
                     <div class="course__inner">
-                        <div class="course__sidebar">
+                        <div class="course__button course__button_active" @click="toggleSidebar">
+                            <img src="https://devskills.foncode.ru/img/filter.jpg" width="40" height="40">
+                        </div>
+                        <div class="course__sidebar" :class="{ 'course__sidebar_open': isSidebarOpen }">
                             <div class="course__sidebar-block">
                                 <div class="course__sidebar-title">
                                     Тематика
                                 </div>
-                                <div class="course__sidebar-check">
+                                <div class="course__sidebar-check course__sidebar-check--lang">
                                     <div
                                         class="course__sidebar-oncheck"
                                         v-for="language in languages"
@@ -150,9 +153,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div
-                                class="course__sidebar-block course__sidebar-block_noline"
-                            >
+                            <div class="course__sidebar-block course__sidebar-block_noline">
                                 <div class="course__sidebar-title">
                                     Длительность
                                 </div>
@@ -622,6 +623,14 @@ import { ref, onMounted, watch, computed, nextTick } from "vue";
 import axios from "axios";
 
 
+/* Реактивная переменная, которая управляет видимостью / открытостью сайдбара */
+const isSidebarOpen = ref(false)
+
+/* Функция, переключающая состояние */
+function toggleSidebar() {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+
 /* =====================================
    1) Общие данные: пользователь, курсы, языки, направления, пагинация, фильтры
 ===================================== */
@@ -964,13 +973,38 @@ onMounted(async () => {
 });
 </script>
 
-
-
-
-
 <style scoped>
 /* Пример возможных стилей для модального окна */
 /* Обёртка */
+.course__button {
+    display: none;
+    width: 40px;
+    height: 38px;
+    position: absolute;
+    top: 0;
+    right: 15px;
+    z-index: 10;
+}
+@media (max-width: 991px) {
+    .course__button {
+        display: block;
+    }
+    .course__sidebar-check--lang {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 10px;
+    }
+}
+@media (max-width: 600px) {
+    .course__sidebar-check--lang{
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+@media (max-width: 500px) {
+    .course__sidebar-check--lang{
+        grid-template-columns: 1fr 1fr;
+    }
+}
 .else__info{
     display: flex;
     flex-direction: column;

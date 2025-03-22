@@ -9,6 +9,11 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ChapterController;
 use App\Models\Course;
+use App\Http\Controllers\ForgotPasswordController;
+
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetCode'])->name('password.email');
+Route::post('/password/reset', [ForgotPasswordController::class, 'resetPassword'])->name('password.reset');
+
 
 Route::get('/', function () {
     return view('welcome');

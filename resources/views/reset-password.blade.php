@@ -8,6 +8,7 @@
 </head>
 <body>
     <div id="app">
+        <header-component></header-component>
         <reset-password-component></reset-password-component>
     </div>
 </body>

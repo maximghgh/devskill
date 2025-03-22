@@ -1,110 +1,141 @@
 <template>
     <div>
-        <div class="block__info">
-            <a class="span__sctrelca" href="#" @click.prevent="goBack">🠔</a>
-            <h1>Темы курса</h1>
-        </div>
-        <!-- Таблица с темами -->
-        <div v-if="topics.length">
-            <table class="light-push-table" v-if="topics.length">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Название темы</th>
-                        <th>Описание</th>
-                        <th>Добавить материал</th>
-                        <th>Количество материала</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(topic, index) in topics" :key="topic.id">
-                        <td>{{ index + 1 }}</td>
-                        <td>{{ topic.title }}</td>
-                        <td>{{ topic.description }}</td>
-                        <td>
-                            <a :href="`/admin/topic/${topic.id}/chapters/create`">
-                            Добавить главу
-                            </a>
-                        </td>
-                        <td>{{ topic.chapters_count }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Сообщение, если тем нет -->
-        <div v-else>
-            <p>Темы отсутствуют.</p>
-        </div>
-
-        <!-- Кнопка для показа/скрытия формы создания темы -->
-        <button class="type-button" @click="toggleTopicForm">
-            {{ showTopicForm ? "Отмена" : "Добавить тему" }}
-        </button>
-
-        <!-- Форма создания темы -->
-        <div v-if="showTopicForm" class="topic-form">
-            <h2>Новая тема</h2>
-            <form @submit.prevent="submitTopic" class="course-form">
-                <div class="form-group">
-                    <label for="title" class="form-label">Название темы:</label>
-                    <input
-                        type="text"
-                        id="title"
-                        v-model="newTopic.title"
-                        required
-                        placeholder="Введите название темы"
-                        class="form-input"
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="description" class="form-label">Описание темы:</label>
-                    <textarea
-                        id="description"
-                        v-model="newTopic.description"
-                        placeholder="Введите описание темы"
-                        class="form-textarea"
-                    ></textarea>
-                </div>
-                <button type="submit" class="form-button">Сохранить тему</button>
-            </form>
-        </div>
+      <div class="block__info">
+        <a class="span__sctrelca" href="#" @click.prevent="goBack">🠔</a>
+        <h1>Темы курса</h1>
+      </div>
+      <!-- Таблица с темами -->
+      <div v-if="topics.length">
+        <table class="light-push-table light-push-table--s">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Название темы</th>
+              <th>Описание</th>
+              <th>Добавить материал</th>
+              <th>Количество материала</th>
+              <th>Изменения</th>
+              <th>Удалить</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(topic, index) in topics" :key="topic.id">
+              <td>{{ index + 1 }}</td>
+  
+              <!-- Режим редактирования для названия темы -->
+              <td v-if="editingTopicId === topic.id">
+                <input v-model="editingTopic.title" type="text" class="form-input" />
+              </td>
+              <td v-else>
+                {{ topic.title }}
+              </td>
+  
+              <!-- Режим редактирования для описания -->
+              <td v-if="editingTopicId === topic.id">
+                <textarea v-model="editingTopic.description" class="form-textarea"></textarea>
+              </td>
+              <td v-else>
+                {{ topic.description }}
+              </td>
+  
+              <!-- Ссылка для добавления материала -->
+              <td>
+                <a :href="`/admin/topic/${topic.id}/chapters/create`">Добавить главу</a>
+              </td>
+  
+              <!-- Количество материала -->
+              <td>{{ topic.chapters_count }}</td>
+  
+              <!-- Редактирование: если тема редактируется, показываем кнопки "Сохранить" и "Отмена" -->
+              <td class="topic__edit" v-if="editingTopicId === topic.id">
+                <button class="btn__user--edit" @click="saveTopic">Сохранить</button>
+                <button class="btn__user--edit" @click="cancelEditingTopic">Отмена</button>
+              </td>
+              <td v-else>
+                <button class="btn__user--edit" @click="startEditingTopic(topic)">Редактировать</button>
+              </td>
+  
+              <!-- Удаление -->
+              <td>
+                <button class="btn__user--delete" @click="deleteTopic(topic.id)">Удалить</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  
+      <!-- Сообщение, если тем нет -->
+      <div v-else>
+        <p>Темы отсутствуют.</p>
+      </div>
+  
+      <!-- Кнопка для показа/скрытия формы создания темы -->
+      <button class="type-button" @click="toggleTopicForm">
+        {{ showTopicForm ? "Отмена" : "Добавить тему" }}
+      </button>
+  
+      <!-- Форма создания темы -->
+      <div v-if="showTopicForm" class="topic-form">
+        <h2>Новая тема</h2>
+        <form @submit.prevent="submitTopic" class="course-form">
+          <div class="form-group">
+            <label for="title" class="form-label">Название темы:</label>
+            <input
+              type="text"
+              id="title"
+              v-model="newTopic.title"
+              required
+              placeholder="Введите название темы"
+              class="form-input"
+            />
+          </div>
+          <div class="form-group">
+            <label for="description" class="form-label">Описание темы:</label>
+            <textarea
+              id="description"
+              v-model="newTopic.description"
+              placeholder="Введите описание темы"
+              class="form-textarea"
+            ></textarea>
+          </div>
+          <button type="submit" class="form-button">Сохранить тему</button>
+        </form>
+      </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
-// 1. Функция, которая ищет в URL "/admin/course/20"
+// 1. Функция для извлечения courseId из URL, например /admin/course/20
 function getCourseIdFromUrl() {
-  const pathParts = window.location.pathname.split('/'); 
-  // pathParts будет ["", "admin", "course", "20"] при URL http://127.0.0.1:8000/admin/course/20
-  // Найдем индекс 'course'
-  const idx = pathParts.indexOf('course');
-  // Следующий элемент после 'course' — это и есть "20"
+  const pathParts = window.location.pathname.split("/");
+  const idx = pathParts.indexOf("course");
   return pathParts[idx + 1];
 }
-
 const courseId = getCourseIdFromUrl();
 
-// 2. Рефы для списка тем, флага формы и новой темы
-const topics = ref([]);
-const showTopicForm = ref(false);
-const newTopic = ref({ title: '', description: '' });
+// 2. Реактивные переменные
+const topics = ref([]);           // Список тем
+const showTopicForm = ref(false); // Показ/скрытие формы "Добавить тему"
+const newTopic = ref({ title: "", description: "" });
 
-// 3. Загрузка тем
+// Inline-редактирование
+const editingTopicId = ref(null);
+const editingTopic = ref({});
+
+// 3. Загрузка тем (GET /admin/course/{course}/topics)
 async function loadTopics() {
   try {
     const response = await axios.get(`/admin/course/${courseId}/topics`);
-    console.log('Ответ от сервера:', response.data);
     topics.value = response.data.topics || [];
   } catch (error) {
-    console.error('Ошибка при загрузке тем:', error);
+    console.error("Ошибка при загрузке тем:", error);
   }
 }
 
-// 4. Создание темы
+// 4. Создание новой темы (POST /admin/course/{course}/topics)
 async function submitTopic() {
   try {
     const response = await axios.post(
@@ -114,28 +145,89 @@ async function submitTopic() {
     if (response.data.topic) {
       topics.value.push(response.data.topic);
     }
-    newTopic.value = { title: '', description: '' };
+    newTopic.value = { title: "", description: "" };
     showTopicForm.value = false;
   } catch (error) {
-    console.error('Ошибка при создании темы:', error);
+    console.error("Ошибка при создании темы:", error);
   }
 }
 
+// 5. Показ/скрытие формы добавления темы
 function toggleTopicForm() {
   showTopicForm.value = !showTopicForm.value;
 }
 
-// 5. Загружаем темы при монтировании
-onMounted(() => {
-  loadTopics();
-});
-
+// 6. Кнопка "Назад"
 function goBack() {
   window.history.back();
 }
+
+// 7. Inline-редактирование
+function startEditingTopic(topic) {
+  editingTopicId.value = topic.id;
+  editingTopic.value = { ...topic }; // копируем поля темы
+}
+
+async function saveTopic() {
+  try {
+    // PATCH /admin/topics/{topic}
+    const response = await axios.put(
+        `/admin/topics/${editingTopic.value.id}`,
+        editingTopic.value
+    );
+    // Находим индекс темы и обновляем
+    const index = topics.value.findIndex(
+      (t) => t.id === editingTopic.value.id
+    );
+    if (index !== -1) {
+      topics.value[index] = response.data.topic;
+    }
+    editingTopicId.value = null;
+    editingTopic.value = {};
+  } catch (error) {
+    console.error("Ошибка при обновлении темы:", error);
+  }
+}
+
+function cancelEditingTopic() {
+  editingTopicId.value = null;
+  editingTopic.value = {};
+}
+
+// 8. Удаление темы (DELETE /admin/topics/{topic})
+async function deleteTopic(topicId) {
+  if (!confirm("Вы действительно хотите удалить тему?")) return;
+  try {
+    const response = await axios.delete(`/admin/topics/${topicId}`);
+    // Удаляем тему из локального массива
+    topics.value = topics.value.filter((t) => t.id !== topicId);
+  } catch (error) {
+    console.error("Ошибка при удалении темы:", error);
+  }
+}
+
+// 9. Загрузка тем при монтировании
+onMounted(() => {
+  loadTopics();
+});
 </script>
 
 <style scoped>
+.btn__user--edit {
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: #007bff;
+}
+.btn__user--delete {
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: red;
+}
+.form-textarea{
+    width: 700px;
+}
 .block__info{
     position: relative;
     display: flex;
@@ -230,7 +322,7 @@ function goBack() {
 }
 table.light-push-table {
     margin: 45px auto;
-    width: 1200px;
+    width: 1500px;
     border-collapse: collapse;
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -243,7 +335,6 @@ table.light-push-table {
     border-bottom: 1px solid #e0e0e0;
     text-align: left;
     font-size: 14px;
-    white-space: nowrap;
     /* Запрещает перенос текста */
     text-overflow: ellipsis;
     /* Добавляет многоточие при обрезке */
