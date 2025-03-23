@@ -8,6 +8,7 @@
 </head>
 <body>
     <div id="app">
+        <header-component></header-component>
         <register-component></register-component>
     </div>
 </body>

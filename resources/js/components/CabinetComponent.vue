@@ -245,7 +245,7 @@ onMounted(async () => {
                 `/api/user/${user.value.id}/purchased-courses`
             );
             console.log("Ответ сервера:", response.data);
-            console.log('purchasedCourses:', purchasedCourses.value);
+            console.log("purchasedCourses:", purchasedCourses.value);
             purchasedCourses.value = response.data.courses;
         } catch (error) {
             console.error("Ошибка при загрузке купленных курсов", error);
@@ -257,7 +257,6 @@ onMounted(async () => {
 <style scoped>
 .course__card_personal {
     width: 336px;
-    max-width: 45%;
     padding: 26px 31px;
 }
 .button_transparent--xl {

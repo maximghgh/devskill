@@ -67,40 +67,40 @@ class AuthController extends Controller
 
     // Подтверждение аккаунта по ссылке
     public function verifyEmail(Request $request, $token)
-{
-    $pendingUser = PendingUser::where('token', $token)
-        ->where('expires_at', '>', now())
-        ->first();
+    {
+        $pendingUser = PendingUser::where('token', $token)
+            ->where('expires_at', '>', now())
+            ->first();
 
-    if (!$pendingUser) {
-        return redirect('/')->with('error', '❌ Недействительная или устаревшая ссылка.');
+        if (!$pendingUser) {
+            return redirect('/')->with('error', '❌ Недействительная или устаревшая ссылка.');
+        }
+
+        if (User::where('email', $pendingUser->email)->exists()) {
+            return redirect('/')->with('error', '❌ Этот email уже подтверждён.');
+        }
+
+        // Создаём реального пользователя
+        $user = User::create([
+            'name'              => $pendingUser->name,
+            'email'             => $pendingUser->email,
+            'password'          => $pendingUser->password, // уже зашифрован
+            'email_verified_at' => now()
+        ]);
+
+        // Удаляем временные данные
+        $pendingUser->delete();
+
+        // Кодируем необходимые поля в base64
+        $encodedUser = base64_encode(json_encode([
+            'id'    => $user->id,
+            'name'  => $user->name,
+            'email' => $user->email
+        ]));
+
+        // Перенаправляем на главную с параметром ?verifiedUser=...
+        return redirect("/?verifiedUser={$encodedUser}");
     }
-
-    if (User::where('email', $pendingUser->email)->exists()) {
-        return redirect('/')->with('error', '❌ Этот email уже подтверждён.');
-    }
-
-    // Создаём реального пользователя
-    $user = User::create([
-        'name'              => $pendingUser->name,
-        'email'             => $pendingUser->email,
-        'password'          => $pendingUser->password, // уже зашифрован
-        'email_verified_at' => now()
-    ]);
-
-    // Удаляем временные данные
-    $pendingUser->delete();
-
-    // Кодируем необходимые поля в base64
-    $encodedUser = base64_encode(json_encode([
-        'id'    => $user->id,
-        'name'  => $user->name,
-        'email' => $user->email
-    ]));
-
-    // Перенаправляем на главную с параметром ?verifiedUser=...
-    return redirect("/?verifiedUser={$encodedUser}");
-}
 
     public function login(Request $request)
     {
@@ -138,4 +138,34 @@ class AuthController extends Controller
 
         return response()->json(['success' => false], 401);
     }
+    public function resendEmail(Request $request)
+    {
+        // Получаем email из запроса
+        $email = $request->input('user_email');
+
+        // Находим PendingUser по email
+        $pendingUser = PendingUser::where('email', $email)->first();
+        if (!$pendingUser) {
+            return back()->with('error', 'Пользователь не найден или уже подтверждён.');
+        }
+
+        // (Опционально) можно обновить expires_at для продления срока действия
+        // $pendingUser->expires_at = Carbon::now()->addMinutes(60);
+        // $pendingUser->save();
+
+        // Генерируем ссылку, используя сохранённый token
+        $verificationUrl = URL::temporarySignedRoute(
+            'verify.email',
+            Carbon::now()->addMinutes(60),
+            ['token' => $pendingUser->token]
+        );
+
+        // Отправляем письмо с подтверждением
+        Mail::to($pendingUser->email)->send(new VerifyEmail($verificationUrl, $pendingUser->name));
+
+        return back()->with('status', 'Ссылка отправлена повторно!');
+    }
+
+
+
 }

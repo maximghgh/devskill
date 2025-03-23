@@ -73,7 +73,14 @@ Route::post('/users/{id}/photo', [UserController::class, 'updateAvatar']);
 // Верефикация по email
 Route::get('/emails/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->name('verify.email');
+// Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail'])
+//     ->name('verify.email');
+
+
 Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+// Route::post('/resend-link', [AuthController::class, 'resendEmail'])
+//     ->name('resend.link');
+
 
 // Создание пользователя и редактирование пользователя
 Route::post('/create-user', [AuthController::class, 'createUser']);

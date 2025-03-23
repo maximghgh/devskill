@@ -179,3 +179,5 @@ Route::group([
     });
 
 
+    Route::post('/resend-link', [AuthController::class, 'resendEmail'])
+    ->name('resend.link');
