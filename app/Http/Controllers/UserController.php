@@ -37,16 +37,36 @@ class UserController extends Controller
 
     public function getPurchasedCourses($id)
     {
-        // Сначала получаем все course_id, которые купил пользователь
+        // 1. Получаем все course_id, которые купил пользователь
         $courseIds = Purchase::where('user_id', $id)->pluck('course_id');
 
-        // Потом вытаскиваем все курсы по этим ID
-        $courses = \App\Models\Course::whereIn('id', $courseIds)->get();
+        // 2. Загружаем курсы, вместе с темами и главами (eager loading)
+        $courses = \App\Models\Course::whereIn('id', $courseIds)
+            ->with('topics.chapters')
+            ->get();
 
+        // 3. Загружаем прогресс пользователя
+        //    Предполагается, что есть модель UserChapterProgress,
+        //    которая хранит записи вида (user_id, chapter_id, completed_at, ...)
+        $progressRows = \App\Models\UserChapterProgress::where('user_id', $id)->get();
+        $completedChapterIds = $progressRows->pluck('chapter_id')->unique();
+
+        // 4. Проставляем is_completed = true/false каждой главе
+        foreach ($courses as $course) {
+            foreach ($course->topics as $topic) {
+                foreach ($topic->chapters as $chapter) {
+                    // Проверяем, есть ли chapter_id в списке пройденных
+                    $chapter->is_completed = $completedChapterIds->contains($chapter->id);
+                }
+            }
+        }
+
+        // 5. Возвращаем JSON-ответ
         return response()->json([
             'courses' => $courses
         ]);
     }
+
     public function update(Request $request, $id)
     {
         // Валидируем входные данные

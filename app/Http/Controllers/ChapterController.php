@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserChapterProgress;
 use App\Models\Chapter;
 use App\Models\Topic;
 use Illuminate\Http\Request;
@@ -74,38 +75,66 @@ class ChapterController extends Controller
     /**
      * Обновить данные главы.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $topicId, $chapterId)
     {
-        $chapter = Chapter::findOrFail($id);
-
-        $validated = $request->validate([
-            'title'      => 'required|string|max:255',
-            'type'       => 'required|in:video,text,task,terms,quiz',
-            'content'    => 'nullable',
-            'video_url'  => 'nullable|string',
-            'order'      => 'nullable|integer',
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'type'  => 'required|string|in:video,text,task,terms',
         ]);
 
-        $chapter->update($validated);
+        $chapter = Chapter::where('topic_id', $topicId)->findOrFail($chapterId);
+        $chapter->title          = $request->title;
+        $chapter->type           = $request->type;
+        $chapter->content        = $request->content; // JSON-контент, если используется Editor.js
+        $chapter->video_url      = $request->video_url ?? null;
+        $chapter->correct_answer = $request->correct_answer ?? null;
+        $chapter->save();
 
         return response()->json([
-            'success' => true,
             'chapter' => $chapter,
-            'message' => 'Глава успешно обновлена'
-        ], 200);
+        ]);
     }
 
     /**
      * Удалить главу.
      */
-    public function destroy($id)
+    public function destroy($topicId, $chapterId)
     {
-        $chapter = Chapter::findOrFail($id);
+        $chapter = Chapter::where('topic_id', $topicId)->findOrFail($chapterId);
         $chapter->delete();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Глава успешно удалена'
+            'message' => 'Глава успешно удалена',
         ]);
     }
+
+    public function completeChapter(Request $request, Chapter $chapter)
+{
+    // Берём user_id из запроса (из поля user_id)
+    $userId = $request->input('user_id') ?? auth()->id();
+
+    if (!$userId) {
+        return response()->json([
+            'message' => 'user_id is required'
+        ], 400);
+    }
+
+    // Создаём или ищем запись
+    $progress = UserChapterProgress::firstOrNew([
+        'user_id' => $userId,
+        'chapter_id' => $chapter->id,
+    ]);
+
+    if (!$progress->completed_at) {
+        $progress->completed_at = now();
+        $progress->save();
+    }
+
+    return response()->json([
+        'message' => 'Chapter completed',
+        'chapter_id' => $chapter->id
+    ]);
+}
+
+
 }

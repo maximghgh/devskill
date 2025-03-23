@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course; // Не забудьте создать модель Course
+use App\Models\Topic; // Не забудьте создать модель Course
+use App\Models\UserChapterProgress; // Не забудьте создать модель Course
 use Illuminate\Http\Request;
 use App\Models\Language; // Ваша модель для языков
 
@@ -298,4 +300,49 @@ class CourseController extends Controller
             'topics' => $course->topics // В каждой теме уже есть chapters
         ]);
     }
+    public function getTopicsWithProgress(Request $request, $courseId)
+    {
+        $userId = $request->input('user_id') ?? auth()->id();
+
+        if (!$userId) {
+            return response()->json([
+                'message' => 'user_id is required'
+            ], 400);
+        }
+
+        // Загружаем все темы и их главы
+        $topics = Topic::where('course_id', $courseId)
+            ->with('chapters')
+            ->get();
+
+        // Загружаем прогресс пользователя
+        $progressRows = UserChapterProgress::where('user_id', $userId)
+            ->whereIn('chapter_id', function($q) use ($courseId) {
+                $q->select('id')
+                ->from('chapters')
+                ->whereIn('topic_id', function($q2) use ($courseId) {
+                    $q2->select('id')->from('topics')->where('course_id', $courseId);
+                });
+            })
+            ->get();
+
+        // Получаем список идентификаторов пройденных глав
+        $completedChapterIds = $progressRows->pluck('chapter_id')->unique();
+
+        // Для каждой главы в темах выставляем флаг is_completed
+        foreach ($topics as $topic) {
+            foreach ($topic->chapters as $chapter) {
+                // $chapter->setAttribute('is_completed', $completedChapterIds->contains($chapter->id));
+                $chapter->is_completed = $completedChapterIds->contains($chapter->id);
+            }
+        }
+             
+
+        return response()->json([
+            'topics' => $topics,
+            'course' => Course::find($courseId),
+        ]);
+    }
+
+
 }

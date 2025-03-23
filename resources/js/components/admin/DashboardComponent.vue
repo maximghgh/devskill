@@ -1008,82 +1008,130 @@
                             </div>
                             <!-- Другие блоки (аналитика, FAQ, и т.д.) -->
                             <div v-else-if="item.id === 'news'">
-                              <table v-if="newsItems.length" class="light-push-table">
-                                <thead>
-                                  <tr>
-                                    <th>ID</th>
-                                    <th>Название новости</th>
-                                    <th>Редактировать</th>
-                                    <th>Удалить</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr v-for="newsItem in newsItems" :key="newsItem.id">
-                                    <td>{{ newsItem.id }}</td>
-                                    <td>{{ newsItem.title }}</td>
-                                    <td>
-                                      <!-- При клике открываем модальное окно редактирования -->
-                                      <button class="btn__user--edit"  @click="openNewsEditModal(newsItem)">
-                                        Редактировать
-                                      </button>
-                                    </td>
-                                    <td>
-                                      <button class="btn__user--delete" @click="deleteNews(newsItem.id)">
-                                        Удалить
-                                      </button>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                              <!-- Модальное окно редактирования новости -->
-                              <div v-if="showNewsEditModal" class="modal-overlay">
-                                <div class="modal-content">
-                                  <h2>Редактирование новости</h2>
-                                  <form @submit.prevent="submitNewsEdit" class="course-form">
-                                    <!-- Заголовок новости -->
-                                    <div class="form-group">
-                                      <label class="form-label">Заголовок новости</label>
-                                      <input
-                                        v-model="editingNews.title"
-                                        type="text"
-                                        placeholder="Введите заголовок новости"
-                                        class="form-input"
-                                      />
+                                <table
+                                    v-if="newsItems.length"
+                                    class="light-push-table"
+                                >
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Название новости</th>
+                                            <th>Редактировать</th>
+                                            <th>Удалить</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            v-for="newsItem in newsItems"
+                                            :key="newsItem.id"
+                                        >
+                                            <td>{{ newsItem.id }}</td>
+                                            <td>{{ newsItem.title }}</td>
+                                            <td>
+                                                <!-- При клике открываем модальное окно редактирования -->
+                                                <button
+                                                    class="btn__user--edit"
+                                                    @click="
+                                                        openNewsEditModal(
+                                                            newsItem
+                                                        )
+                                                    "
+                                                >
+                                                    Редактировать
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    class="btn__user--delete"
+                                                    @click="
+                                                        deleteNews(newsItem.id)
+                                                    "
+                                                >
+                                                    Удалить
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- Модальное окно редактирования новости -->
+                                <div
+                                    v-if="showNewsEditModal"
+                                    class="modal-overlay"
+                                >
+                                    <div class="modal-content">
+                                        <h2>Редактирование новости</h2>
+                                        <form
+                                            @submit.prevent="submitNewsEdit"
+                                            class="course-form"
+                                        >
+                                            <!-- Заголовок новости -->
+                                            <div class="form-group">
+                                                <label class="form-label"
+                                                    >Заголовок новости</label
+                                                >
+                                                <input
+                                                    v-model="editingNews.title"
+                                                    type="text"
+                                                    placeholder="Введите заголовок новости"
+                                                    class="form-input"
+                                                />
+                                            </div>
+                                            <!-- Краткое описание -->
+                                            <div class="form-group">
+                                                <label class="form-label"
+                                                    >Краткое описание</label
+                                                >
+                                                <textarea
+                                                    v-model="
+                                                        editingNews.content
+                                                    "
+                                                    placeholder="Введите краткое описание"
+                                                    class="form-textarea"
+                                                ></textarea>
+                                            </div>
+                                            <!-- Изображение новости -->
+                                            <div class="form-group">
+                                                <label class="form-label"
+                                                    >Изображение новости</label
+                                                >
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    class="form-input"
+                                                    @change="
+                                                        onNewsImageChangeEdit
+                                                    "
+                                                />
+                                            </div>
+                                            <!-- Текст новости (EditorJS) -->
+                                            <div class="form-group">
+                                                <label class="form-label"
+                                                    >Текст новости</label
+                                                >
+                                                <div
+                                                    id="editorjs-news-edit"
+                                                    class="editor-container"
+                                                ></div>
+                                            </div>
+                                            <div class="modal-buttons">
+                                                <button
+                                                    type="submit"
+                                                    class="btn__news--edit"
+                                                >
+                                                    Сохранить изменения
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="btn__news--edit"
+                                                    @click="closeNewsEditModal"
+                                                >
+                                                    Отмена
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
-                                    <!-- Краткое описание -->
-                                    <div class="form-group">
-                                      <label class="form-label">Краткое описание</label>
-                                      <textarea
-                                        v-model="editingNews.content"
-                                        placeholder="Введите краткое описание"
-                                        class="form-textarea"
-                                      ></textarea>
-                                    </div>
-                                    <!-- Изображение новости -->
-                                    <div class="form-group">
-                                      <label class="form-label">Изображение новости</label>
-                                      <input
-                                        type="file"
-                                        accept="image/*"
-                                        class="form-input"
-                                        @change="onNewsImageChangeEdit"
-                                      />
-                                    </div>
-                                    <!-- Текст новости (EditorJS) -->
-                                    <div class="form-group">
-                                      <label class="form-label">Текст новости</label>
-                                      <div id="editorjs-news-edit" class="editor-container"></div>
-                                    </div>
-                                    <div class="modal-buttons">
-                                      <button type="submit" class="btn__news--edit">Сохранить изменения</button>
-                                      <button type="button" class="btn__news--edit" @click="closeNewsEditModal">
-                                        Отмена
-                                      </button>
-                                    </div>
-                                  </form>
                                 </div>
-                              </div> 
-                              <h2 class="h2__margin">Опубликовать новость</h2>
+                                <h2 class="h2__margin">Опубликовать новость</h2>
                                 <form
                                     @submit.prevent="submitNews"
                                     class="course-form"
@@ -1173,63 +1221,111 @@
                                     <div class="languages-list">
                                         <h2>Существующие категории (языки)</h2>
                                         <!-- Проверяем, есть ли языки -->
-                                        <table v-if="languages.length" class="light-push-table">
-                                        <thead>
-                                          <tr>
-                                            <th>ID</th>
-                                            <th>Название языка</th>
-                                            <th>Действия</th>
-                                            <th>Удалить</th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          <tr v-for="lang in languages" :key="lang.id">
-                                            <!-- ID -->
-                                            <td>{{ lang.id }}</td>
+                                        <table
+                                            v-if="languages.length"
+                                            class="light-push-table"
+                                        >
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Название языка</th>
+                                                    <th>Действия</th>
+                                                    <th>Удалить</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    v-for="lang in languages"
+                                                    :key="lang.id"
+                                                >
+                                                    <!-- ID -->
+                                                    <td>{{ lang.id }}</td>
 
-                                            <!-- Название языка -->
-                                            <td>
-                                              <!-- Если редактируем, показываем input -->
-                                              <div v-if="editingLanguageId === lang.id">
-                                                <input
-                                                  class="input__user--edit"
-                                                  v-model="editingLanguage.name"
-                                                />
-                                              </div>
-                                              <!-- Иначе показываем текст, по клику переходим в режим редактирования -->
-                                              <div
-                                                v-else
-                                                @click="startEditingLanguage(lang)"
-                                                style="cursor: pointer"
-                                              >
-                                                {{ lang.name }}
-                                              </div>
-                                            </td>
+                                                    <!-- Название языка -->
+                                                    <td>
+                                                        <!-- Если редактируем, показываем input -->
+                                                        <div
+                                                            v-if="
+                                                                editingLanguageId ===
+                                                                lang.id
+                                                            "
+                                                        >
+                                                            <input
+                                                                class="input__user--edit"
+                                                                v-model="
+                                                                    editingLanguage.name
+                                                                "
+                                                            />
+                                                        </div>
+                                                        <!-- Иначе показываем текст, по клику переходим в режим редактирования -->
+                                                        <div
+                                                            v-else
+                                                            @click="
+                                                                startEditingLanguage(
+                                                                    lang
+                                                                )
+                                                            "
+                                                            style="
+                                                                cursor: pointer;
+                                                            "
+                                                        >
+                                                            {{ lang.name }}
+                                                        </div>
+                                                    </td>
 
-                                            <!-- Кнопки сохранить/отмена или редактировать -->
-                                            <td v-if="editingLanguageId === lang.id">
-                                              <button class="btn__user--edit" @click="saveLanguage">
-                                                Сохранить
-                                              </button>
-                                              <button class="btn__user--edit" @click="cancelEditingLanguage">
-                                                Отмена
-                                              </button>
-                                            </td>
-                                            <td v-else>
-                                              <button class="btn__user--edit" @click="startEditingLanguage(lang)">
-                                                Редактировать
-                                              </button>
-                                            </td>
+                                                    <!-- Кнопки сохранить/отмена или редактировать -->
+                                                    <td
+                                                        v-if="
+                                                            editingLanguageId ===
+                                                            lang.id
+                                                        "
+                                                    >
+                                                        <button
+                                                            class="btn__user--edit"
+                                                            @click="
+                                                                saveLanguage
+                                                            "
+                                                        >
+                                                            Сохранить
+                                                        </button>
+                                                        <button
+                                                            class="btn__user--edit"
+                                                            @click="
+                                                                cancelEditingLanguage
+                                                            "
+                                                        >
+                                                            Отмена
+                                                        </button>
+                                                    </td>
+                                                    <td v-else>
+                                                        <button
+                                                            class="btn__user--edit"
+                                                            @click="
+                                                                startEditingLanguage(
+                                                                    lang
+                                                                )
+                                                            "
+                                                        >
+                                                            Редактировать
+                                                        </button>
+                                                    </td>
 
-                                            <!-- Кнопка удаления языка -->
-                                            <td>
-                                              <button class="btn__user--delete" @click="deleteLanguage(lang.id)">
-                                                Удалить
-                                              </button>
-                                            </td>
-                                          </tr>
-                                        </tbody>
-                                      </table>
+                                                    <!-- Кнопка удаления языка -->
+                                                    <td>
+                                                        <button
+                                                            class="btn__user--delete"
+                                                            @click="
+                                                                deleteLanguage(
+                                                                    lang.id
+                                                                )
+                                                            "
+                                                        >
+                                                            Удалить
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                         <!-- Если массив пуст, выводим текст -->
                                         <p v-else>Нет языков</p>
                                     </div>
@@ -1237,42 +1333,105 @@
                                     <div class="directions-list">
                                         <h2>Существующие направления</h2>
                                         <!-- Проверяем, есть ли направления -->
-                                        <table v-if="directions.length" class="light-push-table">
-                                          <thead>
-                                            <tr>
-                                              <th>ID</th>
-                                              <th>Название направления</th>
-                                              <th>Редактировать</th>
-                                              <th>Удалить</th>
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-                                            <tr v-for="dir in directions" :key="dir.id">
-                                              <td>{{ dir.id }}</td>
-                                              <td>
-                                                <!-- Если данное направление редактируется, показываем input -->
-                                                <div v-if="editingDirectionId === dir.id">
-                                                  <input class="input__user--edit" v-model="editingDirection.name" />
-                                                </div>
-                                                <!-- Иначе показываем текст. По клику запускаем режим редактирования -->
-                                                <div v-else @click="startEditingDirection(dir)" style="cursor: pointer;">
-                                                  {{ dir.name }}
-                                                </div>
-                                              </td>
-                                              <td v-if="editingDirectionId === dir.id">
-                                                <button class="btn__user--edit" @click="saveDirection">Сохранить</button>
-                                                <button class="btn__user--edit" @click="cancelEditingDirection">Отмена</button>
-                                              </td>
-                                              <td v-else>
-                                                <button class="btn__user--edit" @click="startEditingDirection(dir)">Редактировать</button>
-                                              </td>
-                                              <td>
-                                                <button class="btn__user--delete" @click="deleteDirection(dir.id)">
-                                                  Удалить
-                                                </button>
-                                              </td>
-                                            </tr>
-                                          </tbody>
+                                        <table
+                                            v-if="directions.length"
+                                            class="light-push-table"
+                                        >
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>
+                                                        Название направления
+                                                    </th>
+                                                    <th>Редактировать</th>
+                                                    <th>Удалить</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    v-for="dir in directions"
+                                                    :key="dir.id"
+                                                >
+                                                    <td>{{ dir.id }}</td>
+                                                    <td>
+                                                        <!-- Если данное направление редактируется, показываем input -->
+                                                        <div
+                                                            v-if="
+                                                                editingDirectionId ===
+                                                                dir.id
+                                                            "
+                                                        >
+                                                            <input
+                                                                class="input__user--edit"
+                                                                v-model="
+                                                                    editingDirection.name
+                                                                "
+                                                            />
+                                                        </div>
+                                                        <!-- Иначе показываем текст. По клику запускаем режим редактирования -->
+                                                        <div
+                                                            v-else
+                                                            @click="
+                                                                startEditingDirection(
+                                                                    dir
+                                                                )
+                                                            "
+                                                            style="
+                                                                cursor: pointer;
+                                                            "
+                                                        >
+                                                            {{ dir.name }}
+                                                        </div>
+                                                    </td>
+                                                    <td
+                                                        v-if="
+                                                            editingDirectionId ===
+                                                            dir.id
+                                                        "
+                                                    >
+                                                        <button
+                                                            class="btn__user--edit"
+                                                            @click="
+                                                                saveDirection
+                                                            "
+                                                        >
+                                                            Сохранить
+                                                        </button>
+                                                        <button
+                                                            class="btn__user--edit"
+                                                            @click="
+                                                                cancelEditingDirection
+                                                            "
+                                                        >
+                                                            Отмена
+                                                        </button>
+                                                    </td>
+                                                    <td v-else>
+                                                        <button
+                                                            class="btn__user--edit"
+                                                            @click="
+                                                                startEditingDirection(
+                                                                    dir
+                                                                )
+                                                            "
+                                                        >
+                                                            Редактировать
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            class="btn__user--delete"
+                                                            @click="
+                                                                deleteDirection(
+                                                                    dir.id
+                                                                )
+                                                            "
+                                                        >
+                                                            Удалить
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
                                         </table>
                                         <!-- Если массив пуст, выводим текст -->
                                         <p v-else>Нет направлений</p>
@@ -1364,12 +1523,13 @@ import { globalNotification } from "../../globalNotification";
 const newsItems = ref([]);
 
 const editingNewsId = ref(null); // ID редактируемой новости
-const editingNews = ref({        // Копия редактируемой новости
-  title: "",
-  content: "",
-  newsImage: null,
-  editorData: {}
-});  
+const editingNews = ref({
+    // Копия редактируемой новости
+    title: "",
+    content: "",
+    newsImage: null,
+    editorData: {},
+});
 const editingUserId = ref(null);
 const editingUser = ref(null);
 const editingLanguageId = ref(null);
@@ -1383,109 +1543,122 @@ let editorNewsEdit = null;
 
 /* Функция открытия модального окна редактирования новости */
 async function openNewsEditModal(newsItem) {
-  console.log("Данные выбранной новости:", newsItem);
+    console.log("Данные выбранной новости:", newsItem);
 
-  editingNewsId.value = newsItem.id;
-  
-  // 1) Если на бэкенде поле называется editor_data, а приходит как строка JSON, парсим:
-  let parsedEditorData = {};
-  if (newsItem.editor_data) {
-    if (typeof newsItem.editor_data === "string") {
-      try {
-        parsedEditorData = JSON.parse(newsItem.editor_data);
-      } catch (err) {
-        console.error("Ошибка парсинга editor_data:", err);
-        parsedEditorData = {};
-      }
-    } else {
-      // Если уже объект
-      parsedEditorData = newsItem.editor_data;
+    editingNewsId.value = newsItem.id;
+
+    // 1) Если на бэкенде поле называется editor_data, а приходит как строка JSON, парсим:
+    let parsedEditorData = {};
+    if (newsItem.editor_data) {
+        if (typeof newsItem.editor_data === "string") {
+            try {
+                parsedEditorData = JSON.parse(newsItem.editor_data);
+            } catch (err) {
+                console.error("Ошибка парсинга editor_data:", err);
+                parsedEditorData = {};
+            }
+        } else {
+            // Если уже объект
+            parsedEditorData = newsItem.editor_data;
+        }
     }
-  }
 
-  // 2) Копируем остальные поля (title, content и т.д.)
-  editingNews.value = {
-    ...newsItem,
-    // У нас в коде Vue поле editorData:
-    editorData: parsedEditorData,
-    newsImage: null // если нужно редактировать изображение, изначально null
-  };
+    // 2) Копируем остальные поля (title, content и т.д.)
+    editingNews.value = {
+        ...newsItem,
+        // У нас в коде Vue поле editorData:
+        editorData: parsedEditorData,
+        newsImage: null, // если нужно редактировать изображение, изначально null
+    };
 
-  showNewsEditModal.value = true;
+    showNewsEditModal.value = true;
 
-  // Даем Vue отрендерить модалку
-  await nextTick();
+    // Даем Vue отрендерить модалку
+    await nextTick();
 
-  // 3) Инициализируем EditorJS
-  if (editorNewsEdit) {
-    editorNewsEdit.destroy();
-    editorNewsEdit = null;
-  }
-  editorNewsEdit = new EditorJS({
-    holder: "editorjs-news-edit",
-    data: editingNews.value.editorData,
-    placeholder: "Редактируйте контент новости...",
-    tools: {
-      header: { class: Header, inlineToolbar: ["link"] },
-      list: { class: List, inlineToolbar: true },
-      image: {
-        class: ImageTool,
-        config: {
-          endpoints: {
-            byFile: "/api/uploadFile",
-            byUrl: "/api/fetchUrl",
-          },
+    // 3) Инициализируем EditorJS
+    if (editorNewsEdit) {
+        editorNewsEdit.destroy();
+        editorNewsEdit = null;
+    }
+    editorNewsEdit = new EditorJS({
+        holder: "editorjs-news-edit",
+        data: editingNews.value.editorData,
+        placeholder: "Редактируйте контент новости...",
+        tools: {
+            header: { class: Header, inlineToolbar: ["link"] },
+            list: { class: List, inlineToolbar: true },
+            image: {
+                class: ImageTool,
+                config: {
+                    endpoints: {
+                        byFile: "/api/uploadFile",
+                        byUrl: "/api/fetchUrl",
+                    },
+                },
+            },
         },
-      },
-    },
-    onChange: async () => {
-      const savedData = await editorNewsEdit.save();
-      editingNews.value.editorData = savedData;
-      console.log("Содержимое EditorJS (savedData):", savedData);
-      console.log("editingNews.value.editorData:", editingNews.value.editorData);
-    },
-  });
+        onChange: async () => {
+            const savedData = await editorNewsEdit.save();
+            editingNews.value.editorData = savedData;
+            console.log("Содержимое EditorJS (savedData):", savedData);
+            console.log(
+                "editingNews.value.editorData:",
+                editingNews.value.editorData
+            );
+        },
+    });
 }
 /* Функция закрытия модального окна редактирования новости */
 function closeNewsEditModal() {
-  showNewsEditModal.value = false;
-  editingNewsId.value = null;
-  editingNews.value = { title: "", content: "", newsImage: null, editorData: {} };
-  if (editorNewsEdit) {
-    editorNewsEdit.destroy();
-    editorNewsEdit = null;
-  }
+    showNewsEditModal.value = false;
+    editingNewsId.value = null;
+    editingNews.value = {
+        title: "",
+        content: "",
+        newsImage: null,
+        editorData: {},
+    };
+    if (editorNewsEdit) {
+        editorNewsEdit.destroy();
+        editorNewsEdit = null;
+    }
 }
 
 /* Функция отправки изменений новости на сервер */
 async function submitNewsEdit() {
-  try {
-    // Отправляем PATCH-запрос на обновление новости
-    const response = await axios.patch(`/api/news/${editingNews.value.id}`, {
-      title: editingNews.value.title,
-      content: editingNews.value.content,
-      editor_data: editingNews.value.editorData,
-      // Если требуется обновлять изображение, можно реализовать отправку файла отдельно
-    });
-    // Обновляем локальный массив новостей
-    const index = newsItems.value.findIndex(item => item.id === editingNews.value.id);
-    if (index !== -1) {
-      newsItems.value[index] = response.data.news;
+    try {
+        // Отправляем PATCH-запрос на обновление новости
+        const response = await axios.patch(
+            `/api/news/${editingNews.value.id}`,
+            {
+                title: editingNews.value.title,
+                content: editingNews.value.content,
+                editor_data: editingNews.value.editorData,
+                // Если требуется обновлять изображение, можно реализовать отправку файла отдельно
+            }
+        );
+        // Обновляем локальный массив новостей
+        const index = newsItems.value.findIndex(
+            (item) => item.id === editingNews.value.id
+        );
+        if (index !== -1) {
+            newsItems.value[index] = response.data.news;
+        }
+        globalNotification.categoryMessage = "Новость обновлена";
+        globalNotification.type = "success";
+        closeNewsEditModal();
+    } catch (error) {
+        console.error("Ошибка обновления новости:", error);
+        globalNotification.categoryMessage = "Ошибка обновления новости";
+        globalNotification.type = "error";
     }
-    globalNotification.categoryMessage = "Новость обновлена";
-    globalNotification.type = "success";
-    closeNewsEditModal();
-  } catch (error) {
-    console.error("Ошибка обновления новости:", error);
-    globalNotification.categoryMessage = "Ошибка обновления новости";
-    globalNotification.type = "error";
-  }
 }
 /* Функция обработки выбора файла для редактирования изображения новости */
 function onNewsImageChangeEdit(e) {
-  const file = e.target.files[0] || null;
-  // Сохраняем выбранный файл в объект редактирования
-  editingNews.value.newsImage = file;
+    const file = e.target.files[0] || null;
+    // Сохраняем выбранный файл в объект редактирования
+    editingNews.value.newsImage = file;
 }
 // Функция запуска редактирования для выбранного пользователя
 function startEditing(userItem) {
@@ -1494,13 +1667,13 @@ function startEditing(userItem) {
     editingUser.value = { ...userItem };
 }
 function startEditingLanguage(langItem) {
-  editingLanguageId.value = langItem.id;
-  editingLanguage.value = { ...langItem }; // копируем, чтобы не менять оригинал напрямую
+    editingLanguageId.value = langItem.id;
+    editingLanguage.value = { ...langItem }; // копируем, чтобы не менять оригинал напрямую
 }
 function startEditingDirection(direction) {
-  editingDirectionId.value = direction.id;
-  // Создаем копию для редактирования, чтобы не менять исходный объект напрямую
-  editingDirection.value = { ...direction };
+    editingDirectionId.value = direction.id;
+    // Создаем копию для редактирования, чтобы не менять исходный объект напрямую
+    editingDirection.value = { ...direction };
 }
 
 // Функция сохранения изменений пользователя
@@ -1536,59 +1709,67 @@ function cancelEditing() {
 }
 
 async function saveLanguage() {
-  try {
-    // Отправляем PATCH-запрос
-    const response = await axios.patch(`/api/languages/${editingLanguage.value.id}`, {
-      name: editingLanguage.value.name,
-      // если есть другие поля, добавьте их
-    });
-    // Находим индекс языка в локальном массиве
-    const index = languages.value.findIndex(
-      (lang) => lang.id === editingLanguage.value.id
-    );
-    if (index !== -1) {
-      languages.value[index] = response.data.language;
+    try {
+        // Отправляем PATCH-запрос
+        const response = await axios.patch(
+            `/api/languages/${editingLanguage.value.id}`,
+            {
+                name: editingLanguage.value.name,
+                // если есть другие поля, добавьте их
+            }
+        );
+        // Находим индекс языка в локальном массиве
+        const index = languages.value.findIndex(
+            (lang) => lang.id === editingLanguage.value.id
+        );
+        if (index !== -1) {
+            languages.value[index] = response.data.language;
+        }
+        globalNotification.categoryMessage = "Язык успешно обновлён";
+        globalNotification.type = "success";
+    } catch (error) {
+        console.error("Ошибка при обновлении языка:", error);
+        globalNotification.categoryMessage = "Ошибка при обновлении языка";
+        globalNotification.type = "error";
+    } finally {
+        editingLanguageId.value = null;
+        editingLanguage.value = null;
     }
-    globalNotification.categoryMessage = "Язык успешно обновлён";
-    globalNotification.type = "success";
-  } catch (error) {
-    console.error("Ошибка при обновлении языка:", error);
-    globalNotification.categoryMessage = "Ошибка при обновлении языка";
-    globalNotification.type = "error";
-  } finally {
-    editingLanguageId.value = null;
-    editingLanguage.value = null;
-  }
 }
 
 function cancelEditingLanguage() {
-  editingLanguageId.value = null;
-  editingLanguage.value = null;
+    editingLanguageId.value = null;
+    editingLanguage.value = null;
 }
 async function saveDirection() {
-  try {
-    const response = await axios.patch(`/api/directions/${editingDirection.value.id}`, {
-      name: editingDirection.value.name
-    });
-    // Обновляем локальный массив направлений
-    const index = directions.value.findIndex(dir => dir.id === editingDirection.value.id);
-    if (index !== -1) {
-      directions.value[index] = response.data.direction;
+    try {
+        const response = await axios.patch(
+            `/api/directions/${editingDirection.value.id}`,
+            {
+                name: editingDirection.value.name,
+            }
+        );
+        // Обновляем локальный массив направлений
+        const index = directions.value.findIndex(
+            (dir) => dir.id === editingDirection.value.id
+        );
+        if (index !== -1) {
+            directions.value[index] = response.data.direction;
+        }
+        globalNotification.categoryMessage = "Направление обновлено";
+        globalNotification.type = "success";
+    } catch (error) {
+        console.error("Ошибка обновления направления:", error);
+        globalNotification.categoryMessage = "Ошибка обновления направления";
+        globalNotification.type = "error";
+    } finally {
+        editingDirectionId.value = null;
+        editingDirection.value = null;
     }
-    globalNotification.categoryMessage = "Направление обновлено";
-    globalNotification.type = "success";
-  } catch (error) {
-    console.error("Ошибка обновления направления:", error);
-    globalNotification.categoryMessage = "Ошибка обновления направления";
-    globalNotification.type = "error";
-  } finally {
-    editingDirectionId.value = null;
-    editingDirection.value = null;
-  }
 }
 function cancelEditingDirection() {
-  editingDirectionId.value = null;
-  editingDirection.value = null;
+    editingDirectionId.value = null;
+    editingDirection.value = null;
 }
 async function deleteUser(userId) {
     // Добавляем подтверждение удаления
@@ -1610,46 +1791,48 @@ async function deleteUser(userId) {
     }
 }
 async function deleteLanguage(langId) {
-  if (!confirm("Вы действительно хотите удалить этот язык?")) return;
-  try {
-    const response = await axios.delete(`/api/languages/${langId}`);
-    console.log("Язык удалён:", response.data);
-    globalNotification.categoryMessage = "Язык успешно удалён";
-    globalNotification.type = "success";
-    languages.value = languages.value.filter(lang => lang.id !== langId);
-  } catch (error) {
-    console.error("Ошибка при удалении языка:", error);
-    globalNotification.categoryMessage = "Ошибка при удалении языка";
-    globalNotification.type = "error";
-  }
+    if (!confirm("Вы действительно хотите удалить этот язык?")) return;
+    try {
+        const response = await axios.delete(`/api/languages/${langId}`);
+        console.log("Язык удалён:", response.data);
+        globalNotification.categoryMessage = "Язык успешно удалён";
+        globalNotification.type = "success";
+        languages.value = languages.value.filter((lang) => lang.id !== langId);
+    } catch (error) {
+        console.error("Ошибка при удалении языка:", error);
+        globalNotification.categoryMessage = "Ошибка при удалении языка";
+        globalNotification.type = "error";
+    }
 }
 async function deleteDirection(directionId) {
-  if (!confirm("Вы действительно хотите удалить направление?")) return;
-  try {
-    const response = await axios.delete(`/api/directions/${directionId}`);
-    globalNotification.categoryMessage = "Направление удалено";
-    globalNotification.type = "success";
-    directions.value = directions.value.filter(dir => dir.id !== directionId);
-  } catch (error) {
-    console.error("Ошибка удаления направления:", error);
-    globalNotification.categoryMessage = "Ошибка удаления направления";
-    globalNotification.type = "error";
-  }
+    if (!confirm("Вы действительно хотите удалить направление?")) return;
+    try {
+        const response = await axios.delete(`/api/directions/${directionId}`);
+        globalNotification.categoryMessage = "Направление удалено";
+        globalNotification.type = "success";
+        directions.value = directions.value.filter(
+            (dir) => dir.id !== directionId
+        );
+    } catch (error) {
+        console.error("Ошибка удаления направления:", error);
+        globalNotification.categoryMessage = "Ошибка удаления направления";
+        globalNotification.type = "error";
+    }
 }
 async function deleteNews(newsId) {
-  if (!confirm("Вы действительно хотите удалить новость?")) return;
-  try {
-    const response = await axios.delete(`/api/news/${newsId}`);
-    console.log("Новость удалена:", response.data);
-    globalNotification.categoryMessage = "Новость успешно удалена";
-    globalNotification.type = "success";
-    // Удаляем новость из локального массива
-    newsItems.value = newsItems.value.filter(item => item.id !== newsId);
-  } catch (error) {
-    console.error("Ошибка при удалении новости:", error);
-    globalNotification.categoryMessage = "Ошибка при удалении новости";
-    globalNotification.type = "error";
-  }
+    if (!confirm("Вы действительно хотите удалить новость?")) return;
+    try {
+        const response = await axios.delete(`/api/news/${newsId}`);
+        console.log("Новость удалена:", response.data);
+        globalNotification.categoryMessage = "Новость успешно удалена";
+        globalNotification.type = "success";
+        // Удаляем новость из локального массива
+        newsItems.value = newsItems.value.filter((item) => item.id !== newsId);
+    } catch (error) {
+        console.error("Ошибка при удалении новости:", error);
+        globalNotification.categoryMessage = "Ошибка при удалении новости";
+        globalNotification.type = "error";
+    }
 }
 
 const user = ref(null);
@@ -2090,14 +2273,14 @@ async function loadDirections() {
     }
 }
 async function loadNews() {
-  try {
-    const response = await axios.get("/api/news");
-    newsItems.value = response.data; // ожидается, что сервер вернет массив объектов новостей
-  } catch (error) {
-    console.error("Ошибка при загрузке новостей:", error);
-    globalNotification.categoryMessage = "Ошибка при загрузке новостей";
-    globalNotification.type = "error";
-  }
+    try {
+        const response = await axios.get("/api/news");
+        newsItems.value = response.data; // ожидается, что сервер вернет массив объектов новостей
+    } catch (error) {
+        console.error("Ошибка при загрузке новостей:", error);
+        globalNotification.categoryMessage = "Ошибка при загрузке новостей";
+        globalNotification.type = "error";
+    }
 }
 /* =====================================
    10. onMounted
@@ -2339,8 +2522,8 @@ async function submitNews() {
 </script>
 
 <style scoped>
-.h2__margin{
-  margin: 40px 0;
+.h2__margin {
+    margin: 40px 0;
 }
 .btn--control {
     text-decoration: none;
@@ -2780,5 +2963,4 @@ table.light-push-table {
     font-size: 20px;
     cursor: pointer;
 }
-
 </style>

@@ -72,13 +72,40 @@
                                             </div>
                                             <div class="course__card-buttons">
                                                 <p class="course__card-desc">
-
                                                     {{
                                                         difficultyTranslation[
                                                             course.difficulty
                                                         ]
                                                     }}
                                                 </p>
+                                                <div class="course__card-task">
+                                                    <p>Пройдено тем</p>
+                                                    <p>
+                                                        {{
+                                                            getCourseProgress(
+                                                                course
+                                                            ).completedTopics
+                                                        }}/{{
+                                                            getCourseProgress(
+                                                                course
+                                                            ).totalTopics
+                                                        }}
+                                                    </p>
+                                                </div>
+                                                <div class="course__card-task">
+                                                    <p>Решено заданий</p>
+                                                    <p>
+                                                        {{
+                                                            getCourseProgress(
+                                                                course
+                                                            ).completedTasks
+                                                        }}/{{
+                                                            getCourseProgress(
+                                                                course
+                                                            ).totalTasks
+                                                        }}
+                                                    </p>
+                                                </div>
                                                 <div class="menu__button">
                                                     <a
                                                         :href="`/content/${course.id}`"
@@ -159,6 +186,44 @@ const difficultyTranslation = {
     mixed: "Смешанный",
 };
 
+function getCourseProgress(course) {
+    let totalTopics = 0;
+    let completedTopics = 0;
+    let totalTasks = 0;
+    let completedTasks = 0;
+
+    if (course.topics && course.topics.length) {
+        totalTopics = course.topics.length;
+        course.topics.forEach((topic) => {
+            // Если тема имеет главы, то считаем тему завершённой,
+            // если все главы завершены. Если глав нет — можно считать тему пройденной или нет.
+            if (topic.chapters && topic.chapters.length) {
+                const allChaptersCompleted = topic.chapters.every(
+                    (chapter) => chapter.is_completed
+                );
+                if (allChaptersCompleted) {
+                    completedTopics++;
+                }
+                // Подсчёт заданий (глав с type === 'task')
+                topic.chapters.forEach((chapter) => {
+                    if (chapter.type === "task") {
+                        totalTasks++;
+                        if (chapter.is_completed) {
+                            completedTasks++;
+                        }
+                    }
+                });
+            }
+        });
+    }
+    return {
+        completedTopics,
+        totalTopics,
+        completedTasks,
+        totalTasks,
+    };
+}
+
 onMounted(async () => {
     // Загрузка данных пользователя из localStorage
     const storedUser = localStorage.getItem("user");
@@ -180,6 +245,7 @@ onMounted(async () => {
                 `/api/user/${user.value.id}/purchased-courses`
             );
             console.log("Ответ сервера:", response.data);
+            console.log('purchasedCourses:', purchasedCourses.value);
             purchasedCourses.value = response.data.courses;
         } catch (error) {
             console.error("Ошибка при загрузке купленных курсов", error);

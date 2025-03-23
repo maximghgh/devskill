@@ -17,10 +17,10 @@
                                 <!-- Прогресс курса -->
                                 <div class="skill__progress">
                                     <div class="skill__progress-title">
-                                        Прогресс курса <span>40%</span>
+                                        Прогресс курса <span>{{ progressPercentage }}%</span>
                                     </div>
                                     <div class="skill__progress-line">
-                                        <span style="width: 40%"></span>
+                                        <span :style="{ width: progressPercentage + '%' }"></span>
                                     </div>
                                 </div>
                                 <!-- Список тем (основное меню) -->
@@ -144,6 +144,20 @@
                                         <h2>Описание</h2>
                                         <!-- Если content хранится как HTML или текст, выводим -->
                                         <div id="editorjs"></div>
+                                        <button
+                                            v-if="!selectedChapter.is_completed"
+                                            @click="
+                                                markChapterCompleted(
+                                                    selectedChapter
+                                                )
+                                            "
+                                            class="button button--sub"
+                                        >
+                                            Отметить как пройдено
+                                        </button>
+                                        <div v-else>
+                                            <p>Глава уже пройдена!</p>
+                                        </div>
                                     </div>
                                     <!-- Если глава — просто текст -->
                                     <div
@@ -152,6 +166,20 @@
                                         "
                                     >
                                         <div id="editorjs"></div>
+                                        <button
+                                            v-if="!selectedChapter.is_completed"
+                                            @click="
+                                                markChapterCompleted(
+                                                    selectedChapter
+                                                )
+                                            "
+                                            class="button button--sub"
+                                        >
+                                            Отметить как пройдено
+                                        </button>
+                                        <div v-else>
+                                            <p>Глава уже пройдена!</p>
+                                        </div>
                                     </div>
                                     <!-- Если глава — задание (task) -->
                                     <div
@@ -170,6 +198,20 @@
                                                     : "Показать ответ"
                                             }}
                                         </button>
+                                        <button
+                                            v-if="!selectedChapter.is_completed"
+                                            @click="
+                                                markChapterCompleted(
+                                                    selectedChapter
+                                                )
+                                            "
+                                            class="button button--sub"
+                                        >
+                                            Отметить как пройдено
+                                        </button>
+                                        <div v-else>
+                                            <p>Глава уже пройдена!</p>
+                                        </div>
                                         <!-- Модальное окно (с переходом fade) -->
                                         <transition name="fade">
                                             <div
@@ -213,6 +255,20 @@
                                         "
                                     >
                                         <div id="editorjs"></div>
+                                        <button
+                                            v-if="!selectedChapter.is_completed"
+                                            @click="
+                                                markChapterCompleted(
+                                                    selectedChapter
+                                                )
+                                            "
+                                            class="button button--sub"
+                                        >
+                                            Отметить как пройдено
+                                        </button>
+                                        <div v-else>
+                                            <p>Глава уже пройдена!</p>
+                                        </div>
                                     </div>
                                     <!-- На всякий случай fallback для неизвестного типа -->
                                     <div v-else>
@@ -222,7 +278,6 @@
                                         </p>
                                     </div>
                                     <!-- Общие кнопки -->
-
                                     <div class="skill__buttons">
                                         <!-- Кнопка "Назад" с анимацией плавного появления -->
                                         <transition name="fade">
@@ -238,7 +293,7 @@
                                         <!-- Кнопка "Вперёд" с анимацией сдвига вправо -->
                                         <transition name="slide-right">
                                             <button
-                                                v-if="canGoNext"
+                                                v-if="canGoNext && selectedChapter && selectedChapter.is_completed"
                                                 @click="goToNextChapter"
                                                 class="button button_skill-next"
                                             >
@@ -716,18 +771,27 @@ function goToPrevChapter() {
     }
 }
 
+const showNextButton = ref(true);
+
 function goToNextChapter() {
+  // Сначала убираем кнопку плавно
+  showNextButton.value = false;
+  // Затем через задержку выполняем переход (примерно длительность анимации)
+  setTimeout(() => {
     if (
-        selectedTopic.value &&
-        selectedTopic.value.chapters &&
-        selectedChapter.value
+      selectedTopic.value &&
+      selectedTopic.value.chapters &&
+      selectedChapter.value
     ) {
-        const chapters = selectedTopic.value.chapters;
-        const index = chapters.findIndex(
-            (ch) => ch.id === selectedChapter.value.id
-        );
-        if (index < chapters.length - 1) selectChapter(chapters[index + 1]);
+      const chapters = selectedTopic.value.chapters;
+      const index = chapters.findIndex(
+        (ch) => ch.id === selectedChapter.value.id
+      );
+      if (index < chapters.length - 1) selectChapter(chapters[index + 1]);
     }
+    // Опционально вернуть кнопку обратно, если она нужна для следующей главы
+    showNextButton.value = true;
+  }, 500);
 }
 
 const canGoPrev = computed(() => {
@@ -928,6 +992,52 @@ function cancelReply() {
     replyComment.value = "";
     replyTo.value = null;
 }
+//прогресс
+const progressPercentage = computed(() => {
+    let totalChapters = 0;
+    let completedChapters = 0;
+    
+    topics.value.forEach(topic => {
+        if (topic.chapters && topic.chapters.length) {
+            topic.chapters.forEach(chapter => {
+                totalChapters++;
+                if (chapter.is_completed) {
+                    completedChapters++;
+                }
+            });
+        }
+    });
+    
+    return totalChapters ? Math.round((completedChapters / totalChapters) * 100) : 0;
+});
+
+const storedUser = JSON.parse(localStorage.getItem("user"));
+async function markChapterCompleted(chapter) {
+    if (chapter.is_completed) return;
+    try {
+        await axios.post(`/api/chapters/${chapter.id}/complete`, {
+            user_id: storedUser.id,
+        });
+
+        // 1. Вариант: прямо изменить у выбранной главы
+        chapter.is_completed = true;
+
+        // 2. Дополнительно найти эту главу внутри topics.value и проставить is_completed = true,
+        //    чтобы, если пользователь переключится между главами, данные были согласованы.
+        topics.value.forEach((topic) => {
+            topic.chapters.forEach((ch) => {
+                if (ch.id === chapter.id) {
+                    ch.is_completed = true;
+                }
+            });
+        });
+
+        console.log(`Глава ${chapter.id} отмечена как пройденная`);
+        console.log("После отметки: is_completed =", chapter.is_completed);
+    } catch (error) {
+        console.error("Ошибка при завершении главы:", error);
+    }
+}
 
 /* ======================================================
    3. Прочие данные: FAQ, курсы для повышения квалификации и маппинг сложности
@@ -989,15 +1099,32 @@ onMounted(() => {
 
         // Дополнительно подгружаем темы
         axios
-            .get(`/api/course/${courseIdFromUrl}/topics`)
+            .get(`/api/course/${courseIdFromUrl}/topics`, {
+                params: { user_id: storedUser.id },
+            })
             .then((response) => {
-                // Сортируем темы по возрастанию даты создания
                 topics.value = (response.data.topics || []).sort((a, b) => {
+                // Сортируем сами темы
+                return new Date(a.created_at) - new Date(b.created_at);
+                });
+
+                // Теперь сортируем главы в каждой теме
+                topics.value.forEach((topic) => {
+                topic.chapters.sort((a, b) => {
                     return new Date(a.created_at) - new Date(b.created_at);
+                });
+                });
+
+                // Гарантируем, что каждая глава имеет свойство is_completed
+                topics.value.forEach((topic) => {
+                topic.chapters.forEach((chapter) => {
+                    if (typeof chapter.is_completed === "undefined") {
+                    chapter.is_completed = false;
+                    }
+                });
                 });
 
                 course.value = response.data.course || {};
-                console.log("Успешно загрузили темы курса:", topics.value);
             })
             .catch((error) =>
                 console.error("Ошибка при загрузке тем курса:", error)
@@ -1265,12 +1392,20 @@ async function dislikeComment(comment) {
 .fade-leave-active {
     animation: fadeOut 0.5s ease forwards;
 }
-.slide-right-enter-active {
-    animation: slideInRight 1s ease forwards;
-}
 .slide-right-leave-active {
-    animation: slideOutRight 1s ease forwards;
+  transition: all 0.5s ease;
 }
+
+.slide-right-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
 /* Анимация для кнопки "Вперёд" через keyframes */
 @keyframes slideInRight {
     from {

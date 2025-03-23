@@ -16,6 +16,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\CourseCommentController;
 use App\Http\Controllers\TopicController;
+use App\Http\Controllers\ChapterController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,6 +27,13 @@ use App\Http\Controllers\TopicController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+// прогресс пользователя
+Route::get('/course/{courseId}/topics', [CourseController::class, 'getTopicsWithProgress']);
+Route::post('/chapters/{chapter}/complete', [ChapterController::class, 'completeChapter']);
+
+
+
 Route::get('/courses/{id}', [CourseController::class, 'show']);
 Route::prefix('admin')->name('admin.')->group(function () {
     // Создание курса (API)
@@ -129,8 +137,6 @@ Route::middleware('auth:sanctum')->get('/user/purchased-courses', [UserControlle
 Route::post('/{course}/purchase', [PurchaseController::class, 'store'])->name('purchases.store');
 Route::post('/{course}/consultation', [ConsultationController::class, 'store'])->name('consultations.store');
 
-Route::get('/course/{courseId}/topics', [CourseController::class, 'getTopics']);
-
 Route::prefix('admin/course/{course}')->group(function () {
     // Получить список тем курса
     Route::get('/topics', [TopicController::class, 'index'])->name('admin.topics.index');
@@ -143,4 +149,9 @@ Route::prefix('admin/topics')->group(function () {
     Route::patch('/{topic}', [TopicController::class, 'update']);
     // DELETE /admin/topics/{topic}
     Route::delete('/{topic}', [TopicController::class, 'destroy']);
+});
+
+Route::prefix('admin/topic/{topicId}')->group(function () {
+    Route::put('chapters/{chapterId}', [ChapterController::class, 'update']);
+    Route::delete('chapters/{chapterId}', [ChapterController::class, 'destroy']);
 });

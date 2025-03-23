@@ -39,6 +39,7 @@ class Course extends Model
     {
         return $this->hasMany(\App\Models\Topic::class, 'course_id');
     }
+    
     public function purchases()
     {
         return $this->hasMany(\App\Models\Purchase::class, 'course_id');

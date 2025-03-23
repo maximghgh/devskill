@@ -22,10 +22,11 @@ class Chapter extends Model
         'correct_answer',
     ];
 
+    
     protected $casts = [
         'content' => 'json', // или 'json'
     ];
-
+    
     /**
      * Определяет связь «Принадлежит» с моделью Topic.
      * Каждая глава принадлежит одной теме.
@@ -36,4 +37,9 @@ class Chapter extends Model
     {
         return $this->belongsTo(\App\Models\Topic::class, 'topic_id');
     }
+    public function progress()
+    {
+        return $this->hasMany(UserChapterProgress::class);
+    }
+    
 }

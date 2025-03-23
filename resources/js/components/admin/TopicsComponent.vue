@@ -10,32 +10,83 @@
 
         <!-- Таблица с главами -->
         <div v-if="chapters.length">
-            <table class="light-push-table" v-if="chapters.length">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Название</th>
-                        <th>Тип</th>
-                        <th>Описание</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(chapter, index) in chapters" :key="chapter.id">
-                        <td>{{ index + 1 }}</td>
-                        <td>{{ chapter.title }}</td>
-                        <td>{{ chapter.type }}</td>
-                        <td>
-                            {{
-                                chapter.description ||
-                                chapter.textContent ||
-                                chapter.videoEditorContent ||
-                                chapter.taskContent ||
-                                chapter.termsContent
-                            }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+          <table class="light-push-table" v-if="chapters.length">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Название</th>
+                <th>Тип</th>
+                <th>Изменения</th> <!-- Колонка для редактирования -->
+                <th>Удалить</th>   <!-- Колонка для удаления -->
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(chapter, index) in chapters" :key="chapter.id">
+                <td>{{ index + 1 }}</td>
+
+                <!-- Название -->
+                <td>
+                  <!-- Если редактируем именно эту главу, показываем input -->
+                  <div v-if="editingChapterId === chapter.id">
+                    <input v-model="editingChapter.title" class="input__user--edit" />
+                  </div>
+                  <!-- Иначе просто текст. По клику — режим редактирования -->
+                  <div
+                    v-else
+                    @click="startEditingChapter(chapter)"
+                    style="cursor: pointer;"
+                  >
+                    {{ chapter.title }}
+                  </div>
+                </td>
+
+                <!-- Тип -->
+                <td>
+                  <!-- Если редактируем именно эту главу, показываем select -->
+                  <div v-if="editingChapterId === chapter.id">
+                    <select v-model="editingChapter.type" class="input__user--edit">
+                      <option value="video">Видео</option>
+                      <option value="text">Текст</option>
+                      <option value="task">Задания</option>
+                      <option value="terms">Термины</option>
+                    </select>
+                  </div>
+                  <!-- Иначе просто текст. По клику — режим редактирования -->
+                  <div
+                    v-else
+                    @click="startEditingChapter(chapter)"
+                    style="cursor: pointer;"
+                  >
+                    {{ chapter.type }}
+                  </div>
+                </td>
+
+                <!-- Редактирование: кнопки «Сохранить»/«Отмена» или «Редактировать» -->
+                <td>
+                  <div v-if="editingChapterId === chapter.id">
+                    <button @click="saveChapter" class="btn__user--edit">Сохранить</button>
+                    <button @click="cancelEditingChapter" class="btn__user--edit">Отмена</button>
+                  </div>
+                  <div v-else>
+                    <button @click="startEditingChapter(chapter)" class="btn__user--edit">
+                      Редактировать
+                    </button>
+                  </div>
+                </td>
+
+                <!-- Удаление -->
+                <td>
+                  <button
+                    class="btn__user--delete"
+                    @click="deleteChapter(chapter.id)"
+                  >
+                    Удалить
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
         </div>
         <div v-else>
             <p class="p__topic">Пока нет глав</p>
@@ -132,6 +183,52 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 
+const editingChapterId = ref(null);
+const editingChapter = ref({});
+
+// Запускаем режим редактирования
+function startEditingChapter(chapter) {
+  editingChapterId.value = chapter.id;
+  // Копируем данные, чтобы не изменять сразу оригинал
+  editingChapter.value = { ...chapter };
+}
+
+// Сохраняем изменения главы
+async function saveChapter() {
+  try {
+    // PUT-запрос для обновления
+    const response = await axios.put(
+      `/api/admin/topic/${topicId}/chapters/${editingChapterId.value}`,
+      editingChapter.value
+    );
+    const updatedChapter = response.data.chapter;
+    // Обновляем главу в списке
+    const index = chapters.value.findIndex(ch => ch.id === editingChapterId.value);
+    if (index !== -1) {
+      chapters.value[index] = updatedChapter;
+    }
+    editingChapterId.value = null;
+    editingChapter.value = {};
+  } catch (error) {
+    console.error("Ошибка при обновлении главы:", error);
+  }
+}
+
+// Отмена редактирования
+function cancelEditingChapter() {
+  editingChapterId.value = null;
+  editingChapter.value = {};
+}
+
+// Удаление главы
+async function deleteChapter(chapterId) {
+  try {
+    await axios.delete(`/api/admin/topic/${topicId}/chapters/${chapterId}`);
+    chapters.value = chapters.value.filter(ch => ch.id !== chapterId);
+  } catch (error) {
+    console.error("Ошибка при удалении главы:", error);
+  }
+}
 /**
  * Извлекаем ID темы из URL: /admin/topic/3/chapters/create
  */
@@ -296,6 +393,18 @@ function goBack() {
 </script>
 
 <style scoped>
+.btn__user--edit {
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: #007bff;
+}
+.btn__user--delete {
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: red;
+}
 .correct-answer-textarea {
   min-height: 120px;   /* Можно отрегулировать под нужный размер */
   padding: 8px;
