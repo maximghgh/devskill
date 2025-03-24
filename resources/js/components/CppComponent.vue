@@ -50,22 +50,24 @@
                                             :key="teacher.id"
                                         >
                                             <!-- Если у преподавателя есть фото, выводим его, иначе заглушку -->
-                                            <img
-                                                class="teacher-photo"
+                                            <img class="teacher-photo"
                                                 :src="
                                                     teacher.photo
-                                                        ? `/${teacher.photo}`
+                                                        ? `/storage/${teacher.photo}`
                                                         : '/img/teacher_placeholder.png'
                                                 "
                                                 alt="Преподаватель"
+                                                
                                             />
-                                            <p class="teacher-name">
+                                            <div class="teacher__info">
+                                                <p class="teacher-name">
                                                 {{ teacher.name }}
-                                            </p>
-                                            <!-- Можно вывести и другие поля, например email -->
-                                            <p class="teacher-email">
-                                                {{ teacher.email }}
-                                            </p>
+                                                </p>
+                                                <!-- Можно вывести и другие поля, например email -->
+                                                <p class="teacher-email">
+                                                    {{ teacher.email }}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
@@ -217,6 +219,23 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.teacher__info{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+}
+.course-content p {
+    font-size: 0.8em;
+    margin-bottom: 0;
+    text-indent: unset ;
+}
+.teacher-photo{
+    width: 129px;
+    height: 129px;
+    border-radius: 50%;
+}
 ::v-deep(.ce-block__content) {
     width: 100%;
     max-width: 800px;
@@ -229,7 +248,7 @@ onMounted(async () => {
 .course-teachers {
     border-radius: 10px;
     padding: 20px;
-    background-color: #94949467;
+    border: 3px solid #d3d3dd;
     text-align: center;
 }
 
@@ -260,18 +279,13 @@ onMounted(async () => {
     background: #fff;
     border-radius: 8px;
     padding: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.411);
     text-align: center;
 }
 
-.teacher-photo {
-    width: 100%;
-    height: auto;
-    border-radius: 50%;
-    margin-bottom: 12px;
-}
 
 .teacher-name {
+    text-align: center;
     font-weight: bold;
     font-size: 18px;
     margin-bottom: 8px;

@@ -24,10 +24,7 @@
                                     </div>
                                 </div>
                                 <!-- Список тем (основное меню) -->
-                                <div
-                                    v-if="!selectedTopic"
-                                    class="skill__sidebar-menu-main"
-                                >
+                                <div v-if="!selectedTopic" class="skill__sidebar-menu-main">
                                     <ul class="skill__menu-main-list">
                                         <li
                                             v-for="topic in topics"
@@ -55,15 +52,12 @@
                                     </ul>
                                 </div>
                                 <!-- Дополнительное меню (главы), если выбрана тема -->
-                                <div
-                                    v-else-if="selectedTopic"
-                                    class="skill__sidebar-menu-second"
-                                >
+                                <div v-else-if="selectedTopic" class="skill__sidebar-menu-second">
                                     <div class="skill__menu-second-title">
                                         {{ selectedTopic.title }}
                                     </div>
                                     <div class="skill__menu-second-block">
-                                        <!-- <div class="skill__menu-second-progress"></div> -->
+                                        <div class="skill__menu-second-progress"></div>
                                         <ul class="skill__menu-second-list">
                                             <li
                                                 v-for="chapter in selectedTopic.chapters"

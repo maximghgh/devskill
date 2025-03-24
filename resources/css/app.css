@@ -877,6 +877,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .course__card {
     width: 100%;
+    max-width: 47%;
     height: 300px;
     background-repeat: no-repeat;
     background-size: cover;
@@ -1707,7 +1708,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .skill__menu-second-progress {
     width: 1px;
-    height: calc(100% - 44px);
+    height: calc(100% - 110px);
     background: #acacc8;
     position: absolute;
     top: 22px;

@@ -153,7 +153,11 @@ import { ref } from "vue";
 import axios from "axios";
 
 // Настраиваем CSRF-токен через заголовок (если требуется, можно добавить и withCredentials)
-axios.defaults.headers.common["X-CSRF-TOKEN"] = "raHIxcqEYvQCxXOs1aGPTajulasHl7uDn86jEUDQ";
+const token = document.querySelector('meta[name="csrf-token"]');
+if (token) {
+  axios.defaults.headers.common["X-CSRF-TOKEN"] = token.content;
+}
+
 
 // Переменная для переключения шагов формы: 'email' для отправки кода, 'reset' для сброса пароля
 const step = ref("email");
