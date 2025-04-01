@@ -135,6 +135,42 @@ class ChapterController extends Controller
         'chapter_id' => $chapter->id
     ]);
 }
+    public function getStats()
+    {
+        // 1. Общее количество глав
+        $totalChapters = \App\Models\Chapter::count();
+
+        // 2. Делаем запрос с агрегацией
+        //    - Считаем, сколько глав пройдено каждым пользователем (COUNT)
+        //    - Находим последнюю дату прохождения (MAX)
+        //    - Имена берём из таблицы users
+        //    - Учитываем, что user_chapter_progress может и не быть у некоторых
+        $usersProgress = \App\Models\User::select('users.id', 'users.name')
+            ->leftJoin('user_chapter_progress', 'users.id', '=', 'user_chapter_progress.user_id')
+            ->selectRaw('COUNT(user_chapter_progress.id) AS completed_chapters')
+            ->selectRaw('MAX(user_chapter_progress.completed_at) AS last_completed_at')
+            ->groupBy('users.id', 'users.name')
+            ->orderBy('users.name')
+            ->get()
+            ->map(function ($user) use ($totalChapters) {
+                // Считаем процент, если totalChapters > 0
+                $progressPercent = 0;
+                if ($totalChapters > 0) {
+                    $progressPercent = ($user->completed_chapters / $totalChapters) * 100;
+                }
+
+                return [
+                    'id'                => $user->id,
+                    'name'              => $user->name,
+                    'completed_chapters'=> $user->completed_chapters,
+                    'progress_percent'  => $progressPercent,
+                    'last_completed_at' => $user->last_completed_at,
+                ];
+            });
+
+        // 3. Возвращаем ответ (JSON)
+        return response()->json($usersProgress);
+    }
 
 
 }

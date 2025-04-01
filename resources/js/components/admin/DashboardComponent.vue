@@ -293,6 +293,7 @@
                             <!-- Блок "Курсы" -->
                             <div v-else-if="item.id === 'courses'">
                                 <h2>Список курсов</h2>
+                                <a class="course__links" href="/admin/statistics">Статистика учеников</a>
                                 <div v-if="courses.length">
                                     <table class="light-push-table">
                                         <thead>

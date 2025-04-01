@@ -27,6 +27,7 @@ use App\Http\Controllers\ChapterController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('/chapters/stats', [ChapterController::class, 'getStats']);
 
 // прогресс пользователя
 Route::get('/course/{courseId}/topics', [CourseController::class, 'getTopicsWithProgress']);

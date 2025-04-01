@@ -50,6 +50,10 @@ Route::get('/admin/profile', function () {
     return view('admin.profile');
 })->name('admin.profile');;
 
+Route::get('/admin/statistics', function () {
+    return view('admin.statistics');
+})->name('admin.statistics');;
+
 Route::get('/profile', function () {
     return view('profile');
 })->name('profile');
