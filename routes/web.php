@@ -52,7 +52,15 @@ Route::get('/admin/profile', function () {
 
 Route::get('/admin/statistics', function () {
     return view('admin.statistics');
-})->name('admin.statistics');;
+})->name('admin.statistics');
+
+Route::get('/admin/consultations', function () {
+    return view('admin.consultations');
+})->name('admin.consultations');
+
+Route::get('/admin/statisticspurchase', function () {
+    return view('admin.statisticspurchase');
+})->name('admin.statisticspurchase');
 
 Route::get('/profile', function () {
     return view('profile');

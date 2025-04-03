@@ -2,25 +2,27 @@
     <div>
         <div class="block__info">
             <a class="span__sctrelca" href="#" @click.prevent="goBack">🠔</a>
-            <h2>Статистика по ученикам</h2>
+            <h2>Статистика покупок</h2>
         </div>
         <table class="light-push-table">
             <thead>
                 <tr>
-                    <th>Имя ученика</th>
-                    <th>Прогресс (%)</th>
-                    <th>Последняя дата прохождения</th>
+                    <th>Покупатель</th>
+                    <th>Курс</th>
+                    <th>Метод оплаты</th>
+                    <th>Статус</th>
+                    <th>Дата покупки</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="user in stats" :key="user.id">
-                    <td>{{ user.name }}</td>
-                    <!-- Округлим прогресс -->
-                    <td>{{ Math.round(user.progress_percent) }}%</td>
-                    <td v-if="user.last_completed_at">
-                        {{ new Date(user.last_completed_at).toLocaleString() }}
+                <tr v-for="purchase in purchases" :key="purchase.id">
+                    <td>{{ purchase.user_name }}</td>
+                    <td>{{ purchase.course_title }}</td>
+                    <td>{{ purchase.payment_method }}</td>
+                    <td>{{ purchase.status === 'completed' ? 'Успешно' : purchase.status }}</td>
+                    <td>
+                        {{ new Date(purchase.purchase_date).toLocaleString() }}
                     </td>
-                    <td v-else>—</td>
                 </tr>
             </tbody>
         </table>
@@ -30,22 +32,28 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-const stats = ref([]);
+const purchases = ref([]);
+
+const statusMap = {
+  completed: 'Успешно',
+  pending: 'Ожидается оплата',
+  canceled: 'Отменено'
+  // и т.д.
+}
 
 onMounted(async () => {
     try {
-        // Меняем URL, если у вас другая структура
-        const response = await fetch("/api/chapters/stats");
-        stats.value = await response.json();
+        const response = await fetch("/api/purchases");
+        purchases.value = await response.json();
     } catch (error) {
-        console.error("Ошибка при загрузке статистики:", error);
+        console.error("Ошибка при загрузке покупок:", error);
     }
 });
+
 function goBack() {
   window.history.back();
 }
 </script>
-
 <style scoped>
 .block__info{
     position: relative;

@@ -44,5 +44,24 @@ class PurchaseController extends Controller
             'message' => 'Курс успешно куплен'
         ], 201);
     }
+    public function index()
+    {
+        // Берём все покупки, присоединяем пользователей и курсы
+        $purchases = Purchase::query()
+            ->join('users', 'purchases.user_id', '=', 'users.id')
+            ->join('courses', 'purchases.course_id', '=', 'courses.id')
+            ->select(
+                'purchases.id',
+                'purchases.payment_method',
+                'purchases.status',
+                'purchases.created_at as purchase_date', // дата покупки
+                'users.name as user_name',               // имя пользователя
+                'courses.card_title as course_title'     // название курса (или другое поле)
+            )
+            ->orderBy('purchases.created_at', 'desc')
+            ->get();
+
+        return response()->json($purchases);
+    }
 }
 

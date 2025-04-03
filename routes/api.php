@@ -28,6 +28,11 @@ use App\Http\Controllers\ChapterController;
 |
 */
 Route::get('/chapters/stats', [ChapterController::class, 'getStats']);
+Route::get('/purchases', [PurchaseController::class, 'index']);
+Route::get('/consultations', [ConsultationController::class, 'index']);
+Route::post('/consultations/{id}/complete', [ConsultationController::class, 'complete']);
+Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus']);
+
 
 // прогресс пользователя
 Route::get('/course/{courseId}/topics', [CourseController::class, 'getTopicsWithProgress']);

@@ -293,7 +293,23 @@
                             <!-- Блок "Курсы" -->
                             <div v-else-if="item.id === 'courses'">
                                 <h2>Список курсов</h2>
-                                <a class="course__links" href="/admin/statistics">Статистика учеников</a>
+                                <div class="cou">
+                                    <a
+                                        class="course__links"
+                                        href="/admin/statistics"
+                                        >Статистика учеников</a
+                                    >
+                                    <a
+                                        class="course__links"
+                                        href="/admin/statisticspurchase"
+                                        >Покупки пользователей</a
+                                    >
+                                    <a
+                                        class="course__links"
+                                        href="/admin/consultations"
+                                        >Консультации</a
+                                    >
+                                </div>
                                 <div v-if="courses.length">
                                     <table class="light-push-table">
                                         <thead>
@@ -2523,6 +2539,19 @@ async function submitNews() {
 </script>
 
 <style scoped>
+.course__links{
+    color: #0056b3;
+    text-decoration: none;
+}
+.course__links:hover{
+    text-decoration: underline;
+}
+.cou {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 0 0 30px;
+}
 .h2__margin {
     margin: 40px 0;
 }

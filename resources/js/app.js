@@ -13,6 +13,8 @@ import ProfileadminComponent from './components/admin/Profile-adminComponent.vue
 import CourseComponent from './components/admin/CourseComponent.vue';
 import TopicsComponent from './components/admin/TopicsComponent.vue';
 import StatisticsComponent from './components/admin/StatisticsComponent.vue';
+import StatisticsPurchaseComponent from './components/admin/StatisticsPurchaseComponent.vue';
+import ConsultationsComponent from './components/admin/ConsultationsComponent.vue';
 
 // Импорт всех компонентов 
 import ExampleComponent from './components/ExampleComponent.vue';
@@ -38,7 +40,9 @@ import CppComponent from './components/CppComponent.vue';
 const app = createApp({});
 
 // Регистрация компонентов (имена в kebab-case) для админ-панели
+app.component('consultations-component', ConsultationsComponent);
 app.component('statistics-component', StatisticsComponent);
+app.component('statisticspurchase-component', StatisticsPurchaseComponent);
 app.component('dashboard-component', DashboardComponent);
 app.component('course-component', CourseComponent);
 app.component('topic-component', TopicsComponent);
