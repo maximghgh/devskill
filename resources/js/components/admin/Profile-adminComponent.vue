@@ -7,9 +7,9 @@
                         <div class="course__content">
                             <div class="course__menu course__menu-persona">
                                 <div class="course__menu-nickname">
-                                    <img
-                                        src="https://devskills.foncode.ru/img/no_foto.jpg"
-                                        class="course__menu-foto"
+                                    <img 
+                                        :src="user.photo ? `/storage/${user.photo}` : 'https://devskills.foncode.ru/img/no_foto.jpg'" 
+                                        alt="Фото пользователя" class="course__menu-foto"
                                     />
                                     <div class="course__menu-name-admin">
                                         {{ user.name }}
@@ -33,8 +33,9 @@
                             <div class="infoblock__info">
                                 <div lang="infoblock__info-name">
                                     <div class="infoblock__info-name-image">
-                                        <img
-                                            src="https://devskills.foncode.ru/img/no_foto.jpg"
+                                        <img 
+                                            :src="user.photo ? `/storage/${user.photo}` : 'https://devskills.foncode.ru/img/no_foto.jpg'" 
+                                            alt="Фото пользователя" 
                                         />
                                     </div>
                                     <form action="" class="infoblock__info-form">
@@ -174,143 +175,153 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import { ref, reactive, onMounted } from "vue";
 import axios from "axios";
 
-export default {
-    name: "UserHeader",
-    setup() {
-        // Модальное окно
-        const showModal = ref(false);
+// Управление модальным окном
+const showModal = ref(false);
 
-        const user = ref({});
-        const isFocused = ref(false);
+// Данные пользователя и форма для редактирования профиля
+const user = ref({});
+const form = reactive({
+  id: "",
+  name: "",
+  email: "",
+  birthday: "",
+  status: "Ученик",
+  phone: "",
+  country: "",
+});
 
-        // Добавляем поле id в объект form
-        const form = reactive({
-            id: "",
-            name: "",
-            email: "",
-            birthday: "",
-            status: "Ученик",
-            phone: "",
-            country: "",
-        });
+const isFocused = ref(false);
 
-        onMounted(() => {
-            console.log(
-                "Начальное localStorage:",
-                localStorage.getItem("user")
-            );
-            const storedUser = localStorage.getItem("user");
-            if (storedUser) {
-                try {
-                    const parsedUser = JSON.parse(storedUser);
-                    user.value = parsedUser;
+// Переменная для выбранного файла
+const selectedFile = ref(null);
 
-                    // Заполняем все нужные поля формы
-                    form.id = parsedUser.id || "";
-                    form.name = parsedUser.name || "";
-                    form.email = parsedUser.email || "";
-                    // Добавляем поля phone, country, birthday, role => status
-                    form.phone = parsedUser.phone || "";
-                    form.country = parsedUser.country || "";
-                    form.birthday = parsedUser.birthday || "";
-                    form.status =
-                        parsedUser.role === 1
-                            ? "Ученик"
-                            : parsedUser.role === 2
-                            ? "Преподаватель"
-                            : "Администратор";
-                } catch (error) {
-                    console.error(
-                        "Ошибка при парсинге пользователя из localStorage:",
-                        error
-                    );
-                }
-            }
+// onMounted – загрузка данных из localStorage и API
+onMounted(() => {
+  // Попытка загрузить пользователя из localStorage
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    try {
+      const parsedUser = JSON.parse(storedUser);
+      user.value = parsedUser;
 
-            // Загружаем данные пользователя из API
-            loadUserData();
-        });
+      // Заполняем поля формы
+      form.id = parsedUser.id || "";
+      form.name = parsedUser.name || "";
+      form.email = parsedUser.email || "";
+      form.phone = parsedUser.phone || "";
+      form.country = parsedUser.country || "";
+      form.birthday = parsedUser.birthday || "";
+      form.status =
+        parsedUser.role === 1
+          ? "Ученик"
+          : parsedUser.role === 2
+          ? "Преподаватель"
+          : "Администратор";
+    } catch (error) {
+      console.error("Ошибка при парсинге пользователя из localStorage:", error);
+    }
+  }
 
-        const onFocus = () => {
-            isFocused.value = true;
-            if (!form.phone || form.phone === "+7") {
-                form.phone = "+7 ";
-            }
-        };
+  // Загружаем актуальные данные из API
+  loadUserData();
+});
 
-        const onBlur = () => {
-            isFocused.value = false;
-            if (form.phone === "+7 ") {
-                form.phone = "";
-            }
-        };
-
-        const loadUserData = async () => {
-            try {
-                const response = await axios.get("/api/user"); // Laravel API
-                const userData = response.data;
-                // Обновляем id и остальные поля из ответа API
-                form.id = userData.id;
-                form.name = userData.name || "";
-                form.email = userData.email || "";
-                form.birthday = userData.birthday || "";
-                form.status =
-                    userData.role === 1
-                        ? "Ученик"
-                        : userData.role === 2
-                        ? "Преподаватель"
-                        : "Администратор";
-                form.phone = userData.phone || "";
-                form.country = userData.country || "";
-                console.log("Ответ API /api/user:", response.data);
-            } catch (error) {
-                console.error("Ошибка загрузки данных:", error);
-            }
-        };
-
-        const updateProfile = async () => {
-        try {
-          const response = await axios.post('/api/profile', { ...form });
-          // Вместо alert() теперь показываем модалку
-          // alert(response.data.message);
-
-          // Удаляем password, если есть
-          delete response.data.user.password;
-
-          // Сохраняем обновлённые данные пользователя в localStorage
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-          console.log("LocalStorage после обновления:", localStorage.getItem('user'));
-
-          // Обновляем реактивную переменную user
-          user.value = response.data.user;
-
-          // Открываем модальное окно
-          showModal.value = true;
-        } catch (error) {
-          console.error('Ошибка сохранения:', error.response?.data || error.message);
-        }
-      };
-      const closeModal = () => {
-        showModal.value = false;
-      };
-
-        // Возвращаем новые переменные (showModal) и всё остальное
-        return {
-            showModal, // чтобы управлять модальным окном
-            user,
-            form,
-            isFocused,
-            onFocus,
-            onBlur,
-            loadUserData,
-            updateProfile,
-        };
-    },
+// Функции для управления фокусом поля телефона
+const onFocus = () => {
+  isFocused.value = true;
+  if (!form.phone || form.phone === "+7") {
+    form.phone = "+7 ";
+  }
 };
+const onBlur = () => {
+  isFocused.value = false;
+  if (form.phone === "+7 ") {
+    form.phone = "";
+  }
+};
+
+// Загрузка данных пользователя из API
+const loadUserData = async () => {
+  try {
+    const response = await axios.get("/api/user"); // Laravel API
+    const userData = response.data;
+    form.id = userData.id;
+    form.name = userData.name || "";
+    form.email = userData.email || "";
+    form.birthday = userData.birthday || "";
+    form.status =
+      userData.role === 1
+        ? "Ученик"
+        : userData.role === 2
+        ? "Преподаватель"
+        : "Администратор";
+    form.phone = userData.phone || "";
+    form.country = userData.country || "";
+  } catch (error) {
+    console.error("Ошибка загрузки данных:", error);
+  }
+};
+
+// Функция обновления профиля
+const updateProfile = async () => {
+  try {
+    const response = await axios.post("/api/profile", { ...form });
+    // Убираем пароль из данных, если он есть
+    delete response.data.user.password;
+    // Обновляем localStorage и реактивные данные пользователя
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+    user.value = response.data.user;
+    // Показываем модальное окно
+    showModal.value = true;
+  } catch (error) {
+    console.error("Ошибка сохранения:", error.response?.data || error.message);
+  }
+};
+
+const closeModal = () => {
+  showModal.value = false;
+};
+
+// Функция обработки выбора файла
+function onFileSelected(event) {
+  const file = event.target.files[0];
+  selectedFile.value = file;
+}
+
+// Функция загрузки фото
+async function uploadPhoto() {
+  if (!selectedFile.value) {
+    alert("Сначала выберите файл!");
+    return;
+  }
+  try {
+    const formData = new FormData();
+    formData.append("file", selectedFile.value);
+
+    // Берём ID пользователя из реактивной переменной user (или localStorage, если необходимо)
+    const userId =
+      user.value.id ||
+      (localStorage.getItem("user") && JSON.parse(localStorage.getItem("user")).id);
+      
+    const response = await axios.post(`/api/users/${userId}/photo`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    console.log("Фото обновлено:", response.data.user);
+    alert("Фото успешно загружено!");
+    // Обновляем данные пользователя в localStorage и в реактивной переменной
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+    user.value = response.data.user;
+  } catch (error) {
+    console.error("Ошибка при загрузке фото:", error);
+    alert("Ошибка при загрузке фото.");
+  }
+}
 </script>
 
 <style>

@@ -1077,6 +1077,12 @@
                                 >
                                     <div class="modal-content">
                                         <h2>Редактирование новости</h2>
+                                        <button
+                                            class="close-button"
+                                            @click="closeNewsEditModal"
+                                        >
+                                            X
+                                        </button>
                                         <form
                                             @submit.prevent="submitNewsEdit"
                                             class="course-form"
@@ -1133,16 +1139,9 @@
                                             <div class="modal-buttons">
                                                 <button
                                                     type="submit"
-                                                    class="btn__news--edit"
+                                                    class="form-button"
                                                 >
                                                     Сохранить изменения
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    class="btn__news--edit"
-                                                    @click="closeNewsEditModal"
-                                                >
-                                                    Отмена
                                                 </button>
                                             </div>
                                         </form>
@@ -2539,11 +2538,11 @@ async function submitNews() {
 </script>
 
 <style scoped>
-.course__links{
+.course__links {
     color: #0056b3;
     text-decoration: none;
 }
-.course__links:hover{
+.course__links:hover {
     text-decoration: underline;
 }
 .cou {
@@ -2584,7 +2583,7 @@ async function submitNews() {
     color: #000;
     border: 1px solid #e0e0e0;
     padding: 5px;
-    font-size: 18px;
+    font-size: 14px;
 }
 ::v-deep .multiselect__tags {
     overflow: hidden;

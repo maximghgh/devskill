@@ -3,7 +3,7 @@
         <div class="header__inner">
             <div class="header__logo">
                 <a href="/">
-                    <img src="/img/logo.png" alt="Логотип" />
+                    <img src="/img/logo.svg" class="header__logo" alt="Логотип" />
                 </a>
             </div>
             <nav class="header__nav">
@@ -103,6 +103,9 @@ export default {
 </script>
 
 <style scoped>
+.header__logo{
+    height: 90px;
+}
 .avatar__user {
     border-radius: 50%;
 }

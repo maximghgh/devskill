@@ -10,6 +10,7 @@
     <div id="app">
         <header-component></header-component>
         <personal-area-component></personal-area-component>
+        <footer-component></footer-component>
     </div>
 </body>
 </html>

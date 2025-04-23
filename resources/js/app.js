@@ -3,7 +3,7 @@ import { createApp } from 'vue';
 import VueTheMask from 'vue-the-mask';
 // import Register from './components/RegisterComponent.vue';
 import HeaderComponent from './components/HeaderComponent.vue';
-
+import FooterComponent from './components/FooterComponent.vue';
 // Импорт всех компонентов для админ-панели
 
 import DashboardComponent from './components/admin/DashboardComponent.vue';
@@ -51,6 +51,7 @@ app.component('cabinet-admin-component', CabinetadminComponent);
 app.component('profile-admin-component', ProfileadminComponent);
 // Регистрация компонентов (имена в kebab-case)
 app.component('header-component', HeaderComponent);
+app.component('footer-component', FooterComponent);
 app.component('cpp-component', CppComponent);
 app.component('profile-component', ProfileComponent);
 app.component('cabinet-component', CabinetComponent);

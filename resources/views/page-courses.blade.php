@@ -10,6 +10,7 @@
     <div id="app">
         <header-component></header-component>
         <page-courses-component></page-courses-component>
+        <footer-component></footer-component>
     </div>
 </body>
 </html>

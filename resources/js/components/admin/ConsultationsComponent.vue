@@ -109,6 +109,9 @@ function goBack() {
 </script>
 
 <style scoped>
+h2{
+    margin: unset !important;
+}
 .status{
     cursor: pointer;
     color: #1940f0;

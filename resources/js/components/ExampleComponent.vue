@@ -1,15 +1,17 @@
 <template>
     <div>
+        <!-- ===== Главная обёртка ===== -->
         <div class="maincontainer">
             <div class="container">
+                <!-- ================= HERO / OFFER ================= -->
                 <section class="offer offer_main">
                     <div class="offer__inner offer__inner_main">
                         <h1>
-                            Повышайте свои знания и навыки <br />вместе с
-                            DevSkillAcademy
+                            Повышайте свои знания и навыки вместе с
+                            Институтом образовательных технологий
                         </h1>
                         <div class="offer__desc">
-                            Наши курсы прошли более 15000 школьников и
+                            Наши курсы прошли более 15&nbsp;000&nbsp;школьников и
                             студентов.
                         </div>
                         <div class="button button_white button_offer-main">
@@ -17,50 +19,38 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- ================= Сотрудничество ================= -->
                 <section class="cooperation">
                     <h2>
                         Мы сотрудничаем с ведущими <br />организациями и
                         университетами
                     </h2>
                     <div class="cooperation__slider">
-                        <div class="cooperation__slide">
-                            <img src="/img/univer_1.png" />
-                        </div>
-                        <div class="cooperation__slide">
-                            <img src="/img/univer_2.png" />
-                        </div>
-                        <div class="cooperation__slide">
-                            <img src="/img/univer_3.png" />
-                        </div>
-                        <div class="cooperation__slide">
-                            <img src="/img/univer_4.png" />
-                        </div>
-                        <div class="cooperation__slide">
-                            <img src="/img/univer_5.png" />
-                        </div>
-                        <div class="cooperation__slide">
-                            <img src="/img/univer_6.png" />
+                        <div v-for="n in 6" :key="n" class="cooperation__slide">
+                            <img :src="`/img/univer_${n}.png`" />
                         </div>
                     </div>
                 </section>
+
+                <!-- ================= Категории ================= -->
                 <section class="category">
                     <h2>Категории курсов</h2>
                     <div class="category__inner">
                         <div class="category__one category__one_back1">
                             <div class="category__one-inner">
                                 <div class="category__one-title">
-                                    Серия курсов по C++
+                                    Серия курсов по C++
                                 </div>
                                 <div class="category__one-info">
-                                    <p>• Базовый</p>
-                                    <p>• Фундаментальный</p>
-                                    <p>• Олимпиадный</p>
+                                    <p>• Базовый</p>
+                                    <p>• Фундаментальный</p>
+                                    <p>• Олимпиадный</p>
                                 </div>
                                 <a
-                                    href="#"
+                                    href="/category-courses"
                                     class="button button_white button_cat-link"
-                                    >Перейти в категорию</a
-                                >
+                                >Перейти в категорию</a>
                             </div>
                         </div>
                         <div class="category__one category__one_defualt">
@@ -71,89 +61,76 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- ================= Каталог курсов ================= -->
                 <section class="course">
                     <div class="course__inner">
-                        <div class="course__button course__button_active" @click="toggleSidebar">
-                            <img src="https://devskills.foncode.ru/img/filter.jpg" width="40" height="40">
+                        <!-- mobile filter toggle -->
+                        <div
+                            class="course__button course__button_active"
+                            @click="toggleSidebar"
+                        >
+                            <img
+                                src="https://devskills.foncode.ru/img/filter.jpg"
+                                width="40"
+                                height="40"
+                            />
                         </div>
-                        <div class="course__sidebar" :class="{ 'course__sidebar_open': isSidebarOpen }">
+
+                        <!-- ===== Sidebar ===== -->
+                        <div
+                            class="course__sidebar"
+                            :class="{ course__sidebar_open: isSidebarOpen }"
+                        >
+                            <!-- Тематика -->
                             <div class="course__sidebar-block">
                                 <div class="course__sidebar-title">
                                     Тематика
                                 </div>
-                                <div class="course__sidebar-check course__sidebar-check--lang">
+                                <div
+                                    class="course__sidebar-check course__sidebar-check--lang"
+                                >
                                     <div
-                                        class="course__sidebar-oncheck"
                                         v-for="language in languages"
                                         :key="language.id"
+                                        class="course__sidebar-oncheck"
                                     >
-                                        <!-- Привязываем состояние конкретного языка -->
                                         <input
-                                            :id="'lang_' + language.id"
+                                            :id="`lang_${language.id}`"
                                             type="checkbox"
-                                            :name="'lang_' + language.id"
                                             v-model="language.checked"
                                         />
-                                        <label :for="'lang_' + language.id">
+                                        <label :for="`lang_${language.id}`">
                                             <span>{{ language.name }}</span>
                                         </label>
                                     </div>
                                 </div>
                             </div>
+                            <!-- Уровень -->
                             <div class="course__sidebar-block">
                                 <div class="course__sidebar-title">Уровень</div>
                                 <div class="course__sidebar-check">
-                                    <div class="course__sidebar-oncheck">
+                                    <div
+                                        v-for="lvl in levelOptions"
+                                        :key="lvl.value"
+                                        class="course__sidebar-oncheck"
+                                    >
                                         <input
-                                            id="lvl_1"
-                                            name="lvl_1"
+                                            :id="`lvl_${lvl.value}`"
                                             type="checkbox"
-                                            value="basic"
+                                            :value="lvl.value"
                                             v-model="selectedDifficulties"
                                         />
-                                        <label for="lvl_1"
-                                            ><span>Начинающий</span></label
-                                        >
-                                    </div>
-                                    <div class="course__sidebar-oncheck">
-                                        <input
-                                            id="lvl_2"
-                                            name="lvl_2"
-                                            type="checkbox"
-                                            value="middle"
-                                            v-model="selectedDifficulties"
-                                        />
-                                        <label for="lvl_2"
-                                            ><span>Средний</span></label
-                                        >
-                                    </div>
-                                    <div class="course__sidebar-oncheck">
-                                        <input
-                                            id="lvl_3"
-                                            name="lvl_3"
-                                            type="checkbox"
-                                            value="advanced"
-                                            v-model="selectedDifficulties"
-                                        />
-                                        <label for="lvl_3"
-                                            ><span>Продвинутый</span></label
-                                        >
-                                    </div>
-                                    <div class="course__sidebar-oncheck">
-                                        <input
-                                            id="lvl_4"
-                                            name="lvl_4"
-                                            type="checkbox"
-                                            value="mixed"
-                                            v-model="selectedDifficulties"
-                                        />
-                                        <label for="lvl_4"
-                                            ><span>Смешанный</span></label
-                                        >
+                                        <label :for="`lvl_${lvl.value}`">
+                                            <span>{{ lvl.label }}</span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
-                            <div class="course__sidebar-block course__sidebar-block_noline">
+                            <!-- Длительность -->
+                            <div
+                                class="course__sidebar-block course__sidebar-block_noline"
+                            >
                                 <div class="course__sidebar-title">
                                     Длительность
                                 </div>
@@ -167,344 +144,300 @@
                                                 v-model="selectedDuration"
                                                 @input="validateDuration"
                                             />
-                                            <span>От 1 до 24 месяцев</span>
+                                            <span>От 1 до 24&nbsp;месяцев</span>
                                         </label>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <!-- /sidebar -->
+                        <!-- ===== Content ===== -->
                         <div class="course__content">
                             <h2>Каталог курсов</h2>
                             <div class="course__menu">
-                                <!-- Пункт "Все направления" -->
                                 <div
                                     class="course__menu-one"
-                                    :class="{
-                                        active: selectedDirection === 'all',
-                                    }"
+                                    :class="{ active: selectedDirection === 'all' }"
                                     @click="selectedDirection = 'all'"
                                 >
                                     Все направления
                                 </div>
-                                <!-- Остальные направления -->
                                 <div
-                                    class="course__menu-one"
                                     v-for="direction in directions"
                                     :key="direction.id"
-                                    :class="{
-                                        active:
-                                            selectedDirection === direction.id,
-                                    }"
+                                    class="course__menu-one"
+                                    :class="{ active: selectedDirection === direction.id }"
                                     @click="selectedDirection = direction.id"
                                 >
                                     {{ direction.name }}
                                 </div>
                             </div>
                             <div class="block-left">
+                                <!-- cards -->
                                 <div class="course__cards">
                                     <div
                                         v-for="course in paginatedCourses"
                                         :key="course.id"
                                         :class="[
                                             'course__card',
-                                            'course__card_bg1 ',
-                                            difficultyColorClass[
-                                                course.difficulty
-                                            ],
+                                            'course__card_bg1',
+                                            difficultyColorClass[course.difficulty],
                                         ]"
                                     >
-                                        <!-- Изображение курса -->
                                         <div class="course__card-image">
-                                            <!-- Проверяем, есть ли путь к файлу. Если нет, можно подставить заглушку -->
                                             <img
-                                                :src="
-                                                    course.card_image
-                                                        ? course.card_image
-                                                        : '/img/logo_placeholder.png'
-                                                "
+                                                :src="course.card_image || '/img/logo_placeholder.png'"
                                                 alt="Изображение курса"
                                             />
                                         </div>
-                                        <!-- Название на карточке -->
                                         <div class="course__card-title">
                                             {{ course.card_title }}
                                         </div>
-                                        <!-- Уровень сложности -->
-
-                                        <!-- Цена -->
-                                        <!-- Кнопки -->
                                         <div class="course__card-buttons">
                                             <div class="course__card-price">
                                                 <p class="course__card-desc">
-                                                    {{
-                                                        difficultyTranslation[
-                                                            course.difficulty
-                                                        ]
-                                                    }}
+                                                    {{ difficultyTranslation[course.difficulty] }}
                                                 </p>
-                                                <span
-                                                    >{{ course.price }} P</span
-                                                >
+                                                <span>{{ course.price }} P</span>
                                             </div>
-                                            <!-- Ссылка «Подробнее» может вести на страницу с подробной информацией, например /courses/ID -->
                                             <div class="menu__button">
                                                 <a
                                                     :href="`/cpp/${course.id}`"
                                                     class="button button_transparent"
-                                                    >Подробнее</a
-                                                >
+                                                >Подробнее</a>
                                                 <a
                                                     href="#"
                                                     class="button button_white button_white-card"
-                                                    @click.prevent="
-                                                        openModal(course)
-                                                    "
-                                                    >Купить</a
-                                                >
+                                                    @click.prevent="openModal(course)"
+                                                >Купить</a>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                <!-- pagination -->
                                 <div class="pagination-pages">
                                     <button
                                         v-for="page in pages"
                                         :key="page"
                                         @click="currentPage = page"
-                                        :class="{
-                                            active: currentPage === page,
-                                        }"
+                                        :class="{ active: currentPage === page }"
                                     >
                                         {{ page }}
                                     </button>
                                 </div>
+                                <!-- ===== Modal purchase / consult ===== -->
                                 <transition name="modal">
-                                    <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
+                                    <div
+                                        v-if="isModalOpen"
+                                        class="modal-overlay"
+                                        @click.self="closeModal"
+                                    >
                                         <div class="modal-content__block">
                                             <button
                                                 class="modal-close"
                                                 @click="closeModal"
-                                            >
-                                                X
-                                            </button>
-                                            <!-- Заголовок и данные о курсе -->
-                                            <div class="modal-content" v-if="!isSubmitted">
-                                                <div class="block-info"
-                                                    :class="
-                                                        selectedCourse
-                                                            ? difficultyBgClass[
-                                                                selectedCourse
-                                                                    .difficulty
-                                                            ]
-                                                            : ''
-                                                    "
+                                            >X</button>
+
+                                            <div v-if="!isSubmitted" class="modal-content">
+                                                <!-- info -->
+                                                <div
+                                                    class="block-info"
+                                                    :class="selectedCourse ? difficultyBgClass[selectedCourse.difficulty] : ''"
                                                 >
                                                     <div class="block__top">
                                                         <div class="block__logo">
                                                             <img
-                                                                :src="
-                                                                    selectedCourse.card_image
-                                                                        ? selectedCourse.card_image
-                                                                        : '/img/logo_placeholder.png'
-                                                                "
-                                                                alt="Изображение курса"
+                                                                :src="selectedCourse.card_image || '/img/logo_placeholder.png'"
                                                                 width="50"
                                                                 height="50"
                                                             />
-                                                            <h2 v-if="selectedCourse">
-                                                                {{
-                                                                    selectedCourse.card_title
-                                                                }}
-                                                            </h2>
+                                                            <h2>{{ selectedCourse.card_title }}</h2>
                                                         </div>
-                                                        <p
-                                                            class="block__difficul block-bg"
-                                                            v-if="selectedCourse"
-                                                        >
-                                                            {{
-                                                                selectedCourse.description
-                                                            }}
+                                                        <p class="block__difficul block-bg">
+                                                            {{ selectedCourse.description }}
                                                         </p>
                                                     </div>
                                                     <div class="block__bottom">
-                                                        <p
-                                                            class="block__difficul"
-                                                            v-if="selectedCourse"
-                                                        >
-                                                            Уровень:
-                                                            {{
-                                                                difficultyTranslation[
-                                                                    selectedCourse
-                                                                        .difficulty
-                                                                ]
-                                                            }}
+                                                        <p class="block__difficul">
+                                                            Уровень:&nbsp;
+                                                            {{ difficultyTranslation[selectedCourse.difficulty] }}
                                                         </p>
                                                         <div class="block__price">
-                                                            <p v-if="selectedCourse">
-                                                                Цена:
-                                                                {{
-                                                                    selectedCourse.price
-                                                                }}
-                                                                P
-                                                            </p>
+                                                            <p>Цена: {{ selectedCourse.price }} P</p>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <!-- Форма (как на скриншоте) -->
+
+                                                <!-- form -->
                                                 <div class="form-block">
                                                     <form @submit.prevent="submitForm" class="forma">
-                                                        <!-- Блок с радиокнопками -->
+                                                        <!-- radio main -->
                                                         <div class="radio-group">
                                                             <label
-                                                            :class="['radio-option', { active: selectedOption === 'consultation' }]"
+                                                                :class="['radio-option', { active: selectedOption === 'consultation' }]"
                                                             >
-                                                            <input
-                                                                type="radio"
-                                                                name="consultationOption"
-                                                                value="consultation"
-                                                                v-model="selectedOption"
-                                                            />
-                                                            <span class="custom-radio"></span>
-                                                            <span class="custom-radio__text">
-                                                                Записаться на бесплатную консультацию
-                                                            </span>
+                                                                <input
+                                                                    type="radio"
+                                                                    value="consultation"
+                                                                    v-model="selectedOption"
+                                                                />
+                                                                <span class="custom-radio"></span>
+                                                                <span class="custom-radio__text">
+                                                                    Записаться на бесплатную консультацию
+                                                                </span>
                                                             </label>
 
                                                             <label
-                                                            :class="['radio-option', { active: selectedOption === 'discount' }]"
+                                                                :class="['radio-option', { active: selectedOption === 'discount' }]"
                                                             >
-                                                            <input
-                                                                type="radio"
-                                                                name="consultationOption"
-                                                                value="discount"
-                                                                v-model="selectedOption"
-                                                            />
-                                                            <span class="custom-radio"></span>
-                                                            <span class="custom-radio__text">
-                                                                Оплатить и получить дополнительную скидку
-                                                            </span>
+                                                                <input
+                                                                    type="radio"
+                                                                    value="discount"
+                                                                    v-model="selectedOption"
+                                                                />
+                                                                <span class="custom-radio"></span>
+                                                                <span class="custom-radio__text">
+                                                                    Оплатить и получить дополнительную скидку
+                                                                </span>
                                                             </label>
                                                         </div>
 
-                                                        <!-- Поля формы (имя, email, телефон и т.д.) -->
                                                         <div class="form-group floating-label">
                                                             <input
-                                                            id="email"
-                                                            type="email"
-                                                            name="email"
-                                                            required
-                                                            v-model="formData.email"
-                                                            
-                                                            placeholder=" "
+                                                                id="email"
+                                                                type="email"
+                                                                required
+                                                                v-model="formData.email"
+                                                                placeholder=" "
                                                             />
                                                             <label for="email">Электронная почта</label>
                                                         </div>
 
                                                         <div class="form-group floating-label">
                                                             <input
-                                                            id="name"
-                                                            type="text"
-                                                            name="name"
-                                                            required
-                                                            v-model="formData.name"
-                                                            placeholder=" "
+                                                                id="name"
+                                                                type="text"
+                                                                required
+                                                                v-model="formData.name"
+                                                                placeholder=" "
                                                             />
                                                             <label for="name">Имя</label>
                                                         </div>
 
                                                         <div class="form-group">
                                                             <input
-                                                            class="form__input"
-                                                            id="phone"
-                                                            type="tel"
-                                                            name="phone"
-                                                            required
-                                                            v-model="formData.phone"
-                                                            placeholder="+7 999 999-99-99"
+                                                                id="phone"
+                                                                type="tel"
+                                                                required
+                                                                v-model="formData.phone"
+                                                                placeholder="+7 999 999-99-99"
+                                                                class="form__input"
                                                             />
                                                         </div>
 
-                                                        <!-- Если выбран "discount" (оплата), можно показать доп. блок -->
+                                                        <!-- payment -->
                                                         <transition name="fade-slide">
-                                                            <div v-if="selectedOption === 'discount'" class="payment-block">
-                                                                <h3 class="payment__h3">Оплата курса со скидкой</h3>
-                                                                <!-- Дополнительная радио-группа для выбора способа оплаты -->
+                                                            <div
+                                                                v-if="selectedOption === 'discount'"
+                                                                class="payment-block"
+                                                            >
+                                                                <h3 class="payment__h3">
+                                                                    Оплата курса со скидкой
+                                                                </h3>
+
                                                                 <div class="radio-group">
-                                                                <label :class="['radio-option', { active: selectedDiscountOption === 'card' }]">
-                                                                    <input
-                                                                    type="radio"
-                                                                    name="discountOption"
-                                                                    value="card"
-                                                                    v-model="selectedDiscountOption"
-                                                                    />
-                                                                    <span class="custom-radio"></span>
-                                                                    <span class="custom-radio__text">Покупка картой</span>
-                                                                </label>
-                                                                <label :class="['radio-option', { active: selectedDiscountOption === 'sbp' }]">
-                                                                    <input
-                                                                    type="radio"
-                                                                    name="discountOption"
-                                                                    value="sbp"
-                                                                    v-model="selectedDiscountOption"
-                                                                    />
-                                                                    <span class="custom-radio"></span>
-                                                                    <span class="custom-radio__text">Покупка через СБП</span>
-                                                                </label>
+                                                                    <label
+                                                                        :class="['radio-option', { active: selectedDiscountOption === 'card' }]"
+                                                                    >
+                                                                        <input
+                                                                            type="radio"
+                                                                            value="card"
+                                                                            v-model="selectedDiscountOption"
+                                                                        />
+                                                                        <span class="custom-radio"></span>
+                                                                        <span class="custom-radio__text">
+                                                                            Покупка картой
+                                                                        </span>
+                                                                    </label>
+
+                                                                    <label
+                                                                        :class="['radio-option', { active: selectedDiscountOption === 'sbp' }]"
+                                                                    >
+                                                                        <input
+                                                                            type="radio"
+                                                                            value="sbp"
+                                                                            v-model="selectedDiscountOption"
+                                                                        />
+                                                                        <span class="custom-radio"></span>
+                                                                        <span class="custom-radio__text">
+                                                                            Покупка через СБП
+                                                                        </span>
+                                                                    </label>
                                                                 </div>
 
-                                                                <!-- Если выбрана опция "Покупка картой", показываем поля для карты -->
+                                                                <!-- card fields -->
                                                                 <div v-if="selectedDiscountOption === 'card'">
-                                                                <div class="form-group">
-                                                                    <label for="cardNumber" class="form-label">Номер карты:</label>
-                                                                    <input
-                                                                    type="text"
-                                                                    id="cardNumber"
-                                                                    v-model="cardInfo.cardNumber"
-                                                                    placeholder="0000 0000 0000 0000"
-                                                                    class="form__input"
-                                                                    v-mask="'#### #### #### ####'"
-                                                                    />
-                                                                </div>
-                                                                <div class="block-card">
                                                                     <div class="form-group">
-                                                                    <label for="cardExpiry" class="form-label">Срок действия (ММ/ГГ):</label>
-                                                                    <input
-                                                                        type="text"
-                                                                        id="cardExpiry"
-                                                                        v-model="cardInfo.expiry"
-                                                                        placeholder="ММ/ГГ"
-                                                                        class="form__input--card"
-                                                                        v-mask="'##/##'"
-                                                                    />
+                                                                        <label for="cardNumber" class="form-label">
+                                                                            Номер карты:
+                                                                        </label>
+                                                                        <input
+                                                                            id="cardNumber"
+                                                                            type="text"
+                                                                            v-model="cardInfo.cardNumber"
+                                                                            placeholder="0000 0000 0000 0000"
+                                                                            class="form__input"
+                                                                            v-mask="'#### #### #### ####'"
+                                                                        />
                                                                     </div>
-                                                                    <div class="form-group">
-                                                                    <label for="cardCVC" class="form-label">CVC:</label>
-                                                                    <input
-                                                                        type="text"
-                                                                        id="cardCVC"
-                                                                        v-model="cardInfo.cvc"
-                                                                        placeholder="CVC"
-                                                                        class="form__input--card"
-                                                                        v-mask="'###'"
-                                                                    />
+
+                                                                    <div class="block-card">
+                                                                        <div class="form-group">
+                                                                            <label for="cardExpiry" class="form-label">
+                                                                                Срок действия (ММ/ГГ):
+                                                                            </label>
+                                                                            <input
+                                                                                id="cardExpiry"
+                                                                                type="text"
+                                                                                v-model="cardInfo.expiry"
+                                                                                placeholder="ММ/ГГ"
+                                                                                class="form__input--card"
+                                                                                v-mask="'##/##'"
+                                                                            />
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="cardCVC" class="form-label">
+                                                                                CVC:
+                                                                            </label>
+                                                                            <input
+                                                                                id="cardCVC"
+                                                                                type="text"
+                                                                                v-model="cardInfo.cvc"
+                                                                                placeholder="CVC"
+                                                                                class="form__input--card"
+                                                                                v-mask="'###'"
+                                                                            />
+                                                                        </div>
                                                                     </div>
-                                                                </div>
                                                                 </div>
                                                             </div>
                                                         </transition>
 
-                                                        <!-- Кнопка отправки -->
                                                         <div class="form-field form-field--button">
                                                             <input
                                                                 class="form-submit form-submit--button"
                                                                 type="submit"
-                                                                name="submit"
-                                                                :value="selectedOption === 'consultation' ? 'Заказать консультацию' : 'Оплатить'"
+                                                                :value="selectedOption === 'consultation'
+                                                                    ? 'Заказать консультацию'
+                                                                    : 'Оплатить'"
                                                             />
                                                         </div>
                                                     </form>
                                                 </div>
                                             </div>
-                                            <div class="modal__else" v-else>
+
+                                            <!-- success screen -->
+                                            <div v-else class="modal__else">
                                                 <div class="else__info">
                                                     <h2>{{ successMessage }}</h2>
                                                     <p v-if="selectedOption === 'consultation'">
@@ -513,465 +446,328 @@
                                                     <p v-else>
                                                         Вы успешно купили курс, поздравляем!
                                                     </p>
-                                                    <!-- Кнопка «Закрыть» или «Ок» -->
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </transition>
                             </div>
+                            <!-- /block-left -->
                         </div>
+                        <!-- /content -->
                     </div>
                 </section>
             </div>
-            <footer>
-                <div class="footer__inner">
-                    <div class="footer__row">
-                        <div class="footer__block">API</div>
-                        <div class="footer__block">
-                            <div class="footer__logo">
-                                <img src="img/logo.png" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="footer__row">
-                        © 2011-2023 гг. Сайт не является публичной офертой и
-                        носит информационный характер. Все материалы данного
-                        сайта являются объектами авторского права (в том числе
-                        дизайн). Запрещается копирование, распространение (в том
-                        числе путем копирования на другие сайты и ресурсы в
-                        Интернете) или любое иное использование информации и
-                        объектов без предварительного согласия правообладателя.
-                    </div>
-                </div>
-            </footer>
         </div>
-        <div class="b-popup" id="popup">
-            <div class="closer-big"></div>
-            <div class="b-popup-content">
-                <div class="popup-title"></div>
-                <div class="popup-desc"></div>
-                <div class="form-block">
-                    <form
-                        method="post"
-                        name="mtForm1"
-                        id="mtForm1"
-                        class="forma"
-                    >
-                        <input
-                            type="hidden"
-                            name="data_form"
-                            id="data_form"
-                            value=""
-                        />
-                        <input type="hidden" name="no" value="no" />
-                        <div class="form-field">
-                            <label>
-                                <span>Ваше имя:</span>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    required="required"
-                                />
-                            </label>
-                        </div>
-                        <div class="form-field">
-                            <label>
-                                <span>Ваш телефон:</span>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    required="required"
-                                    class="phone_valid"
-                                />
-                            </label>
-                        </div>
-                        <div class="form-field form-field--button">
-                            <input
-                                type="submit"
-                                name="submit"
-                                value="Отправить заявку"
-                            />
-                        </div>
-                    </form>
+
+        <!-- ===== auth modal ===== -->
+        <transition name="modal">
+            <div
+                v-if="showAuthModal"
+                class="modal-overlay modal-overlay--auth"
+                @click.self="showAuthModal = false"
+            >
+                <div class="modal-content__block modal-close--auth">
+                <button class="modal-close modal-close--auth" @click="showAuthModal = false">X</button>
+                <div class="modal-content modal-content--auth">
+                    <h2 class="modal__h2--auth">Войдите или зарегистрируйтесь</h2>
+                    <p>Чтобы приобрести курс или заказать консультацию, войдите в аккаунт.</p>
+                    <div class="auth-buttons">
+                    <a href="/login" class="button button_white--auth">Войти</a>
+                    <a href="/register" class="button button_white--auth">Регистрация</a>
+                    </div>
                 </div>
-                <div class="close-up">
-                    <div></div>
-                    <div></div>
                 </div>
             </div>
-        </div>
-        <div class="b-popup" id="message">
-            <div class="closer-big closer-big-all"></div>
-            <div class="b-popup-content">
-                <div class="popup-title">Cпасибо вам!</div>
-                <div class="popup-desc">
-                    Ваша заявка успешно отправлена. <br />C вами свяжутся в
-                    ближайшее время.
-                </div>
-                <div class="close-up close-up-all">
-                    <div></div>
-                    <div></div>
-                </div>
-            </div>
-        </div>
+        </transition>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed, nextTick } from "vue";
-import axios from "axios";
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import axios from 'axios';
 
+/* ------------------------------------------------------------------ */
+/* 1. Константы                                                       */
+/* ------------------------------------------------------------------ */
+const AUTH_KEY = 'user';
 
-/* Реактивная переменная, которая управляет видимостью / открытостью сайдбара */
-const isSidebarOpen = ref(false)
+/* ------------------------------------------------------------------ */
+/* 2. Сторы состояния                                                 */
+/* ------------------------------------------------------------------ */
+const isSidebarOpen         = ref(false);
+const showAuthModal         = ref(false);
+const user                  = ref(null);
 
-/* Функция, переключающая состояние */
-function toggleSidebar() {
-  isSidebarOpen.value = !isSidebarOpen.value
-}
+const courses               = ref([]);
+const languages             = ref([]);
+const directions            = ref([]);
 
-/* =====================================
-   1) Общие данные: пользователь, курсы, языки, направления, пагинация, фильтры
-===================================== */
-const user = ref(null);
-const courses = ref([]);
-const languages = ref([]);
-const directions = ref([]);
+/* ------------------------------------------------------------------ */
+/* 3. Постраничный вывод                                              */
+/* ------------------------------------------------------------------ */
+const pageSize     = 6;
+const currentPage  = ref(1);
 
-const isSubmitted = ref(false);
-const successMessage = ref("");
-
-const pageSize = 6;
-const currentPage = ref(1);
-const paginatedCourses = computed(() => {
-  const start = (currentPage.value - 1) * pageSize;
-  return courses.value.slice(start, start + pageSize);
-});
-const totalPages = computed(() => Math.ceil(courses.value.length / pageSize));
+const paginatedCourses = computed(() =>
+    courses.value.slice(
+        (currentPage.value - 1) * pageSize,
+        currentPage.value * pageSize
+    )
+);
 const pages = computed(() =>
-  Array.from({ length: totalPages.value }, (_, i) => i + 1)
+    Array.from(
+        { length: Math.ceil(courses.value.length / pageSize) },
+        (_, i) => i + 1
+    )
 );
 
-// Модальное окно для редактирования курса
-const isModalOpen = ref(false);
-const selectedCourse = ref(null);
-function openModal(course) {
-  selectedCourse.value = course;
-  isSubmitted.value = false;
-  successMessage.value = "";
-  isModalOpen.value = true;
-}
-function closeModal() {
-  isModalOpen.value = false;
-}
+/* ------------------------------------------------------------------ */
+/* 4. Фильтры                                                         */
+/* ------------------------------------------------------------------ */
+const levelOptions = [
+    { value: 'basic',    label: 'Начинающий' },
+    { value: 'middle',   label: 'Средний' },
+    { value: 'advanced', label: 'Продвинутый' },
+    { value: 'mixed',    label: 'Смешанный' },
+];
 
-// Фильтры
 const selectedDifficulties = ref([]);
-const selectedDirection = ref("all");
-const selectedDuration = ref(null);
+const selectedDirection    = ref('all');
+const selectedDuration     = ref(null);
 
-// Чекбоксы для языков
 const selectedLanguages = computed(() =>
-  languages.value.filter((language) => language.checked).map((language) => language.id)
+    languages.value.filter(l => l.checked).map(l => l.id)
 );
+const validateDuration = e => {
+    const v = Number(e.target.value);
+    selectedDuration.value = v && v >= 1 && v <= 24 ? v : '';
+};
 
-// Переводы сложности и CSS-классы
+/* ------------------------------------------------------------------ */
+/* 5. Справочники (словарики)                                         */
+/* ------------------------------------------------------------------ */
 const difficultyTranslation = {
-  basic: "Начинающий",
-  middle: "Средний",
-  advanced: "Продвинутый",
-  mixed: "Смешанный",
+    basic:    'Начинающий',
+    middle:   'Средний',
+    advanced: 'Продвинутый',
+    mixed:    'Смешанный',
 };
 const difficultyColorClass = {
-  basic: "course__card_bg-cyan",
-  middle: "course__card_bg-fiolet",
-  advanced: "course__card_bg-orange",
-  mixed: "course__card_bg-green",
+    basic:    'course__card_bg-cyan',
+    middle:   'course__card_bg-fiolet',
+    advanced: 'course__card_bg-orange',
+    mixed:    'course__card_bg-green',
 };
 const difficultyBgClass = {
-  basic: "block-info_bg-cyan",
-  middle: "block-info_bg-fiolet",
-  advanced: "block-info_bg-orange",
-  mixed: "block-info_bg-green",
+    basic:    'block-info_bg-cyan',
+    middle:   'block-info_bg-fiolet',
+    advanced: 'block-info_bg-orange',
+    mixed:    'block-info_bg-green',
 };
 
-// Валидатор длительности
-function validateDuration(event) {
-  let value = event.target.value;
-  if (value === "") {
-    selectedDuration.value = "";
-    return;
-  }
-  const numericValue = Number(value);
-  if (numericValue > 24) {
-    event.target.value = 24;
-    selectedDuration.value = 24;
-  } else if (numericValue < 1) {
-    event.target.value = "";
-    selectedDuration.value = "";
-  } else {
-    selectedDuration.value = numericValue;
-  }
-}
+/* ------------------------------------------------------------------ */
+/* 6. Модалка покупки/консультации                                    */
+/* ------------------------------------------------------------------ */
+const isModalOpen             = ref(false);
+const selectedCourse          = ref(null);
+const isSubmitted             = ref(false);
+const successMessage          = ref('');
 
-// Logout
-function logout() {
-  localStorage.removeItem("user");
-  user.value = null;
-  window.location.href = "/";
-}
+const selectedOption          = ref('consultation');
+const selectedDiscountOption  = ref('card');
 
-// Загрузка направлений
+const formData = ref({ email: '', name: '', phone: '' });
+const cardInfo = ref({ cardNumber: '', expiry: '', cvc: '' });
+
+const openAuth = () => {
+  showAuthModal.value = true;
+};
+
+const openModal = course => {
+    if (!user.value) {
+        showAuthModal.value = true;
+        return;
+    }
+    selectedCourse.value = course;
+    isSubmitted.value    = false;
+    successMessage.value = '';
+    isModalOpen.value    = true;
+};
+const closeModal = () => (isModalOpen.value = false);
+
+/* ------------------------------------------------------------------ */
+/* 7. API‑запросы                                                     */
+/* ------------------------------------------------------------------ */
 async function loadDirections() {
-  try {
-    const response = await axios.get("/api/directions");
-    if (Array.isArray(response.data)) {
-      directions.value = response.data;
-    } else if (response.data && Array.isArray(response.data.data)) {
-      directions.value = response.data.data;
-    } else {
-      console.warn("Непредвиденный формат данных направлений:", response.data);
-      directions.value = [];
-    }
-  } catch (error) {
-    console.error("Ошибка при загрузке направлений:", error);
-  }
-}
-
-// Загрузка курсов
-async function fetchCourses() {
-  try {
-    let params = {};
-    if (selectedLanguages.value.length > 0) {
-      params.languages = selectedLanguages.value.join(",");
-    }
-    if (selectedDifficulties.value.length > 0) {
-      params.difficulties = selectedDifficulties.value;
-    }
-    if (selectedDirection.value !== "all") {
-      params.direction = selectedDirection.value;
-    }
-    if (selectedDuration.value) {
-      params.duration = selectedDuration.value;
-    }
-    const response = await axios.get("/api/courses", { params });
-    const coursesData = response.data?.data ?? response.data;
-    if (Array.isArray(coursesData)) {
-      courses.value = coursesData;
-    } else {
-      console.warn("Непредвиденный формат данных курсов:", response.data);
-      courses.value = [];
-    }
-  } catch (error) {
-    console.error("Ошибка при загрузке курсов:", error);
-  }
-}
-
-// Watchers для обновления курсов при изменении фильтров
-watch(selectedDifficulties, fetchCourses, { deep: true });
-watch(selectedDirection, fetchCourses);
-watch(selectedDuration, fetchCourses);
-watch(selectedLanguages, fetchCourses);
-
-/* =====================================
-   2) Форма "консультация / оплата"
-===================================== */
-// Выбор варианта: консультация или скидка (оплата)
-const selectedOption = ref("consultation");
-const formData = ref({
-  email: "",
-  name: "",
-  phone: ""
-});
-
-// Для оплаты со скидкой – выбор способа оплаты и данные карты
-const selectedDiscountOption = ref("card"); // "card" или "sbp"
-const cardInfo = ref({
-  cardNumber: "",
-  expiry: "",
-  cvc: ""
-});
-
-async function submitForm() {
-
-  if (!selectedCourse.value || !selectedCourse.value.id) {
-    console.error("Нет выбранного курса");
-    return;
-  }
-
-  // Берём id из selectedCourse
-  const courseId = selectedCourse.value.id;
-
-  const payload = {
-    user_id: user.value.id,
-    ...formData.value,
-    type: selectedOption.value
-  };
-  console.log(user.value.id);
-  // Если выбран вариант "discount" + "card",
-  // добавляем данные карты
-  if (selectedOption.value === "discount") {
-  // Оплата
-  payload.payment_method = selectedDiscountOption.value; // 'card' или 'sbp'
-  if (selectedDiscountOption.value === "card") {
-    // Запишем cardInfo в payment_details
-    payload.payment_details = JSON.stringify(cardInfo.value);
-  }
-} else {
-// consultation — тогда как быть? 
-// Либо используем 'payment_method = "card"' условно, либо меняем логику на бэкенде
-payload.payment_method = "card"; 
-payload.payment_details = null;
-}
-
-  let url; // сюда сохраним адрес запроса
-  if (selectedOption.value === "consultation") {
-    // Заказ консультации
-    url = `/api/${courseId}/consultation`;
-  } else {
-    // Покупка (discount)
-    url = `/api/${courseId}/purchase`;
-  }
-
-//   try {
-//     const response = await axios.post(url, payload);
-//     console.log("Успешно отправлено:", response.data);
-//     alert("Ваша заявка отправлена!");
-//     // Сбрасываем форму
-//     formData.value = { email: "", name: "", phone: "" };
-//     selectedOption.value = "consultation";
-//     selectedDiscountOption.value = "card";
-//     cardInfo.value = { cardNumber: "", expiry: "", cvc: "" };
-//   } catch (error) {
-//     console.error("Ошибка при отправке:", error);
-//     alert("Ошибка при отправке формы");
-//   }
     try {
-        const response = await axios.post(url, payload);
-        console.log("Успешно отправлено:", response.data);
+        const r = await axios.get('/api/directions');
+        directions.value = Array.isArray(r.data) ? r.data : r.data.data ?? [];
+    } catch (e) {
+        console.error(e);
+    }
+}
 
-        // Вместо закрытия модалки - показываем «экран успеха»
-        // 1) Заполняем successMessage
-        if (selectedOption.value === "consultation") {
-        successMessage.value = "Спасибо за заявку!";
-        } else {
-        successMessage.value = "Поздравляем с покупкой!";
+async function fetchCourses() {
+    try {
+        const params = {};
+        if (selectedLanguages.value.length)
+            params.languages = selectedLanguages.value.join(',');
+        if (selectedDifficulties.value.length)
+            params.difficulties = selectedDifficulties.value;
+        if (selectedDirection.value !== 'all')
+            params.direction = selectedDirection.value;
+        if (selectedDuration.value)
+            params.duration = selectedDuration.value;
+
+        const r = await axios.get('/api/courses', { params });
+        courses.value = Array.isArray(r.data) ? r.data : r.data.data ?? [];
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. Реактивные вотчеры                                              */
+/* ------------------------------------------------------------------ */
+watch(
+    [
+        selectedDifficulties,
+        selectedDirection,
+        selectedDuration,
+        selectedLanguages,
+    ],
+    fetchCourses,
+    { deep: true }
+);
+
+/* ------------------------------------------------------------------ */
+/* 9. Отправка форм                                                   */
+/* ------------------------------------------------------------------ */
+async function submitForm() {
+    if (!selectedCourse.value) return;
+
+    const payload = {
+        user_id: user.value.id,
+        ...formData.value,
+        type: selectedOption.value,
+    };
+
+    if (selectedOption.value === 'discount') {
+        payload.payment_method = selectedDiscountOption.value;
+        if (selectedDiscountOption.value === 'card') {
+            payload.payment_details = JSON.stringify(cardInfo.value);
         }
+    } else {
+        payload.payment_method  = 'card';
+        payload.payment_details = null;
+    }
 
-        // 2) Ставим флаг, что форма отправлена
+    const url =
+        selectedOption.value === 'consultation'
+            ? `/api/${selectedCourse.value.id}/consultation`
+            : `/api/${selectedCourse.value.id}/purchase`;
+
+    try {
+        await axios.post(url, payload);
+        successMessage.value =
+            selectedOption.value === 'consultation'
+                ? 'Спасибо за заявку!'
+                : 'Поздравляем с покупкой!';
+
         isSubmitted.value = true;
 
-        // 3) Сбрасываем поля формы (по желанию)
-        formData.value = { email: "", name: "", phone: "" };
-        selectedOption.value = "consultation";
-        selectedDiscountOption.value = "card";
-        cardInfo.value = { cardNumber: "", expiry: "", cvc: "" };
-    } catch (error) {
-        console.error("Ошибка при отправке:", error);
-        alert("Ошибка при отправке формы");
+        /* очистка */
+        formData.value           = { email: '', name: '', phone: '' };
+        selectedOption.value     = 'consultation';
+        selectedDiscountOption.value = 'card';
+        cardInfo.value           = { cardNumber: '', expiry: '', cvc: '' };
+    } catch (e) {
+        console.error(e);
     }
 }
 
+/* ------------------------------------------------------------------ */
+/* 10. Авторизация                                                    */
+/* ------------------------------------------------------------------ */
+function handleLoginEvent(e) {
+    user.value = e.detail;
+    showAuthModal.value = false;
+    localStorage.setItem(AUTH_KEY, JSON.stringify(e.detail));
+}
 
-/* =====================================
-   3) Форма для создания тем курса
-===================================== */
-// Извлекаем ID курса из URL, например /admin/course/20
-// function getCourseIdFromUrl() {
-//   const pathParts = window.location.pathname.split("/");
-//   const idx = pathParts.indexOf("course");
-//   return pathParts[idx + 1];
-// }
-// const courseId = getCourseIdFromUrl();
-
-// const topics = ref([]);
-// const showTopicForm = ref(false);
-// const newTopic = ref({ title: "", description: "" });
-
-// async function loadTopics() {
-//   try {
-//     const response = await axios.get(`/admin/course/${courseId}/topics`);
-//     topics.value = response.data.topics || [];
-//   } catch (error) {
-//     console.error("Ошибка при загрузке тем:", error);
-//   }
-// }
-
-// async function submitTopic() {
-//   try {
-//     const response = await axios.post(`/admin/course/${courseId}/topics`, newTopic.value);
-//     if (response.data.topic) {
-//       topics.value.push(response.data.topic);
-//     }
-//     newTopic.value = { title: "", description: "" };
-//     showTopicForm.value = false;
-//   } catch (error) {
-//     console.error("Ошибка при создании темы:", error);
-//   }
-// }
-
-// function toggleTopicForm() {
-//   showTopicForm.value = !showTopicForm.value;
-// }
-
-/* =====================================
-   4) onMounted: Инициализация и загрузка всех данных
-===================================== */
+/* ------------------------------------------------------------------ */
+/* 11. Монтирование компонента                                        */
+/* ------------------------------------------------------------------ */
 onMounted(async () => {
-  // Проверяем параметр verifiedUser
-  const urlParams = new URLSearchParams(window.location.search);
-  const verifiedUserParam = urlParams.get("verifiedUser");
-  if (verifiedUserParam) {
+    const storedUser = localStorage.getItem(AUTH_KEY);
+
+    if (storedUser) {
+        try {
+            user.value = JSON.parse(storedUser);
+        } catch (err) {
+            console.error(err);
+            showAuthModal.value = true;
+        }
+    }
+    window.addEventListener('user:login', handleLoginEvent);
+
+    await loadDirections();
+
     try {
-      const pureBase64 = decodeURIComponent(verifiedUserParam);
-      const decodedString = decodeURIComponent(escape(atob(pureBase64)));
-      const verifiedUserData = JSON.parse(decodedString);
-      localStorage.setItem("user", JSON.stringify(verifiedUserData));
-      localStorage.removeItem("pendingUser");
-      console.log("✅ Email подтвержден:", verifiedUserData);
-    } catch (error) {
-      console.error("❌ Ошибка при декодировании verifiedUserParam:", error);
+        const lr  = await axios.get('/api/languages');
+        const arr = Array.isArray(lr.data) ? lr.data : lr.data.data ?? [];
+        languages.value = arr.map(l => ({ ...l, checked: false }));
+    } catch (e) {
+        console.error(e);
     }
-  }
-  // Загружаем пользователя из localStorage
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    try {
-      user.value = JSON.parse(storedUser);
-      console.log("✅ Пользователь авторизован:", user.value);
-    } catch (error) {
-      console.error("❌ Ошибка при парсинге localStorage:", error);
-    }
-  } else {
-    console.warn("⚠️ Пользователь НЕ авторизован.");
-  }
-  // Загружаем направления
-  await loadDirections();
-  // Загружаем языки
-  try {
-    const langResponse = await axios.get("/api/languages");
-    const data = langResponse.data;
-    let arr = [];
-    if (Array.isArray(data)) {
-      arr = data;
-    } else if (data && Array.isArray(data.data)) {
-      arr = data.data;
-    } else {
-      console.warn("Непонятная структура данных языков:", data);
-    }
-    languages.value = arr.map((lang) => ({
-      ...lang,
-      checked: lang.checked ?? false,
-    }));
-  } catch (error) {
-    console.error("Ошибка при получении языков:", error);
-  }
-  // Загружаем курсы
-  await fetchCourses();
-  // Загружаем темы курса
+
+    await fetchCourses();
 });
+
+onUnmounted(() => {
+    window.removeEventListener('user:login', handleLoginEvent);
+});
+
+/* ------------------------------------------------------------------ */
+/* 12. UI‑утилиты                                                     */
+/* ------------------------------------------------------------------ */
+const toggleSidebar = () => {
+    isSidebarOpen.value = !isSidebarOpen.value;
+};
 </script>
+
+<style scoped>
+.modal-close--auth{
+    background-color: #00000000 !important;
+}
+.modal__h2--auth{
+    margin: 0 0 10px;
+}
+.button_white--auth{
+    cursor: pointer;
+    background: #1d6ffdc9;
+    border: 1px solid #1d6ffdc9;
+    width: 200px;
+    padding: 10px;
+    text-align: center;
+    color: #ffffff;
+}
+.button_white--auth:hover{
+    background: #ffffff;
+    border: 1px solid #1d6ffdc9;
+    color: #1d6ffdc9;
+}
+.modal-content--auth{
+    display: flex !important; 
+}
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 50px;
+}
+</style>
 
 <style scoped>
 /* Пример возможных стилей для модального окна */
@@ -996,25 +792,25 @@ onMounted(async () => {
     }
 }
 @media (max-width: 600px) {
-    .course__sidebar-check--lang{
+    .course__sidebar-check--lang {
         grid-template-columns: 1fr 1fr 1fr;
     }
 }
 @media (max-width: 500px) {
-    .course__sidebar-check--lang{
+    .course__sidebar-check--lang {
         grid-template-columns: 1fr 1fr;
     }
 }
-.else__info{
+.else__info {
     display: flex;
     flex-direction: column;
     align-items: center;
     z-index: 10;
 }
-.modal__else{
+.modal__else {
     background-image: url(/resources/assets/img/bg__complite.png);
     background-repeat: no-repeat;
-    background-position: right ;
+    background-position: right;
     min-height: 300px;
     display: flex;
     flex-direction: column;
@@ -1028,27 +824,29 @@ onMounted(async () => {
 }
 
 .modal-content-wrapper {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.5s ease;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.5s ease;
 }
 
 .modal-content-wrapper.open {
-  max-height: 1000px; /* Достаточно большое значение, чтобы вместить содержимое */
+    max-height: 1000px; /* Достаточно большое значение, чтобы вместить содержимое */
 }
-.fade-slide-enter-active, .fade-slide-leave-active {
-  transition: all 0.5s ease;
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+    transition: all 0.5s ease;
 }
-.fade-slide-enter-from, .fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
 }
-.fade-slide-enter-to, .fade-slide-leave-from {
-  opacity: 1;
-  transform: translateY(0);
+.fade-slide-enter-to,
+.fade-slide-leave-from {
+    opacity: 1;
+    transform: translateY(0);
 }
-.form__input--card{
-
+.form__input--card {
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -1056,17 +854,17 @@ onMounted(async () => {
     font-size: 14px;
     margin: 0 0 30px;
 }
-.block-card{
+.block-card {
     display: grid;
     grid-template-columns: repeat(2, 205px);
     justify-content: space-between;
 }
-.form-label{
+.form-label {
     font-size: 15px;
     display: block;
     margin: 0 0 10px;
 }
-.payment__h3{
+.payment__h3 {
     margin: 0 0 20px;
 }
 .block-bg {
@@ -1346,6 +1144,12 @@ onMounted(async () => {
     background-color: rgba(128, 128, 128, 0.637);
 }
 @media (max-width: 1100px) {
+    .modal-close--auth{
+        max-width: 500px;
+    }
+    .modal-close--auth p {
+        text-align: center;
+    }
     .modal-content {
         max-width: 500px;
         padding-top: 0px;
@@ -1384,7 +1188,15 @@ onMounted(async () => {
         background-color: rgba(128, 128, 128, 0.637);
     }
 }
+@media (max-width: 767px) {
+    .modal__h2--auth {
+        font-size: 2.15em;
+    }
+}
 @media (max-width: 515px) {
+    .modal__h2--auth {
+        font-size: 1.5em;
+    }
     .block-info {
         min-height: 200px;
         align-items: center;
@@ -1419,6 +1231,18 @@ onMounted(async () => {
     }
     .block__price {
         text-align: center;
+    }
+    .modal__h2--auth{
+        margin: 0 0 15px;
+    }
+    .modal-close--auth{
+        max-width: 400px;
+    }
+    .auth-buttons{
+        margin-top: 25px;
+    }
+    .button_white--auth{
+        width: 150px;
     }
     .modal-content {
         width: 400px;

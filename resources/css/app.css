@@ -193,7 +193,7 @@ h1 {
     text-align: center;
 }
 .offer__inner h1 {
-    max-width: 810px;
+    max-width: 861px;
     margin-bottom: 90px;
     text-align: left;
 }
@@ -637,7 +637,7 @@ nav a:hover {
 .offer__inner {
     max-width: var(--max-width);
     padding: var(--padding);
-    margin: var(--margin);
+    margin: 0 120px;
     display: flex;
     align-items: center;
     justify-content: center;

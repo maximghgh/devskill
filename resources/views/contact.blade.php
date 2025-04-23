@@ -10,6 +10,7 @@
     <div id="app">
         <header-component></header-component>
         <contact-component></contact-component>
+        <footer-component></footer-component>
     </div>
 </body>
 </html>

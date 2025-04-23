@@ -14,10 +14,15 @@
                         <div v-if="user" class="header__lk">
                             <a href="/profile" class="header__lk-img">
                                 <img
-                                    src="https://devskills.foncode.ru/img/nofotolk.png"
+                                    :src="
+                                        user.photo
+                                            ? `/storage/${user.photo}`
+                                            : 'https://devskills.foncode.ru/img/nofotolk.png'
+                                    "
+                                    alt="Фото пользователя"
                                     width="40"
                                     height="40"
-                                    alt="Пользователь"
+                                    class="avatar__user"
                                 />
                             </a>
                             <div class="header__lk-name">

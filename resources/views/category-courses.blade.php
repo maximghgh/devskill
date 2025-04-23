@@ -8,7 +8,9 @@
 </head>
 <body>
     <div id="app">
+        <header-component></header-component>
         <category-courses-component></category-courses-component>
+        <footer-component></footer-component>
     </div>
 </body>
 </html>

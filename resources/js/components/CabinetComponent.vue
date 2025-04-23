@@ -49,7 +49,7 @@
                                             v-for="course in purchasedCourses"
                                             :key="course.id"
                                             :class="[
-                                                'course__card',
+                                                'course__cardss',
                                                 'course__card_personal',
                                                 'course__card_bg1',
                                                 difficultyColorClass[
@@ -128,29 +128,6 @@
                     </div>
                 </section>
             </div>
-            <footer>
-                <div class="footer__inner">
-                    <div class="footer__row">
-                        <div class="footer__block">API</div>
-                        <div class="footer__block">
-                            <div class="footer__logo">
-                                <img
-                                    src="https://devskills.foncode.ru/img/logo.png"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="footer__row">
-                        © 2011-2023 гг. Сайт не является публичной офертой и
-                        носит информационный характер. Все материалы данного
-                        сайта являются объектами авторского права (в том числе
-                        дизайн). Запрещается копирование, распространение (в том
-                        числе путем копирования на другие сайты и ресурсы в
-                        Интернете) или любое иное использование информации и
-                        объектов без предварительного согласия правообладателя.
-                    </div>
-                </div>
-            </footer>
         </div>
     </div>
 </template>
@@ -255,9 +232,47 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.course__cardss{
+    width: 100%;
+    height: 300px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    padding: 34px 44px;
+    border-radius: 60px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    transition: var(--transition-3);
+}
 .course__card_personal {
     width: 336px;
     padding: 26px 31px;
+}
+.course__card_personal {
+    padding: 26px 31px;
+}
+.course__card_bg-cyan {
+    background-color: #698dc9;
+}
+.course__card_bg1 {
+    background-image: url(http://127.0.0.1:8000/img/bg_1.png);
+}
+.course__card {
+    width: 100%;
+    height: 300px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    padding: 34px 44px;
+    border-radius: 60px;
+    color: #fff;
+    display: flex
+;
+    justify-content: space-between;
+    flex-direction: column;
+    transition: var(--transition-3);
 }
 .button_transparent--xl {
     max-width: unset;
@@ -265,5 +280,10 @@ onMounted(async () => {
 .course__card-buttons {
     display: grid;
     grid-template-columns: 1fr;
+}
+.course__card_personal .course__card-image {
+    top: 26px;
+    right: 30px;
+    width: 61px;
 }
 </style>

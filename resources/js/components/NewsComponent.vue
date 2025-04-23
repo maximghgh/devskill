@@ -36,7 +36,6 @@
                     </div>
                 </section>
             </div>
-            <footer></footer>
         </div>
         <div class="b-popup" id="popup">
             <div class="closer-big"></div>
@@ -147,6 +146,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.content p {
+    display: block;
+}
 .content__img_big {
     border-radius: 60px;
 }

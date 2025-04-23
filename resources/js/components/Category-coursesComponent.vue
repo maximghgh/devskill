@@ -2,30 +2,6 @@
     <div>
         <div class="maincontainer">
             <div class="container">
-                <header class="header header_main">
-                    <div class="header__inner">
-                        <div class="header__logo">
-                            <img src="img/logo.png">
-                        </div>
-                        <nav>
-                            <a href="#">Банк знаний</a>
-                            <a href="#">Каталог</a>
-                            <a href="#">Профориентация</a>
-                            <a href="#">Для учителей</a>
-                            <a href="#">О нас</a>
-                            <a href="#">Стажировки</a>
-                            <a href="#">Новости</a>
-                        </nav>
-                        <div class="header__lk">
-                            <div class="header__lk-img">
-                                <img src="img/nofotolk.png">
-                            </div>
-                            <div class="header__lk-name">
-                                Василий Пупкин
-                            </div>
-                        </div>
-                    </div>
-                </header>
                 <section class="category">
                     <h2>Категории курсов</h2>
                     <div class="category__inner">
@@ -50,19 +26,6 @@
                     </div>
                 </section>
             </div>
-            <footer>
-                <div class="footer__inner">
-                    <div class="footer__row">
-                        <div class="footer__block">API</div>
-                        <div class="footer__block">
-                            <div class="footer__logo">
-                                <img src="img/logo.png">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="footer__row">© 2011-2023 гг. Сайт не является публичной офертой и носит информационный характер. Все материалы данного сайта являются объектами авторского права (в том числе дизайн). Запрещается копирование, распространение (в том числе путем копирования на другие сайты и ресурсы в Интернете) или любое иное использование информации и объектов без предварительного согласия правообладателя.</div>
-                </div>
-            </footer>
         </div>
         <div class="b-popup" id="popup">
     		<div class="closer-big"></div>

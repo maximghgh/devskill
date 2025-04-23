@@ -10,6 +10,7 @@
 <body>
     <div id="app">
         <verify-component></verify-component>
+        <footer-component></footer-component>
     </div>
 </body>
 </html>

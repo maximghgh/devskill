@@ -180,27 +180,6 @@
           </div>
         </section>
             </div>
-            <footer>
-                <div class="footer__inner">
-                    <div class="footer__row">
-                        <div class="footer__block">API</div>
-                        <div class="footer__block">
-                            <div class="footer__logo">
-                                <img src="img/logo.png" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="footer__row">
-                        © 2011-2023 гг. Сайт не является публичной офертой и
-                        носит информационный характер. Все материалы данного
-                        сайта являются объектами авторского права (в том числе
-                        дизайн). Запрещается копирование, распространение (в том
-                        числе путем копирования на другие сайты и ресурсы в
-                        Интернете) или любое иное использование информации и
-                        объектов без предварительного согласия правообладателя.
-                    </div>
-                </div>
-            </footer>
         </div>
         <div class="b-popup" id="popup">
             <div class="closer-big"></div>
@@ -564,10 +543,20 @@ onMounted(() => {
 </script>
 
 
-
-
-
-
+<style>
+.codex-editor__redactor{
+  padding: 0 !important;
+}
+.content p {
+  display: none;
+}
+.ce-block__content {
+  max-width: none !important;
+}
+.ce-paragraph{
+  font-size: 0.85em !important;
+}
+</style>
 
 <style scoped>
 @media (max-width: 991px) {
