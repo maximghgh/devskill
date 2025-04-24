@@ -96,7 +96,7 @@
                                 <div class="course-content__evolution">
                                     <div class="course-content__evolution-block course__card_bg-cyan">
                                         <div class="course-content__evolution-top">
-                                            <div class="course-content__evolution-title">Базовый</div>
+                                            <div class="course-content__evolution-title">Начинающий</div>
                                             <div class="course-content__evolution-desc"> Начните свой путь в программирование с нуля. Научитесь создавать магию из ничего.</div>
                                             <div class="course-content__evolution-text">Содержание программы:<br>
                                             Основы алгоритмов: Откройте мир алгоритмов - строительных блоков программирования, и научитесь создавать простые последовательности действий.<br>
@@ -108,7 +108,7 @@
                                     </div>
                                     <div class="course-content__evolution-block course__card_bg-fiolet">
                                         <div class="course-content__evolution-top">
-                                            <div class="course-content__evolution-title">Фундаментальный</div>
+                                            <div class="course-content__evolution-title">Средний</div>
                                             <div class="course-content__evolution-desc">  Углубьтесь в язык программирования, создавайте более сложные и мощные программы.</div>
                                             <div class="course-content__evolution-text">Содержание программы:<br>
                                             Структуры данных и библиотеки: Освоите различные способы хранения данных и стандартные инструменты программирования для более умного кода.<br>
@@ -120,7 +120,7 @@
                                     </div>
                                     <div class="course-content__evolution-block course__card_bg-orange">
                                         <div class="course-content__evolution-top">
-                                            <div class="course-content__evolution-title">Олимпиадный</div>
+                                            <div class="course-content__evolution-title">Продвинутый</div>
                                             <div class="course-content__evolution-desc">  Станьте настоящим героем программирования. Готовы к соревнованиям?</div>
                                             <div class="course-content__evolution-text">Содержание программы:<br>
                                             Сложные алгоритмы и оптимизация: Разберитесь с продвинутыми алгоритмами и их использованием для решения сложных задач.<br>
@@ -130,15 +130,16 @@
                                         </div>
                                         <a href="#" class="button button_transparent">Подробнее</a>
                                     </div>
-                                    <div class="course-content__evolution-block course__card_bg-orange">
+                                    <div class="course-content__evolution-block course__card_bg-green">
                                         <div class="course-content__evolution-top">
-                                            <div class="course-content__evolution-title">Олимпиадный</div>
-                                            <div class="course-content__evolution-desc">  Станьте настоящим героем программирования. Готовы к соревнованиям?</div>
+                                            <div class="course-content__evolution-title">Смешанный</div>
+                                            <div class="course-content__evolution-desc">  Соедините лучшие знания из всех уровней. Плавно переходите от основ к глубине — в собственном темпе.</div>
                                             <div class="course-content__evolution-text">Содержание программы:<br>
-                                            Сложные алгоритмы и оптимизация: Разберитесь с продвинутыми алгоритмами и их использованием для решения сложных задач.<br>
-                                            Стратегии олимпиадного программирования: Изучите создание эффективных стратегий для решения задач и избегайте типичных ошибок.
-                                            Мастерство C++: Станьте экспертом в C++, используя его мощные функции для сложных задач.<br>
-                                            Подготовка и соревнования: Готовьтесь к соревнованиям, участвуйте в олимпиадах, побеждайте и разблокируйте свой потенциал в программировании.</div>
+                                                Повторение основ: Освежите базовые принципы — алгоритмы, условия, циклы и простые программы. Даже с небольшими знаниями это поможет укрепить фундамент.<br>
+                                                Структурированный код: Изучите структуры данных, библиотеки и основы модульного подхода. Пишите чистый и понятный код.<br>
+                                                Объектное мышление: Разберитесь с ООП, создавайте классы и управляйте ими в реальных задачах.<br>
+                                                Файлы и многозадачность: Узнайте, как работать с внешними файлами и ускорять программы с помощью многопоточности.
+                                                </div>
                                         </div>
                                         <a href="#" class="button button_transparent">Подробнее</a>
                                     </div>

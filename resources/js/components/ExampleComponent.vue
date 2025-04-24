@@ -331,6 +331,7 @@
                                                                 required
                                                                 v-model="formData.phone"
                                                                 placeholder="+7 999 999-99-99"
+                                                                v-mask="'+7 (###) ###-##-##'"
                                                                 class="form__input"
                                                             />
                                                         </div>
