@@ -17,14 +17,22 @@
                                 <!-- Прогресс курса -->
                                 <div class="skill__progress">
                                     <div class="skill__progress-title">
-                                        Прогресс курса <span>{{ progressPercentage }}%</span>
+                                        Прогресс курса
+                                        <span>{{ progressPercentage }}%</span>
                                     </div>
                                     <div class="skill__progress-line">
-                                        <span :style="{ width: progressPercentage + '%' }"></span>
+                                        <span
+                                            :style="{
+                                                width: progressPercentage + '%',
+                                            }"
+                                        ></span>
                                     </div>
                                 </div>
                                 <!-- Список тем (основное меню) -->
-                                <div v-if="!selectedTopic" class="skill__sidebar-menu-main">
+                                <div
+                                    v-if="!selectedTopic"
+                                    class="skill__sidebar-menu-main"
+                                >
                                     <ul class="skill__menu-main-list">
                                         <li
                                             v-for="topic in topics"
@@ -52,12 +60,17 @@
                                     </ul>
                                 </div>
                                 <!-- Дополнительное меню (главы), если выбрана тема -->
-                                <div v-else-if="selectedTopic" class="skill__sidebar-menu-second">
+                                <div
+                                    v-else-if="selectedTopic"
+                                    class="skill__sidebar-menu-second"
+                                >
                                     <div class="skill__menu-second-title">
                                         {{ selectedTopic.title }}
                                     </div>
                                     <div class="skill__menu-second-block">
-                                        <div class="skill__menu-second-progress"></div>
+                                        <div
+                                            class="skill__menu-second-progress"
+                                        ></div>
                                         <ul class="skill__menu-second-list">
                                             <li
                                                 v-for="chapter in selectedTopic.chapters"
@@ -124,7 +137,9 @@
                                     <h1>{{ selectedChapter.title }}</h1>
 
                                     <!-- Если глава — видео -->
-                                    <div v-if="selectedChapter.type === 'video'">
+                                    <div
+                                        v-if="selectedChapter.type === 'video'"
+                                    >
                                         <!-- Допустим, в БД есть поле video_url -->
                                         <iframe
                                             v-if="selectedChapter.video_url"
@@ -152,7 +167,11 @@
                                         </div>
                                     </div>
                                     <!-- Если глава — просто текст -->
-                                    <div v-else-if=" selectedChapter.type === 'text'">
+                                    <div
+                                        v-else-if="
+                                            selectedChapter.type === 'text'
+                                        "
+                                    >
                                         <div id="editorjs"></div>
                                         <button
                                             v-if="!selectedChapter.is_completed"
@@ -170,7 +189,11 @@
                                         </div>
                                     </div>
                                     <!-- Если глава — задание (task) -->
-                                    <div v-else-if="selectedChapter.type === 'task'">
+                                    <div
+                                        v-else-if="
+                                            selectedChapter.type === 'task'
+                                        "
+                                    >
                                         <div id="editorjs"></div>
                                         <button
                                             @click="toggleSolution"
@@ -233,7 +256,11 @@
                                         </transition>
                                     </div>
                                     <!-- Если глава — терминология (terms) -->
-                                    <div v-else-if="selectedChapter.type === 'terms'">
+                                    <div
+                                        v-else-if="
+                                            selectedChapter.type === 'terms'
+                                        "
+                                    >
                                         <div id="editorjs"></div>
                                         <button
                                             v-if="!selectedChapter.is_completed"
@@ -251,14 +278,22 @@
                                         </div>
                                     </div>
                                     <!-- Если глава — презентация -->
-                                    <div v-else-if="selectedChapter.type === 'presentation'">
+                                    <div
+                                        v-else-if="
+                                            selectedChapter.type ===
+                                            'presentation'
+                                        "
+                                    >
                                         <div id="editorjs"></div>
 
-                                        <div v-if="embeddedSrc" class="presentation-wrapper">
+                                        <div
+                                            v-if="embeddedSrc"
+                                            class="presentation-wrapper"
+                                        >
                                             <iframe
-                                            :src="embeddedSrc"
-                                            class="presentation-frame"
-                                            allowfullscreen
+                                                :src="embeddedSrc"
+                                                class="presentation-frame"
+                                                allowfullscreen
                                             ></iframe>
                                         </div>
                                         <a
@@ -271,7 +306,11 @@
                                         </a>
                                         <button
                                             v-if="!selectedChapter.is_completed"
-                                            @click="markChapterCompleted(selectedChapter)"
+                                            @click="
+                                                markChapterCompleted(
+                                                    selectedChapter
+                                                )
+                                            "
                                             class="button button--sub"
                                         >
                                             Отметить как пройдено
@@ -299,7 +338,11 @@
                                         <!-- Кнопка "Вперёд" с анимацией сдвига вправо -->
                                         <transition name="slide-right">
                                             <button
-                                                v-if="canGoNext && selectedChapter && selectedChapter.is_completed"
+                                                v-if="
+                                                    canGoNext &&
+                                                    selectedChapter &&
+                                                    selectedChapter.is_completed
+                                                "
                                                 @click="goToNextChapter"
                                                 class="button button_skill-next"
                                             >
@@ -713,61 +756,60 @@ let editorInstance = null;
 const showSolution = ref(false);
 
 const presentationSrc = computed(() => {
-  const ch = selectedChapter.value;
-  if (!ch) return null;
+    const ch = selectedChapter.value;
+    if (!ch) return null;
 
-  let raw = ch.presentation_path || ch.presentation || '';   // все варианты
+    let raw = ch.presentation_path || ch.presentation || ""; // все варианты
 
-  // ① Если бекенд вернул абсолютный URL («https://…») — ничего не делаем
-  if (/^https?:\/\//i.test(raw)) {
-    return raw;
-  }
+    // ① Если бекенд вернул абсолютный URL («https://…») — ничего не делаем
+    if (/^https?:\/\//i.test(raw)) {
+        return raw;
+    }
 
-  // ② Если уже начинается с «/storage/» — оставляем как есть
-  if (raw.startsWith('/storage/')) {
-    return raw;
-  }
+    // ② Если уже начинается с «/storage/» — оставляем как есть
+    if (raw.startsWith("/storage/")) {
+        return raw;
+    }
 
-  // ③ Если без ведущего слэша («storage/…») — добавляем «/»
-  if (raw.startsWith('storage/')) {
-    return '/' + raw;                  // → «/storage/…»
-  }
+    // ③ Если без ведущего слэша («storage/…») — добавляем «/»
+    if (raw.startsWith("storage/")) {
+        return "/" + raw; // → «/storage/…»
+    }
 
-  // ④ Если пришло только имя файла («my.pptx») или подпапка+имя
-  //    решаем, где у нас хранятся презентации
-  return '/storage/presentations/' + raw;
+    // ④ Если пришло только имя файла («my.pptx») или подпапка+имя
+    //    решаем, где у нас хранятся презентации
+    return "/storage/presentations/" + raw;
 });
 
 const presentationExt = computed(() => {
-  if (!presentationSrc.value) return '';
-  // ".pptx" или ".pdf" → "pptx" / "pdf"
-  return presentationSrc.value.split('.').pop().toLowerCase();
+    if (!presentationSrc.value) return "";
+    // ".pptx" или ".pdf" → "pptx" / "pdf"
+    return presentationSrc.value.split(".").pop().toLowerCase();
 });
 
 const embeddedSrc = computed(() => {
-  if (!presentationSrc.value) return null;
+    if (!presentationSrc.value) return null;
 
-  // 1) PDF оставляем как есть
-  if (presentationExt.value === 'pdf') {
-    return presentationSrc.value;
-  }
+    // 1) PDF оставляем как есть
+    if (presentationExt.value === "pdf") {
+        return presentationSrc.value;
+    }
 
-  // 2) PPT / PPTX → Google viewer
-  if (['ppt', 'pptx'].includes(presentationExt.value)) {
+    // 2) PPT / PPTX → Google viewer
+    if (["ppt", "pptx"].includes(presentationExt.value)) {
+        return (
+            "https://viewer.zoho.com/api/url?embed=true&url=" +
+            encodeURIComponent(location.origin + presentationSrc.value)
+        );
+        // location.origin нужен, если путь относительный (/storage/…)
+    }
+
+    // 3) Фолбэк – Office viewer (DOCX, XLSX и т.п.)
     return (
-      'https://view.officeapps.live.com/op/embed.aspx?src=' +
-      encodeURIComponent(location.origin + presentationSrc.value)
+        "https://view.officeapps.live.com/op/embed.aspx?src=" +
+        encodeURIComponent(location.origin + presentationSrc.value)
     );
-    // location.origin нужен, если путь относительный (/storage/…)
-  }
-
-  // 3) Фолбэк – Office viewer (DOCX, XLSX и т.п.)
-  return (
-    'https://view.officeapps.live.com/op/embed.aspx?src=' +
-    encodeURIComponent(location.origin + presentationSrc.value)
-  );
 });
-
 
 function toggleSolution() {
     showSolution.value = !showSolution.value;
@@ -812,24 +854,24 @@ function goToPrevChapter() {
 const showNextButton = ref(true);
 
 function goToNextChapter() {
-  // Сначала убираем кнопку плавно
-  showNextButton.value = false;
-  // Затем через задержку выполняем переход (примерно длительность анимации)
-  setTimeout(() => {
-    if (
-      selectedTopic.value &&
-      selectedTopic.value.chapters &&
-      selectedChapter.value
-    ) {
-      const chapters = selectedTopic.value.chapters;
-      const index = chapters.findIndex(
-        (ch) => ch.id === selectedChapter.value.id
-      );
-      if (index < chapters.length - 1) selectChapter(chapters[index + 1]);
-    }
-    // Опционально вернуть кнопку обратно, если она нужна для следующей главы
-    showNextButton.value = true;
-  }, 500);
+    // Сначала убираем кнопку плавно
+    showNextButton.value = false;
+    // Затем через задержку выполняем переход (примерно длительность анимации)
+    setTimeout(() => {
+        if (
+            selectedTopic.value &&
+            selectedTopic.value.chapters &&
+            selectedChapter.value
+        ) {
+            const chapters = selectedTopic.value.chapters;
+            const index = chapters.findIndex(
+                (ch) => ch.id === selectedChapter.value.id
+            );
+            if (index < chapters.length - 1) selectChapter(chapters[index + 1]);
+        }
+        // Опционально вернуть кнопку обратно, если она нужна для следующей главы
+        showNextButton.value = true;
+    }, 500);
 }
 
 const canGoPrev = computed(() => {
@@ -909,7 +951,9 @@ watch(selectedChapter, (newChapter) => {
             "Содержимое content:",
             newChapter.content
         );
-        if (["text","task","terms","presentation"].includes(newChapter.type)) {
+        if (
+            ["text", "task", "terms", "presentation"].includes(newChapter.type)
+        ) {
             initEditor(newChapter.content);
         } else if (newChapter.type === "video") {
             console.log(
@@ -1034,10 +1078,10 @@ function cancelReply() {
 const progressPercentage = computed(() => {
     let totalChapters = 0;
     let completedChapters = 0;
-    
-    topics.value.forEach(topic => {
+
+    topics.value.forEach((topic) => {
         if (topic.chapters && topic.chapters.length) {
-            topic.chapters.forEach(chapter => {
+            topic.chapters.forEach((chapter) => {
                 totalChapters++;
                 if (chapter.is_completed) {
                     completedChapters++;
@@ -1045,8 +1089,10 @@ const progressPercentage = computed(() => {
             });
         }
     });
-    
-    return totalChapters ? Math.round((completedChapters / totalChapters) * 100) : 0;
+
+    return totalChapters
+        ? Math.round((completedChapters / totalChapters) * 100)
+        : 0;
 });
 
 const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -1142,24 +1188,24 @@ onMounted(() => {
             })
             .then((response) => {
                 topics.value = (response.data.topics || []).sort((a, b) => {
-                // Сортируем сами темы
-                return new Date(a.created_at) - new Date(b.created_at);
+                    // Сортируем сами темы
+                    return new Date(a.created_at) - new Date(b.created_at);
                 });
 
                 // Теперь сортируем главы в каждой теме
                 topics.value.forEach((topic) => {
-                topic.chapters.sort((a, b) => {
-                    return new Date(a.created_at) - new Date(b.created_at);
-                });
+                    topic.chapters.sort((a, b) => {
+                        return new Date(a.created_at) - new Date(b.created_at);
+                    });
                 });
 
                 // Гарантируем, что каждая глава имеет свойство is_completed
                 topics.value.forEach((topic) => {
-                topic.chapters.forEach((chapter) => {
-                    if (typeof chapter.is_completed === "undefined") {
-                    chapter.is_completed = false;
-                    }
-                });
+                    topic.chapters.forEach((chapter) => {
+                        if (typeof chapter.is_completed === "undefined") {
+                            chapter.is_completed = false;
+                        }
+                    });
                 });
 
                 course.value = response.data.course || {};
@@ -1327,10 +1373,10 @@ async function dislikeComment(comment) {
 </script>
 
 <style scoped>
-.presentation-frame{
-  width:1000px;
-  height:60vh;     /* или 60vh, как удобнее */
-  border:0;
+.presentation-frame {
+    width: 1000px;
+    height: 60vh; /* или 60vh, как удобнее */
+    border: 0;
 }
 .button--sub {
     background: rgb(56, 184, 56) !important;
@@ -1437,17 +1483,17 @@ async function dislikeComment(comment) {
     animation: fadeOut 0.5s ease forwards;
 }
 .slide-right-leave-active {
-  transition: all 0.5s ease;
+    transition: all 0.5s ease;
 }
 
 .slide-right-leave-from {
-  opacity: 1;
-  transform: translateX(0);
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .slide-right-leave-to {
-  opacity: 0;
-  transform: translateX(100%);
+    opacity: 0;
+    transform: translateX(100%);
 }
 
 /* Анимация для кнопки "Вперёд" через keyframes */

@@ -19,6 +19,7 @@
         "@editorjs/list": "^2.0.6",
         "@vkid/sdk": "^2.5.2",
         "dayjs": "^1.11.13",
+        "pptxjs": "^0.0.0",
         "v-mask": "^2.3.0",
         "vue-multiselect": "^3.0.0-beta.3",
         "vue-the-mask": "^0.11.1"
