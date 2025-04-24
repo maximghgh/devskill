@@ -25,6 +25,7 @@ class CreateCoursesTable extends Migration
             $table->integer('upgradequalification')->default(0);
             $table->string('card_image')->nullable();
             $table->string('description_image')->nullable();
+            $table->string('pdf_path')->nullable();
             $table->timestamps();
         });
     }

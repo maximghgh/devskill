@@ -124,9 +124,7 @@
                                     <h1>{{ selectedChapter.title }}</h1>
 
                                     <!-- Если глава — видео -->
-                                    <div
-                                        v-if="selectedChapter.type === 'video'"
-                                    >
+                                    <div v-if="selectedChapter.type === 'video'">
                                         <!-- Допустим, в БД есть поле video_url -->
                                         <iframe
                                             v-if="selectedChapter.video_url"
@@ -154,11 +152,7 @@
                                         </div>
                                     </div>
                                     <!-- Если глава — просто текст -->
-                                    <div
-                                        v-else-if="
-                                            selectedChapter.type === 'text'
-                                        "
-                                    >
+                                    <div v-else-if=" selectedChapter.type === 'text'">
                                         <div id="editorjs"></div>
                                         <button
                                             v-if="!selectedChapter.is_completed"
@@ -176,11 +170,7 @@
                                         </div>
                                     </div>
                                     <!-- Если глава — задание (task) -->
-                                    <div
-                                        v-else-if="
-                                            selectedChapter.type === 'task'
-                                        "
-                                    >
+                                    <div v-else-if="selectedChapter.type === 'task'">
                                         <div id="editorjs"></div>
                                         <button
                                             @click="toggleSolution"
@@ -243,11 +233,7 @@
                                         </transition>
                                     </div>
                                     <!-- Если глава — терминология (terms) -->
-                                    <div
-                                        v-else-if="
-                                            selectedChapter.type === 'terms'
-                                        "
-                                    >
+                                    <div v-else-if="selectedChapter.type === 'terms'">
                                         <div id="editorjs"></div>
                                         <button
                                             v-if="!selectedChapter.is_completed"
@@ -264,7 +250,33 @@
                                             <p>Глава уже пройдена!</p>
                                         </div>
                                     </div>
-                                    <!-- На всякий случай fallback для неизвестного типа -->
+                                    <!-- Если глава — презентация -->
+                                    <div v-else-if="selectedChapter.type === 'presentation'">
+                                        <div id="editorjs"></div>
+
+                                        <div v-if="embeddedSrc" class="presentation-wrapper">
+                                            <iframe
+                                            :src="embeddedSrc"
+                                            class="presentation-frame"
+                                            allowfullscreen
+                                            ></iframe>
+                                        </div>
+                                        <a
+                                            v-if="presentationSrc"
+                                            :href="presentationSrc"
+                                            download
+                                            class="button button--sub"
+                                        >
+                                            Скачать файл
+                                        </a>
+                                        <button
+                                            v-if="!selectedChapter.is_completed"
+                                            @click="markChapterCompleted(selectedChapter)"
+                                            class="button button--sub"
+                                        >
+                                            Отметить как пройдено
+                                        </button>
+                                    </div>
                                     <div v-else>
                                         <p>
                                             Неизвестный тип главы:
@@ -340,7 +352,7 @@
                                                         :src="
                                                             comment.user_avatar
                                                                 ? `/storage/${comment.user_avatar}`
-                                                                : 'img/avatar.jpg'
+                                                                : '/public/img/avatar.jpg'
                                                         "
                                                         alt="Avatar"
                                                     />
@@ -437,7 +449,7 @@
                                             >
                                                 <div class="comment__avatar">
                                                     <img
-                                                        src="img/avatar.jpg"
+                                                        src="/public/img/avatar.jpg"
                                                         alt="Avatar"
                                                     />
                                                 </div>
@@ -495,7 +507,7 @@
                                                                 :src="
                                                                     child.user_avatar
                                                                         ? `/storage/${child.user_avatar}`
-                                                                        : 'img/avatar.jpg'
+                                                                        : '/public/img/avatar.jpg'
                                                                 "
                                                                 alt="Avatar"
                                                             />
@@ -700,6 +712,63 @@ let editorInstance = null;
 
 const showSolution = ref(false);
 
+const presentationSrc = computed(() => {
+  const ch = selectedChapter.value;
+  if (!ch) return null;
+
+  let raw = ch.presentation_path || ch.presentation || '';   // все варианты
+
+  // ① Если бекенд вернул абсолютный URL («https://…») — ничего не делаем
+  if (/^https?:\/\//i.test(raw)) {
+    return raw;
+  }
+
+  // ② Если уже начинается с «/storage/» — оставляем как есть
+  if (raw.startsWith('/storage/')) {
+    return raw;
+  }
+
+  // ③ Если без ведущего слэша («storage/…») — добавляем «/»
+  if (raw.startsWith('storage/')) {
+    return '/' + raw;                  // → «/storage/…»
+  }
+
+  // ④ Если пришло только имя файла («my.pptx») или подпапка+имя
+  //    решаем, где у нас хранятся презентации
+  return '/storage/presentations/' + raw;
+});
+
+const presentationExt = computed(() => {
+  if (!presentationSrc.value) return '';
+  // ".pptx" или ".pdf" → "pptx" / "pdf"
+  return presentationSrc.value.split('.').pop().toLowerCase();
+});
+
+const embeddedSrc = computed(() => {
+  if (!presentationSrc.value) return null;
+
+  // 1) PDF оставляем как есть
+  if (presentationExt.value === 'pdf') {
+    return presentationSrc.value;
+  }
+
+  // 2) PPT / PPTX → Google viewer
+  if (['ppt', 'pptx'].includes(presentationExt.value)) {
+    return (
+      'https://view.officeapps.live.com/op/embed.aspx?src=' +
+      encodeURIComponent(location.origin + presentationSrc.value)
+    );
+    // location.origin нужен, если путь относительный (/storage/…)
+  }
+
+  // 3) Фолбэк – Office viewer (DOCX, XLSX и т.п.)
+  return (
+    'https://view.officeapps.live.com/op/embed.aspx?src=' +
+    encodeURIComponent(location.origin + presentationSrc.value)
+  );
+});
+
+
 function toggleSolution() {
     showSolution.value = !showSolution.value;
 }
@@ -840,7 +909,7 @@ watch(selectedChapter, (newChapter) => {
             "Содержимое content:",
             newChapter.content
         );
-        if (["text", "task", "terms"].includes(newChapter.type)) {
+        if (["text","task","terms","presentation"].includes(newChapter.type)) {
             initEditor(newChapter.content);
         } else if (newChapter.type === "video") {
             console.log(
@@ -1253,10 +1322,16 @@ async function dislikeComment(comment) {
         }
     }
     saveUserVotes();
+    console.log(selectedChapter);
 }
 </script>
 
 <style scoped>
+.presentation-frame{
+  width:1000px;
+  height:60vh;     /* или 60vh, как удобнее */
+  border:0;
+}
 .button--sub {
     background: rgb(56, 184, 56) !important;
 }

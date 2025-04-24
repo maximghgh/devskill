@@ -24,7 +24,7 @@
                     <!-- Блок 1 -->
                     <div class="article-block">
                         <img
-                            src="img/image_3.jpg"
+                            src="/img/image_3.jpg"
                             alt="Изображение 1"
                             class="article-img article-img--left"
                         />
@@ -66,7 +66,7 @@
                             </p>
                         </div>
                         <img
-                            src="img/image_2.jpg"
+                            src="/img/image_2.jpg"
                             alt="Изображение 2"
                             class="article-img article-img--right"
                         />
@@ -74,7 +74,7 @@
                     <!-- Блок 3 -->
                     <div class="article-block">
                         <img
-                            src="img/image_3.jpg"
+                            src="/img/image_3.jpg"
                             alt="Изображение 3"
                             class="article-img article-img--left"
                         />
@@ -91,7 +91,7 @@
                     <!-- Блок 4 -->
                     <div class="article-block">
                         <img
-                            src="img/image_4.jpg"
+                            src="/img/image_4.jpg"
                             alt="Изображение 4"
                             class="article-img article-img--right"
                         />

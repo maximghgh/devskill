@@ -41,27 +41,39 @@ class ChapterController extends Controller
     public function store(Request $request, $topicId)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'type'  => 'required|in:video,text,task,terms,quiz',
-            'content' => 'nullable', // Массив или объект
-            'video_url' => 'nullable|string',
-            'correct_answer' => 'nullable|string', // <-- добавили
+            'title'           => 'required|string|max:255',
+            'type'            => 'required|in:video,text,task,terms,presentation',
+            'content'         => 'nullable',
+            'video_url'       => 'nullable|string',
+            'correct_answer'  => 'nullable|string',
+            // новое правило
+            'presentation'    => 'nullable|file|mimes:ppt,pptx,pdf|max:20480',
         ]);
 
         $validated['topic_id'] = $topicId;
 
-        // Если 'content' пришел массивом/объектом, нужно превратить в строку JSON
+        // content → JSON-строка
         if (is_array($validated['content']) || is_object($validated['content'])) {
             $validated['content'] = json_encode($validated['content']);
+        }
+
+        // если пришёл файл презентации
+        if ($request->hasFile('presentation')) {
+            $path = $request->file('presentation')
+                        ->store('public/presentations');           // storage/app/public/…
+            $validated['presentation_path'] = str_replace(
+                'public/', 'storage/', $path                        // для доступа через URL
+            );
         }
 
         $chapter = Chapter::create($validated);
 
         return response()->json([
             'success' => true,
-            'chapter' => $chapter
+            'chapter' => $chapter,
         ], 201);
     }
+
 
     /**
      * Показать форму редактирования главы.

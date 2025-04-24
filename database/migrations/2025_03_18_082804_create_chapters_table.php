@@ -17,15 +17,11 @@ class CreateChaptersTable extends Migration
             // Заголовок главы – обязательное поле
             $table->string('title');
             
-            // Тип главы: video, text, task, terms
-            $table->enum('type', ['video','text','task','terms','quiz'])->default('text');
-            
-            // Общее поле для контента: редакторский вывод (editor)
-            // Используется для типов text, task, terms и даже для описания видео
-            $table->json('content')->nullable();
-            
-            // Если тип видео, дополнительно сохраняем ссылку на видео
+            $table->enum('type', ['video','text','task','terms','presentation'])->default('text');
+
             $table->string('video_url')->nullable();
+            $table->string('presentation_path')->nullable();
+            $table->json('content')->nullable();
             
             // Поле для сортировки глав внутри темы (необязательно)
             $table->integer('order')->default(0);

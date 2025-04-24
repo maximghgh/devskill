@@ -26,6 +26,7 @@ class Course extends Model
         'upgradequalification',
         'card_image',
         'description_image',
+        'pdf_path',   
     ];
 
     protected $casts = [

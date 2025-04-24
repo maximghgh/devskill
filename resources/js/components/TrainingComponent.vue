@@ -43,7 +43,7 @@
                                         :src="
                                             course.card_image
                                                 ? course.card_image
-                                                : '/img/logo_placeholder.png'
+                                                : '/public/img/logo_placeholder.png'
                                         "
                                         alt="Изображение курса"
                                     />
@@ -83,7 +83,7 @@
                         >
                         <!-- Если у преподавателя есть собственное изображение, используем его, иначе — стандартное -->
                         <img
-                            :src="teacher.photo ? `/storage/${teacher.photo}` : 'img/teacher.jpg'"
+                            :src="teacher.photo ? `/storage/${teacher.photo}` : '/public/img/teacher.jpg'"
                             alt="Teacher Image" class="avatar__teacher"
                         />
                         <div class="course-content__teacher-info">
@@ -118,7 +118,7 @@
                             </div>
                             <div class="course-content__top-block">
                                 <img
-                                    src="img/begin.png"
+                                    src="/public/img/begin.png"
                                     class="course-content__top-img"
                                 />
                             </div>
@@ -129,22 +129,22 @@
                     <h2>Партнеры</h2>
                     <div class="cooperation__slider">
                         <div class="cooperation__slide">
-                            <img src="img/univer_1.png" />
+                            <img src="/img/univer_1.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="img/univer_2.png" />
+                            <img src="/img/univer_2.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="img/univer_3.png" />
+                            <img src="/img/univer_3.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="img/univer_4.png" />
+                            <img src="/img/univer_4.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="img/univer_5.png" />
+                            <img src="/img/univer_5.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="img/univer_6.png" />
+                            <img src="/img/univer_6.png" />
                         </div>
                     </div>
                 </section>

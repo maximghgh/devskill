@@ -20,6 +20,7 @@ class Chapter extends Model
         'video_url',
         'order',
         'correct_answer',
+        'presentation_path',   // ← добавили
     ];
 
     

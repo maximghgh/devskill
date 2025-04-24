@@ -3,7 +3,7 @@
         <div class="header__inner">
             <div class="header__logo">
                 <a href="/">
-                    <img src="/img/logo.svg" class="header__logo" alt="Логотип" />
+                    <img src="/img/logo.svg" class="header__logo" alt="Логотип"/>
                 </a>
             </div>
             <nav class="header__nav">

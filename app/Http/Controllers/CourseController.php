@@ -28,6 +28,7 @@ class CourseController extends Controller
             'upgradequalification' => 'required|in:0,1',
             'cardImage'           => 'nullable|file|image|max:5120', // до 5 МБ
             'descriptionImage'    => 'nullable|file|image|max:5120',
+            'pdf'                  => 'nullable|file|mimes:pdf|max:20480',
         ]);
 
         // $data['upgrade_qualification'] = $data['upgradeQualification'] === '1' ? true : false;
@@ -54,6 +55,23 @@ class CourseController extends Controller
             $data['description_image'] = str_replace('public/', 'storage/', $path);
         }
 
+        // Обработка файла для PDF
+        if ($file = $request->file('pdf')) {
+
+            // 1. Берём исходное имя
+            $origName = $file->getClientOriginalName();          // «program.pdf»
+        
+            // 2. Чтобы избежать коллизий, добавим метку времени или id
+            //    (можно заменить time() на Str::uuid() или courseName и т.п.)
+            $filename = time() . '_' . $origName;                // «1714069531_program.pdf»
+        
+            // 3. Кладём с этим именем
+            $storedPath = $file->storeAs('public/pdfs', $filename);
+        
+            // 4. Сохраняем путь в том же поле
+            $data['pdf_path'] = str_replace('public/', 'storage/', $storedPath);
+        }
+
         $dataToSave = [
             'card_title'         => $data['cardTitle'] ?? null,
             'course_name'        => $data['courseName'],
@@ -70,6 +88,7 @@ class CourseController extends Controller
             'upgradequalification'=> $data['upgradequalification'] ?? null,
             'card_image'         => $data['card_image'] ?? null,
             'description_image'  => $data['description_image'] ?? null,
+            'pdf_path'             => $data['pdf_path'] ?? null, 
         ];
         
         // Создаём запись в БД

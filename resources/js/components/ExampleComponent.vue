@@ -14,9 +14,9 @@
                             Наши курсы прошли более 15&nbsp;000&nbsp;школьников и
                             студентов.
                         </div>
-                        <div class="button button_white button_offer-main">
+                        <a class="button button_white button_offer-main" href="#course" @click.prevent="scrollToCourse">
                             Присоединиться
-                        </div>
+                        </a>
                     </div>
                 </section>
 
@@ -48,7 +48,7 @@
                                     <p>• Олимпиадный</p>
                                 </div>
                                 <a
-                                    href="/category-courses"
+                                    href="/page-courses"
                                     class="button button_white button_cat-link"
                                 >Перейти в категорию</a>
                             </div>
@@ -63,7 +63,7 @@
                 </section>
 
                 <!-- ================= Каталог курсов ================= -->
-                <section class="course">
+                <section class="course" id="course">
                     <div class="course__inner">
                         <!-- mobile filter toggle -->
                         <div
@@ -459,7 +459,6 @@
                 </section>
             </div>
         </div>
-
         <!-- ===== auth modal ===== -->
         <transition name="modal">
             <div
@@ -521,7 +520,6 @@ const pages = computed(() =>
         (_, i) => i + 1
     )
 );
-
 /* ------------------------------------------------------------------ */
 /* 4. Фильтры                                                         */
 /* ------------------------------------------------------------------ */
@@ -543,7 +541,6 @@ const validateDuration = e => {
     const v = Number(e.target.value);
     selectedDuration.value = v && v >= 1 && v <= 24 ? v : '';
 };
-
 /* ------------------------------------------------------------------ */
 /* 5. Справочники (словарики)                                         */
 /* ------------------------------------------------------------------ */
@@ -565,7 +562,6 @@ const difficultyBgClass = {
     advanced: 'block-info_bg-orange',
     mixed:    'block-info_bg-green',
 };
-
 /* ------------------------------------------------------------------ */
 /* 6. Модалка покупки/консультации                                    */
 /* ------------------------------------------------------------------ */
@@ -595,7 +591,6 @@ const openModal = course => {
     isModalOpen.value    = true;
 };
 const closeModal = () => (isModalOpen.value = false);
-
 /* ------------------------------------------------------------------ */
 /* 7. API‑запросы                                                     */
 /* ------------------------------------------------------------------ */
@@ -626,7 +621,6 @@ async function fetchCourses() {
         console.error(e);
     }
 }
-
 /* ------------------------------------------------------------------ */
 /* 8. Реактивные вотчеры                                              */
 /* ------------------------------------------------------------------ */
@@ -640,7 +634,6 @@ watch(
     fetchCourses,
     { deep: true }
 );
-
 /* ------------------------------------------------------------------ */
 /* 9. Отправка форм                                                   */
 /* ------------------------------------------------------------------ */
@@ -686,7 +679,6 @@ async function submitForm() {
         console.error(e);
     }
 }
-
 /* ------------------------------------------------------------------ */
 /* 10. Авторизация                                                    */
 /* ------------------------------------------------------------------ */
@@ -695,7 +687,6 @@ function handleLoginEvent(e) {
     showAuthModal.value = false;
     localStorage.setItem(AUTH_KEY, JSON.stringify(e.detail));
 }
-
 /* ------------------------------------------------------------------ */
 /* 11. Монтирование компонента                                        */
 /* ------------------------------------------------------------------ */
@@ -728,13 +719,18 @@ onMounted(async () => {
 onUnmounted(() => {
     window.removeEventListener('user:login', handleLoginEvent);
 });
-
 /* ------------------------------------------------------------------ */
 /* 12. UI‑утилиты                                                     */
 /* ------------------------------------------------------------------ */
 const toggleSidebar = () => {
     isSidebarOpen.value = !isSidebarOpen.value;
 };
+function scrollToCourse() {
+  const el = document.getElementById('course');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
 </script>
 
 <style scoped>

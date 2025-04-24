@@ -2,31 +2,7 @@
     <div>
         <div class="maincontainer">
             <div class="container">
-                <header class="header header_main">
-                    <div class="header__inner">
-                        <div class="header__logo">
-                            <img src="img/logo.png">
-                        </div>
-                        <nav>
-                            <a href="#">Банк знаний</a>
-                            <a href="#">Каталог</a>
-                            <a href="#">Профориентация</a>
-                            <a href="#">Для учителей</a>
-                            <a href="#">О нас</a>
-                            <a href="#">Стажировки</a>
-                            <a href="#">Новости</a>
-                        </nav>
-                        <div class="header__lk">
-                            <div class="header__lk-img">
-                                <img src="img/nofotolk.png">
-                            </div>
-                            <div class="header__lk-name">
-                                Василий Пупкин
-                            </div>
-                        </div>
-                    </div>
-                </header>
-                <section class="offer" style="background-image: url(img/bg_offer_course.jpg);">
+                <section class="offer" style="background-image: url(/img/bg_offer_course.jpg);">
                     <div class="offer__inner">
                         <h1>Откройте дверь в мир программирования с нашими курсами по C++!</h1>
                         <a href="#" class="button button_white button_offer-main">Узнать подробнее</a>
@@ -42,7 +18,7 @@
                             </div>
                             <div class="course-content__top-block">
                                 <div class="course-content__top-block-img">
-                                    <img src="img/logo_c.png" class="course-content__top-img">
+                                    <img src="/img/logo_c.png" class="course-content__top-img">
                                 </div>
                             </div>
                         </div>
@@ -52,14 +28,14 @@
                                 <div class="course-content__main-desc">Полезен в качестве фундамента для обучения</div>
                                 <div class="category__one category__one_defualt">
                                     <div class="category__one-inner category__one-inner_row">
-                                        <img src="img/book.png">
+                                        <img src="/img/book.png">
                                         <p>Java, JavaScript, C #, как и огромное количество других популярных языков программирования, содержит в основе принципы C++. Именно поэтому учебные программы многих вузов содержат курс «плюсплюс», который идёт сразу за получением основ на C.</p>
                                     </div>
                                 </div>
                                 <div class="course-content__blocks">
                                     <div class="course-content__block course__card_bg-cyan">
                                         <div class="course-content__block-image">
-                                            <img src="img/fast.png">
+                                            <img src="/img/fast.png">
                                         </div>
                                         <div class="course-content__block-title">
                                             Быстр
@@ -70,7 +46,7 @@
                                     </div>
                                     <div class="course-content__block course__card_bg-fiolet">
                                         <div class="course-content__block-image">
-                                            <img src="img/universal.png">
+                                            <img src="/img/universal.png">
                                         </div>
                                         <div class="course-content__block-title">
                                             Универсален
@@ -81,7 +57,7 @@
                                     </div>
                                     <div class="course-content__block course__card_bg-orange">
                                         <div class="course-content__block-image">
-                                            <img src="img/active.png">
+                                            <img src="/img/active.png">
                                         </div>
                                         <div class="course-content__block-title">
                                             Активно поддерживается
@@ -92,7 +68,7 @@
                                     </div>
                                     <div class="course-content__block course__card_bg-green">
                                         <div class="course-content__block-image">
-                                            <img src="img/need.png">
+                                            <img src="/public/img/need.png">
                                         </div>
                                         <div class="course-content__block-title">
                                             Востребован
@@ -110,7 +86,7 @@
                                 <p> C++ может показаться сложным на первый взгляд, но правильная последовательность обучения сделает вас мастером этого языка. Изучение программирования на C++ может быть захватывающим и продуктивным опытом, особенно если вы учитесь в школе и только начинаете свой путь в мир программирования. Для успешного овладения этим языком программирования мы разделили путь на три основных уровня: базовый, фундаментальный и олимпиадный. Давайте рассмотрим, с чего начать на каждом из этих уровней на карте траектории развития.</p>
                             </div>
                             <div class="course-content__top-block">
-                                <img src="img/begin.png" class="course-content__top-img">
+                                <img src="/img/begin.png" class="course-content__top-img">
                                 
                             </div>
                         </div>
@@ -154,17 +130,29 @@
                                         </div>
                                         <a href="#" class="button button_transparent">Подробнее</a>
                                     </div>
+                                    <div class="course-content__evolution-block course__card_bg-orange">
+                                        <div class="course-content__evolution-top">
+                                            <div class="course-content__evolution-title">Олимпиадный</div>
+                                            <div class="course-content__evolution-desc">  Станьте настоящим героем программирования. Готовы к соревнованиям?</div>
+                                            <div class="course-content__evolution-text">Содержание программы:<br>
+                                            Сложные алгоритмы и оптимизация: Разберитесь с продвинутыми алгоритмами и их использованием для решения сложных задач.<br>
+                                            Стратегии олимпиадного программирования: Изучите создание эффективных стратегий для решения задач и избегайте типичных ошибок.
+                                            Мастерство C++: Станьте экспертом в C++, используя его мощные функции для сложных задач.<br>
+                                            Подготовка и соревнования: Готовьтесь к соревнованиям, участвуйте в олимпиадах, побеждайте и разблокируйте свой потенциал в программировании.</div>
+                                        </div>
+                                        <a href="#" class="button button_transparent">Подробнее</a>
+                                    </div>
                                 </div>
                                 <h2>Наши выпускники о курсе</h2>
                                 <div class="course-content__video">
                                     <div class="course-content__video-block">
-                                        <img src="img/video.jpg">
+                                        <img src="/img/video.jpg">
                                     </div>
                                     <div class="course-content__video-block">
-                                        <img src="img/video.jpg">
+                                        <img src="/img/video.jpg">
                                     </div>
                                     <div class="course-content__video-block">
-                                        <img src="img/video.jpg">
+                                        <img src="/img/video.jpg">
                                     </div>
                                 </div>
                             </div>

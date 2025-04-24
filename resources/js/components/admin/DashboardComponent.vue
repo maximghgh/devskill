@@ -350,16 +350,7 @@
                                                     >
                                                 </td>
                                                 <td>
-                                                    <button
-                                                        class="btn__user--delete"
-                                                        @click.prevent="
-                                                            deleteCourse(
-                                                                course.id
-                                                            )
-                                                        "
-                                                    >
-                                                        Удалить курс
-                                                    </button>
+                                                    <button class="btn__user--delete" @click.prevent="deleteCourse(course.id)">Удалить курс</button>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -724,6 +715,18 @@
                                                             "
                                                         />
                                                     </div>
+                                                    <div class="form-group">
+                                                        <label
+                                                            class="form-label"
+                                                            >PDF фаил курса</label
+                                                        >
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            class="form-input"
+                                                            
+                                                        />
+                                                    </div>
                                                 </div>
                                                 <!-- Editor.js контейнер -->
                                                 <div
@@ -1010,16 +1013,23 @@
                                                 "
                                             />
                                         </div>
+                                        <div class="form-group">
+                                            <label
+                                                class="form-label"
+                                                >PDF файл курса</label
+                                            >
+                                            <input
+                                            type="file"
+                                            accept="application/pdf"
+                                            class="form-input"
+                                            @change="onPdfChange"
+                                            />
+                                        </div>
                                         <div
                                             id="editorjs-create"
                                             class="editor-container"
                                         ></div>
-                                        <button
-                                            type="submit"
-                                            class="form-button"
-                                        >
-                                            Отправить
-                                        </button>
+                                        <button type="submit" class="form-button">Отправить</button>
                                     </form>
                                 </div>
                             </div>
@@ -1871,7 +1881,6 @@ function getRoleName(role) {
             return "Неизвестно";
     }
 }
-
 /* =====================================
    2. Курсы, языки и направления
 ===================================== */
@@ -1897,6 +1906,7 @@ const newCourse = ref({
     upgradeQualification: 0, // по умолчанию "Нет"
     cardImage: null,
     descriptionImage: null,
+    pdfFile: null,  
     editorData: {},
 });
 
@@ -1947,6 +1957,9 @@ function onDescriptionImageChange(e) {
 /* =====================================
    5. Создание нового курса
 ===================================== */
+function onPdfChange(e) {
+  newCourse.value.pdfFile = e.target.files[0] || null;
+}
 
 async function submitForm() {
     try {
@@ -1995,6 +2008,9 @@ async function submitForm() {
                 newCourse.value.descriptionImage
             );
         }
+        if (newCourse.value.pdfFile) {
+            formData.append('pdf', newCourse.value.pdfFile);
+        }
 
         // Отправляем POST-запрос на /api/courses
         const response = await axios.post("/api/courses", formData, {
@@ -2026,6 +2042,7 @@ async function submitForm() {
             upgradeQualification: "0", // сброс к значению по умолчанию
             cardImage: null,
             descriptionImage: null,
+            pdfFile: null,  
             editorData: {},
         };
 

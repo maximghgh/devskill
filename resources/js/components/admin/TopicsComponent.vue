@@ -3,104 +3,140 @@
         <!-- Отображение информации о теме -->
         <div class="block__info">
             <a class="span__sctrelca" href="#" @click.prevent="goBack">🠔</a>
-            <h1>Тема: {{ topic.title }}</h1> 
+            <h1>Тема: {{ topic.title }}</h1>
         </div>
-        
+
         <h2>Список глав</h2>
 
         <!-- Таблица с главами -->
         <div v-if="chapters.length">
-          <table class="light-push-table" v-if="chapters.length">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Название</th>
-                <th>Тип</th>
-                <th>Изменения</th>
-                <th>Удалить</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(chapter, index) in chapters" :key="chapter.id">
-                <td>{{ index + 1 }}</td>
-                <td>{{ chapter.title }}</td>
-                <td>{{ chapter.type }}</td>
-                <td>
-                  <!-- Вместо прямого редактирования вызываем модальное окно -->
-                  <button class="btn__user--edit" @click="openEditModal(chapter)">Редактировать</button>
-                </td>
-                <td>
-                  <button class="btn__user--delete" @click="deleteChapter(chapter.id)">Удалить</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <table class="light-push-table" v-if="chapters.length">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Изменения</th>
+                        <th>Удалить</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(chapter, index) in chapters" :key="chapter.id">
+                        <td>{{ index + 1 }}</td>
+                        <td>{{ chapter.title }}</td>
+                        <td>{{ chapter.type }}</td>
+                        <td>
+                            <!-- Вместо прямого редактирования вызываем модальное окно -->
+                            <button
+                                class="btn__user--edit"
+                                @click="openEditModal(chapter)"
+                            >
+                                Редактировать
+                            </button>
+                        </td>
+                        <td>
+                            <button
+                                class="btn__user--delete"
+                                @click="deleteChapter(chapter.id)"
+                            >
+                                Удалить
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <div v-else>
             <p class="p__topic">Пока нет глав</p>
         </div>
         <div v-if="editModalOpen" class="modal-overlay">
-          <div class="modal-content">
-            <h3>Редактирование главы</h3>
-            <div class="edit-course-form-container">
-              <form @submit.prevent="saveEditedChapter" class="edit-course-form">
-                <!-- Поле "Название" -->
-                <div class="form-group">
-                  <label class="form-label">Название</label>
-                  <input
-                    v-model="editingChapter.title"
-                    type="text"
-                    placeholder="Введите название главы"
-                    class="form-input"
-                    required
-                  />
-                </div>
+            <div class="modal-content">
+                <h3>Редактирование главы</h3>
+                <div class="edit-course-form-container">
+                    <form
+                        @submit.prevent="saveEditedChapter"
+                        class="edit-course-form"
+                    >
+                        <!-- Поле "Название" -->
+                        <div class="form-group">
+                            <label class="form-label">Название</label>
+                            <input
+                                v-model="editingChapter.title"
+                                type="text"
+                                placeholder="Введите название главы"
+                                class="form-input"
+                                required
+                            />
+                        </div>
 
-                <!-- Поле "Тип" -->
-                <div class="form-group">
-                  <label class="form-label">Тип</label>
-                  <select v-model="editingChapter.type" class="form-input">
-                    <option value="video">Видео</option>
-                    <option value="text">Текст</option>
-                    <option value="task">Задания</option>
-                    <option value="terms">Термины</option>
-                  </select>
-                </div>
+                        <!-- Поле "Тип" -->
+                        <div class="form-group">
+                            <label class="form-label">Тип</label>
+                            <select
+                                v-model="editingChapter.type"
+                                class="form-input"
+                            >
+                                <option value="video">Видео</option>
+                                <option value="text">Текст</option>
+                                <option value="task">Задания</option>
+                                <option value="terms">Термины</option>
+                                <option value="presentation">
+                                    Презентация
+                                </option>
+                            </select>
+                        </div>
 
-                <!-- Поле для ссылки (только для видео) -->
-                <div v-if="editingChapter.type === 'video'" class="form-group">
-                  <label class="form-label">Ссылка на видео</label>
-                  <input
-                    v-model="editingChapter.video_url"
-                    type="text"
-                    placeholder="https://..."
-                    class="form-input"
-                  />
-                </div>
+                        <!-- Поле для ссылки (только для видео) -->
+                        <div
+                            v-if="editingChapter.type === 'video'"
+                            class="form-group"
+                        >
+                            <label class="form-label">Ссылка на видео</label>
+                            <input
+                                v-model="editingChapter.video_url"
+                                type="text"
+                                placeholder="https://..."
+                                class="form-input"
+                            />
+                        </div>
 
-                <!-- Поле для правильного ответа (только для заданий) -->
-                <div v-if="editingChapter.type === 'task'" class="form-group">
-                  <label class="form-label">Правильный ответ</label>
-                  <textarea
-                    v-model="editingChapter.correct_answer"
-                    placeholder="Введите правильный ответ"
-                    class="form-textarea"
-                  ></textarea>
-                </div>
+                        <!-- Поле для правильного ответа (только для заданий) -->
+                        <div
+                            v-if="editingChapter.type === 'task'"
+                            class="form-group"
+                        >
+                            <label class="form-label">Правильный ответ</label>
+                            <textarea
+                                v-model="editingChapter.correct_answer"
+                                placeholder="Введите правильный ответ"
+                                class="form-textarea"
+                            ></textarea>
+                        </div>
 
-                <!-- Редактор контента Editor.js -->
-                <div class="form-group">
-                  <label class="form-label">Контент</label>
-                  <div id="editor-edit" class="editor-container"></div>
-                </div>
+                        <!-- Редактор контента Editor.js -->
+                        <div class="form-group">
+                            <label class="form-label">Контент</label>
+                            <div
+                                id="editor-edit"
+                                class="editor-container"
+                            ></div>
+                        </div>
 
-                <div class="modal-buttons">
-                  <button type="submit" class="form-button">Сохранить</button>
-                  <button type="button" @click="closeEditModal" class="form-button form-button--close">Отмена</button>
+                        <div class="modal-buttons">
+                            <button type="submit" class="form-button">
+                                Сохранить
+                            </button>
+                            <button
+                                type="button"
+                                @click="closeEditModal"
+                                class="form-button form-button--close"
+                            >
+                                Отмена
+                            </button>
+                        </div>
+                    </form>
                 </div>
-              </form>
             </div>
-          </div>
         </div>
 
         <!-- Блок для добавления новой главы -->
@@ -122,16 +158,21 @@
                 <button @click="selectType('terms')" class="type-button">
                     Термины
                 </button>
+                <button @click="selectType('presentation')" class="type-button">
+                    Презентация
+                </button>
             </div>
         </div>
 
         <!-- Форма, которая появляется после выбора типа -->
         <div v-if="selectedType" class="form">
-            <h3 class="h3__topic">Добавление главы типа «{{ selectedType }}»</h3>
+            <h3 class="h3__topic">
+                Добавление главы типа «{{ selectedType }}»
+            </h3>
             <form @submit.prevent="submitChapter" class="chapter-form">
                 <!-- Общее поле для названия главы -->
                 <div class="form-group">
-                    <label class="form-label">Название главы:</label>
+                    <label class="form-label">Название главы :</label>
                     <input
                         placeholder="Название главы"
                         type="text"
@@ -153,7 +194,7 @@
                         />
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Видео редактор:</label>
+                        <label class="form-label">Описание темы :</label>
                         <div id="editor-video" class="editor-container"></div>
                     </div>
                 </div>
@@ -166,9 +207,13 @@
 
                 <!-- Для теста -->
                 <div v-else-if="selectedType === 'task'" class="form-group">
-                    <label class="form-label">Поле для правильного ответа:</label>
-                    <textarea v-model="newChapter.correct_answer" class="correct-answer-textarea" placeholder="Введите правильный ответ"></textarea>
-                    <label class="form-label">Редактор теста:</label>
+                    <label class="form-label">Поле для правильного ответа :</label>
+                    <textarea
+                        v-model="newChapter.correct_answer"
+                        class="correct-answer-textarea"
+                        placeholder="Введите правильный ответ"
+                    ></textarea>
+                    <label class="form-label">Задание :</label>
                     <div id="editor-task" class="editor-container"></div>
                 </div>
 
@@ -177,7 +222,21 @@
                     <label class="form-label">Редактор терминов:</label>
                     <div id="editor-terms" class="editor-container"></div>
                 </div>
-
+                <!-- Для презентации -->
+                <div v-else-if="selectedType === 'presentation'" class="form-group">
+                  <label class="form-label">Редактор описания презентации:</label>
+                  <div id="editor-presentation" class="editor-container"></div>
+                  <div class="form-group">
+                    <label class="form-label">Прикрепить файл (PDF/PPTX):</label>
+                    <input
+                      type="file"
+                      accept=".pdf,.ppt,.pptx"
+                      @change="onPresentationChange"
+                      class="form-input"
+                    />
+                  </div>
+                </div>
+                <!-- загрузка презентации -->
                 <button type="submit" class="form-button">
                     Добавить главу
                 </button>
@@ -197,27 +256,22 @@ import ImageTool from "@editorjs/image";
 // Модальное окно для редактирования главы
 const editModalOpen = ref(false);
 const editingChapter = ref({});
+let modalEditorInstance = null;
 
-// Функция открытия модального окна
 function openEditModal(chapter) {
   editModalOpen.value = true;
   editingChapter.value = { ...chapter };
-  // Если content — строка, пробуем распарсить её в объект
+  // парсим content
   if (typeof editingChapter.value.content === "string" && editingChapter.value.content.trim()) {
     try {
       editingChapter.value.content = JSON.parse(editingChapter.value.content);
-    } catch (e) {
-      console.error("Ошибка парсинга content:", e);
+    } catch {
       editingChapter.value.content = {};
     }
   }
-  // Инициализируем EditorJS в модалке
-  nextTick(() => {
-    initModalEditor();
-  });
+  nextTick(initModalEditor);
 }
 
-// Функция закрытия модального окна
 function closeEditModal() {
   editModalOpen.value = false;
   editingChapter.value = {};
@@ -227,7 +281,6 @@ function closeEditModal() {
   }
 }
 
-let modalEditorInstance = null;
 function initModalEditor() {
   if (modalEditorInstance) {
     modalEditorInstance.destroy();
@@ -240,77 +293,63 @@ function initModalEditor() {
     tools: {
       header: { class: Header, inlineToolbar: ["link"] },
       list: { class: List, inlineToolbar: true },
-      image: {
-        class: ImageTool,
-        config: {
-          endpoints: {
-            byFile: "/api/uploadFile",
-            byUrl: "/api/fetchUrl",
-          },
-        },
-      },
-    },
-    onReady: () => {
-      console.log("Editor.js для модалки готов в контейнере editor-edit");
-    },
+      image: { class: ImageTool, config: { endpoints: { byFile: "/api/uploadFile", byUrl: "/api/fetchUrl" } } }
+    }
   });
 }
 
 async function saveEditedChapter() {
   try {
     if (modalEditorInstance) {
-      const editorData = await modalEditorInstance.save();
-      editingChapter.value.content = editorData;
+      const data = await modalEditorInstance.save();
+      editingChapter.value.content = data;
     }
-    // Если backend ожидает строку, преобразуем объект content в JSON
-    let payload = { ...editingChapter.value };
+    const payload = { ...editingChapter.value };
     if (payload.content && typeof payload.content === "object") {
       payload.content = JSON.stringify(payload.content);
     }
-    const response = await axios.put(
+    const res = await axios.put(
       `/api/admin/topic/${topicId}/chapters/${editingChapter.value.id}`,
       payload
     );
-    const updatedChapter = response.data.chapter;
-    const idx = chapters.value.findIndex(ch => ch.id === updatedChapter.id);
-    if (idx !== -1) {
-      chapters.value[idx] = updatedChapter;
-    }
+    const updated = res.data.chapter;
+    const idx = chapters.value.findIndex(c => c.id === updated.id);
+    if (idx !== -1) chapters.value[idx] = updated;
     closeEditModal();
-  } catch (error) {
-    console.error("Ошибка при обновлении главы:", error);
+  } catch (e) {
+    console.error(e);
   }
 }
 
-async function deleteChapter(chapterId) {
+async function deleteChapter(id) {
   try {
-    await axios.delete(`/api/admin/topic/${topicId}/chapters/${chapterId}`);
-    chapters.value = chapters.value.filter(ch => ch.id !== chapterId);
-  } catch (error) {
-    console.error("Ошибка при удалении главы:", error);
+    await axios.delete(`/api/admin/topic/${topicId}/chapters/${id}`);
+    chapters.value = chapters.value.filter(c => c.id !== id);
+  } catch (e) {
+    console.error(e);
   }
 }
 
 function getTopicIdFromUrl() {
-  const pathParts = window.location.pathname.split("/");
-  const idx = pathParts.indexOf("topic");
-  return pathParts[idx + 1];
+  const parts = window.location.pathname.split("/");
+  return parts[parts.indexOf("topic") + 1];
 }
-
 const topicId = getTopicIdFromUrl();
-
 const topic = ref({});
 const chapters = ref([]);
 
 // Для создания новой главы
 const selectedType = ref("");
-const newChapter = ref({
+const blankChapter = {
   title: "",
   video_url: "",
   content: null,
-  correct_answer: ""
-});
+  correct_answer: "",
+  presentation_file: null
+};
+const newChapter = ref({ ...blankChapter });
 let editorInstance = null;
+
 function initEditor(containerId) {
   if (editorInstance) {
     editorInstance.destroy();
@@ -322,108 +361,93 @@ function initEditor(containerId) {
     tools: {
       header: { class: Header, inlineToolbar: ["link"] },
       list: { class: List, inlineToolbar: true },
-      image: {
-        class: ImageTool,
-        config: {
-          endpoints: {
-            byFile: "/api/uploadFile",
-            byUrl: "/api/fetchUrl",
-          },
-        },
-      },
-    },
-    onReady: () => {
-      console.log("Editor.js готов в контейнере", containerId);
-    },
+      image: { class: ImageTool, config: { endpoints: { byFile: "/api/uploadFile", byUrl: "/api/fetchUrl" } } }
+    }
   });
 }
 
-watch(selectedType, async (newType) => {
-  if (!newType) return;
+function onPresentationChange(e) {
+  newChapter.value.presentation_file = e.target.files[0] || null;
+}
+
+watch(selectedType, async type => {
+  if (!type) return;
   await nextTick();
-  if (newType === "text") {
-    initEditor("editor-text");
-  } else if (newType === "task") {
-    initEditor("editor-task");
-  } else if (newType === "terms") {
-    initEditor("editor-terms");
-  } else if (newType === "video") {
-    initEditor("editor-video");
-  }
+  if (type === 'text') initEditor('editor-text');
+  else if (type === 'task') initEditor('editor-task');
+  else if (type === 'terms') initEditor('editor-terms');
+  else if (type === 'video') initEditor('editor-video');
+  else if (type === 'presentation') initEditor('editor-presentation');
 });
 
 async function loadTopicAndChapters() {
   try {
-    const topicResponse = await axios.get(`/admin/topic/${topicId}`);
-    topic.value = topicResponse.data.topic || {};
-    const chaptersResponse = await axios.get(`/admin/topic/${topicId}/chapters`);
-    chapters.value = chaptersResponse.data.chapters || [];
-  } catch (error) {
-    console.error("Ошибка при загрузке данных:", error);
+    const t = await axios.get(`/admin/topic/${topicId}`);
+    topic.value = t.data.topic || {};
+    const c = await axios.get(`/admin/topic/${topicId}/chapters`);
+    chapters.value = c.data.chapters || [];
+  } catch (e) {
+    console.error(e);
   }
 }
 
 function selectType(type) {
   selectedType.value = type;
-  newChapter.value = {
-    title: "",
-    video_url: "",
-    content: null,
-    correct_answer: ""
-  };
+  newChapter.value = { ...blankChapter };
 }
 
 async function submitChapter() {
   try {
-    let editorData = null;
-    if (["text", "task", "terms", "video"].includes(selectedType.value) && editorInstance) {
-      editorData = await editorInstance.save();
+    let data = null;
+    if (['text','task','terms','video','presentation'].includes(selectedType.value) && editorInstance) {
+      data = await editorInstance.save();
     }
-    newChapter.value.content = editorData;
-    const payload = {
-      ...newChapter.value,
-      type: selectedType.value,
-    };
-    const response = await axios.post(`/admin/topic/${topicId}/chapters`, payload);
-    if (response.data.chapter) {
-      chapters.value.push(response.data.chapter);
+    newChapter.value.content = data;
+
+    let res;
+    if (selectedType.value === 'presentation') {
+      const fd = new FormData();
+      fd.append('title', newChapter.value.title);
+      fd.append('type', selectedType.value);
+      fd.append('content', JSON.stringify(data));
+      if (newChapter.value.presentation_file) fd.append('presentation', newChapter.value.presentation_file);
+      res = await axios.post(`/admin/topic/${topicId}/chapters`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+    } else {
+      const payload = { ...newChapter.value, type: selectedType.value, content: data };
+      res = await axios.post(`/admin/topic/${topicId}/chapters`, payload);
     }
-    selectedType.value = "";
-    newChapter.value = { title: "", video_url: "", content: null, correct_answer: "" };
-    if (editorInstance) {
-      editorInstance.destroy();
-      editorInstance = null;
-    }
-  } catch (error) {
-    console.error("Ошибка при создании главы:", error);
+    if (res.data.chapter) chapters.value.push(res.data.chapter);
+    selectedType.value = '';
+    newChapter.value = { ...blankChapter };
+    if (editorInstance) { editorInstance.destroy(); editorInstance = null; }
+  } catch (e) {
+    console.error(e);
   }
 }
 
-onMounted(() => {
-  loadTopicAndChapters();
-});
-
-function goBack() {
-  window.history.back();
-}
+onMounted(loadTopicAndChapters);
+function goBack() { window.history.back(); }
 </script>
 
 <style scoped>
+.form-input--m{
+  margin: 0 0 20px;
+}
 /* Стиль модального окна, пример */
-.edit-course-form{
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.edit-course-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
-.form-button--close{
-  background: none !important;
-  border: 1px solid #007bff !important;
-  color: #007bff !important;
+.form-button--close {
+    background: none !important;
+    border: 1px solid #007bff !important;
+    color: #007bff !important;
 }
-.modal-buttons{
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.modal-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 .modal-overlay {
     position: fixed;
@@ -452,10 +476,10 @@ function goBack() {
     position: relative;
 }
 .editor-container {
-  min-height: 150px;
-  border: 1px solid #ccc;
-  padding: 8px;
-  margin-bottom: 16px;
+    min-height: 150px;
+    border: 1px solid #ccc;
+    padding: 8px;
+    margin-bottom: 16px;
 }
 .btn__user--edit {
     cursor: pointer;
@@ -470,23 +494,23 @@ function goBack() {
     color: red;
 }
 .correct-answer-textarea {
-  min-height: 120px;   /* Можно отрегулировать под нужный размер */
-  padding: 8px;
-  margin-top: 5px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  resize: vertical;    /* Позволяет вертикально растягивать поле */
-  font-size: 14px;
+    min-height: 120px; /* Можно отрегулировать под нужный размер */
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical; /* Позволяет вертикально растягивать поле */
+    font-size: 14px;
 }
-.block__info{
+.block__info {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 30px 0 40px;
 }
-.span__sctrelca{
+.span__sctrelca {
     cursor: pointer;
     user-select: none;
     color: #ffffff;
@@ -502,17 +526,17 @@ function goBack() {
     list-style: none;
     text-decoration: none;
 }
-.form{
+.form {
     padding: 20px 0;
 }
-.p__topic{
+.p__topic {
     text-align: center;
     margin: 0 0 30px;
 }
-.form-group--margin{
+.form-group--margin {
     margin: 0 0 20px;
 }
-.h3__topic{
+.h3__topic {
     font-size: 30px;
     margin: 40px auto;
     text-align: center;
@@ -536,6 +560,10 @@ function goBack() {
 }
 
 .type-button {
+    width: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: #007bff;
     color: #fff;
     border: none;
@@ -617,7 +645,6 @@ table.light-push-table {
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-
 }
 
 .light-push-table th,

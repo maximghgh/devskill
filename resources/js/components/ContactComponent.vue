@@ -6,7 +6,7 @@
                     <div class="contacts__inner">
                         <div class="contacts__block">
                             <div class="contacts__img">
-                                <img src="img/technic.png">
+                                <img src="/public/img/technic.png">
                             </div>
                             <div class="contacts__title">
                                 Технический отдел       
@@ -29,7 +29,7 @@
                         </div>
                         <div class="contacts__block">
                             <div class="contacts__img">
-                                <img src="img/organization.png">
+                                <img src="/public/img/organization.png">
                             </div>
                             <div class="contacts__title">
                                 Организация мероприятий
@@ -52,7 +52,7 @@
                         </div>
                         <div class="contacts__block">
                             <div class="contacts__img">
-                                <img src="img/general.png">
+                                <img src="/public/img/general.png">
                             </div>
                             <div class="contacts__title">
                                 Общие вопросы

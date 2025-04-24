@@ -3,7 +3,7 @@
         <div class="header__inner">
             <div class="header__logo">
                 <a href="/admin">
-                    <img src="/img/logo.png" alt="Логотип Devskill" />
+                    <img src="/img/logo.svg" class="header__logo" alt="Логотип" />
                 </a>
             </div>
             <h3>Панель администратора</h3>
@@ -128,6 +128,9 @@ watch(
 </script>
 
 <style scoped>
+.header__logo{
+    height: 90px;
+}
 /* Стили для успешного уведомления */
 .modal__message_success {
     display: flex;

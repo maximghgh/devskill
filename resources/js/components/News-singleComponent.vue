@@ -51,7 +51,7 @@
                         <div class="comment__one">
                             <div class="comment__avatar">
                             <img
-                                :src="comment.user_avatar ? `/storage/${comment.user_avatar}` : 'img/avatar.jpg'"
+                                :src="comment.user_avatar ? `/storage/${comment.user_avatar}` : '/public/img/avatar.jpg'"
                                 alt="Avatar"
                             />
                             </div>
@@ -103,7 +103,7 @@
                         <!-- Форма ответа (подкомментария) для этого комментария -->
                         <div v-if="replyTo === comment.id" class="comment__one comment__one_respond">
                             <div class="comment__avatar">
-                            <img src="img/avatar.jpg" alt="Avatar" />
+                            <img src="/public/img/avatar.jpg" alt="Avatar" />
                             </div>
                             <div class="comment__block">
                             <div class="comment__area">
@@ -124,7 +124,7 @@
                             >
                             <div class="comment__avatar">
                                 <img
-                                :src="child.user_avatar ? `/storage/${child.user_avatar}` : 'img/avatar.jpg'"
+                                :src="child.user_avatar ? `/storage/${child.user_avatar}` : '/public/img/avatar.jpg'"
                                 alt="Avatar"
                                 />
                             </div>

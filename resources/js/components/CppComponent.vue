@@ -97,13 +97,15 @@
                                         </p>
                                     </div>
                                     <a
-                                        href=""
+                                        v-if="course.pdf_path"
+                                        :href="`/${course.pdf_path}`"
+                                        download                     
                                         class="course-content__sidebar-program"
-                                        >Программа курса</a
                                     >
-                                    <a href="" class="button button_sidebar"
-                                        >Купить</a
-                                    >
+                                        Программа курса
+                                    </a>
+                                    <small v-else class="no-pdf">PDF не загружен</small>
+                                    <a href="" class="button button_sidebar">Купить</a>
                                 </div>
                             </div>
                         </div>
@@ -125,9 +127,21 @@ import ImageTool from "@editorjs/image";
 const course = ref(null);
 let editorInstance = null;
 
+// Функция скачивания PDF
+function downloadPdf(path) {
+  // Создаём скрытую ссылку и эмулируем клик
+  const link = document.createElement('a');
+  // Путь может содержать уже '/storage/...'
+  link.href = `/${path}`;
+  link.download = '';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 onMounted(async () => {
     try {
-        // 1. Получаем ID курса из URL (например, "/cpp/4" или через ?id=4)
+        // 1. Получаем ID курса из URL
         const path = window.location.pathname;
         const segments = path.split("/");
         let courseId = segments[2];
@@ -148,20 +162,19 @@ onMounted(async () => {
             const responseUsers = await axios.post("/api/users/by-ids", {
                 ids: course.value.teachers,
             });
-            // Получим массив объектов пользователей, например [{id:2, name:'Иван'}, {id:5, name:'Мария'}]
             course.value.teachersData = responseUsers.data;
         }
 
-        // 3. Подождать, пока элемент с id="editorjs" появится в DOM
+        // 3. Ждём рендеринга контейнера EditorJS
         await nextTick();
 
-        // 4. Определяем данные для Editor.js.
+        // 4. Данные для EditorJS
         const editorData =
             typeof course.value.editor_data === "string"
                 ? JSON.parse(course.value.editor_data)
                 : course.value.editor_data || {};
 
-        // 5. Инициализация Editor.js (только для чтения)
+        // 5. Инициализация Editor.js в режиме "только чтение"
         editorInstance = new EditorJS({
             holder: "editorjs",
             readOnly: true,
@@ -176,10 +189,7 @@ onMounted(async () => {
                         defaultLevel: 2,
                     },
                 },
-                list: {
-                    class: List,
-                    inlineToolbar: true,
-                },
+                list: { class: List, inlineToolbar: true },
                 image: {
                     class: ImageTool,
                     config: {
