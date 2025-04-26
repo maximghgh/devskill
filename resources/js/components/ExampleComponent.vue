@@ -734,7 +734,7 @@ function scrollToCourse() {
 }
 </script>
 
-<style scoped>
+<style>
 .modal-close--auth{
     background-color: #00000000 !important;
 }

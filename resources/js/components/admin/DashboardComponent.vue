@@ -77,130 +77,12 @@
                                             :key="userItem.id"
                                         >
                                             <td>{{ userItem.id }}</td>
-                                            <td>
-                                                <div
-                                                    v-if="
-                                                        editingUserId ===
-                                                        userItem.id
-                                                    "
-                                                >
-                                                    <input
-                                                        class="input__user--edit"
-                                                        v-model="
-                                                            editingUser.name
-                                                        "
-                                                    />
-                                                </div>
-                                                <div
-                                                    v-else
-                                                    @click="
-                                                        startEditing(userItem)
-                                                    "
-                                                    style="cursor: pointer"
-                                                >
-                                                    {{ userItem.name }}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div
-                                                    v-if="
-                                                        editingUserId ===
-                                                        userItem.id
-                                                    "
-                                                >
-                                                    <input
-                                                        class="input__user--edit"
-                                                        v-model="
-                                                            editingUser.email
-                                                        "
-                                                    />
-                                                </div>
-                                                <div
-                                                    v-else
-                                                    @click="
-                                                        startEditing(userItem)
-                                                    "
-                                                    style="cursor: pointer"
-                                                >
-                                                    {{ userItem.email }}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div
-                                                    v-if="
-                                                        editingUserId ===
-                                                        userItem.id
-                                                    "
-                                                >
-                                                    <input
-                                                        v-mask="
-                                                            '+7 (###) ###-##-##'
-                                                        "
-                                                        class="input__user--edit"
-                                                        v-model="
-                                                            editingUser.phone
-                                                        "
-                                                    />
-                                                </div>
-                                                <div
-                                                    v-else
-                                                    @click="
-                                                        startEditing(userItem)
-                                                    "
-                                                    style="cursor: pointer"
-                                                >
-                                                    {{ userItem.phone }}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div
-                                                    v-if="
-                                                        editingUserId ===
-                                                        userItem.id
-                                                    "
-                                                >
-                                                    <input
-                                                        class="input__user--edit"
-                                                        v-model="
-                                                            editingUser.birthday
-                                                        "
-                                                        type="date"
-                                                    />
-                                                </div>
-                                                <div
-                                                    v-else
-                                                    @click="
-                                                        startEditing(userItem)
-                                                    "
-                                                    style="cursor: pointer"
-                                                >
-                                                    {{ userItem.birthday }}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div
-                                                    v-if="
-                                                        editingUserId ===
-                                                        userItem.id
-                                                    "
-                                                >
-                                                    <input
-                                                        class="input__user--edit"
-                                                        v-model="
-                                                            editingUser.country
-                                                        "
-                                                    />
-                                                </div>
-                                                <div
-                                                    v-else
-                                                    @click="
-                                                        startEditing(userItem)
-                                                    "
-                                                    style="cursor: pointer"
-                                                >
-                                                    {{ userItem.country }}
-                                                </div>
-                                            </td>
+                                            <td>{{ userItem.name }}</td>
+                                            <td>{{ userItem.email }}</td>
+                                            <td>{{ userItem.phone }}</td>
+                                            <td>{{ userItem.birthday }}</td>
+                                            <td>{{ userItem.country }}</td>
+                                            <!-- роли -->
                                             <td>
                                                 <div
                                                     v-if="
@@ -245,50 +127,45 @@
                                                     }}
                                                 </div>
                                             </td>
-                                            <td
-                                                v-if="
-                                                    editingUserId ===
-                                                    userItem.id
-                                                "
-                                            >
-                                                <button
-                                                    class="btn__user--edit"
-                                                    @click="saveUser"
-                                                >
-                                                    Сохранить
-                                                </button>
-                                                <button
-                                                    class="btn__user--edit"
-                                                    @click="cancelEditing"
-                                                >
-                                                    Отмена
-                                                </button>
-                                            </td>
-                                            <td v-else>
-                                                <!-- Если не редактируется, можно добавить иконку для входа в режим редактирования (опционально) -->
-                                                <button
-                                                    class="btn__user--edit"
-                                                    @click="
-                                                        startEditing(userItem)
-                                                    "
-                                                >
-                                                    Редактировать
-                                                </button>
+                                            <td>
+                                                <button class="btn__user--edit" @click="startEditing(userItem)">Редактировать</button>
                                             </td>
                                             <td>
-                                                <button
-                                                    class="btn__user--delete"
-                                                    @click="
-                                                        deleteUser(userItem.id)
-                                                    "
-                                                >
-                                                    Удалить пользователя
-                                                </button>
+                                                <button class="btn__user--delete" @click="deleteUser(userItem.id)">Удалить пользователя</button>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 <div v-else>Нет пользователей</div>
+                                <!-- Модальное окно -->
+                                <div v-if="showUserEditModal" class="modal-overlay">
+                                    <div class="modal-content">
+                                        <button class="close-button" @click="closeUserEditModal">✕</button>
+                                        <h2>Редактировать пользователя</h2>
+                                        <form @submit.prevent="saveUserModal" class="edit-form">
+                                        <div class="form-group">
+                                            <label>Имя</label>
+                                            <input v-model="editingUser.name" type="text" class="form-input" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input v-model="editingUser.email" type="email" class="form-input" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Телефон</label>
+                                            <input v-model="editingUser.phone" type="text" class="form-input" />
+                                        </div>
+                                        <!-- Добавьте остальные поля по аналогии -->
+                                        <div class="modal-actions">
+                                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                                            <button type="button" class="btn btn-secondary" @click="closeUserEditModal">
+                                            Отмена
+                                            </button>
+                                        </div>
+                                        </form>
+                                    </div>
+                                </div>
+
                             </div>
                             <!-- Блок "Курсы" -->
                             <div v-else-if="item.id === 'courses'">
@@ -722,9 +599,9 @@
                                                         >
                                                         <input
                                                             type="file"
-                                                            accept="image/*"
+                                                            accept="application/pdf"
                                                             class="form-input"
-                                                            
+                                                            @change="onPdfChange"
                                                         />
                                                     </div>
                                                 </div>
@@ -896,10 +773,7 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"
-                                                >Выберите языки
-                                                программирования</label
-                                            >
+                                            <label class="form-label">Выберите языки программирования</label>
                                             <!-- multiple позволяет выбрать сразу несколько пунктов -->
                                             <Multiselect
                                                 v-model="
@@ -921,10 +795,7 @@
                                                         selected,
                                                     }"
                                                 >
-                                                    <div
-                                                        class="multiselect__option"
-                                                    >
-                                                        <!-- «Пузырь» вместо стандартного чекбокса -->
+                                                    <div class="multiselect__option">
                                                         <input
                                                             type="checkbox"
                                                             class="checkbox"
@@ -934,7 +805,6 @@
                                                             }"
                                                         />
                                                         <span class="checkmark">
-                                                            <!-- SVG-галочка -->
                                                             <svg
                                                                 class="checkmark__icon"
                                                                 xmlns="http://www.w3.org/2000/svg"
@@ -954,14 +824,9 @@
                                                         >
                                                     </div>
                                                 </template>
-
                                                 <!-- Кастомизация заголовка списка -->
-                                                <template
-                                                    #selection="{ values }"
-                                                >
-                                                    <span
-                                                        class="selection-header"
-                                                    >
+                                                <template #selection="{ values }">
+                                                    <span class="selection-header">
                                                         {{
                                                             values
                                                                 .map(
@@ -975,43 +840,26 @@
                                             </Multiselect>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"
-                                                >Повышение квалификации</label
-                                            >
-                                            <select
-                                                v-model="
-                                                    newCourse.upgradeQualification
-                                                "
-                                                class="form-input"
-                                            >
+                                            <label class="form-label">Повышение квалификации</label>
+                                            <select v-model="newCourse.upgradeQualification" class="form-input">
                                                 <option value="0">Нет</option>
                                                 <option value="1">Да</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"
-                                                >Логотип курса</label
-                                            >
-                                            <input
-                                                type="file"
+                                            <label class="form-label">Логотип курса</label>
+                                            <input type="file"
                                                 accept="image/*"
                                                 class="form-input"
                                                 @change="onFileChange"
                                             />
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"
-                                                >Изображение для описания
-                                                курса</label
-                                            >
-                                            <input
-                                                type="file"
+                                            <label class="form-label">Изображение для описания курса</label>
+                                            <input type="file"
                                                 accept="image/*"
                                                 class="form-input"
-                                                @change="
-                                                    onDescriptionImageChange
-                                                "
-                                            />
+                                                @change="onDescriptionImageChange"/>
                                         </div>
                                         <div class="form-group">
                                             <label
@@ -1924,6 +1772,7 @@ const editCourse = ref({
     selectedLanguage: "javascript",
     cardImage: null,
     descriptionImage: null,
+    pdfFile: null,  
     editorData: {},
 });
 
@@ -1959,6 +1808,7 @@ function onDescriptionImageChange(e) {
 ===================================== */
 function onPdfChange(e) {
   newCourse.value.pdfFile = e.target.files[0] || null;
+  editCourse.value.pdfFile = e.target.files[0] || null;
 }
 
 async function submitForm() {
@@ -2108,6 +1958,10 @@ async function updateCourse() {
                 editCourse.value.descriptionImage
             );
         }
+        if (editCourse.value.pdfFile) {
+            formData.append('pdf', editCourse.value.pdfFile);
+        }
+
 
         const response = await axios.post(
             `/api/courses/${selectedCourse.value.id}`,

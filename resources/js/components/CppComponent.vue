@@ -50,18 +50,18 @@
                                             :key="teacher.id"
                                         >
                                             <!-- Если у преподавателя есть фото, выводим его, иначе заглушку -->
-                                            <img class="teacher-photo"
+                                            <img
+                                                class="teacher-photo"
                                                 :src="
                                                     teacher.photo
                                                         ? `/storage/${teacher.photo}`
                                                         : '/img/teacher_placeholder.png'
                                                 "
                                                 alt="Преподаватель"
-                                                
                                             />
                                             <div class="teacher__info">
                                                 <p class="teacher-name">
-                                                {{ teacher.name }}
+                                                    {{ teacher.name }}
                                                 </p>
                                                 <!-- Можно вывести и другие поля, например email -->
                                                 <p class="teacher-email">
@@ -99,13 +99,15 @@
                                     <a
                                         v-if="course.pdf_path"
                                         :href="`/${course.pdf_path}`"
-                                        download                     
+                                        download
                                         class="course-content__sidebar-program"
                                     >
                                         Программа курса
                                     </a>
-                                    <small v-else class="no-pdf">PDF не загружен</small>
-                                    <a href="" class="button button_sidebar">Купить</a>
+                                    <small v-else class="no-pdf"></small>
+                                    <a href="" class="button button_sidebar"
+                                        >Купить</a
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -129,14 +131,14 @@ let editorInstance = null;
 
 // Функция скачивания PDF
 function downloadPdf(path) {
-  // Создаём скрытую ссылку и эмулируем клик
-  const link = document.createElement('a');
-  // Путь может содержать уже '/storage/...'
-  link.href = `/${path}`;
-  link.download = '';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    // Создаём скрытую ссылку и эмулируем клик
+    const link = document.createElement("a");
+    // Путь может содержать уже '/storage/...'
+    link.href = `/${path}`;
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 onMounted(async () => {
@@ -208,7 +210,10 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.teacher__info{
+.course-content__sidebar-info {
+    margin: 0 0 30px;
+}
+.teacher__info {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -218,9 +223,9 @@ onMounted(async () => {
 .course-content p {
     font-size: 0.8em;
     margin-bottom: 0;
-    text-indent: unset ;
+    text-indent: unset;
 }
-.teacher-photo{
+.teacher-photo {
     width: 129px;
     height: 129px;
     border-radius: 50%;
@@ -271,7 +276,6 @@ onMounted(async () => {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.411);
     text-align: center;
 }
-
 
 .teacher-name {
     text-align: center;

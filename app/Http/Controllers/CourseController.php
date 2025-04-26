@@ -126,6 +126,7 @@ class CourseController extends Controller
             'cardImage'           => 'nullable|file|image|max:5120',
             'descriptionImage'    => 'nullable|image|max:2048',
             'editorData'          => 'required', // Если нужно editorData
+            'pdf' => 'nullable|file|mimes:pdf|max:20480',
         ]);
 
 
@@ -170,12 +171,43 @@ class CourseController extends Controller
 
         // Обработка файлов, если есть
         if ($request->hasFile('cardImage')) {
-            $path = $request->file('cardImage')->store('courses', 'public');
-            $course->card_image = $path;
-        }
+            $path = $request->file('cardImage')->store('public/cards');
+            // сохраняем в $data['card_image']
+            $course->card_image = str_replace('public/', 'storage/', $path);
+        }  
         if ($request->hasFile('descriptionImage')) {
-            $path = $request->file('descriptionImage')->store('courses', 'public');
-            $course->description_image = $path;
+            $path = $request->file('descriptionImage')->store('public/descriptions');
+            $course->description_image = str_replace('public/', 'storage/', $path);
+        }
+
+        // PDF-файл
+        if ($request->hasFile('pdf')) {
+            // 1) Удаляем старый, если есть
+            if ($course->pdf_path) {
+                $oldPath = public_path($course->pdf_path);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+        
+            // 2) Берём файл из запроса
+            $file     = $request->file('pdf');
+            $origName = $file->getClientOriginalName();
+            $filename = time() . '_' . $origName;
+        
+            // 3) Папка, куда сохраняем (storage/app/public/pdfs → public/storage/pdfs)
+            $destination = public_path('storage/pdfs');
+        
+            // 4) Если папки нет — создаём
+            if (! is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+        
+            // 5) Перемещаем файл
+            $file->move($destination, $filename);
+        
+            // 6) Записываем путь в модель (относительно public/)
+            $course->pdf_path = 'storage/pdfs/' . $filename;
         }
 
         $course->save();
