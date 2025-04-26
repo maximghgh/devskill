@@ -205,7 +205,7 @@
                     <div id="editor-text" class="editor-container"></div>
                 </div>
 
-                <!-- Для теста -->
+                <!-- Для задания -->
                 <div v-else-if="selectedType === 'task'" class="form-group">
                     <label class="form-label">Поле для правильного ответа :</label>
                     <textarea
@@ -228,14 +228,14 @@
                   <div id="editor-presentation" class="editor-container"></div>
                   <div class="form-group">
                     <label class="form-label">Прикрепить файл (PDF/PPTX):</label>
-                    <input
-                      type="file"
-                      accept=".pdf,.ppt,.pptx"
-                      @change="onPresentationChange"
-                      class="form-input"
-                    />
                   </div>
                 </div>
+                <input
+                    type="file"
+                    accept=".pdf,.ppt,.pptx,video/*,image/*"
+                    @change="e => newChapter.file = e.target.files[0]"
+                    class="form-input"
+                />
                 <!-- загрузка презентации -->
                 <button type="submit" class="form-button">
                     Добавить главу
@@ -341,11 +341,15 @@ const chapters = ref([]);
 // Для создания новой главы
 const selectedType = ref("");
 const blankChapter = {
-  title: "",
-  video_url: "",
+  title: '',
+  video_url: '',
   content: null,
-  correct_answer: "",
-  presentation_file: null
+  correct_answer: '',
+  presentation_file: null,
+  video_file: null,        // добавили
+  text_file: null,
+  task_file: null,
+  terms_file: null
 };
 const newChapter = ref({ ...blankChapter });
 let editorInstance = null;
@@ -396,34 +400,48 @@ function selectType(type) {
   newChapter.value = { ...blankChapter };
 }
 
-async function submitChapter() {
+async function submitChapter () {
   try {
+    // 1. собираем контент из редактора
     let data = null;
-    if (['text','task','terms','video','presentation'].includes(selectedType.value) && editorInstance) {
+    if (editorInstance) {
       data = await editorInstance.save();
     }
-    newChapter.value.content = data;
 
-    let res;
-    if (selectedType.value === 'presentation') {
-      const fd = new FormData();
-      fd.append('title', newChapter.value.title);
-      fd.append('type', selectedType.value);
-      fd.append('content', JSON.stringify(data));
-      if (newChapter.value.presentation_file) fd.append('presentation', newChapter.value.presentation_file);
-      res = await axios.post(`/admin/topic/${topicId}/chapters`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-    } else {
-      const payload = { ...newChapter.value, type: selectedType.value, content: data };
-      res = await axios.post(`/admin/topic/${topicId}/chapters`, payload);
+    // 2. упаковываем FormData
+    const fd = new FormData();
+    fd.append('title',   newChapter.value.title);
+    fd.append('type',    selectedType.value);
+    fd.append('content', JSON.stringify(data || {}));
+    if (newChapter.value.file) {
+      fd.append('file', newChapter.value.file);
     }
-    if (res.data.chapter) chapters.value.push(res.data.chapter);
+
+    // 3. шлём на бэкенд и ждём ответ
+    const { data: resp } = await axios.post(
+      `/admin/topic/${topicId}/chapters`,
+      fd,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+
+    // 4. пушим новую главу в список
+    if (resp.chapter) {
+      chapters.value.push(resp.chapter);
+    }
+
+    // 5. очищаем форму
     selectedType.value = '';
     newChapter.value = { ...blankChapter };
-    if (editorInstance) { editorInstance.destroy(); editorInstance = null; }
-  } catch (e) {
-    console.error(e);
+    if (editorInstance) {
+      editorInstance.destroy();
+      editorInstance = null;
+    }
+  } catch (err) {
+    console.error('Ошибка при создании главы:', err);
   }
 }
+
+
 
 onMounted(loadTopicAndChapters);
 function goBack() { window.history.back(); }

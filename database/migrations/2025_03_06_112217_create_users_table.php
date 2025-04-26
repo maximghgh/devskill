@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->date('birthday')->nullable();
             // Поле role для статуса: 1 - ученик, 2 - преподаватель, 3 - администратор
             $table->unsignedTinyInteger('role')->default(1);
+            $table->string('position')->nullable()->after('role');
             $table->string('phone')->nullable();
             $table->string('country')->nullable();
             $table->string('password');
@@ -25,6 +26,9 @@ return new class extends Migration {
         Schema::dropIfExists('users');
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('photo');
+        });
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('position');
         });
     }
 };

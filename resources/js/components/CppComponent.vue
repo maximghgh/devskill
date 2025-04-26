@@ -65,7 +65,7 @@
                                                 </p>
                                                 <!-- Можно вывести и другие поля, например email -->
                                                 <p class="teacher-email">
-                                                    {{ teacher.email }}
+                                                    {{ teacher.position }}
                                                 </p>
                                             </div>
                                         </div>

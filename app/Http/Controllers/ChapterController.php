@@ -39,40 +39,47 @@ class ChapterController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request, $topicId)
-    {
-        $validated = $request->validate([
-            'title'           => 'required|string|max:255',
-            'type'            => 'required|in:video,text,task,terms,presentation',
-            'content'         => 'nullable',
-            'video_url'       => 'nullable|string',
-            'correct_answer'  => 'nullable|string',
-            // новое правило
-            'presentation'    => 'nullable|file|mimes:ppt,pptx,pdf|max:20480',
-        ]);
+{
+    $validated = $request->validate([
+        'title'   => 'required|string|max:255',
+        'type'    => 'required|in:video,text,task,terms,presentation',
+        'content' => 'nullable',
+        'file'    => 'nullable|file|max:20480',  // единое правило
+    ]);
 
-        $validated['topic_id'] = $topicId;
+    // Привяжем к теме
+    $validated['topic_id'] = $topicId;
 
-        // content → JSON-строка
-        if (is_array($validated['content']) || is_object($validated['content'])) {
-            $validated['content'] = json_encode($validated['content']);
-        }
-
-        // если пришёл файл презентации
-        if ($request->hasFile('presentation')) {
-            $path = $request->file('presentation')
-                        ->store('public/presentations');           // storage/app/public/…
-            $validated['presentation_path'] = str_replace(
-                'public/', 'storage/', $path                        // для доступа через URL
-            );
-        }
-
-        $chapter = Chapter::create($validated);
-
-        return response()->json([
-            'success' => true,
-            'chapter' => $chapter,
-        ], 201);
+    // Сериализуем editor.js-поле, если надо
+    if (isset($validated['content']) && is_array($validated['content'])) {
+        $validated['content'] = json_encode($validated['content']);
     }
+
+    // Если пришёл файл — сохраняем его в public и пишем путь в presentation_path
+    if ($request->hasFile('file')) {
+
+        $file       = $request->file('file');
+    
+        // ► как называется файл у пользователя
+        $original   = $file->getClientOriginalName();        // docs.pdf
+    
+              // или любой алгоритм
+    
+        // кладём в storage/app/public/chapters_files/…
+        $path = $file->storeAs('public/chapters_files', $original);
+    
+        // путь, по которому фронт сможет достучаться:  /storage/chapters_files/…
+        $validated['presentation_path'] = str_replace('public/', 'storage/', $path);
+    }
+
+    $chapter = Chapter::create($validated);
+
+    return response()->json([
+        'success' => true,
+        'chapter' => $chapter->fresh(),
+    ], 201);
+}
+
 
 
     /**

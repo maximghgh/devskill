@@ -296,14 +296,14 @@
                                                 allowfullscreen
                                             ></iframe>
                                         </div>
-                                        <a
+                                        <!-- <a
                                             v-if="presentationSrc"
                                             :href="presentationSrc"
                                             download
                                             class="button button--sub"
                                         >
                                             Скачать файл
-                                        </a>
+                                        </a> -->
                                         <button
                                             v-if="!selectedChapter.is_completed"
                                             @click="
@@ -322,6 +322,9 @@
                                             {{ selectedChapter.type }}
                                         </p>
                                     </div>
+                                    <a v-if="fileSrc" :href="fileSrc" download class="link--dow">
+                                        <span>Скачать файл урока</span>
+                                    </a>
                                     <!-- Общие кнопки -->
                                     <div class="skill__buttons">
                                         <!-- Кнопка "Назад" с анимацией плавного появления -->
@@ -755,6 +758,29 @@ let editorInstance = null;
 
 const showSolution = ref(false);
 
+//работа с файлами
+const fileSrc = computed(() => {
+  const ch = selectedChapter.value
+  if (!ch) return null
+
+  // возможные поля, где хранится путь
+  let raw =
+    ch.file_path || ch.attachment_path || ch.presentation_path || ch.file || ''
+
+  if (!raw) return null
+
+  // ① абсолютный URL
+  if (/^https?:\/\//i.test(raw)) return raw
+
+  // ② начинается с /storage/
+  if (raw.startsWith('/storage/')) return raw
+
+  // ③ начинается с storage/ (без слэша)
+  if (raw.startsWith('storage/')) return '/' + raw
+
+  // ④ только имя файла
+  return '/storage/files/' + raw      // ← папку подберите под себя
+})
 const presentationSrc = computed(() => {
     const ch = selectedChapter.value;
     if (!ch) return null;
@@ -1377,6 +1403,18 @@ async function dislikeComment(comment) {
     width: 1000px;
     height: 60vh; /* или 60vh, как удобнее */
     border: 0;
+}
+.link--dow {
+    display: block;
+    color: #0228fd;
+    cursor: pointer;
+    list-style: none;
+    text-decoration: none;
+    margin: 15px 0 0;
+    transition: 0.2s color;
+}
+.link--dow:hover{
+    color: #677eff;
 }
 .button--sub {
     background: rgb(56, 184, 56) !important;

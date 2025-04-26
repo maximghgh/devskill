@@ -77,18 +77,15 @@ class UserController extends Controller
             'birthday' => 'nullable|date',
             'country'  => 'nullable|string|max:100',
             'role'     => 'required|in:1,2,3',
+            'position' => 'nullable|string|max:255',
         ]);
 
         // Ищем пользователя по ID
         $user = User::findOrFail($id);
 
         // Обновляем поля пользователя
-        $user->name     = $validated['name'];
-        $user->email    = $validated['email'];
-        $user->phone    = $validated['phone'] ?? $user->phone;
-        $user->birthday = $validated['birthday'] ?? $user->birthday;
-        $user->country  = $validated['country'] ?? $user->country;
-        $user->role     = $validated['role'];
+        // Обновляем все поля разом
+        $user->update($validated);
 
         // Сохраняем изменения в базе
         $user->save();

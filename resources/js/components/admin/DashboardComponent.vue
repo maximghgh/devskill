@@ -6,8 +6,7 @@
                     <div class="aside__menu">
                         <!-- Меню -->
                         <ul class="aside__list">
-                            <li
-                                class="aside__item"
+                            <li class="aside__item"
                                 v-for="(item, index) in menuItems"
                                 :key="index"
                             >
@@ -28,8 +27,7 @@
                         </ul>
                     </div>
                     <div class="menu-block">
-                        <div
-                            v-for="(item, index) in menuItems"
+                        <div v-for="(item, index) in menuItems"
                             :key="index"
                             :id="item.id"
                             class="block"
@@ -40,9 +38,7 @@
                             <!-- Блок "Все пользователи" -->
                             <div v-if="item.id === 'users'" class="user-block">
                                 <div class="filters">
-                                    <label for="roleFilter"
-                                        >Фильтр по роли:</label
-                                    >
+                                    <label for="roleFilter">Фильтр по роли:</label>
                                     <select
                                         id="roleFilter"
                                         v-model="selectedRole"
@@ -54,14 +50,11 @@
                                         <option value="1">Ученик</option>
                                     </select>
                                 </div>
-                                <table
-                                    class="light-push-table"
-                                    v-if="users.length"
-                                >
+                                <table class="light-push-table" v-if="users.length">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Имя</th>
+                                            <th>№</th>
+                                            <th>ФИО</th>
                                             <th>Email</th>
                                             <th>Телефон</th>
                                             <th>День рождения</th>
@@ -72,11 +65,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr
-                                            v-for="userItem in filteredUsers"
-                                            :key="userItem.id"
-                                        >
-                                            <td>{{ userItem.id }}</td>
+                                        <tr v-for="(userItem,index) in filteredUsers" :key="userItem.id">
+                                            <td>{{ index + 1 }}</td>
                                             <td>{{ userItem.name }}</td>
                                             <td>{{ userItem.email }}</td>
                                             <td>{{ userItem.phone }}</td>
@@ -128,7 +118,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <button class="btn__user--edit" @click="startEditing(userItem)">Редактировать</button>
+                                                <button class="btn__user--edit" @click="openUserEditModal(userItem)">Редактировать</button>
                                             </td>
                                             <td>
                                                 <button class="btn__user--delete" @click="deleteUser(userItem.id)">Удалить пользователя</button>
@@ -139,33 +129,66 @@
                                 <div v-else>Нет пользователей</div>
                                 <!-- Модальное окно -->
                                 <div v-if="showUserEditModal" class="modal-overlay">
-                                    <div class="modal-content">
+                                    <div class="modal-content modal-content--s">
                                         <button class="close-button" @click="closeUserEditModal">✕</button>
                                         <h2>Редактировать пользователя</h2>
-                                        <form @submit.prevent="saveUserModal" class="edit-form">
+                                        <form @submit.prevent="saveUserModal" class="form-column form-column--s">
                                         <div class="form-group">
-                                            <label>Имя</label>
+                                            <label class="form-label">ФИО</label>
                                             <input v-model="editingUser.name" type="text" class="form-input" />
                                         </div>
                                         <div class="form-group">
-                                            <label>Email</label>
+                                            <label class="form-label">Email</label>
                                             <input v-model="editingUser.email" type="email" class="form-input" />
                                         </div>
                                         <div class="form-group">
-                                            <label>Телефон</label>
-                                            <input v-model="editingUser.phone" type="text" class="form-input" />
+                                            <label class="form-label">Телефон</label>
+                                            <input v-model="editingUser.phone" placeholder="+7 (999) 999-99-99" v-mask="'+7 (###) ###-##-##'" type="text" class="form-input" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Дата рождения</label>
+                                            <input
+                                                v-model="editingUser.birthday"
+                                                type="date"
+                                                class="form-input"
+                                            />
+                                        </div>
+                                        <!-- Местоположение -->
+                                        <div class="form-group">
+                                            <label class="form-label">Местоположение</label>
+                                            <input
+                                                v-model="editingUser.country"
+                                                type="text"
+                                                class="form-input"
+                                                placeholder="Город, страна"
+                                            />
+                                        </div>
+                                        <!-- Роль -->
+                                        <div class="form-group">
+                                            <label class="form-label">Роль</label>
+                                                <select v-model="editingUser.role" class="form-input">
+                                                    <option :value="3">Администратор</option>
+                                                    <option :value="2">Преподаватель</option>
+                                                    <option :value="1">Ученик</option>
+                                                </select>
+                                        </div>
+                                        <!-- Должность (только для ролей 3 и 2) -->
+                                        <div class="form-group" v-if="editingUser.role === 3 || editingUser.role === 2">
+                                            <label class="form-label">Должность</label>
+                                            <input
+                                                v-model="editingUser.position"
+                                                type="text"
+                                                class="form-input"
+                                                placeholder="Введите должность"
+                                            />
                                         </div>
                                         <!-- Добавьте остальные поля по аналогии -->
                                         <div class="modal-actions">
-                                            <button type="submit" class="btn btn-primary">Сохранить</button>
-                                            <button type="button" class="btn btn-secondary" @click="closeUserEditModal">
-                                            Отмена
-                                            </button>
+                                            <button type="submit" class="btn form-button form-button--s">Сохранить</button>
                                         </div>
                                         </form>
                                     </div>
                                 </div>
-
                             </div>
                             <!-- Блок "Курсы" -->
                             <div v-else-if="item.id === 'courses'">
@@ -191,6 +214,7 @@
                                     <table class="light-push-table">
                                         <thead>
                                             <tr>
+                                                <th>№</th>
                                                 <th>Название курса</th>
                                                 <th>Уровень</th>
                                                 <th>Изменить курс</th>
@@ -200,9 +224,12 @@
                                         </thead>
                                         <tbody>
                                             <tr
-                                                v-for="course in courses"
+                                                v-for="(course, index) in courses"
                                                 :key="course.id"
                                             >
+                                                <td>
+                                                    {{ index + 1 }}
+                                                </td>
                                                 <td>
                                                     {{ course.course_name }}
                                                 </td>
@@ -459,10 +486,7 @@
                                                             >Выберите языки
                                                             программирования</label
                                                         >
-                                                        <Multiselect
-                                                            v-model="
-                                                                editCourse.selectedLanguages
-                                                            "
+                                                        <Multiselect v-model="editCourse.selectedLanguages"
                                                             :options="languages"
                                                             :multiple="true"
                                                             track-by="id"
@@ -541,17 +565,8 @@
                                                         </Multiselect>
                                                     </div>
                                                     <div class="form-group">
-                                                        <label
-                                                            class="form-label"
-                                                            >Повышение
-                                                            квалификации</label
-                                                        >
-                                                        <select
-                                                            v-model="
-                                                                editCourse.upgradeQualification
-                                                            "
-                                                            class="form-input"
-                                                        >
+                                                        <label class="form-label">Повышение квалификации</label>
+                                                        <select v-model="editCourse.upgradeQualification" class="form-input">
                                                             <!-- Используем числовые значения -->
                                                             <option :value="0">
                                                                 Нет
@@ -562,11 +577,7 @@
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <label
-                                                            class="form-label"
-                                                            >Логотип
-                                                            курса</label
-                                                        >
+                                                        <label class="form-label">Логотипкурса</label>
                                                         <input
                                                             type="file"
                                                             accept="image/*"
@@ -577,12 +588,7 @@
                                                         />
                                                     </div>
                                                     <div class="form-group">
-                                                        <label
-                                                            class="form-label"
-                                                            >Изображение для
-                                                            описания
-                                                            курса</label
-                                                        >
+                                                        <label class="form-label">Изображение для описания курса</label>
                                                         <input
                                                             type="file"
                                                             accept="image/*"
@@ -606,33 +612,19 @@
                                                     </div>
                                                 </div>
                                                 <!-- Editor.js контейнер -->
-                                                <div
-                                                    id="editorjs-edit"
-                                                    class="editor-container"
-                                                ></div>
-                                                <button
-                                                    type="submit"
-                                                    class="form-button"
-                                                >
-                                                    Сохранить
-                                                </button>
+                                                <div id="editorjs-edit" class="editor-container"></div>
+                                                <button type="submit" class="form-button">Сохранить</button>
                                             </form>
                                         </div>
                                     </div>
                                 </div>
                                 <!-- Конец модального окна -->
-
                                 <!-- Форма создания нового курса -->
                                 <div class="course-form-container">
                                     <h2>Создать новый курс</h2>
-                                    <form
-                                        @submit.prevent="submitForm"
-                                        class="course-form"
-                                    >
+                                    <form @submit.prevent="submitForm" class="course-form">
                                         <div class="form-group">
-                                            <label class="form-label"
-                                                >Название на карточке</label
-                                            >
+                                            <label class="form-label">Название на карточке</label>
                                             <input
                                                 v-model="newCourse.cardTitle"
                                                 type="text"
@@ -641,9 +633,7 @@
                                             />
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"
-                                                >Название курса</label
-                                            >
+                                            <label class="form-label">Название курса</label>
                                             <input
                                                 v-model="newCourse.courseName"
                                                 type="text"
@@ -652,9 +642,7 @@
                                             />
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label"
-                                                >Цена</label
-                                            >
+                                            <label class="form-label">Цена</label>
                                             <input
                                                 v-model="newCourse.price"
                                                 type="number"
@@ -732,10 +720,7 @@
                                             <label class="form-label"
                                                 >Выберите преподавателей</label
                                             >
-                                            <select
-                                                v-model="
-                                                    newCourse.selectedTeachers
-                                                "
+                                            <select v-model="newCourse.selectedTeachers"
                                                 multiple
                                                 class="form-input"
                                             >
@@ -753,12 +738,7 @@
                                             <label class="form-label"
                                                 >Выберите направление</label
                                             >
-                                            <select
-                                                v-model="
-                                                    newCourse.selectedDirection
-                                                "
-                                                class="form-input"
-                                            >
+                                            <select v-model="newCourse.selectedDirection" class="form-input">
                                                 <option>
                                                     -- Выберите направление --
                                                 </option>
@@ -775,10 +755,7 @@
                                         <div class="form-group">
                                             <label class="form-label">Выберите языки программирования</label>
                                             <!-- multiple позволяет выбрать сразу несколько пунктов -->
-                                            <Multiselect
-                                                v-model="
-                                                    newCourse.selectedLanguages
-                                                "
+                                            <Multiselect v-model="newCourse.selectedLanguages"
                                                 :options="languages"
                                                 :multiple="true"
                                                 track-by="id"
@@ -883,68 +860,34 @@
                             </div>
                             <!-- Другие блоки (аналитика, FAQ, и т.д.) -->
                             <div v-else-if="item.id === 'news'">
-                                <table
-                                    v-if="newsItems.length"
-                                    class="light-push-table"
-                                >
+                                <table v-if="newsItems.length" class="light-push-table">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
+                                            <th>№</th>
                                             <th>Название новости</th>
                                             <th>Редактировать</th>
                                             <th>Удалить</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr
-                                            v-for="newsItem in newsItems"
-                                            :key="newsItem.id"
-                                        >
-                                            <td>{{ newsItem.id }}</td>
+                                        <tr v-for="(newsItem, index) in newsItems" :key="newsItem.id">
+                                            <td>{{ index + 1 }}</td>
                                             <td>{{ newsItem.title }}</td>
                                             <td>
-                                                <!-- При клике открываем модальное окно редактирования -->
-                                                <button
-                                                    class="btn__user--edit"
-                                                    @click="
-                                                        openNewsEditModal(
-                                                            newsItem
-                                                        )
-                                                    "
-                                                >
-                                                    Редактировать
-                                                </button>
+                                                <button class="btn__user--edit" @click="openNewsEditModal(newsItem)">Редактировать</button>
                                             </td>
                                             <td>
-                                                <button
-                                                    class="btn__user--delete"
-                                                    @click="
-                                                        deleteNews(newsItem.id)
-                                                    "
-                                                >
-                                                    Удалить
-                                                </button>
+                                                <button class="btn__user--delete" @click="deleteNews(newsItem.id)">Удалить</button>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 <!-- Модальное окно редактирования новости -->
-                                <div
-                                    v-if="showNewsEditModal"
-                                    class="modal-overlay"
-                                >
+                                <div v-if="showNewsEditModal" class="modal-overlay">
                                     <div class="modal-content">
                                         <h2>Редактирование новости</h2>
-                                        <button
-                                            class="close-button"
-                                            @click="closeNewsEditModal"
-                                        >
-                                            X
-                                        </button>
-                                        <form
-                                            @submit.prevent="submitNewsEdit"
-                                            class="course-form"
-                                        >
+                                        <button class="close-button" @click="closeNewsEditModal">X</button>
+                                        <form @submit.prevent="submitNewsEdit" class="course-form">
                                             <!-- Заголовок новости -->
                                             <div class="form-group">
                                                 <label class="form-label"
@@ -979,9 +922,7 @@
                                                     type="file"
                                                     accept="image/*"
                                                     class="form-input"
-                                                    @change="
-                                                        onNewsImageChangeEdit
-                                                    "
+                                                    @change="onNewsImageChangeEdit"
                                                 />
                                             </div>
                                             <!-- Текст новости (EditorJS) -->
@@ -1101,7 +1042,7 @@
                                         >
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
+                                                    <th>№</th>
                                                     <th>Название языка</th>
                                                     <th>Действия</th>
                                                     <th>Удалить</th>
@@ -1109,11 +1050,11 @@
                                             </thead>
                                             <tbody>
                                                 <tr
-                                                    v-for="lang in languages"
+                                                    v-for="(lang, index) in languages"
                                                     :key="lang.id"
                                                 >
                                                     <!-- ID -->
-                                                    <td>{{ lang.id }}</td>
+                                                    <td>{{ index + 1 }}</td>
 
                                                     <!-- Название языка -->
                                                     <td>
@@ -1213,20 +1154,18 @@
                                         >
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
-                                                    <th>
-                                                        Название направления
-                                                    </th>
+                                                    <th>№</th>
+                                                    <th>Название направления</th>
                                                     <th>Редактировать</th>
                                                     <th>Удалить</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr
-                                                    v-for="dir in directions"
+                                                    v-for="(dir, index) in directions"
                                                     :key="dir.id"
                                                 >
-                                                    <td>{{ dir.id }}</td>
+                                                    <td>{{ index + 1 }}</td>
                                                     <td>
                                                         <!-- Если данное направление редактируется, показываем input -->
                                                         <div
@@ -1404,8 +1343,7 @@ const editingNews = ref({
     newsImage: null,
     editorData: {},
 });
-const editingUserId = ref(null);
-const editingUser = ref(null);
+
 const editingLanguageId = ref(null);
 const editingLanguage = ref(null);
 const editingDirectionId = ref(null);
@@ -1500,46 +1438,41 @@ function closeNewsEditModal() {
 }
 
 /* Функция отправки изменений новости на сервер */
-async function submitNewsEdit() {
-    try {
-        // Отправляем PATCH-запрос на обновление новости
-        const response = await axios.patch(
-            `/api/news/${editingNews.value.id}`,
-            {
-                title: editingNews.value.title,
-                content: editingNews.value.content,
-                editor_data: editingNews.value.editorData,
-                // Если требуется обновлять изображение, можно реализовать отправку файла отдельно
-            }
-        );
-        // Обновляем локальный массив новостей
-        const index = newsItems.value.findIndex(
-            (item) => item.id === editingNews.value.id
-        );
-        if (index !== -1) {
-            newsItems.value[index] = response.data.news;
-        }
-        globalNotification.categoryMessage = "Новость обновлена";
-        globalNotification.type = "success";
-        closeNewsEditModal();
-    } catch (error) {
-        console.error("Ошибка обновления новости:", error);
-        globalNotification.categoryMessage = "Ошибка обновления новости";
-        globalNotification.type = "error";
+async function submitNewsEdit () {
+  try {
+    const fd = new FormData();
+    fd.append('title',       editingNews.value.title);
+    fd.append('content',      editingNews.value.content);
+    fd.append('editor_data', JSON.stringify(editingNews.value.editorData));
+
+    if (editingNews.newsImage) {          // ← файл теперь есть
+      fd.append('image', editingNews.newsImage);
     }
+    fd.append('_method', 'PATCH');        // spoof-patch
+
+    const { data } = await axios.post(`/api/news/${editingNews.value.id}`, fd);
+
+    // реактивно меняем объект в списке
+    const i = newsItems.value.findIndex(n => n.id === data.news.id);
+    if (i !== -1) newsItems.value.splice(i, 1, data.news);
+
+    globalNotification.categoryMessage = 'Новость обновлена';
+    globalNotification.type = 'success';
+  } catch (err) {
+    console.error('Ошибка обновления новости', err);
+    globalNotification.categoryMessage = 'Ошибка обновления новости';
+    globalNotification.type = 'error';
+  } finally {
+    editingNews.newsImage = null;
+    closeNewsEditModal();
+  }
 }
 /* Функция обработки выбора файла для редактирования изображения новости */
-function onNewsImageChangeEdit(e) {
-    const file = e.target.files[0] || null;
-    // Сохраняем выбранный файл в объект редактирования
-    editingNews.value.newsImage = file;
+function onNewsImageChangeEdit (e) {
+  editingNews.newsImage = e.target.files[0] || null;
 }
-// Функция запуска редактирования для выбранного пользователя
-function startEditing(userItem) {
-    editingUserId.value = userItem.id;
-    // Создаем копию объекта пользователя (чтобы не менять оригинал напрямую)
-    editingUser.value = { ...userItem };
-}
+
+
 function startEditingLanguage(langItem) {
     editingLanguageId.value = langItem.id;
     editingLanguage.value = { ...langItem }; // копируем, чтобы не менять оригинал напрямую
@@ -1550,37 +1483,39 @@ function startEditingDirection(direction) {
     editingDirection.value = { ...direction };
 }
 
-// Функция сохранения изменений пользователя
-async function saveUser() {
-    try {
-        // Отправляем PATCH-запрос с обновленными данными пользователя
-        const response = await axios.patch(
-            `/api/users/${editingUser.value.id}`,
-            editingUser.value
-        );
-        // Обновляем локальный массив пользователей: заменяем старую запись на обновленную
-        const index = users.value.findIndex(
-            (u) => u.id === editingUser.value.id
-        );
-        if (index !== -1) {
-            users.value[index] = response.data.user;
-        }
-        globalNotification.categoryMessage = "Пользователь обновлён";
-        globalNotification.type = "success";
-    } catch (error) {
-        console.error("Ошибка обновления пользователя:", error);
-        globalNotification.categoryMessage = "Ошибка обновления пользователя";
-        globalNotification.type = "error";
-    } finally {
-        editingUserId.value = null;
-        editingUser.value = null;
-    }
+// изменение пользователя
+ const showUserEditModal = ref(false);
+ const editingUser      = ref(null);
+
+ // открыть модалку
+ function openUserEditModal(user) {
+   editingUser.value = { ...user };
+   showUserEditModal.value = true;
+ }
+
+// закрыть без сохранения
+function closeUserEditModal() {
+   showUserEditModal.value = false;
+   editingUser.value = null;
 }
-// Функция отмены редактирования
-function cancelEditing() {
-    editingUserId.value = null;
-    editingUser.value = null;
+
+ // сохранить и закрыть
+ async function saveUserModal() {
+   try {
+     const { id, name, email, phone, birthday, country, role, position } = editingUser.value;     const resp = await axios.patch(`/api/users/${id}`, { name, email, phone, birthday, country, role, position });
+     const idx = users.value.findIndex(u => u.id === id);
+     if (idx !== -1) users.value[idx] = resp.data.user;
+     globalNotification.categoryMessage = 'Пользователь обновлён';
+     globalNotification.type = 'success';
+   } catch (err) {
+    console.error('Ошибка при сохранении пользователя', err);
+     globalNotification.categoryMessage = 'Ошибка обновления пользователя';
+     globalNotification.type = 'error';
+   } finally {
+     closeUserEditModal();
+   }
 }
+
 
 async function saveLanguage() {
     try {
@@ -2409,6 +2344,12 @@ async function submitNews() {
 </script>
 
 <style scoped>
+.form-button--s{
+    width: 280px !important;
+}
+.modal-content--s{
+    width: 600px !important;
+}
 .course__links {
     color: #0056b3;
     text-decoration: none;

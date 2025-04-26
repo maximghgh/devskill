@@ -70,21 +70,27 @@ class NewsController extends Controller
             'image'       => 'nullable|image|max:2048',
         ]);
 
-        // Обработка загрузки нового изображения
+        // загружаем новую картинку
         if ($request->hasFile('image')) {
-            // (Опционально) Можно удалить старое изображение, если оно есть:
+            // удалить старую, если была
             if ($news->image) {
                 Storage::disk('public')->delete($news->image);
             }
-            $data['image'] = $request->file('image')->store('news_images', 'public');
+            $path        = $request->file('image')->store('news_images', 'public');
+            $data['image'] = $path;               // сохраняем путь
         }
 
+        // сериализуем editor_data
         if (isset($data['editor_data']) && is_array($data['editor_data'])) {
             $data['editor_data'] = json_encode($data['editor_data']);
         }
 
         $news->update($data);
-        return response()->json($news);
+
+        // !!! возвращаем в формате { news: {...} }, как ждёт фронт
+        return response()->json([
+            'news' => $news->fresh(),             // fresh() — сразу с новым image
+        ]);
     }
    //Удаления новости
     public function destroy($id)

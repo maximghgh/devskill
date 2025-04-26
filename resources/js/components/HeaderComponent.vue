@@ -112,7 +112,7 @@ export default {
 @media (max-width: 991px) {
     nav {
         position: absolute;
-        top: 60px; /* например, на 60px ниже header */
+        top: 122px; /* например, на 60px ниже header */
         left: 0;
         width: 100%;
         height: auto; /* или нужная высота */

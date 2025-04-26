@@ -645,6 +645,11 @@ nav a:hover {
     align-items: flex-start;
     height: 100%;
 }
+@media (max-width: 800px) {
+    .offer__inner {
+        margin: 0 60px;
+    }
+}
 .offer_main {
     background-image: url("http://127.0.0.1:8000/img/bg_offer.jpg");
 }
@@ -1421,7 +1426,6 @@ input[type="number"]::-webkit-outer-spin-button {
     justify-content: space-between;
     align-items: flex-start;
     flex-direction: column;
-    
 }
 .course-content__evolution-title {
     font-family: JanoSansProBold;
@@ -2216,7 +2220,7 @@ footer {
         font-size: 0.8em;
     }
     .offer__inner {
-        padding: 0 35px;
+        margin: 0 30px;
     }
     .offer {
         height: 410px;

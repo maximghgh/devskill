@@ -33,40 +33,56 @@
                             <h2>Курсы</h2>
                             <div class="course__cards">
                                 <!-- Перебираем только те курсы, у которых upgradequalification = 1 -->
-                                <div class="course__card"
+                                <div
+                                    class="course__card"
                                     v-for="course in upgradeCourses"
                                     :key="course.id"
-                                    :class="difficultyBgClass[course.difficulty]" 
+                                    :class="
+                                        difficultyBgClass[course.difficulty]
+                                    "
                                 >
-                                <div class="course__card-image">
-                                    <img
-                                        :src="
-                                            course.card_image
-                                                ? course.card_image
-                                                : '/public/img/logo_placeholder.png'
-                                        "
-                                        alt="Изображение курса"
-                                    />
-                                </div>
-                                <div class="course__card-title">
-                                    {{ course.course_name }}
-                                </div>
-                                <div class="course__card-desc">
-                                    {{ difficultyTranslation[course.difficulty] }}
-                                </div>
-                                <div class="course__card-price">
-                                    <span>{{ course.price }} P</span>
-                                    <!-- Пример «старой цены» -->
-                                    <del>{{ Math.round(course.price * 1.5) }} P</del>
-                                </div>
-                                <div class="course__card-buttons">
-                                    <a
-                                        :href="`/cpp/${course.id}`"
-                                        class="button button_transparent"
-                                        >Подробнее</a
-                                    >
-                                    <a href="#" class="button button_white button_white-card">Купить</a>
-                                </div>
+                                    <div class="course__card-image">
+                                        <img
+                                            :src="
+                                                course.card_image
+                                                    ? course.card_image
+                                                    : '/public/img/logo_placeholder.png'
+                                            "
+                                            alt="Изображение курса"
+                                        />
+                                    </div>
+                                    <div class="course__card-title">
+                                        {{ course.course_name }}
+                                    </div>
+                                    <div class="course__card-desc">
+                                        {{
+                                            difficultyTranslation[
+                                                course.difficulty
+                                            ]
+                                        }}
+                                    </div>
+                                    <div class="course__card-price">
+                                        <span>{{ course.price }} P</span>
+                                        <!-- Пример «старой цены» -->
+                                        <del
+                                            >{{
+                                                Math.round(course.price * 1.5)
+                                            }}
+                                            P</del
+                                        >
+                                    </div>
+                                    <div class="course__card-buttons">
+                                        <a
+                                            :href="`/cpp/${course.id}`"
+                                            class="button button_transparent"
+                                            >Подробнее</a
+                                        >
+                                        <a
+                                            href="#"
+                                            class="button button_white button_white-card"
+                                            >Купить</a
+                                        >
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -77,20 +93,30 @@
                     <div class="course-content__teacher">
                         <!-- Перебираем преподавателей -->
                         <div
-                        class="course-content__teacher-one course-content__teacher-one_column"
-                        v-for="teacher in teachers"
-                        :key="teacher.id"
+                            class="course-content__teacher-one course-content__teacher-one_column"
+                            v-for="teacher in teachers"
+                            :key="teacher.id"
                         >
-                        <!-- Если у преподавателя есть собственное изображение, используем его, иначе — стандартное -->
-                        <img
-                            :src="teacher.photo ? `/storage/${teacher.photo}` : '/public/img/teacher.jpg'"
-                            alt="Teacher Image" class="avatar__teacher"
-                        />
-                        <div class="course-content__teacher-info">
-                            <p>{{ teacher.name }}</p>
-                            <!-- Если у преподавателя есть должность, выводим её, иначе — дефолтное значение -->
-                            <p>{{ teacher.position || "Доцент кафедры ИВТ, ИжГТУ" }}</p>
-                        </div>
+                            <!-- Если у преподавателя есть собственное изображение, используем его, иначе — стандартное -->
+                            <img
+                                :src="
+                                    teacher.photo
+                                        ? `/storage/${teacher.photo}`
+                                        : '/public/img/teacher.jpg'
+                                "
+                                alt="Teacher Image"
+                                class="avatar__teacher"
+                            />
+                            <div class="course-content__teacher-info">
+                                <p>{{ teacher.name }}</p>
+                                <!-- Если у преподавателя есть должность, выводим её, иначе — дефолтное значение -->
+                                <p>
+                                    {{
+                                        teacher.position ||
+                                        "Доцент кафедры ИВТ, ИжГТУ"
+                                    }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -118,7 +144,7 @@
                             </div>
                             <div class="course-content__top-block">
                                 <img
-                                    src="/public/img/begin.png"
+                                    src="/img/begin.png"
                                     class="course-content__top-img"
                                 />
                             </div>
@@ -265,53 +291,53 @@ import axios from "axios";
 const questions = ref([]);
 
 function toggleAnswer(index) {
-  questions.value[index].isOpen = !questions.value[index].isOpen;
+    questions.value[index].isOpen = !questions.value[index].isOpen;
 }
 
 async function loadFaqs() {
-  try {
-    const response = await axios.get("/api/faqs");
-    console.log("Полученные FAQ:", response.data);
-    // Добавляем флаг isOpen для анимации раскрытия
-    questions.value = response.data.map((item) => ({
-      ...item,
-      isOpen: false,
-    }));
-  } catch (error) {
-    console.error("Ошибка при загрузке FAQ:", error);
-  }
+    try {
+        const response = await axios.get("/api/faqs");
+        console.log("Полученные FAQ:", response.data);
+        // Добавляем флаг isOpen для анимации раскрытия
+        questions.value = response.data.map((item) => ({
+            ...item,
+            isOpen: false,
+        }));
+    } catch (error) {
+        console.error("Ошибка при загрузке FAQ:", error);
+    }
 }
 
 function beforeEnter(el) {
-  el.style.height = "0";
-  el.style.opacity = "0";
-}
-function enter(el, done) {
-  const height = el.scrollHeight;
-  el.style.transition = "height 0.4s ease, opacity 0.4s ease";
-  requestAnimationFrame(() => {
-    el.style.height = height + "px";
-    el.style.opacity = "1";
-  });
-  el.addEventListener("transitionend", done);
-}
-function afterEnter(el) {
-  el.style.height = "auto";
-}
-function beforeLeave(el) {
-  el.style.height = el.scrollHeight + "px";
-  el.style.opacity = "1";
-}
-function leave(el, done) {
-  el.style.transition = "height 0.4s ease, opacity 0.4s ease";
-  requestAnimationFrame(() => {
     el.style.height = "0";
     el.style.opacity = "0";
-  });
-  el.addEventListener("transitionend", done);
+}
+function enter(el, done) {
+    const height = el.scrollHeight;
+    el.style.transition = "height 0.4s ease, opacity 0.4s ease";
+    requestAnimationFrame(() => {
+        el.style.height = height + "px";
+        el.style.opacity = "1";
+    });
+    el.addEventListener("transitionend", done);
+}
+function afterEnter(el) {
+    el.style.height = "auto";
+}
+function beforeLeave(el) {
+    el.style.height = el.scrollHeight + "px";
+    el.style.opacity = "1";
+}
+function leave(el, done) {
+    el.style.transition = "height 0.4s ease, opacity 0.4s ease";
+    requestAnimationFrame(() => {
+        el.style.height = "0";
+        el.style.opacity = "0";
+    });
+    el.addEventListener("transitionend", done);
 }
 function afterLeave(el) {
-  // можно очистить стили, если нужно
+    // можно очистить стили, если нужно
 }
 
 /* =====================================
@@ -321,16 +347,16 @@ const users = ref([]);
 
 // Вычисляемый массив преподавателей (пользователи с role === 2)
 const teachers = computed(() => {
-  return users.value.filter(user => user.role === 2);
+    return users.value.filter((user) => user.role === 2);
 });
 
 async function loadUsers() {
-  try {
-    const response = await axios.get("/api/users");
-    users.value = response.data;
-  } catch (error) {
-    console.error("Ошибка при загрузке пользователей:", error);
-  }
+    try {
+        const response = await axios.get("/api/users");
+        users.value = response.data;
+    } catch (error) {
+        console.error("Ошибка при загрузке пользователей:", error);
+    }
 }
 
 /* =====================================
@@ -340,48 +366,49 @@ const allCourses = ref([]);
 
 // Фильтруем только те курсы, у которых upgradequalification = 1
 const upgradeCourses = computed(() => {
-  return allCourses.value.filter(course => course.upgradequalification === 1);
+    return allCourses.value.filter(
+        (course) => course.upgradequalification === 1
+    );
 });
 
 async function loadCourses() {
-  try {
-    const response = await axios.get("/api/courses");
-    allCourses.value = response.data;
-  } catch (error) {
-    console.error("Ошибка при загрузке курсов:", error);
-  }
+    try {
+        const response = await axios.get("/api/courses");
+        allCourses.value = response.data;
+    } catch (error) {
+        console.error("Ошибка при загрузке курсов:", error);
+    }
 }
 
 /* =====================================
    4. Маппинг сложности курсов
 ===================================== */
-const difficultyBgClass = { 
-  basic: "block-info_bg-cyan",
-  middle: "block-info_bg-fiolet",
-  advanced: "block-info_bg-orange",
-  mixed: "block-info_bg-green",
+const difficultyBgClass = {
+    basic: "block-info_bg-cyan",
+    middle: "block-info_bg-fiolet",
+    advanced: "block-info_bg-orange",
+    mixed: "block-info_bg-green",
 };
 
 const difficultyTranslation = {
-  basic: "Начинающий",
-  middle: "Средний",
-  advanced: "Продвинутый",
-  mixed: "Смешанный",
+    basic: "Начинающий",
+    middle: "Средний",
+    advanced: "Продвинутый",
+    mixed: "Смешанный",
 };
 
 /* =====================================
    5. onMounted: загрузка всех данных
 ===================================== */
 onMounted(() => {
-  loadFaqs();
-  loadUsers();
-  loadCourses();
+    loadFaqs();
+    loadUsers();
+    loadCourses();
 });
 </script>
 
-
 <style scoped>
-.avatar__teacher{
+.avatar__teacher {
     width: 129px;
     height: 129px;
     border-radius: 50%;
