@@ -735,6 +735,11 @@ function scrollToCourse() {
 </script>
 
 <style>
+.payment-block{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
 .modal-close--auth{
     background-color: #00000000 !important;
 }
@@ -856,6 +861,23 @@ function scrollToCourse() {
     grid-template-columns: repeat(2, 205px);
     justify-content: space-between;
 }
+@media (max-width: 400px){
+    .block-card {
+        display: grid;
+        grid-template-columns: repeat(1, 205px);
+        justify-content: space-between;
+    }
+    .form__input--card{
+        width: 268px;
+        padding: 15px;
+    }
+    .block__logo{
+        display: flex;
+        flex-direction: column;
+        gap: 15px !important;
+        margin: 0 0 20px;
+    }
+}
 .form-label {
     font-size: 15px;
     display: block;
@@ -889,6 +911,7 @@ function scrollToCourse() {
     font-size: 20px;
 }
 .radio-group {
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 1rem; /* отступ между радио */
@@ -1125,7 +1148,7 @@ function scrollToCourse() {
     border-radius: 8px;
 }
 .modal-close {
-    background-color: rgba(128, 128, 128, 0.438);
+    background: none;
     border: none;
     border-radius: 50%;
     width: 30px;
@@ -1135,12 +1158,12 @@ function scrollToCourse() {
     right: 10px;
     cursor: pointer;
     z-index: 10;
-    transition: background-color 0.3s;
 }
-.modal-close:hover {
-    background-color: rgba(128, 128, 128, 0.637);
-}
+
 @media (max-width: 1100px) {
+    .modal-content__block{
+        max-width: 700px;
+    }
     .modal-close--auth{
         max-width: 500px;
     }
@@ -1148,17 +1171,29 @@ function scrollToCourse() {
         text-align: center;
     }
     .modal-content {
-        max-width: 500px;
         padding-top: 0px;
-        grid-template-columns: 500px;
+        grid-template-columns: 1fr;
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
+    }
+    .floating-label input {
+        width: 614px;
+    }
+    .form__input{
+        width: 614px;
     }
     .modal-close {
         background-color: #ffffff;
     }
     .modal-close:hover {
         background-color: rgba(128, 128, 128, 0.637);
+    }
+    .block-card{
+        gap: 20px;
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .form__input--card{
+        width: 280px;
     }
 }
 @media (max-width: 550px) {
