@@ -15,7 +15,7 @@
                                     :src="
                                         course.description_image
                                             ? '/' + course.description_image
-                                            : '/img/course_image_main.jpg'
+                                            : '../../img/course_image_main.jpg'
                                     "
                                     class="course-content__top-img"
                                     alt="Изображение курса"
@@ -55,7 +55,7 @@
                                                 :src="
                                                     teacher.photo
                                                         ? `/storage/${teacher.photo}`
-                                                        : '/img/teacher_placeholder.png'
+                                                        : '../../img/nofotolk.png'
                                                 "
                                                 alt="Преподаватель"
                                             />

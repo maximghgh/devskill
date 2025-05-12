@@ -18,7 +18,7 @@
                             </div>
                             <div class="course-content__top-block">
                                 <div class="course-content__top-block-img">
-                                    <img src="/img/logo_c.png" class="course-content__top-img">
+                                    <img src="../../img/logo_c.png" class="course-content__top-img">
                                 </div>
                             </div>
                         </div>
@@ -28,14 +28,14 @@
                                 <div class="course-content__main-desc">Полезен в качестве фундамента для обучения</div>
                                 <div class="category__one category__one_defualt">
                                     <div class="category__one-inner category__one-inner_row">
-                                        <img src="/img/book.png">
+                                        <img src="../../img/book.png">
                                         <p>Java, JavaScript, C #, как и огромное количество других популярных языков программирования, содержит в основе принципы C++. Именно поэтому учебные программы многих вузов содержат курс «плюсплюс», который идёт сразу за получением основ на C.</p>
                                     </div>
                                 </div>
                                 <div class="course-content__blocks">
                                     <div class="course-content__block course__card_bg-cyan">
                                         <div class="course-content__block-image">
-                                            <img src="/img/fast.png">
+                                            <img src="../../img/fast.png">
                                         </div>
                                         <div class="course-content__block-title">
                                             Быстр
@@ -46,7 +46,7 @@
                                     </div>
                                     <div class="course-content__block course__card_bg-fiolet">
                                         <div class="course-content__block-image">
-                                            <img src="/img/universal.png">
+                                            <img src="../../img/universal.png">
                                         </div>
                                         <div class="course-content__block-title">
                                             Универсален
@@ -57,7 +57,7 @@
                                     </div>
                                     <div class="course-content__block course__card_bg-orange">
                                         <div class="course-content__block-image">
-                                            <img src="/img/active.png">
+                                            <img src="../../img/active.png">
                                         </div>
                                         <div class="course-content__block-title">
                                             Активно поддерживается
@@ -68,7 +68,7 @@
                                     </div>
                                     <div class="course-content__block course__card_bg-green">
                                         <div class="course-content__block-image">
-                                            <img src="/public/img/need.png">
+                                            <img src="../../img/need.png">
                                         </div>
                                         <div class="course-content__block-title">
                                             Востребован
@@ -86,7 +86,7 @@
                                 <p> C++ может показаться сложным на первый взгляд, но правильная последовательность обучения сделает вас мастером этого языка. Изучение программирования на C++ может быть захватывающим и продуктивным опытом, особенно если вы учитесь в школе и только начинаете свой путь в мир программирования. Для успешного овладения этим языком программирования мы разделили путь на три основных уровня: базовый, фундаментальный и олимпиадный. Давайте рассмотрим, с чего начать на каждом из этих уровней на карте траектории развития.</p>
                             </div>
                             <div class="course-content__top-block">
-                                <img src="/img/begin.png" class="course-content__top-img">
+                                <img src="../../img/begin.png" class="course-content__top-img">
                                 
                             </div>
                         </div>
@@ -147,13 +147,13 @@
                                 <h2>Наши выпускники о курсе</h2>
                                 <div class="course-content__video">
                                     <div class="course-content__video-block">
-                                        <img src="/img/video.jpg">
+                                        <img src="../../img/video.jpg">
                                     </div>
                                     <div class="course-content__video-block">
-                                        <img src="/img/video.jpg">
+                                        <img src="../../img/video.jpg">
                                     </div>
                                     <div class="course-content__video-block">
-                                        <img src="/img/video.jpg">
+                                        <img src="../../img/video.jpg">
                                     </div>
                                 </div>
                             </div>

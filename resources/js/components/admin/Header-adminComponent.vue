@@ -1,9 +1,15 @@
 <template>
     <header class="header header_main">
         <div class="header__inner">
-            <div class="header__logo">
+            <div class="header__logos">
                 <a href="/admin">
-                    <img src="/img/logo.svg" class="header__logo" alt="Логотип" />
+                    <img
+                        src="../../../img/logo.svg"
+                        class="header__logo"
+                        alt="Логотип"
+                        height="90"
+                        width="90"
+                    />
                 </a>
             </div>
             <h3>Панель администратора</h3>
@@ -128,7 +134,7 @@ watch(
 </script>
 
 <style scoped>
-.header__logo{
+.header__logo {
     height: 90px;
 }
 /* Стили для успешного уведомления */

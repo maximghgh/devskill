@@ -15,16 +15,7 @@ export default defineConfig({
         alias: {
             vue: "vue/dist/vue.esm-bundler.js", // Исправляет проблему с Vue runtime
             "@": path.resolve(__dirname, "resources/"), // Добавлен alias для удобства
-        },
-    },
-    build: {
-        rollupOptions: {
-            output: {
-                manualChunks: {
-                    vue: ["vue", "vue-router", "pinia"], // Оптимизировать размер JS-чанков
-                    vendor: ["axios", "lodash-es"],
-                },
-            },
+            "/img1/": path.resolve(__dirname, "public/img"),
         },
     },
 });

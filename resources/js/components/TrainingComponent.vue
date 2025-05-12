@@ -144,7 +144,7 @@
                             </div>
                             <div class="course-content__top-block">
                                 <img
-                                    src="/img/begin.png"
+                                    src="../../img/begin.png"
                                     class="course-content__top-img"
                                 />
                             </div>
@@ -155,22 +155,22 @@
                     <h2>Партнеры</h2>
                     <div class="cooperation__slider">
                         <div class="cooperation__slide">
-                            <img src="/img/univer_1.png" />
+                            <img src="../../img/univer_1.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="/img/univer_2.png" />
+                            <img src="../../img/univer_2.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="/img/univer_3.png" />
+                            <img src="../../img/univer_3.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="/img/univer_4.png" />
+                            <img src="../../img/univer_4.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="/img/univer_5.png" />
+                            <img src="../../img/univer_5.png" />
                         </div>
                         <div class="cooperation__slide">
-                            <img src="/img/univer_6.png" />
+                            <img src="../../img/univer_6.png" />
                         </div>
                     </div>
                 </section>

@@ -139,7 +139,7 @@
                                             :src="
                                                 course.card_image
                                                     ? course.card_image
-                                                    : '/img/logo_placeholder.png'
+                                                    : '../../img/logo_placeholder.png'
                                             "
                                             alt="Изображение курса"
                                         />
