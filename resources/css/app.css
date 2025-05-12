@@ -108,48 +108,48 @@ a {
 /* fonts */
 @font-face {
     font-family: JanoSansProLight;
-    src: url("http://127.0.0.1:8000/fonts/JanoSansPro-Light.eot");
-    src: url("http://127.0.0.1:8000/fonts/JanoSansPro-Light.eot?#iefix")
+    src: url("../fonts/JanoSansPro-Light.eot");
+    src: url("../fonts/JanoSansPro-Light.eot?#iefix")
             format("embedded-opentype"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-Light.woff") format("woff"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-Light.ttf")
+        url("../fonts/JanoSansPro-Light.woff") format("woff"),
+        url("../fonts/JanoSansPro-Light.ttf")
             format("truetype"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-Light.svg#JanoSansPro-Light")
+        url("../fonts/JanoSansPro-Light.svg#JanoSansPro-Light")
             format("svg");
 }
 @font-face {
     font-family: JanoSansProRegular;
-    src: url("http://127.0.0.1:8000/fonts/JanoSansPro-Regular.eot");
-    src: url("http://127.0.0.1:8000/fonts/JanoSansPro-Regular.eot?#iefix")
+    src: url("../fonts/JanoSansPro-Regular.eot");
+    src: url("../fonts/JanoSansPro-Regular.eot?#iefix")
             format("embedded-opentype"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-Regular.woff")
+        url("../fonts/JanoSansPro-Regular.woff")
             format("woff"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-Regular.ttf")
+        url("../fonts/JanoSansPro-Regular.ttf")
             format("truetype"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-Regular.svg#JanoSansPro-Regular")
+        url("../fonts/JanoSansPro-Regular.svg#JanoSansPro-Regular")
             format("svg");
 }
 @font-face {
     font-family: JanoSansProSemiBold;
-    src: url("http://127.0.0.1:8000/fonts/JanoSansPro-SemiBold.eot");
-    src: url("http://127.0.0.1:8000/fonts/JanoSansPro-SemiBold.eot?#iefix")
+    src: url("../fonts/JanoSansPro-SemiBold.eot");
+    src: url("../fonts/JanoSansPro-SemiBold.eot?#iefix")
             format("embedded-opentype"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-SemiBold.woff")
+        url("../fonts/JanoSansPro-SemiBold.woff")
             format("woff"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-SemiBold.ttf")
+        url("../fonts/JanoSansPro-SemiBold.ttf")
             format("truetype"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-SemiBold.svg#JanoSansPro-SemiBold")
+        url("../fonts/JanoSansPro-SemiBold.svg#JanoSansPro-SemiBold")
             format("svg");
 }
 @font-face {
     font-family: JanoSansProBold;
-    src: url("http://127.0.0.1:8000/fonts/JanoSansPro-Bold.eot");
-    src: url("http://127.0.0.1:8000/fonts/JanoSansPro-Bold.eot?#iefix")
+    src: url("../fonts/JanoSansPro-Bold.eot");
+    src: url("../fonts/JanoSansPro-Bold.eot?#iefix")
             format("embedded-opentype"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-Bold.woff") format("woff"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-Bold.ttf")
+        url("../fonts/JanoSansPro-Bold.woff") format("woff"),
+        url("../fonts/JanoSansPro-Bold.ttf")
             format("truetype"),
-        url("http://127.0.0.1:8000/fonts/JanoSansPro-Bold.svg#JanoSansPro-Bold")
+        url("../fonts/JanoSansPro-Bold.svg#JanoSansPro-Bold")
             format("svg");
 }
 
@@ -651,14 +651,14 @@ nav a:hover {
     }
 }
 .offer_main {
-    background-image: url("http://127.0.0.1:8000/img/bg_offer.jpg");
+    background-image: url("../img/bg_offer.jpg");
 }
 
 .offer_about {
-    background-image: url("http://127.0.0.1:8000/img/bg_about.jpg");
+    background-image: url("../img/bg_about.jpg");
 }
 .offer_training {
-    background-image: url("http://127.0.0.1:8000/img/bg_training.jpg");
+    background-image: url("../img/bg_training.jpg");
 }
 .offer__inner_main {
 }
@@ -896,10 +896,10 @@ input[type="number"]::-webkit-outer-spin-button {
     transition: var(--transition-3);
 }
 .course__card_bg1 {
-    background-image: url("http://127.0.0.1:8000/img/bg_1.png");
+    background-image: url("../img1/bg_1.png");
 }
 .course__card_bg2 {
-    background-image: url(/img/bg_2.png);
+    background-image: url(../img/bg_2.png);
 }
 .course__card_bg-cyan {
     background-color: #698dc9;
@@ -1238,7 +1238,7 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 50%;
 }
 .course-content__top-block-img {
-    background-image: url("http://127.0.0.1:8000/img/bg_1.png");
+    background-image: url("../img/bg_1.png");
     background-color: #cc5a60;
     background-repeat: no-repeat;
     background-position: bottom right;
@@ -1381,7 +1381,7 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 100%;
     max-width: 47%;
     height: 300px;
-    background-image: url(img/bg_1.png);
+    background-image: url(../img/bg_1.png);
     background-repeat: no-repeat;
     background-position: bottom right;
     padding: 34px 44px;
@@ -1416,7 +1416,7 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: 0 0 140px;
 }
 .course-content__evolution-block {
-    background-image: url(img/bg_1.png);
+    background-image: url(../img/bg_1.png);
     background-repeat: no-repeat;
     background-position: bottom right;
     padding: 50px 30px 30px;
@@ -1492,12 +1492,12 @@ input[type="number"]::-webkit-outer-spin-button {
     color: #000;
     font-size: 1.5em;
     height: 145px;
-    background-image: url("http://127.0.0.1:8000/img/bg_courses_def.jpg");
+    background-image: url("../img/bg_courses_def.jpg");
     font-family: JanoSansProRegular;
     background-position: right;
 }
 .category__one_back1 {
-    background-image: url("http://127.0.0.1:8000/img/bg_courses_c.jpg");
+    background-image: url("../img/bg_courses_c.jpg");
 }
 
 /* contacts */

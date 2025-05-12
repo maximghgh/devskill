@@ -257,7 +257,7 @@ onMounted(async () => {
     background-color: #698dc9;
 }
 .course__card_bg1 {
-    background-image: url(http://127.0.0.1:8000/img/bg_1.png);
+    background-image: url(../img/bg_1.png);
 }
 .course__card {
     width: 100%;
