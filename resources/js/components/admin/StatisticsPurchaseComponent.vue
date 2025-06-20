@@ -15,7 +15,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="purchase in purchases" :key="purchase.id">
+                <tr v-for="purchase in paginatedPurchases" :key="purchase.id">
                     <td>{{ purchase.user_name }}</td>
                     <td>{{ purchase.course_title }}</td>
                     <td>{{ purchase.payment_method }}</td>
@@ -26,28 +26,66 @@
                 </tr>
             </tbody>
         </table>
+        <div class="pagination-users" v-if="totalPagesPurchases > 1">
+            <button
+                :disabled="currentPagePurchases === 1"
+                @click="currentPagePurchases--"
+            >‹ Назад</button>
+
+            <button
+                v-for="p in totalPagesPurchases"
+                :key="p"
+                :class="{ active: currentPagePurchases === p }"
+                @click="currentPagePurchases = p"
+            >{{ p }}</button>
+
+            <button
+                :disabled="currentPagePurchases === totalPagesPurchases"
+                @click="currentPagePurchases++"
+            >Вперёд ›</button>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 
 const purchases = ref([]);
 
+// 1) Текущая страница и размер страницы
+const currentPagePurchases = ref(1);
+const pageSizePurchases    = ref(5); // сколько строк на страницу
+
+// 2) Вычисляем общее число страниц
+const totalPagesPurchases = computed(() =>
+  Math.ceil(purchases.value.length / pageSizePurchases.value)
+);
+
+// 3) Вычисляем массив текущей страницы
+const paginatedPurchases = computed(() => {
+  const start = (currentPagePurchases.value - 1) * pageSizePurchases.value;
+  return purchases.value.slice(start, start + pageSizePurchases.value);
+});
+
+// 4) Сброс страницы на 1 при загрузке/обновлении данных
+watch(purchases, () => {
+  currentPagePurchases.value = 1;
+});
+
 const statusMap = {
   completed: 'Успешно',
-  pending: 'Ожидается оплата',
-  canceled: 'Отменено'
-  // и т.д.
-}
+  pending:   'Ожидается оплата',
+  canceled:  'Отменено',
+  // ...
+};
 
 onMounted(async () => {
-    try {
-        const response = await fetch("/api/purchases");
-        purchases.value = await response.json();
-    } catch (error) {
-        console.error("Ошибка при загрузке покупок:", error);
-    }
+  try {
+    const response = await fetch("/api/purchases");
+    purchases.value = await response.json();
+  } catch (error) {
+    console.error("Ошибка при загрузке покупок:", error);
+  }
 });
 
 function goBack() {
@@ -55,6 +93,44 @@ function goBack() {
 }
 </script>
 <style scoped>
+.pagination-users {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.pagination-users button {
+  min-width: 40px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.pagination-users button:hover:not(:disabled) {
+  background-color: #fff;
+  border-color: #888;
+  transform: translateY(-1px);
+}
+
+.pagination-users button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pagination-users button.active {
+  background-color: #698dc9;
+  border-color: #698dc9;
+  color: #fff;
+  font-weight: bold;
+}
 .block__info{
     position: relative;
     display: flex;

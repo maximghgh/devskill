@@ -17,6 +17,7 @@ use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\CourseCommentController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ChapterController;
+use App\Http\Controllers\CertificateController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -38,7 +39,7 @@ Route::post('/consultations/{id}/status', [ConsultationController::class, 'updat
 Route::get('/course/{courseId}/topics', [CourseController::class, 'getTopicsWithProgress']);
 Route::post('/chapters/{chapter}/complete', [ChapterController::class, 'completeChapter']);
 
-
+Route::post('courses/{course}/certificate', [CertificateController::class, 'generate']);
 
 Route::get('/courses/{id}', [CourseController::class, 'show']);
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -46,6 +47,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/courses', [CourseController::class, 'store'])
          ->name('courses.store');
 });
+
+Route::get('/chapter/{id}', [ChapterController::class, 'showteach'])
+     ->name('api.chapter.show');
 
 // Получение id пользователя 
 Route::post('/users/by-ids', [UserController::class, 'getByIds']);
@@ -108,10 +112,20 @@ Route::patch('/directions/{id}', [DirectionController::class, 'update']);
 // Удаление направления
 Route::delete('/directions/{id}', [DirectionController::class, 'destroy']);
 
+// Получить комментарии для новости {id}
+Route::get('comments/news/{id}', [CommentController::class, 'index']);
+
 
 // Добавление частых вопросов
 Route::post('/faqs', [FaqController::class, 'store']);
 Route::get('/faqs', [FaqController::class, 'index']);
+
+Route::apiResource('faqs', FaqController::class)
+     ->only(['update','destroy']);
+
+// routes/api.php
+Route::get('/stats', [App\Http\Controllers\StatsController::class, 'index']);
+
 
 Route::get('/news', [NewsController::class, 'index']);
 Route::get('/news/{id}', [NewsController::class, 'show']);

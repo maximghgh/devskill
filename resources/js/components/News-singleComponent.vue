@@ -41,7 +41,7 @@
                   Отмена
                 </div>
                 <div class="button button_comment-send" @click="submitComment">
-                  Оставить комментарий
+                  Отправить
                 </div>
               </div>
                 <div class="comment__list">
@@ -49,12 +49,12 @@
                     <div class="comment__branch" v-for="comment in newsItem.comments" :key="comment.id">
     <!-- Родительский комментарий -->
                         <div class="comment__one">
-                            <div class="comment__avatar">
+                            <!-- <div class="comment__avatar">
                             <img
                                 :src="comment.user_avatar ? `/storage/${comment.user_avatar}` : '/public/img/avatar.jpg'"
                                 alt="Avatar"
                             />
-                            </div>
+                            </div> -->
                             <div class="comment__block">
                             <div class="comment__name">
                                 {{ comment.user_name ? comment.user_name : currentUserName }}
@@ -111,7 +111,7 @@
                             </div>
                             <div class="comment__button">
                                 <div class="button button_comment-cancel" @click="cancelReply">Отмена</div>
-                                <div class="button button_comment-send" @click="submitReply(comment)">Оставить комментарий</div>
+                                <div class="button button_comment-send" @click="submitReply(comment)">Ответить</div>
                             </div>
                             </div>
                         </div>
@@ -582,6 +582,73 @@ onMounted(() => {
 
 .comment__like.active svg {
     fill: #7173c8;
+}
+@media (max-width: 670px) {
+  .comment__one_respond{
+    margin: 0 0 40px;
+  }
+}
+@media (max-width: 580px) {
+  .comment__one_respond{
+    margin: 0 0 40px;
+  }
+  .button_comment-send{
+    width: 200px;
+  }
+  .button_comment-send{
+      font-size: 15px;
+  }
+}
+@media (max-width: 480px) {
+  .comment__one_respond{
+    margin: 0 0 40px;
+  }
+  .button_comment-send{
+    width: 150px;
+  }
+  .button_comment-send{
+      font-size: 15px;
+  }
+}
+@media (max-width: 425px) {
+  .comment__one_respond{
+    margin: 0 0 40px;
+  }
+  .button_comment-send{
+    width: 150px;
+  }
+  .button_comment-send{
+      font-size: 15px !important;
+  }
+  .button_comment-cancel{
+    width: 120px;
+    font-size: 15px;
+  }
+}
+@media (max-width: 410px) {
+  .comment__button{
+    margin: 0 0 40px;
+  }
+    .button_comment-send{
+        font-size: 20px;
+    }
+}
+@media (max-width: 385px) {
+  .comment__button{
+    margin: 0 0 40px;
+  }
+  .button_comment-send{
+    width: 120px;
+    font-size: 15px;
+  }
+}
+@media (max-width: 365px) {
+  .comment__button{
+    margin: 0 0 40px;
+  }
+  .button_comment-send{
+    width: 100px;
+  }
 }
 
 </style>

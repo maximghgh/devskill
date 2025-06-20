@@ -8,6 +8,47 @@ use Illuminate\Http\Request;
 class CommentController extends Controller
 {
     // Добавление нового комментария или ответа
+
+     public function index($newsId)
+    {
+        $comments = Comment::with('user:id,name,photo')
+            ->where('news_id', $newsId)
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function (Comment $c) {
+                return [
+                    'id'           => $c->id,
+                    'body'         => $c->body,
+                    'created_at'   => $c->created_at->toDateTimeString(),
+                    'likes'        => $c->likes,
+                    'dislikes'     => $c->dislikes,
+                    'parent_id'    => $c->parent_id,
+                    // вложенные ответы (если нужны — можно рекурсивно)
+                    'children'     => $c->children->map(function($child) {
+                        return [
+                            'id'           => $child->id,
+                            'body'         => $child->body,
+                            'created_at'   => $child->created_at->toDateTimeString(),
+                            'likes'        => $child->likes,
+                            'dislikes'     => $child->dislikes,
+                            'parent_id'    => $child->parent_id,
+                            'user_name'    => $child->user_name,
+                            'user_avatar'  => $child->user
+                                                 ? "/storage/{$child->user->photo}"
+                                                 : null,
+                        ];
+                    }),
+                    // автор
+                    'user_name'   => $c->user_name ?: ($c->user->name ?? 'Аноним'),
+                    'user_avatar' => $c->user
+                                        && $c->user->photo
+                                      ? "/storage/{$c->user->photo}"
+                                      : null,
+                ];
+            });
+
+        return response()->json($comments);
+    }
     public function store(Request $request)
     {
         // Валидируем входящие данные

@@ -80,9 +80,7 @@
                                 <option value="text">Текст</option>
                                 <option value="task">Задания</option>
                                 <option value="terms">Термины</option>
-                                <option value="presentation">
-                                    Презентация
-                                </option>
+                                <option value="presentation">Итоговый тест</option>
                             </select>
                         </div>
 
@@ -159,7 +157,7 @@
                     Термины
                 </button>
                 <button @click="selectType('presentation')" class="type-button">
-                    Презентация
+                    Итоговый тест
                 </button>
             </div>
         </div>
@@ -167,7 +165,7 @@
         <!-- Форма, которая появляется после выбора типа -->
         <div v-if="selectedType" class="form">
             <h3 class="h3__topic">
-                Добавление главы типа «{{ selectedType }}»
+                Добавление главы
             </h3>
             <form @submit.prevent="submitChapter" class="chapter-form">
                 <!-- Общее поле для названия главы -->
@@ -224,18 +222,18 @@
                 </div>
                 <!-- Для презентации -->
                 <div v-else-if="selectedType === 'presentation'" class="form-group">
-                  <label class="form-label">Редактор описания презентации:</label>
-                  <div id="editor-presentation" class="editor-container"></div>
-                  <div class="form-group">
+                  <label class="form-label">Конструктор итогового теста:</label>
+                  <div id="editor-final-test" class="editor-container"></div>
+                  <!-- <div class="form-group">
                     <label class="form-label">Прикрепить файл (PDF/PPTX):</label>
-                  </div>
+                  </div> -->
                 </div>
-                <input
+                <!-- <input
                     type="file"
                     accept=".pdf,.ppt,.pptx,video/*,image/*"
                     @change="e => newChapter.file = e.target.files[0]"
                     class="form-input"
-                />
+                /> -->
                 <!-- загрузка презентации -->
                 <button type="submit" class="form-button">
                     Добавить главу
@@ -246,33 +244,63 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from "vue";
-import axios from "axios";
-import EditorJS from "@editorjs/editorjs";
-import Header from "@editorjs/header";
-import List from "@editorjs/list";
-import ImageTool from "@editorjs/image";
+import { ref, onMounted, watch, nextTick } from 'vue';
+import axios               from 'axios';
+import EditorJS            from '@editorjs/editorjs';
+import Header              from '@editorjs/header';
+import List                from '@editorjs/list';
+import ImageTool           from '@editorjs/image';
+import QuizTool            from '@/components/editorjs-quiz';   // ← ваш плагин
 
-// Модальное окно для редактирования главы
-const editModalOpen = ref(false);
-const editingChapter = ref({});
-let modalEditorInstance = null;
+/* ---------------------------------------------------
+ *  Утилита: текущий topicId берём из URL
+ * ------------------------------------------------- */
+function getTopicIdFromUrl () {
+  const parts = window.location.pathname.split('/');
+  return parts[parts.indexOf('topic') + 1];
+}
+const topicId   = getTopicIdFromUrl();
 
-function openEditModal(chapter) {
-  editModalOpen.value = true;
+/* ---------------------------------------------------
+ *  Список глав + данные темы
+ * ------------------------------------------------- */
+const topic    = ref({});
+const chapters = ref([]);
+
+async function loadTopicAndChapters () {
+  try {
+    const t = await axios.get(`/admin/topic/${topicId}`);
+    topic.value = t.data.topic || {};
+
+    const c = await axios.get(`/admin/topic/${topicId}/chapters`);
+    chapters.value = c.data.chapters || [];
+  } catch (e) {
+    console.error(e);
+  }
+}
+onMounted(loadTopicAndChapters);
+
+/* ---------------------------------------------------
+ *  --- 1. Редактирование существующей главы (модалка)
+ * ------------------------------------------------- */
+const editModalOpen   = ref(false);
+const editingChapter  = ref({});
+let   modalEditorInstance = null;
+
+function openEditModal (chapter) {
+  editModalOpen.value  = true;
   editingChapter.value = { ...chapter };
-  // парсим content
-  if (typeof editingChapter.value.content === "string" && editingChapter.value.content.trim()) {
-    try {
-      editingChapter.value.content = JSON.parse(editingChapter.value.content);
-    } catch {
-      editingChapter.value.content = {};
-    }
+
+  // content приходит строкой – парсим
+  if (typeof editingChapter.value.content === 'string' &&
+      editingChapter.value.content.trim()) {
+    try    { editingChapter.value.content = JSON.parse(editingChapter.value.content); }
+    catch  { editingChapter.value.content = {}; }
   }
   nextTick(initModalEditor);
 }
 
-function closeEditModal() {
+function closeEditModal () {
   editModalOpen.value = false;
   editingChapter.value = {};
   if (modalEditorInstance) {
@@ -281,171 +309,179 @@ function closeEditModal() {
   }
 }
 
-function initModalEditor() {
-  if (modalEditorInstance) {
-    modalEditorInstance.destroy();
-    modalEditorInstance = null;
-  }
+function initModalEditor () {
+  if (modalEditorInstance) modalEditorInstance.destroy();
+
   modalEditorInstance = new EditorJS({
-    holder: "editor-edit",
-    placeholder: "Добавьте контент главы...",
-    data: editingChapter.value.content || {},
-    tools: {
-      header: { class: Header, inlineToolbar: ["link"] },
-      list: { class: List, inlineToolbar: true },
-      image: { class: ImageTool, config: { endpoints: { byFile: "/api/uploadFile", byUrl: "/api/fetchUrl" } } }
+    holder      : 'editor-edit',
+    placeholder : 'Добавьте контент главы…',
+    data        : editingChapter.value.content || {},
+    tools       : {
+      header : { class: Header, inlineToolbar: ['link'] },
+      list   : { class: List,   inlineToolbar: true  },
+      image  : { class: ImageTool,
+                 config: { endpoints: { byFile: '/api/uploadFile',
+                                        byUrl : '/api/fetchUrl' } } },
+      quiz   : QuizTool               // чтобы можно было править тесты
     }
   });
 }
 
-async function saveEditedChapter() {
+async function saveEditedChapter () {
   try {
     if (modalEditorInstance) {
       const data = await modalEditorInstance.save();
       editingChapter.value.content = data;
     }
     const payload = { ...editingChapter.value };
-    if (payload.content && typeof payload.content === "object") {
+    if (typeof payload.content === 'object')
       payload.content = JSON.stringify(payload.content);
-    }
-    const res = await axios.put(
+
+    const { data: res } = await axios.put(
       `/api/admin/topic/${topicId}/chapters/${editingChapter.value.id}`,
       payload
     );
-    const updated = res.data.chapter;
-    const idx = chapters.value.findIndex(c => c.id === updated.id);
-    if (idx !== -1) chapters.value[idx] = updated;
+
+    const idx = chapters.value.findIndex(c => c.id === res.chapter.id);
+    if (idx !== -1) chapters.value[idx] = res.chapter;
     closeEditModal();
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) { console.error(e); }
 }
 
-async function deleteChapter(id) {
+async function deleteChapter (id) {
   try {
     await axios.delete(`/api/admin/topic/${topicId}/chapters/${id}`);
     chapters.value = chapters.value.filter(c => c.id !== id);
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) { console.error(e); }
 }
 
-function getTopicIdFromUrl() {
-  const parts = window.location.pathname.split("/");
-  return parts[parts.indexOf("topic") + 1];
-}
-const topicId = getTopicIdFromUrl();
-const topic = ref({});
-const chapters = ref([]);
-
-// Для создания новой главы
-const selectedType = ref("");
+/* ---------------------------------------------------
+ * --- 2. Создание новой главы
+ * ------------------------------------------------- */
+const selectedType = ref('');
 const blankChapter = {
-  title: '',
-  video_url: '',
-  content: null,
+  title         : '',
+  video_url     : '',
+  content       : null,
   correct_answer: '',
-  presentation_file: null,
-  video_file: null,        // добавили
-  text_file: null,
-  task_file: null,
-  terms_file: null
+  file          : null              // общий инпут-файл
 };
-const newChapter = ref({ ...blankChapter });
-let editorInstance = null;
+const newChapter  = ref({ ...blankChapter });
 
-function initEditor(containerId) {
-  if (editorInstance) {
-    editorInstance.destroy();
-    editorInstance = null;
-  }
+/* Два разных редактора:
+ *  - editorInstance  → text / video / task / terms
+ *  - quizEditor      → final_test
+ */
+let editorInstance = null;
+let quizEditor     = null;
+
+function destroyEditors () {
+  if (editorInstance) { editorInstance.destroy(); editorInstance = null; }
+  if (quizEditor)     { quizEditor.destroy();     quizEditor     = null; }
+}
+
+function initEditor (holderId) {
+  destroyEditors();
   editorInstance = new EditorJS({
-    holder: containerId,
-    placeholder: "Добавьте контент главы...",
-    tools: {
-      header: { class: Header, inlineToolbar: ["link"] },
-      list: { class: List, inlineToolbar: true },
-      image: { class: ImageTool, config: { endpoints: { byFile: "/api/uploadFile", byUrl: "/api/fetchUrl" } } }
+    holder      : holderId,
+    placeholder : 'Добавьте контент главы…',
+    tools       : {
+      header : { class: Header, inlineToolbar: ['link'] },
+      list   : { class: List,   inlineToolbar: true  },
+      image  : { class: ImageTool,
+                 config: { endpoints: { byFile: '/api/uploadFile',
+                                        byUrl : '/api/fetchUrl' } } }
     }
   });
 }
 
-function onPresentationChange(e) {
-  newChapter.value.presentation_file = e.target.files[0] || null;
+function initQuizEditor () {
+    console.log('[initQuizEditor] fired');
+  destroyEditors();                       // закрываем старые инстансы
+
+  quizEditor = new EditorJS({
+    holder : 'editor-final-test',
+    tools  : { quiz: QuizTool },
+
+    /** ← добавляем стартовый блок  */
+    data   : {
+      blocks: [
+        {
+          type : 'quiz',
+          data : {                       // минимальные данные
+            questions: [],
+            settings : { shuffle: false }
+          }
+        }
+      ]
+    }
+  });
+  window.editorFinalTest = quizEditor
 }
 
-watch(selectedType, async type => {
-  if (!type) return;
+
+/* ---- реагируем на смену типа ---- */
+watch(selectedType, async (type) => {
   await nextTick();
-  if (type === 'text') initEditor('editor-text');
-  else if (type === 'task') initEditor('editor-task');
-  else if (type === 'terms') initEditor('editor-terms');
-  else if (type === 'video') initEditor('editor-video');
-  else if (type === 'presentation') initEditor('editor-presentation');
+  switch (type) {
+    case 'text'       : initEditor('editor-text');        break;
+    case 'task'       : initEditor('editor-task');        break;
+    case 'terms'      : initEditor('editor-terms');       break;
+    case 'video'      : initEditor('editor-video');       break;
+    case 'presentation' : initQuizEditor();                 break;
+    default           : destroyEditors();
+  }
 });
 
-async function loadTopicAndChapters() {
-  try {
-    const t = await axios.get(`/admin/topic/${topicId}`);
-    topic.value = t.data.topic || {};
-    const c = await axios.get(`/admin/topic/${topicId}/chapters`);
-    chapters.value = c.data.chapters || [];
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-function selectType(type) {
+/* ---- ручной выбор типа (кнопки/селект) ---- */
+function selectType (type) {
   selectedType.value = type;
-  newChapter.value = { ...blankChapter };
+  newChapter.value   = { ...blankChapter };
 }
 
+/* ---- отправка формы ---- */
 async function submitChapter () {
   try {
-    // 1. собираем контент из редактора
-    let data = null;
-    if (editorInstance) {
-      data = await editorInstance.save();
-    }
-
-    // 2. упаковываем FormData
     const fd = new FormData();
-    fd.append('title',   newChapter.value.title);
-    fd.append('type',    selectedType.value);
-    fd.append('content', JSON.stringify(data || {}));
-    if (newChapter.value.file) {
-      fd.append('file', newChapter.value.file);
-    }
+    fd.append('title', newChapter.value.title);
+    fd.append('type' , selectedType.value);
 
-    // 3. шлём на бэкенд и ждём ответ
-    const { data: resp } = await axios.post(
+    /* контент */
+    let contentPayload = {};
+    if (selectedType.value === 'presentation' && quizEditor) {
+      const saved = await quizEditor.save();
+      contentPayload = saved.blocks[0]?.data || {};
+    } else if (editorInstance) {
+      contentPayload = await editorInstance.save();
+    }
+    fd.append('content', JSON.stringify(contentPayload));
+
+    /* файл (если был) */
+    if (newChapter.value.file) fd.append('file', newChapter.value.file);
+
+    /* запрос */
+    const { data: res } = await axios.post(
       `/admin/topic/${topicId}/chapters`,
       fd,
       { headers: { 'Content-Type': 'multipart/form-data' } }
     );
+    if (res.chapter) chapters.value.push(res.chapter);
 
-    // 4. пушим новую главу в список
-    if (resp.chapter) {
-      chapters.value.push(resp.chapter);
-    }
-
-    // 5. очищаем форму
+    /* очистка */
     selectedType.value = '';
-    newChapter.value = { ...blankChapter };
-    if (editorInstance) {
-      editorInstance.destroy();
-      editorInstance = null;
-    }
+    newChapter.value   = { ...blankChapter };
+    destroyEditors();
   } catch (err) {
     console.error('Ошибка при создании главы:', err);
   }
 }
 
-
-
-onMounted(loadTopicAndChapters);
-function goBack() { window.history.back(); }
+/* ---------------------------------------------------
+ *  Разное
+ * ------------------------------------------------- */
+function goBack () { window.history.back(); }
 </script>
+
 
 <style scoped>
 .form-input--m{
@@ -578,7 +614,7 @@ function goBack() { window.history.back(); }
 }
 
 .type-button {
-    width: 160px;
+    width: 224px;
     display: flex;
     justify-content: center;
     align-items: center;

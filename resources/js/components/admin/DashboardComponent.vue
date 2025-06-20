@@ -50,87 +50,97 @@
                                         <option value="1">Ученик</option>
                                     </select>
                                 </div>
-                                <table class="light-push-table" v-if="users.length">
-                                    <thead>
-                                        <tr>
-                                            <th>№</th>
-                                            <th>ФИО</th>
-                                            <th>Email</th>
-                                            <th>Телефон</th>
-                                            <th>День рождения</th>
-                                            <th>Местоположение</th>
-                                            <th>Роль</th>
-                                            <th>Действия</th>
-                                            <th>Удалить пользователя</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="(userItem,index) in filteredUsers" :key="userItem.id">
-                                            <td>{{ index + 1 }}</td>
-                                            <td>{{ userItem.name }}</td>
-                                            <td>{{ userItem.email }}</td>
-                                            <td>{{ userItem.phone }}</td>
-                                            <td>{{ userItem.birthday }}</td>
-                                            <td>{{ userItem.country }}</td>
-                                            <!-- роли -->
-                                            <td>
-                                                <div
-                                                    v-if="
-                                                        editingUserId ===
-                                                        userItem.id
-                                                    "
-                                                >
-                                                    <select
-                                                        v-model="
-                                                            editingUser.role
-                                                        "
-                                                        class="select"
-                                                        style="
-                                                            padding: 5px;
-                                                            border: 1px solid
-                                                                #ccc;
-                                                            border-radius: 4px;
-                                                        "
-                                                    >
-                                                        <option :value="3">
-                                                            Админ
-                                                        </option>
-                                                        <option :value="2">
-                                                            Преподаватель
-                                                        </option>
-                                                        <option :value="1">
-                                                            Ученик
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                                <div
-                                                    v-else
-                                                    @click="
-                                                        startEditing(userItem)
-                                                    "
-                                                    style="cursor: pointer"
-                                                >
-                                                    {{
-                                                        getRoleName(
-                                                            userItem.role
-                                                        )
-                                                    }}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <button class="btn__user--edit" @click="openUserEditModal(userItem)">Редактировать</button>
-                                            </td>
-                                            <td>
-                                                <button class="btn__user--delete" @click="deleteUser(userItem.id)">Удалить пользователя</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div v-if="filteredUsers.length > 0">
+                                    <table class="light-push-table">
+                                        <thead>
+                                            <tr>
+                                                <th>№</th>
+                                                <th>ФИО</th>
+                                                <th>Email</th>
+                                                <th>Телефон</th>
+                                                <th>День рождения</th>
+                                                <th>Местоположение</th>
+                                                <th>Роль</th>
+                                                <th>Действия</th>
+                                                <th>Удалить пользователя</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(userItem, index) in paginatedUsers" :key="userItem.id">
+                                                <td>{{ index + 1 }}</td>
+                                                <td>{{ userItem.name }}</td>
+                                                <td>{{ userItem.email }}</td>
+                                                <td>{{ userItem.phone }}</td>
+                                                <td>{{ userItem.birthday }}</td>
+                                                <td>{{ userItem.country }}</td>
+                                                <!-- роли -->
+                                                <td>
+                                                    <div v-if="editingUserId ===userItem.id">
+                                                        <select
+                                                            v-model="
+                                                                editingUser.role
+                                                            "
+                                                            class="select"
+                                                            style="
+                                                                padding: 5px;
+                                                                border: 1px solid
+                                                                    #ccc;
+                                                                border-radius: 4px;
+                                                            "
+                                                        >
+                                                            <option :value="3">
+                                                                Админ
+                                                            </option>
+                                                            <option :value="2">
+                                                                Преподаватель
+                                                            </option>
+                                                            <option :value="1">
+                                                                Ученик
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <div v-else @click="startEditing(userItem)" style="cursor: pointer">
+                                                        {{
+                                                            getRoleName(
+                                                                userItem.role
+                                                            )
+                                                        }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button class="btn__user--edit" @click="openUserEditModal(userItem)">Редактировать</button>
+                                                </td>
+                                                <td>
+                                                    <button class="btn__user--delete" @click="deleteUser(userItem.id)">Удалить пользователя</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                                 <div v-else>Нет пользователей</div>
+                                <div class="pagination-users" v-if="totalPagesUsers > 1">
+                                    <button
+                                        :disabled="currentPageUsers === 1"
+                                        @click="currentPageUsers--"
+                                    >‹ Назад</button>
+
+                                    <button
+                                        v-for="p in totalPagesUsers"
+                                        :key="p"
+                                        :class="{ active: currentPageUsers === p }"
+                                        @click="currentPageUsers = p"
+                                    >{{ p }}</button>
+
+                                    <button
+                                        :disabled="currentPageUsers === totalPagesUsers"
+                                        @click="currentPageUsers++"
+                                    >Вперёд ›</button>
+                                </div>
+                                
                                 <!-- Модальное окно -->
                                 <div v-if="showUserEditModal" class="modal-overlay">
                                     <div class="modal-content modal-content--s">
-                                        <button class="close-button" @click="closeUserEditModal">✕</button>
+                                        <button class="close-button" @click="closeUserEditModal">×</button>
                                         <h2>Редактировать пользователя</h2>
                                         <form @submit.prevent="saveUserModal" class="form-column form-column--s">
                                         <div class="form-group">
@@ -192,75 +202,96 @@
                             </div>
                             <!-- Блок "Курсы" -->
                             <div v-else-if="item.id === 'courses'">
-                                <h2>Список курсов</h2>
-                                <div class="cou">
-                                    <a
-                                        class="course__links"
-                                        href="/admin/statistics"
-                                        >Статистика учеников</a
-                                    >
-                                    <a
-                                        class="course__links"
-                                        href="/admin/statisticspurchase"
-                                        >Покупки пользователей</a
-                                    >
-                                    <a
-                                        class="course__links"
-                                        href="/admin/consultations"
-                                        >Консультации</a
-                                    >
-                                </div>
-                                <div v-if="courses.length">
-                                    <table class="light-push-table">
-                                        <thead>
-                                            <tr>
-                                                <th>№</th>
-                                                <th>Название курса</th>
-                                                <th>Уровень</th>
-                                                <th>Изменить курс</th>
-                                                <th>Управлять курсом</th>
-                                                <th>Удалить курс</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr
-                                                v-for="(course, index) in courses"
-                                                :key="course.id"
+                                <div class="admin__block">
+                                    <div class="cou">
+                                        <div class="div__link">
+                                            <a
+                                                class="course__links"
+                                                href="/admin/statistics"
+                                                >Статистика учеников</a
                                             >
-                                                <td>
-                                                    {{ index + 1 }}
-                                                </td>
-                                                <td>
-                                                    {{ course.course_name }}
-                                                </td>
-                                                <td>{{ course.difficulty }}</td>
-                                                <td>
-                                                    <button
-                                                        class="btn__user--edit"
-                                                        @click.prevent="
-                                                            openEditModal(
-                                                                course
-                                                            )
-                                                        "
-                                                    >
-                                                        Редактировать
-                                                    </button>
-                                                </td>
-                                                <td>
-                                                    <a
-                                                        class="btn--control"
-                                                        :href="`/admin/course/${course.id}/topics/json`"
-                                                        >Управлять курсом</a
-                                                    >
-                                                </td>
-                                                <td>
-                                                    <button class="btn__user--delete" @click.prevent="deleteCourse(course.id)">Удалить курс</button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                            <a
+                                                class="course__links"
+                                                href="/admin/statisticspurchase"
+                                                >Cтатистика покупок пользователей</a
+                                            >
+                                            <a
+                                                class="course__links"
+                                                href="/admin/consultations"
+                                                >Записи на консультации</a
+                                            >
+                                        </div>
+                                    </div>
+                                    <div v-if="paginatedCourses.length">
+                                        <table class="light-push-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>№</th>
+                                                    <th>Название курса</th>
+                                                    <th>Уровень</th>
+                                                    <th>Изменить курс</th>
+                                                    <th>Управлять курсом</th>
+                                                    <th>Удалить курс</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    v-for="(course, index) in paginatedCourses"
+                                                    :key="course.id"
+                                                >
+                                                    <td>
+                                                        {{ index + 1 }}
+                                                    </td>
+                                                    <td>
+                                                        {{ course.course_name }}
+                                                    </td>
+                                                    <td>{{ course.difficulty }}</td>
+                                                    <td>
+                                                        <button
+                                                            class="btn__user--edit"
+                                                            @click.prevent="
+                                                                openEditModal(
+                                                                    course
+                                                                )
+                                                            "
+                                                        >
+                                                            Редактировать
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <a
+                                                            class="btn--control"
+                                                            :href="`/admin/course/${course.id}/topics/json`"
+                                                            >Управлять курсом</a
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn__user--delete" @click.prevent="deleteCourse(course.id)">Удалить курс</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="pagination-users" v-if="totalPagesCourses > 1" style="margin-top: 20px;">
+                                            <button
+                                            :disabled="currentPageCourses === 1"
+                                            @click="currentPageCourses--"
+                                            >‹ Назад</button>
+
+                                            <button
+                                            v-for="p in totalPagesCourses"
+                                            :key="p"
+                                            :class="{ active: currentPageCourses === p }"
+                                            @click="currentPageCourses = p"
+                                            >{{ p }}</button>
+
+                                            <button
+                                            :disabled="currentPageCourses === totalPagesCourses"
+                                            @click="currentPageCourses++"
+                                            >Вперёд ›</button>
+                                        </div>
+                                    </div>
+                                    <div v-else>Нет курсов</div>
                                 </div>
-                                <div v-else>Нет курсов</div>
 
                                 <!-- Модальное окно редактирования курса -->
                                 <div v-if="showEditModal" class="modal-overlay">
@@ -269,7 +300,7 @@
                                             class="close-button"
                                             @click="closeEditModal"
                                         >
-                                            X
+                                            ×
                                         </button>
                                         <h2>Редактирование курса</h2>
                                         <div class="edit-course-form-container">
@@ -641,27 +672,37 @@
                                                 class="form-input"
                                             />
                                         </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Цена</label>
-                                            <input
-                                                v-model="newCourse.price"
-                                                type="number"
-                                                placeholder="Введите цену"
-                                                class="form-input"
-                                            />
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label"
-                                                >Длительность (в месяцах от
-                                                1-24)</label
-                                            >
-                                            <input
-                                                v-model="newCourse.duration"
-                                                type="text"
-                                                placeholder="Введите длительность"
-                                                class="form-input"
-                                            />
-                                        </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Цена</label>
+                                                <input
+                                                    v-model="newCourse.price"
+                                                    type="number"
+                                                    placeholder="Введите цену"
+                                                    class="form-input"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label"
+                                                    >Длительность в месяцах</label
+                                                >
+                                                <input
+                                                    v-model="newCourse.duration"
+                                                    type="text"
+                                                    placeholder="Введите от 1 до 24 месяцев"
+                                                    class="form-input"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label"
+                                                    >Количество часов</label
+                                                >
+                                                <input
+                                                    v-model="newCourse.hours"
+                                                    type="number"
+                                                    placeholder="Введите количество часов"
+                                                    class="form-input"
+                                                />
+                                            </div>
                                         <div class="form-group">
                                             <label class="form-label"
                                                 >Описание</label
@@ -671,17 +712,6 @@
                                                 placeholder="Введите описание"
                                                 class="form-textarea"
                                             ></textarea>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label"
-                                                >Количество часов</label
-                                            >
-                                            <input
-                                                v-model="newCourse.hours"
-                                                type="number"
-                                                placeholder="Введите количество часов"
-                                                class="form-input"
-                                            />
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label"
@@ -860,7 +890,7 @@
                             </div>
                             <!-- Другие блоки (аналитика, FAQ, и т.д.) -->
                             <div v-else-if="item.id === 'news'">
-                                <table v-if="newsItems.length" class="light-push-table">
+                                <table v-if="paginatedNews.length" class="light-push-table">
                                     <thead>
                                         <tr>
                                             <th>№</th>
@@ -870,7 +900,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="(newsItem, index) in newsItems" :key="newsItem.id">
+                                        <tr v-for="(newsItem, index) in paginatedNews" :key="newsItem.id">
                                             <td>{{ index + 1 }}</td>
                                             <td>{{ newsItem.title }}</td>
                                             <td>
@@ -882,11 +912,21 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                <div class="pagination-users" v-if="totalPagesNews > 1">
+                                    <button :disabled="currentPageNews === 1" @click="currentPageNews--">‹ Назад</button>
+                                    <button
+                                        v-for="p in totalPagesNews"
+                                        :key="p"
+                                        :class="{ active: currentPageNews === p }"
+                                        @click="currentPageNews = p"
+                                    >{{ p }}</button>
+                                    <button :disabled="currentPageNews === totalPagesNews" @click="currentPageNews++">Вперёд ›</button>
+                                </div>
                                 <!-- Модальное окно редактирования новости -->
                                 <div v-if="showNewsEditModal" class="modal-overlay">
                                     <div class="modal-content">
                                         <h2>Редактирование новости</h2>
-                                        <button class="close-button" @click="closeNewsEditModal">X</button>
+                                        <button class="close-button" @click="closeNewsEditModal">×</button>
                                         <form @submit.prevent="submitNewsEdit" class="course-form">
                                             <!-- Заголовок новости -->
                                             <div class="form-group">
@@ -896,7 +936,7 @@
                                                 <input
                                                     v-model="editingNews.title"
                                                     type="text"
-                                                    placeholder="Введите заголовок новости"
+                                                    placeholder="Введите заголовок новостиa"
                                                     class="form-input"
                                                 />
                                             </div>
@@ -1000,22 +1040,107 @@
                                 <!-- Другой контент -->
                             </div>
                             <div v-else-if="item.id === 'faq'">
-                                <form
-                                    @submit.prevent="submitFaq"
-                                    class="edit-course-form--small"
-                                >
-                                    <label
-                                        class="form-label--small"
-                                        for="question"
-                                        >Создание частых вопросов</label
+                                <table v-if="faqs.length" class="light-push-table light-push-table--s">
+                                    <thead>
+                                    <tr>
+                                        <th>№</th>
+                                        <th>Вопрос</th>
+                                        <th>Ответ</th>
+                                        <th>Изменить</th>
+                                        <th>Удалить</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="(f, i) in paginatedFaqs" :key="f.id">
+                                        <td>{{ i + 1 }}</td>
+                                        <td>{{ f.question }}</td>
+                                        <td>{{ f.answer }}</td>
+                                        <td>
+                                            <button class="btn__user--edit" @click="startEditingFaq(f)">Редактировать</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn__user--delete" @click="deleteFaq(f.id)">Удалить</button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <p v-else>Нет частых вопросов</p>
+                                <div class="pagination-users" v-if="totalPagesFaq > 1">
+                                    <button
+                                        :disabled="currentPageFaq === 1"
+                                        @click="currentPageFaq--"
+                                    >‹ Назад</button>
+
+                                    <button
+                                        v-for="p in totalPagesFaq"
+                                        :key="p"
+                                        :class="{ active: currentPageFaq === p }"
+                                        @click="currentPageFaq = p"
+                                    >{{ p }}</button>
+
+                                    <button
+                                        :disabled="currentPageFaq === totalPagesFaq"
+                                        @click="currentPageFaq++"
+                                    >Вперёд ›</button>
+                                </div>
+                                
+                                <div
+                                    v-if="editingFaq.id"
+                                    class="modal-overlay"
+                                    @click.self="cancelEditingFaq"
                                     >
-                                    <input
-                                        type="text"
-                                        name="question"
-                                        v-model="faq.question"
-                                        placeholder="Введите вопрос"
-                                        class="form-input"
-                                    />
+                                    <div class="modal-content modal-flex">
+                                        <!-- крестик закрытия -->
+                                        <button class="close-button" @click="cancelEditingFaq">×</button>
+
+                                        <h4>Редактирование #{{ editingFaq.id }}</h4>
+                                            <div class="form-group">
+                                                <label class="form-label"
+                                                    >Вопрос</label
+                                                >
+                                                <input
+                                                    v-model="editingFaq.question"
+                                                    placeholder="Вопрос"
+                                                    class="form-input form-input--xl"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label"
+                                                    >Ответ на вопрос</label
+                                                >
+                                                <textarea
+                                                    v-model="editingFaq.answer"
+                                                    placeholder="Вопрос"
+                                                    class="form-input form-input--xl textarea"
+                                                />
+                                            </div>
+                                        <div class="button__edit__faq" style="margin-top:1em; text-align:right">
+                                            <button @click="saveEditingFaq" class="form-button--small">
+                                                Сохранить
+                                            </button>
+                                            <button @click="cancelEditingFaq" class="form-button--small">
+                                                Отмена
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h2
+                                    class="h2__margin"
+                                    for="question"
+                                    >Создание частых вопросов</h2
+                                >
+                                <form @submit.prevent="submitFaq" class="course-form">
+                                    <div class="form-group">
+                                        <label class="form-label">Вопрос</label>
+                                        <input
+                                            type="text"
+                                            name="question"
+                                            v-model="faq.question"
+                                            placeholder="Введите вопрос"
+                                            class="form-input"
+                                        />
+                                    </div>
+                                    <label class="form-label">Ответ на вопрос</label>
                                     <textarea
                                         name="answer"
                                         v-model="faq.answer"
@@ -1037,7 +1162,7 @@
                                         <h2>Существующие категории (языки)</h2>
                                         <!-- Проверяем, есть ли языки -->
                                         <table
-                                            v-if="languages.length"
+                                            v-if="paginatedLangs.length"
                                             class="light-push-table"
                                         >
                                             <thead>
@@ -1049,10 +1174,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr
-                                                    v-for="(lang, index) in languages"
-                                                    :key="lang.id"
-                                                >
+                                                <tr v-for="(lang, index) in paginatedLangs" :key="lang.id">
                                                     <!-- ID -->
                                                     <td>{{ index + 1 }}</td>
 
@@ -1141,6 +1263,16 @@
                                                 </tr>
                                             </tbody>
                                         </table>
+                                        <div class="pagination-users" v-if="totalPagesLangs > 1">
+                                            <button :disabled="currentPageLangs === 1" @click="currentPageLangs--">‹ Назад</button>
+                                            <button
+                                                v-for="p in totalPagesLangs"
+                                                :key="p"
+                                                :class="{ active: currentPageLangs === p }"
+                                                @click="currentPageLangs = p"
+                                            >{{ p }}</button>
+                                            <button :disabled="currentPageLangs === totalPagesLangs" @click="currentPageLangs++">Вперёд ›</button>
+                                        </div>
                                         <!-- Если массив пуст, выводим текст -->
                                         <p v-else>Нет языков</p>
                                     </div>
@@ -1149,7 +1281,7 @@
                                         <h2>Существующие направления</h2>
                                         <!-- Проверяем, есть ли направления -->
                                         <table
-                                            v-if="directions.length"
+                                            v-if="paginatedDirs.length"
                                             class="light-push-table"
                                         >
                                             <thead>
@@ -1162,7 +1294,7 @@
                                             </thead>
                                             <tbody>
                                                 <tr
-                                                    v-for="(dir, index) in directions"
+                                                    v-for="(dir, index) in paginatedDirs"
                                                     :key="dir.id"
                                                 >
                                                     <td>{{ index + 1 }}</td>
@@ -1246,6 +1378,16 @@
                                                 </tr>
                                             </tbody>
                                         </table>
+                                        <div class="pagination-users" v-if="totalPagesDirs > 1">
+                                            <button :disabled="currentPageDirs === 1" @click="currentPageDirs--">‹ Назад</button>
+                                            <button
+                                                v-for="p in totalPagesDirs"
+                                                :key="p"
+                                                :class="{ active: currentPageDirs === p }"
+                                                @click="currentPageDirs = p"
+                                            >{{ p }}</button>
+                                            <button :disabled="currentPageDirs === totalPagesDirs" @click="currentPageDirs++">Вперёд ›</button>
+                                        </div>
                                         <!-- Если массив пуст, выводим текст -->
                                         <p v-else>Нет направлений</p>
                                     </div>
@@ -1319,7 +1461,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, nextTick } from "vue";
+import { ref, reactive, onMounted, computed, nextTick, watch } from "vue";
 import axios from "axios";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.css";
@@ -1334,6 +1476,16 @@ import { globalNotification } from "../../globalNotification";
 ===================================== */
 // Inline-редактирование всей строки:
 const newsItems = ref([]);
+const currentPageNews    = ref(1);
+const pageSizeNews       = ref(5);  // сколько новостей на страницу
+const totalPagesNews     = computed(() =>
+  Math.ceil(newsItems.value.length / pageSizeNews.value)
+);
+const paginatedNews      = computed(() => {
+  const start = (currentPageNews.value - 1) * pageSizeNews.value;
+  return newsItems.value.slice(start, start + pageSizeNews.value);
+});
+watch(newsItems, () => (currentPageNews.value = 1));
 
 const editingNewsId = ref(null); // ID редактируемой новости
 const editingNews = ref({
@@ -1471,7 +1623,6 @@ async function submitNewsEdit () {
 function onNewsImageChangeEdit (e) {
   editingNews.newsImage = e.target.files[0] || null;
 }
-
 
 function startEditingLanguage(langItem) {
     editingLanguageId.value = langItem.id;
@@ -1652,6 +1803,24 @@ const filteredUsers = computed(() => {
         ? users.value
         : users.value.filter((u) => String(u.role) === selectedRole.value);
 });
+
+const currentPageUsers = ref(1);
+const pageSizeUsers   = 4;
+
+const totalPagesUsers = computed(() =>
+  Math.ceil(filteredUsers.value.length / pageSizeUsers)
+);
+
+const paginatedUsers = computed(() => {
+  const start = (currentPageUsers.value - 1) * pageSizeUsers;
+  return filteredUsers.value.slice(start, start + pageSizeUsers);
+});
+
+watch(selectedRole, () => {
+  currentPageUsers.value = 1;
+});
+
+
 function getRoleName(role) {
     switch (role) {
         case 3:
@@ -1670,8 +1839,53 @@ function getRoleName(role) {
 const courses = ref([]);
 const languages = ref([]); // Языки программирования
 
+// ————— пагинация для Языков —————
+const currentPageLangs = ref(1);
+const pageSizeLangs    = ref(5);
+const totalPagesLangs  = computed(() =>
+  Math.ceil(languages.value.length / pageSizeLangs.value)
+);
+const paginatedLangs   = computed(() => {
+  const start = (currentPageLangs.value - 1) * pageSizeLangs.value;
+  return languages.value.slice(start, start + pageSizeLangs.value);
+});
+watch(languages, () => (currentPageLangs.value = 1));
+
+
+//пагинация курсов
+const currentPageCourses = ref(1)
+const pageSizeCourses    = ref(4)
+
+const totalPagesCourses = computed(() =>
+  Math.ceil(courses.value.length / pageSizeCourses.value)
+)
+
+const paginatedCourses = computed(() => {
+  const start = (currentPageCourses.value - 1) * pageSizeCourses.value
+  return courses.value.slice(start, start + pageSizeCourses.value)
+})
+watch(courses, () => {
+  currentPageCourses.value = 1
+})
+//открытие формы создания курса
+
+
+
 // Реактивная переменная для направлений
 const directions = ref([]);
+// ————— пагинация для Направлений —————
+const currentPageDirs = ref(1);
+const pageSizeDirs    = ref(5);
+const totalPagesDirs  = computed(() =>
+  Math.ceil(directions.value.length / pageSizeDirs.value)
+);
+const paginatedDirs   = computed(() => {
+  const start = (currentPageDirs.value - 1) * pageSizeDirs.value;
+  return directions.value.slice(start, start + pageSizeDirs.value);
+});
+watch(directions, () => (currentPageDirs.value = 1));
+
+
 
 // Состояние для создания курса
 const newCourse = ref({
@@ -2174,6 +2388,7 @@ onMounted(() => {
     loadLanguages();
     loadDirections();
     loadNews();
+    loadFaqs();
 
     // Инициализация EditorJS для создания новости
     editorNews = new EditorJS({
@@ -2199,6 +2414,7 @@ onMounted(() => {
    11. Добавление категории языка (пример)
 ===================================== */
 const languageCategory = ref("");
+
 async function createLanguageCategory() {
     try {
         const response = await axios.post("/api/languages", {
@@ -2219,8 +2435,12 @@ async function createLanguageCategory() {
 /* =====================================
    12. Добавление нового направления
 ===================================== */
+
 const directionName = ref("");
 const directionDescription = ref("");
+
+
+watch(directions, () => (currentPageDirs.value = 1));
 async function submitDirection() {
     try {
         const response = await axios.post("/api/directions", {
@@ -2257,7 +2477,29 @@ const faq = ref({
     question: "",
     answer: "",
 });
-
+const faqs = ref([]);
+const editingFaq   = reactive({ id:null, question:'', answer:'' });
+const currentPageFaq = ref(1);
+const pageSizeFaq    = ref(3);
+const totalPagesFaq  = computed(() =>
+  Math.ceil(faqs.value.length / pageSizeFaq.value)
+);
+const paginatedFaqs  = computed(() => {
+  const start = (currentPageFaq.value - 1) * pageSizeFaq.value;
+  return faqs.value.slice(start, start + pageSizeFaq.value);
+});
+watch(faqs, () => {
+  currentPageFaq.value = 1;
+});
+// — 3.2 Загрузка списка FAQ
+async function loadFaqs() {
+  try {
+    const { data } = await axios.get('/api/faqs');
+    faqs.value = data;
+  } catch (err) {
+    console.error('Не удалось загрузить FAQ:', err);
+  }
+}
 async function submitFaq() {
     try {
         const response = await axios.post("/api/faqs", faq.value);
@@ -2274,7 +2516,28 @@ async function submitFaq() {
         globalNotification.type = "error";
     }
 }
-
+function startEditingFaq(f) {
+  editingFaq.id       = f.id;
+  editingFaq.question = f.question;
+  editingFaq.answer   = f.answer;
+}
+async function saveEditingFaq() {
+  await axios.put(`/api/faqs/${editingFaq.id}`, {
+    question: editingFaq.question,
+    answer:   editingFaq.answer
+  });
+  editingFaq.id = null;
+  await loadFaqs();
+}
+function cancelEditingFaq() {
+  editingFaq.id = null;
+}
+// 3.5 Удалить
+async function deleteFaq(id) {
+  if (!confirm('Удалить этот вопрос?')) return;
+  await axios.delete(`/api/faqs/${id}`);
+  await loadFaqs();
+}
 /* =====================================
    15. Создание новости (News)
    (Новый блок: вставлено после раздела "14. Добавление FAQ")
@@ -2344,6 +2607,67 @@ async function submitNews() {
 </script>
 
 <style scoped>
+
+.modal-flex{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.button__edit__faq{
+    display: flex; gap: 20px;
+}
+.textarea{
+    resize: unset;
+    height: 80px;
+}
+.form-input--xl{
+    width: 800px;
+}
+.form-textarea{
+    width: 100%;
+    margin: 20px 0 0;
+}
+/* пагинация */
+
+.pagination-users {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.pagination-users button {
+  min-width: 40px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.pagination-users button:hover:not(:disabled) {
+  background-color: #fff;
+  border-color: #888;
+  transform: translateY(-1px);
+}
+
+.pagination-users button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pagination-users button.active {
+  background-color: #698dc9;
+  border-color: #698dc9;
+  color: #fff;
+  font-weight: bold;
+}
+/* // */
 .form-button--s{
     width: 280px !important;
 }
@@ -2697,12 +3021,29 @@ h2 {
     text-decoration: underline;
 }
 
+
+
 table.light-push-table {
     width: 100%;
     border-collapse: collapse;
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+    margin: 0 0 30px;
+}
+
+
+.light-push-table--small {
+  width: 50%;        /* таблица займет 50% контейнера */
+  max-width: 600px;  /* при желании ограничьте максимальную ширину */
+  margin: 0 auto;    /* по центру */
+  box-sizing: border-box;
+}
+
+.light-push-table--small .light-push-table th,
+.light-push-table--small .light-push-table td {
+    font-size: 12px;
+    white-space: unset;
 }
 
 .light-push-table th,
@@ -2711,7 +3052,6 @@ table.light-push-table {
     border-bottom: 1px solid #e0e0e0;
     text-align: left;
     font-size: 14px;
-    white-space: nowrap;
     /* Запрещает перенос текста */
     text-overflow: ellipsis;
     /* Добавляет многоточие при обрезке */

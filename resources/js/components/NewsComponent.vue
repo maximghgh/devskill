@@ -155,7 +155,10 @@ onMounted(() => {
 @media (max-width: 991px) {
     .content__img_big {
         width: 100%;
-        height: 100%;
+        height: 250px;
+    }
+    .content__button{
+        margin: 0 0 70px;
     }
 }
 @media (max-width: 370px) {

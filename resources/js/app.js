@@ -1,4 +1,5 @@
 import './bootstrap';
+import '../css/quiz.css';
 import { createApp } from 'vue';
 import VueTheMask from 'vue-the-mask';
 // import Register from './components/RegisterComponent.vue';
@@ -15,6 +16,7 @@ import TopicsComponent from './components/admin/TopicsComponent.vue';
 import StatisticsComponent from './components/admin/StatisticsComponent.vue';
 import StatisticsPurchaseComponent from './components/admin/StatisticsPurchaseComponent.vue';
 import ConsultationsComponent from './components/admin/ConsultationsComponent.vue';
+import AddCourseComponent from './components/admin/AddCourseComponent.vue';
 
 // Импорт всех компонентов 
 import ExampleComponent from './components/ExampleComponent.vue';
@@ -35,11 +37,13 @@ import PageCoursesComponent from './components/Page-coursesComponent.vue';
 import PersonalAreaComponent from './components/Personal-areaComponent.vue';
 import TrainingComponent from './components/TrainingComponent.vue';
 import CppComponent from './components/CppComponent.vue';
+import ChapterView from './components/ChapterView.vue';
 
 // Создание приложения Vue
 const app = createApp({});
 
 // Регистрация компонентов (имена в kebab-case) для админ-панели
+app.component('addcourse-component', AddCourseComponent);
 app.component('consultations-component', ConsultationsComponent);
 app.component('statistics-component', StatisticsComponent);
 app.component('statisticspurchase-component', StatisticsPurchaseComponent);
@@ -51,6 +55,7 @@ app.component('cabinet-admin-component', CabinetadminComponent);
 app.component('profile-admin-component', ProfileadminComponent);
 // Регистрация компонентов (имена в kebab-case)
 app.component('header-component', HeaderComponent);
+app.component('chapter-component', ChapterView);
 app.component('footer-component', FooterComponent);
 app.component('cpp-component', CppComponent);
 app.component('profile-component', ProfileComponent);

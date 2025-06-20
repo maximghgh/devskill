@@ -1,733 +1,143 @@
 <template>
-    <div>
-        <div class="maincontainer">
-            <div class="container">
-                <section class="skill">
-                    <div class="skill__title skill__title-second">
-                        <div class="skill__title-inner" @click.prevent="goBack">
-                            <span class="skill__title-arrow">&larr;</span>
-                            <a class="skill__title-h1">{{
-                                course.card_title
-                            }}</a>
-                        </div>
-                    </div>
-                    <div class="skill__inner">
-                        <div class="skill__sidebar">
-                            <div class="skill__sidebar-inner">
-                                <!-- Прогресс курса -->
-                                <div class="skill__progress">
-                                    <div class="skill__progress-title">
-                                        Прогресс курса
-                                        <span>{{ progressPercentage }}%</span>
-                                    </div>
-                                    <div class="skill__progress-line">
-                                        <span
-                                            :style="{
-                                                width: progressPercentage + '%',
-                                            }"
-                                        ></span>
-                                    </div>
-                                </div>
-                                <!-- Список тем (основное меню) -->
-                                <div
-                                    v-if="!selectedTopic"
-                                    class="skill__sidebar-menu-main"
-                                >
-                                    <ul class="skill__menu-main-list">
-                                        <li
-                                            v-for="topic in topics"
-                                            :key="topic.id"
-                                            :class="[
-                                                'skill__menu-main-item',
-                                                {
-                                                    'skill__menu-main-item_active':
-                                                        selectedTopic &&
-                                                        selectedTopic.id ===
-                                                            topic.id,
-                                                },
-                                            ]"
-                                        >
-                                            <!-- При клике выбираем тему -->
-                                            <a
-                                                href="#"
-                                                @click.prevent="
-                                                    selectTopic(topic)
-                                                "
-                                            >
-                                                {{ topic.title }}
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <!-- Дополнительное меню (главы), если выбрана тема -->
-                                <div
-                                    v-else-if="selectedTopic"
-                                    class="skill__sidebar-menu-second"
-                                >
-                                    <div class="skill__menu-second-title">
-                                        {{ selectedTopic.title }}
-                                    </div>
-                                    <div class="skill__menu-second-block">
-                                        <div
-                                            class="skill__menu-second-progress"
-                                        ></div>
-                                        <ul class="skill__menu-second-list">
-                                            <li
-                                                v-for="chapter in selectedTopic.chapters"
-                                                :key="chapter.id"
-                                                :class="[
-                                                    'skill__menu-second',
-                                                    {
-                                                        'skill__menu-second_active':
-                                                            selectedChapter &&
-                                                            selectedChapter.id ===
-                                                                chapter.id,
-                                                    },
-                                                ]"
-                                            >
-                                                <!-- При клике выбираем главу -->
-                                                <a
-                                                    href="#"
-                                                    @click.prevent="
-                                                        selectChapter(chapter)
-                                                    "
-                                                >
-                                                    <span>{{
-                                                        chapter.title
-                                                    }}</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                        <button
-                                            @click="deselectTopic"
-                                            class="button button_transparent button--xl"
-                                        >
-                                            Все темы
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="skill__content">
-                            <div class="skill__content-inner">
-                                <!-- 1) Если вообще ничего не выбрано — показываем приветствие -->
-                                <div
-                                    class="welcome_course"
-                                    v-if="!selectedTopic"
-                                >
-                                    <h1>
-                                        Добро пожаловать, на курс
-                                        {{ course.card_title }}!
-                                    </h1>
-                                    <p>Выберите тему, чтобы начать изучение.</p>
-                                </div>
-                                <!-- 2) Если выбрана тема, но не выбрана глава — показываем что-то общее по теме -->
-                                <div
-                                    v-else-if="
-                                        selectedTopic && !selectedChapter
-                                    "
-                                >
-                                    <h1>{{ selectedTopic.title }}</h1>
-                                    <p class="info__topic">
-                                        {{ selectedTopic.description }}
-                                    </p>
-                                </div>
-                                <div v-else>
-                                    <!-- Заголовок: название темы + название главы -->
-                                    <h1>{{ selectedChapter.title }}</h1>
-
-                                    <!-- Если глава — видео -->
-                                    <div
-                                        v-if="selectedChapter.type === 'video'"
-                                    >
-                                        <!-- Допустим, в БД есть поле video_url -->
-                                        <iframe
-                                            v-if="selectedChapter.video_url"
-                                            :src="selectedChapter.video_url"
-                                            controls
-                                            allowfullscreen
-                                            class="iframe"
-                                        ></iframe>
-                                        <h2>Описание</h2>
-                                        <!-- Если content хранится как HTML или текст, выводим -->
-                                        <div id="editorjs"></div>
-                                        <button
-                                            v-if="!selectedChapter.is_completed"
-                                            @click="
-                                                markChapterCompleted(
-                                                    selectedChapter
-                                                )
-                                            "
-                                            class="button button--sub"
-                                        >
-                                            Отметить как пройдено
-                                        </button>
-                                        <div v-else>
-                                            <p>Глава уже пройдена!</p>
-                                        </div>
-                                    </div>
-                                    <!-- Если глава — просто текст -->
-                                    <div
-                                        v-else-if="
-                                            selectedChapter.type === 'text'
-                                        "
-                                    >
-                                        <div id="editorjs"></div>
-                                        <button
-                                            v-if="!selectedChapter.is_completed"
-                                            @click="
-                                                markChapterCompleted(
-                                                    selectedChapter
-                                                )
-                                            "
-                                            class="button button--sub"
-                                        >
-                                            Отметить как пройдено
-                                        </button>
-                                        <div v-else>
-                                            <p>Глава уже пройдена!</p>
-                                        </div>
-                                    </div>
-                                    <!-- Если глава — задание (task) -->
-                                    <div
-                                        v-else-if="
-                                            selectedChapter.type === 'task'
-                                        "
-                                    >
-                                        <div id="editorjs"></div>
-                                        <button
-                                            @click="toggleSolution"
-                                            class="button button--sub"
-                                        >
-                                            {{
-                                                showSolution
-                                                    ? "Показать ответ"
-                                                    : "Показать ответ"
-                                            }}
-                                        </button>
-                                        <button
-                                            v-if="!selectedChapter.is_completed"
-                                            @click="
-                                                markChapterCompleted(
-                                                    selectedChapter
-                                                )
-                                            "
-                                            class="button button--sub"
-                                        >
-                                            Отметить как пройдено
-                                        </button>
-                                        <div v-else>
-                                            <p>Глава уже пройдена!</p>
-                                        </div>
-                                        <!-- Модальное окно (с переходом fade) -->
-                                        <transition name="fade">
-                                            <div
-                                                class="modal"
-                                                v-if="showSolution"
-                                            >
-                                                <!-- Полупрозрачный фон (оверлей). При клике закрываем модалку -->
-                                                <div
-                                                    class="modal-overlay"
-                                                    @click="
-                                                        showSolution = false
-                                                    "
-                                                ></div>
-
-                                                <!-- Содержимое модалки -->
-                                                <div class="modal-content">
-                                                    <h3>Правильный ответ:</h3>
-                                                    <!-- Выводим правильный ответ -->
-                                                    <div
-                                                        v-html="
-                                                            selectedChapter.correct_answer
-                                                        "
-                                                    ></div>
-                                                    <!-- Кнопка «Закрыть» -->
-                                                    <button
-                                                        @click="
-                                                            showSolution = false
-                                                        "
-                                                        class="button"
-                                                    >
-                                                        Закрыть
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </transition>
-                                    </div>
-                                    <!-- Если глава — терминология (terms) -->
-                                    <div
-                                        v-else-if="
-                                            selectedChapter.type === 'terms'
-                                        "
-                                    >
-                                        <div id="editorjs"></div>
-                                        <button
-                                            v-if="!selectedChapter.is_completed"
-                                            @click="
-                                                markChapterCompleted(
-                                                    selectedChapter
-                                                )
-                                            "
-                                            class="button button--sub"
-                                        >
-                                            Отметить как пройдено
-                                        </button>
-                                        <div v-else>
-                                            <p>Глава уже пройдена!</p>
-                                        </div>
-                                    </div>
-                                    <!-- Если глава — презентация -->
-                                    <div
-                                        v-else-if="
-                                            selectedChapter.type ===
-                                            'presentation'
-                                        "
-                                    >
-                                        <div id="editorjs"></div>
-
-                                        <div
-                                            v-if="embeddedSrc"
-                                            class="presentation-wrapper"
-                                        >
-                                            <iframe
-                                                :src="embeddedSrc"
-                                                class="presentation-frame"
-                                                allowfullscreen
-                                            ></iframe>
-                                        </div>
-                                        <!-- <a
-                                            v-if="presentationSrc"
-                                            :href="presentationSrc"
-                                            download
-                                            class="button button--sub"
-                                        >
-                                            Скачать файл
-                                        </a> -->
-                                        <button
-                                            v-if="!selectedChapter.is_completed"
-                                            @click="
-                                                markChapterCompleted(
-                                                    selectedChapter
-                                                )
-                                            "
-                                            class="button button--sub"
-                                        >
-                                            Отметить как пройдено
-                                        </button>
-                                    </div>
-                                    <div v-else>
-                                        <p>
-                                            Неизвестный тип главы:
-                                            {{ selectedChapter.type }}
-                                        </p>
-                                    </div>
-                                    <a v-if="fileSrc" :href="fileSrc" download class="link--dow">
-                                        <span>Скачать файл урока</span>
-                                    </a>
-                                    <!-- Общие кнопки -->
-                                    <div class="skill__buttons">
-                                        <!-- Кнопка "Назад" с анимацией плавного появления -->
-                                        <transition name="fade">
-                                            <button
-                                                v-if="canGoPrev"
-                                                @click="goToPrevChapter"
-                                                class="button button_skill-prev"
-                                            >
-                                                Назад
-                                            </button>
-                                        </transition>
-
-                                        <!-- Кнопка "Вперёд" с анимацией сдвига вправо -->
-                                        <transition name="slide-right">
-                                            <button
-                                                v-if="
-                                                    canGoNext &&
-                                                    selectedChapter &&
-                                                    selectedChapter.is_completed
-                                                "
-                                                @click="goToNextChapter"
-                                                class="button button_skill-next"
-                                            >
-                                                Вперёд
-                                            </button>
-                                        </transition>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="comments" v-if="courseComments">
-                                <h2>Комментарии</h2>
-                                <div class="comments__inner">
-                                    <div class="comment__title">
-                                        <span class="comment__count">{{
-                                            courseComments.length
-                                        }}</span>
-                                        комментариев
-                                    </div>
-                                    <!-- Форма для добавления нового комментария -->
-                                    <div class="comment__area">
-                                        <textarea
-                                            v-model="newComment"
-                                            placeholder="Мой комментарий..."
-                                        ></textarea>
-                                    </div>
-                                    <div class="comment__button">
-                                        <button
-                                            class="button button_comment-cancel"
-                                            @click="newComment = ''"
-                                        >
-                                            Отмена
-                                        </button>
-                                        <button
-                                            class="button button_comment-send"
-                                            @click="submitComment"
-                                        >
-                                            Оставить комментарий
-                                        </button>
-                                    </div>
-                                    <!-- Список комментариев -->
-                                    <div class="comment__list">
-                                        <div
-                                            class="comment__branch"
-                                            v-for="comment in courseComments"
-                                            :key="comment.id"
-                                        >
-                                            <div class="comment__one">
-                                                <div class="comment__avatar">
-                                                    <img
-                                                        :src="
-                                                            comment.user_avatar
-                                                                ? `/storage/${comment.user_avatar}`
-                                                                : '/public/img/avatar.jpg'
-                                                        "
-                                                        alt="Avatar"
-                                                    />
-                                                </div>
-                                                <div class="comment__block">
-                                                    <div class="comment__name">
-                                                        <!-- Если есть user, выводим user.name, иначе "Аноним" -->
-                                                        {{
-                                                            comment.user
-                                                                ? comment.user
-                                                                      .name
-                                                                : "Аноним"
-                                                        }}
-                                                    </div>
-                                                    <div class="comment__time">
-                                                        {{
-                                                            formatTime(
-                                                                comment.created_at
-                                                            )
-                                                        }}
-                                                    </div>
-                                                    <div class="comment__text">
-                                                        {{ comment.body }}
-                                                    </div>
-                                                    <div class="comment__likes">
-                                                        <div
-                                                            class="comment__like comment__like-good"
-                                                            @click="
-                                                                likeComment(
-                                                                    comment
-                                                                )
-                                                            "
-                                                        >
-                                                            <span>
-                                                                <svg
-                                                                    viewBox="0 0 800 800"
-                                                                >
-                                                                    <path
-                                                                        d="M530,150c0-50-49.4-83.3-88-83.3c-26.9,0-29,20.4-33.1,60.7c-1.8,17.7-4,39.1-8.9,64.3 c-12.9,66.7-57.3,152-99.9,177.5v197.5c-0.1,75,24.9,100,133.2,100h125.8c72.5,0,90.1-47.8,96.6-65.5l0.4-1.2 c3.8-10.2,11.9-18.2,21.3-27.3c10.3-10.2,22.1-21.8,30.9-39.3c10.4-20.8,9-39.2,7.8-55.7c-0.8-10-1.5-19.2,0.6-27.7 c2.1-9,4.9-15.8,7.5-22.4c4.8-11.9,9.2-22.9,9.2-44.3c0-50-24.9-83.3-77.2-83.3H516.7C516.7,300.1,530,200,530,150z M183.3,333.3 c-27.6,0-50,22.4-50,50v233.3c0,27.6,22.4,50,50,50s50-22.4,50-50V383.3C233.3,355.7,210.9,333.3,183.3,333.3z"
-                                                                    />
-                                                                </svg>
-                                                            </span>
-                                                            <span
-                                                                class="comment__like-count"
-                                                                >{{
-                                                                    comment.likes
-                                                                }}</span
-                                                            >
-                                                        </div>
-
-                                                        <!-- Кнопка "Дизлайк" -->
-                                                        <div
-                                                            class="comment__like comment__like-bad"
-                                                            @click="
-                                                                dislikeComment(
-                                                                    comment
-                                                                )
-                                                            "
-                                                        >
-                                                            <span>
-                                                                <svg
-                                                                    viewBox="0 0 800 800"
-                                                                >
-                                                                    <path
-                                                                        class="st0"
-                                                                        d="M516.7,433.4h139.5c52.3,0,77.2-33.3,77.2-83.3c0-21.4-4.4-32.4-9.2-44.3c-2.6-6.6-5.4-13.4-7.5-22.4 c-2.1-8.5-1.4-17.7-0.6-27.7c1.2-16.5,2.6-34.9-7.8-55.7c-8.8-17.5-20.6-29.1-30.9-39.3c-9.4-9.1-17.5-17.1-21.3-27.3l-0.4-1.2 c-6.5-17.7-24.1-65.5-96.6-65.5H433.3c-108.3,0-133.3,25-133.2,100v197.5c42.6,25.5,87,110.8,99.9,177.5c4.9,25.2,7.1,46.6,8.9,64.3 c4.1,40.3,6.2,60.7,33.1,60.7c38.6,0,88-33.3,88-83.3S516.7,433.3,516.7,433.4z M233.3,350.1V116.8c0-27.6-22.4-50-50-50 s-50,22.4-50,50v233.3c0,27.6,22.4,50,50,50S233.3,377.7,233.3,350.1z"
-                                                                    />
-                                                                </svg>
-                                                            </span>
-                                                            <span
-                                                                class="comment__like-count"
-                                                                >{{
-                                                                    comment.dislikes
-                                                                }}</span
-                                                            >
-                                                        </div>
-                                                        <div
-                                                            class="comment__like-answer"
-                                                            @click="
-                                                                replyToComment(
-                                                                    comment
-                                                                )
-                                                            "
-                                                        >
-                                                            Ответить
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- Форма ответа (если выбран этот комментарий) -->
-                                            <div
-                                                v-if="replyTo === comment.id"
-                                                class="comment__one comment__one_respond"
-                                            >
-                                                <div class="comment__avatar">
-                                                    <img
-                                                        src="/public/img/avatar.jpg"
-                                                        alt="Avatar"
-                                                    />
-                                                </div>
-                                                <div class="comment__block">
-                                                    <div class="comment__area">
-                                                        <textarea
-                                                            v-model="
-                                                                replyComment
-                                                            "
-                                                            placeholder="Мой комментарий..."
-                                                        ></textarea>
-                                                    </div>
-                                                    <div
-                                                        class="comment__button"
-                                                    >
-                                                        <button
-                                                            class="button button_comment-cancel"
-                                                            @click="cancelReply"
-                                                        >
-                                                            Отмена
-                                                        </button>
-                                                        <button
-                                                            class="button button_comment-send"
-                                                            @click="
-                                                                submitReply(
-                                                                    comment
-                                                                )
-                                                            "
-                                                        >
-                                                            Оставить комментарий
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- Вывод вложенных комментариев -->
-                                            <div
-                                                v-if="
-                                                    comment.children &&
-                                                    comment.children.length
-                                                "
-                                            >
-                                                <!-- Цикл по дочерним комментариям -->
-                                                <div
-                                                    class="comment__branch"
-                                                    v-for="child in comment.children"
-                                                    :key="child.id"
-                                                >
-                                                    <div
-                                                        class="comment__one comment__one_respond"
-                                                    >
-                                                        <div
-                                                            class="comment__avatar"
-                                                        >
-                                                            <img
-                                                                :src="
-                                                                    child.user_avatar
-                                                                        ? `/storage/${child.user_avatar}`
-                                                                        : '/public/img/avatar.jpg'
-                                                                "
-                                                                alt="Avatar"
-                                                            />
-                                                        </div>
-                                                        <div
-                                                            class="comment__block"
-                                                        >
-                                                            <div
-                                                                class="comment__name"
-                                                            >
-                                                                {{
-                                                                    child.user_name ||
-                                                                    currentUserName
-                                                                }}
-                                                            </div>
-                                                            <div
-                                                                class="comment__time"
-                                                            >
-                                                                {{
-                                                                    formatTime(
-                                                                        child.created_at
-                                                                    )
-                                                                }}
-                                                            </div>
-                                                            <div
-                                                                class="comment__text"
-                                                            >
-                                                                {{ child.body }}
-                                                            </div>
-                                                            <div
-                                                                class="comment__likes"
-                                                            >
-                                                                <div
-                                                                    class="comment__like comment__like-good"
-                                                                    @click="
-                                                                        likeComment(
-                                                                            comment
-                                                                        )
-                                                                    "
-                                                                >
-                                                                    <span>
-                                                                        <svg
-                                                                            viewBox="0 0 800 800"
-                                                                        >
-                                                                            <path
-                                                                                d="M530,150c0-50-49.4-83.3-88-83.3c-26.9,0-29,20.4-33.1,60.7c-1.8,17.7-4,39.1-8.9,64.3 c-12.9,66.7-57.3,152-99.9,177.5v197.5c-0.1,75,24.9,100,133.2,100h125.8c72.5,0,90.1-47.8,96.6-65.5l0.4-1.2 c3.8-10.2,11.9-18.2,21.3-27.3c10.3-10.2,22.1-21.8,30.9-39.3c10.4-20.8,9-39.2,7.8-55.7c-0.8-10-1.5-19.2,0.6-27.7 c2.1-9,4.9-15.8,7.5-22.4c4.8-11.9,9.2-22.9,9.2-44.3c0-50-24.9-83.3-77.2-83.3H516.7C516.7,300.1,530,200,530,150z M183.3,333.3 c-27.6,0-50,22.4-50,50v233.3c0,27.6,22.4,50,50,50s50-22.4,50-50V383.3C233.3,355.7,210.9,333.3,183.3,333.3z"
-                                                                            />
-                                                                        </svg>
-                                                                    </span>
-                                                                    <span
-                                                                        class="comment__like-count"
-                                                                        >{{
-                                                                            comment.likes
-                                                                        }}</span
-                                                                    >
-                                                                </div>
-
-                                                                <!-- Кнопка "Дизлайк" -->
-                                                                <div
-                                                                    class="comment__like comment__like-bad"
-                                                                    @click="
-                                                                        dislikeComment(
-                                                                            comment
-                                                                        )
-                                                                    "
-                                                                >
-                                                                    <span>
-                                                                        <svg
-                                                                            viewBox="0 0 800 800"
-                                                                        >
-                                                                            <path
-                                                                                class="st0"
-                                                                                d="M516.7,433.4h139.5c52.3,0,77.2-33.3,77.2-83.3c0-21.4-4.4-32.4-9.2-44.3c-2.6-6.6-5.4-13.4-7.5-22.4 c-2.1-8.5-1.4-17.7-0.6-27.7c1.2-16.5,2.6-34.9-7.8-55.7c-8.8-17.5-20.6-29.1-30.9-39.3c-9.4-9.1-17.5-17.1-21.3-27.3l-0.4-1.2 c-6.5-17.7-24.1-65.5-96.6-65.5H433.3c-108.3,0-133.3,25-133.2,100v197.5c42.6,25.5,87,110.8,99.9,177.5c4.9,25.2,7.1,46.6,8.9,64.3 c4.1,40.3,6.2,60.7,33.1,60.7c38.6,0,88-33.3,88-83.3S516.7,433.3,516.7,433.4z M233.3,350.1V116.8c0-27.6-22.4-50-50-50 s-50,22.4-50,50v233.3c0,27.6,22.4,50,50,50S233.3,377.7,233.3,350.1z"
-                                                                            />
-                                                                        </svg>
-                                                                    </span>
-                                                                    <span
-                                                                        class="comment__like-count"
-                                                                        >{{
-                                                                            comment.dislikes
-                                                                        }}</span
-                                                                    >
-                                                                </div>
-                                                                <div
-                                                                    class="comment__like-answer"
-                                                                    @click="
-                                                                        replyToComment(
-                                                                            child
-                                                                        )
-                                                                    "
-                                                                >
-                                                                    Ответить
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
+    <div class="maincontainer">
+        <div class="backs">
+            <button @click="goBack" class="btn-back">Вернуться в личный кабинет</button>
         </div>
-        <div class="b-popup" id="popup">
-            <div class="closer-big"></div>
-            <div class="b-popup-content">
-                <div class="popup-title"></div>
-                <div class="popup-desc"></div>
-                <div class="form-block">
-                    <form
-                        method="post"
-                        name="mtForm1"
-                        id="mtForm1"
-                        class="forma"
-                    >
-                        <input
-                            type="hidden"
-                            name="data_form"
-                            id="data_form"
-                            value=""
+        <div class="container flex">
+            <!-- Левый сайдбар -->
+            <aside class="sidebar">
+                <!-- Карточка курса -->
+                <div class="card course-card">
+                    <div class="course-card__header">
+                        <div>
+                            <div class="course-card__label">Курс</div>
+                            <h2 class="course-card__title">
+                                {{ course.card_title }}
+                            </h2>
+                            <div class="course-card__sub">
+                                С финальной работой
+                            </div>
+                        </div>
+                        <img
+                            :src="
+                                `../${course.card_image}` ||
+                                '/img/logo_placeholder.png'
+                            "
+                            alt="Изображение курса"
+                            width="93"
+                            height="92"
+                            class="logo_couerses"
                         />
-                        <input type="hidden" name="no" value="no" />
-                        <div class="form-field">
-                            <label>
-                                <span>Ваше имя:</span>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    required="required"
-                                />
-                            </label>
+                    </div>
+                    <div class="progres">
+                        <div class="course-card__sub">Ваш прогресс</div>
+                        <div class="progress-bar">
+                            <span
+                                :style="{ width: progressPercentage + '%' }"
+                            ></span>
                         </div>
-                        <div class="form-field">
-                            <label>
-                                <span>Ваш телефон:</span>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    required="required"
-                                    class="phone_valid"
-                                />
-                            </label>
+                    </div>
+
+                    <button
+                        class="button"
+                        :class="{ 'button--disabled': !certificateUnlocked }"
+                        :disabled="!certificateUnlocked"
+                        @click="downloadCertificate"
+                    >
+                        Сертификат
+                    </button>
+                </div>
+
+                <!-- Telegram-чат -->
+                <div class="card telegram-card">
+                    <div class="telegram-card__header">
+                        <h3>
+                            Напишите на почту, если у вас появились проблемы
+                        </h3>
+                    </div>
+                    <p>
+                        Мы быстро с вами свяжемся и поможем
+                        <a href="#">devskillreport@mail.ru</a>.
+                    </p>
+                </div>
+            </aside>
+
+            <!-- Правый контент -->
+            <div class="content">
+                <ul class="topics-list">
+                    <li
+                        v-for="(topic, idx) in topics"
+                        :key="topic.id"
+                        class="topic"
+                    >
+                        <!-- Заголовок раздела -->
+                        <div
+                            class="topic__header"
+                            @click="toggleTopic(topic.id)"
+                        >
+                            <span>{{ idx + 1 }}</span>
+                            <h4>{{ topic.title }}</h4>
+                            <span
+                                class="toggle-caret"
+                                :class="{ 'is-open': openTopic === topic.id }"
+                            ></span>
                         </div>
-                        <div class="form-field">
-                            <input
-                                type="submit"
-                                name="submit"
-                                value="Отправить заявку"
-                            />
-                        </div>
-                    </form>
-                </div>
-                <div class="close-up">
-                    <div></div>
-                    <div></div>
-                </div>
-            </div>
-        </div>
-        <div class="b-popup" id="message">
-            <div class="closer-big closer-big-all"></div>
-            <div class="b-popup-content">
-                <div class="popup-title">Cпасибо вам!</div>
-                <div class="popup-desc">
-                    Ваша заявка успешно отправлена. <br />C вами свяжутся в
-                    ближайшее время.
-                </div>
-                <div class="close-up close-up-all">
-                    <div></div>
-                    <div></div>
-                </div>
+                        <transition name="collapse">
+                            <!-- ГЛАВЫ: карточки  -->
+                            <ul
+                                v-show="openTopic === topic.id"
+                                class="chapters-grid"
+                            >
+                                <li
+                                    v-for="ch in topic.chapters"
+                                    :key="ch.id"
+                                    class="chapter-card"
+                                >
+                                    <a
+                                        class="chapter-link"
+                                        :href="`/chapter/${ch.id}`"
+                                    >
+                                        <div
+                                            class="chapter-card__preview-wrapper"
+                                            :class="{
+                                                'is-completed': ch.is_completed,
+                                            }"
+                                        >
+                                            <div
+                                                v-show="ch.is_completed"
+                                                class="good"
+                                            >
+                                                <img
+                                                    width="15"
+                                                    height="15"
+                                                    src="../../img/circle.png"
+                                                    alt=""
+                                                />
+                                            </div>
+                                            <img
+                                                width="30"
+                                                height="50"
+                                                :src="getPreviewSrc(ch)"
+                                                :alt="ch.title"
+                                                class="chapter-card__preview"
+                                            />
+                                            <span
+                                                v-if="ch.is_completed"
+                                                class="chapter-card__badge"
+                                            >
+                                                <i class="icon-check"></i>
+                                            </span>
+                                        </div>
+                                        <h5 class="chapter-card__title">
+                                            {{ topic.id }}.{{ ch.id }}
+                                            {{ ch.title }}
+                                        </h5>
+                                    </a>
+                                </li>
+                            </ul>
+                        </transition>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
@@ -743,8 +153,35 @@ import ImageTool from "@editorjs/image";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
+import iconText from "../../img/text.png";
+import iconVideo from "../../img/video.png";
+import iconTerms from "../../img/terms.png";
+import iconTask from "../../img/task.png";
+import iconPresentation from "../../img/presentation.png";
+
+const iconMap = {
+    text: iconText,
+    video: iconVideo,
+    terms: iconTerms,
+    task: iconTask,
+    presentation: iconPresentation,
+};
+
+function getPreviewSrc(chapter) {
+    // если у главы есть собственный preview, используем его
+    if (chapter.preview) return chapter.preview;
+    // иначе берём из маппинга по типу
+    return iconMap[chapter.type] || iconText; // text по умолчанию
+}
+
 dayjs.extend(relativeTime);
 dayjs.locale("ru");
+
+const openTopic = ref(null);
+
+function toggleTopic(id) {
+    openTopic.value = openTopic.value === id ? null : id;
+}
 
 /* ======================================================
    1. Работа с курсом, темами и главами
@@ -760,27 +197,31 @@ const showSolution = ref(false);
 
 //работа с файлами
 const fileSrc = computed(() => {
-  const ch = selectedChapter.value
-  if (!ch) return null
+    const ch = selectedChapter.value;
+    if (!ch) return null;
 
-  // возможные поля, где хранится путь
-  let raw =
-    ch.file_path || ch.attachment_path || ch.presentation_path || ch.file || ''
+    // возможные поля, где хранится путь
+    let raw =
+        ch.file_path ||
+        ch.attachment_path ||
+        ch.presentation_path ||
+        ch.file ||
+        "";
 
-  if (!raw) return null
+    if (!raw) return null;
 
-  // ① абсолютный URL
-  if (/^https?:\/\//i.test(raw)) return raw
+    // ① абсолютный URL
+    if (/^https?:\/\//i.test(raw)) return raw;
 
-  // ② начинается с /storage/
-  if (raw.startsWith('/storage/')) return raw
+    // ② начинается с /storage/
+    if (raw.startsWith("/storage/")) return raw;
 
-  // ③ начинается с storage/ (без слэша)
-  if (raw.startsWith('storage/')) return '/' + raw
+    // ③ начинается с storage/ (без слэша)
+    if (raw.startsWith("storage/")) return "/" + raw;
 
-  // ④ только имя файла
-  return '/storage/files/' + raw      // ← папку подберите под себя
-})
+    // ④ только имя файла
+    return "/storage/files/" + raw; // ← папку подберите под себя
+});
 const presentationSrc = computed(() => {
     const ch = selectedChapter.value;
     if (!ch) return null;
@@ -1121,6 +562,83 @@ const progressPercentage = computed(() => {
         : 0;
 });
 
+const certificateUnlocked = computed(() => progressPercentage.value === 100);
+
+// 2) Идентификатор курса — либо из route params, либо из localStorage
+
+/* -------------------------------------------------
+   2. Достаём пользователя из localStorage
+   localStorage.setItem('user', JSON.stringify({id: 2, name: 'Иванов Иван'}))
+--------------------------------------------------*/
+function getStoredUser() {
+    try {
+        return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch (e) {
+        console.error("Не смог распарсить user из localStorage", e);
+        return {};
+    }
+}
+const stordUser = getStoredUser();
+
+/* -------------------------------------------------
+   3. Получаем id курса из URL
+      – ?course=42         -> 42
+      – /courses/42        -> 42
+--------------------------------------------------*/
+function getCourseIdFromUrl() {
+    const url = new URL(window.location.href);
+
+    // 3.1 сначала ищем query-param
+    if (url.searchParams.has("course")) {
+        return url.searchParams.get("course");
+    }
+
+    // 3.2 иначе берём последнюю цифру в pathname
+    const match = url.pathname.match(/(\d+)(?!.*\d)/);
+    return match ? match[1] : null;
+}
+const coursId = getCourseIdFromUrl();
+
+/* -------------------------------------------------
+   4. Клик по кнопке = обращение к API и скачивание
+--------------------------------------------------*/
+async function downloadCertificate() {
+    if (!certificateUnlocked) return;
+
+    if (!stordUser.id || !stordUser.name) {
+        return alert("В localStorage нет данных пользователя");
+    }
+    if (!coursId) {
+        return alert("Не удалось определить ID курса из URL");
+    }
+
+    try {
+        const response = await axios.post(
+            `/api/courses/${coursId}/certificate`,
+            {
+                user_id: stordUser.id,
+                name: stordUser.name,
+                // Передавать название курса не нужно —
+                // бэкенд найдёт его по id. Если хотите —
+                // передайте отдельным полем.
+            },
+            { responseType: "blob" }
+        );
+
+        // Сохранить PDF
+        const blob = new Blob([response.data], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `certificate_${stordUser.id}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error(e);
+        alert("Ошибка при генерации сертификата");
+    }
+}
+
 const storedUser = JSON.parse(localStorage.getItem("user"));
 async function markChapterCompleted(chapter) {
     if (chapter.is_completed) return;
@@ -1399,6 +917,339 @@ async function dislikeComment(comment) {
 </script>
 
 <style scoped>
+.backs{
+    display: flex;
+    height: 20px;
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+}
+.collapse-enter-active,
+.collapse-leave-active {
+    transition: max-height 0.7s ease-in, opacity 0.5s ease;
+    overflow: hidden;
+}
+
+/* Начальное состояние (до того как элемент «въехал») */
+.collapse-enter-from,
+.collapse-leave-to {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* Конечное состояние (когда полностью открыт) */
+.collapse-enter-to,
+.collapse-leave-from {
+    max-height: 800px; /* достаточно большое, чтобы влез весь список */
+    opacity: 1;
+}
+.button--disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+.maincontainer {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: unset;
+}
+.btn-back {
+    font-size: 15px;
+    background: none;
+    border: none;
+    color: #5b4bff;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+.toggle-caret {
+    /* размер стрелки */
+    width: 10px;
+    height: 10px;
+
+    /* «рисуем» стрелку двумя сторонами рамки */
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+
+    /* изначально каретка смотрит вправо-вниз (закрыто) */
+    transform: rotate(45deg);
+    transition: transform 0.25s;
+}
+
+/* когда раздел открыт – стрелка вверх */
+.toggle-caret.is-open {
+    transform: rotate(-135deg); /* поворачиваем на 180° */
+}
+.chapters-grid {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+/* сама карточка-обёртка */
+.chapter-card {
+    display: flex;
+    flex-direction: column;
+}
+
+/* превью-контейнер */
+.chapter-card__preview-wrapper {
+    position: relative;
+    background: #eaeaf4;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 150px; /* гарантируем высоту до загрузки img */
+    transition: transform 0.25s;
+}
+.chapter-card__preview-wrapper:hover {
+    transform: translateY(-4px);
+}
+
+/* превью-изображение */
+.chapter-card__preview {
+    margin: 0 auto;
+    width: 100px;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+/* зелёный чек сверху слева */
+.chapter-card__badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 24px;
+    height: 24px;
+    background: var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #fff;
+}
+
+/* длительность внизу слева */
+.chapter-card__time {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    font-size: 12px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.65);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+.chapter-link {
+    text-decoration: none;
+}
+/* подпись под карточкой */
+.chapter-card__title {
+    margin: 8px 0 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.3;
+    color: #000000;
+}
+
+.content ul li {
+    margin-bottom: 15px;
+}
+
+h2 {
+    text-align: left;
+}
+.maincontainer {
+    background: #ffffff;
+    color: #000000;
+    min-height: 100vh;
+    padding: 20px;
+}
+.container {
+    width: 100%;
+    max-width: 1240px;
+    margin: 25px auto;
+}
+.flex {
+    display: flex;
+    gap: 40px;
+}
+
+/* ========== Sidebar ========== */
+.sidebar {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Общий класс карточки */
+.card {
+    width: 100%;
+    max-width: 500px;
+    background: #eaeaf4;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+/* Карточка курса */
+.course-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.course-card__label {
+    color: #617aff;
+    font-size: 12px;
+    margin: 0 0 7px;
+}
+.course-card__title {
+    color: #617aff;
+    font-size: 20px;
+    margin: 4px 0;
+    margin: 0 0 7px;
+}
+.course-card__sub {
+    font-size: 14px;
+    color: #617aff;
+}
+.course-card__img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+.course-stats {
+    color: #617aff;
+    margin: 16px 0;
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    font-size: 14px;
+    opacity: 0.9;
+    justify-content: space-around;
+}
+
+.progres {
+    margin: 40px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.progress-bar {
+    height: 6px;
+    background: #ffffff;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar span {
+    display: block;
+    height: 100%;
+    background: #5b4bff;
+    transition: width 0.4s;
+}
+
+.button--disabled {
+    cursor: unset !important;
+    user-select: none;
+    width: 100%;
+    padding: 10px;
+    background: #33333380 !important;
+    color: #666;
+    border: none;
+    border-radius: 6px;
+    cursor: not-allowed;
+}
+
+/* Telegram-карточка */
+.telegram-card__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.telegram-card__header h3 {
+    font-size: 16px;
+    margin: 0;
+}
+.telegram-card p {
+    font-size: 13px;
+    line-height: 1.4;
+}
+.telegram-card a {
+    color: #5b4bff;
+    text-decoration: none;
+}
+
+/* ========== Content ========== */
+.content {
+    flex: 1;
+}
+
+.topics-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.topic {
+    border-bottom: 1px solid #333;
+    padding: 12px 0;
+}
+.topic__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+.topic__header h4 {
+    margin: 0 8px;
+    font-size: 16px;
+}
+.toggle-icon i {
+    font-size: 14px;
+    color: #5b4bff;
+}
+
+.chapters-list {
+    list-style: none;
+    padding: 8px 0 0 20px;
+    margin: 0;
+}
+.chapter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+.chapter__header h5 {
+    margin: 0 8px;
+    font-size: 14px;
+    opacity: 0.9;
+}
+.status-icon i {
+    font-size: 16px;
+    color: #38b838; /* зелёный для пройденных */
+}
+.status-icon .icon-play-circle {
+    color: #ffa500; /* оранжевый для текущих */
+}
+</style>
+
+<style scoped>
+.good {
+    border-radius: 10px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
 .presentation-frame {
     width: 1000px;
     height: 60vh; /* или 60vh, как удобнее */
@@ -1413,7 +1264,7 @@ async function dislikeComment(comment) {
     margin: 15px 0 0;
     transition: 0.2s color;
 }
-.link--dow:hover{
+.link--dow:hover {
     color: #677eff;
 }
 .button--sub {
@@ -1466,6 +1317,7 @@ async function dislikeComment(comment) {
 
 /* Пример оформления кнопки (опционально) */
 .button {
+    width: 100%;
     margin-top: 16px;
     padding: 8px 16px;
     background: #617aff;
@@ -1579,5 +1431,29 @@ async function dislikeComment(comment) {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+@media (max-width: 767px){
+    .btn-back{
+        left: 6%;
+    }
+    .sidebar{
+        width: 250px;
+    }
+    .logo_couerses{
+        width: 50px;
+        height: 50px;
+    }
+}
+@media (max-width: 680px){
+    .card{
+        max-width: 100%;
+    }
+    .sidebar{
+        width: 100%;
+    }
+    .flex{
+        justify-content: center;
+        flex-direction: column;
+    }
 }
 </style>

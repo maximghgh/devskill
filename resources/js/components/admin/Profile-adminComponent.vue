@@ -44,6 +44,7 @@
                                                 type="file"
                                                 name="file"
                                                 accept=".jpg, .png, .wbep,.jpeg"
+                                                @change="onFileSelected" 
                                             />
                                             <span
                                                 class="infoblock__info-filebtn"
@@ -57,6 +58,7 @@
                                             type="submit"
                                             value="Добавить"
                                             class="infoblock__button"
+                                            @click="uploadPhoto"
                                         />
                                     </form>
                                 </div>

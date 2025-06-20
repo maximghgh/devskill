@@ -19,6 +19,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
+
+Route::view('/chapter/{id}', 'chapterview')   // resources/views/chapter.blade.php
+     ->name('chapter.page');
+
+
+Route::post('/certificate/generate', [CertificateController::class, 'generate'])
+->name('certificate.generate');
+
+
 Route::get('/contact', function () {
     return view('contact');
 })->name('contact');
@@ -77,6 +87,10 @@ Route::get('/news-single/{id}', function ($id) {
 Route::get('/page-courses', function () {
     return view('page-courses');
 })->name('page-courses');
+
+Route::get('/admin/addcourse', function () {
+    return view('admin.addcourse');
+})->name('admin.addcourse');
 
 Route::get('/verify', function () {
     return view('verify');

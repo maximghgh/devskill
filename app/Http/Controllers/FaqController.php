@@ -28,5 +28,21 @@ class FaqController extends Controller
         $faqs = Faq::all();
         return response()->json($faqs);
     }
+
+    public function update(Request $request, Faq $faq)
+    {
+        $data = $request->validate([
+            'question' => 'required|string',
+            'answer'   => 'required|string',
+        ]);
+        $faq->update($data);
+        return response()->json($faq);
+    }
+
+public function destroy(Faq $faq)
+    {
+        $faq->delete();
+        return response()->json(null, 204);
+    }
 }
 

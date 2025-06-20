@@ -89,13 +89,9 @@
 
                         <div class="b-popup__link-social">
                             <a
-                                href="https://devskills.foncode.ru/login"
+                                href="/login"
                                 title="Вход"
                             >Вход</a>
-                            <a
-                                href="https://devskills.foncode.ru/social-auth/vkontakte"
-                                title="Vkontakte"
-                            >По ВКонтакте</a>
                         </div>
                         <div style="margin-top: 20px; font-size: 14px">
                             <input

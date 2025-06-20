@@ -60,7 +60,6 @@
                 <div class="b-popup__block" style="justify-content: right;">
                       <div class="b-popup__link-social" style="margin: 0px;">
                       <a href="/reset-password" class="b-popup__forget">Забыли пароль?</a>
-                      <a href="/social-auth/vkontakte" title="Vkontakte">По ВКонтакте</a>
                       </div>
                   </div>
                 <!-- Общее сообщение об ошибке (если есть) -->

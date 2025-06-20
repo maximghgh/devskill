@@ -1,0 +1,189 @@
+/* quiz.css */
+
+.quiz-wrapper {
+  margin: 16px 0;
+  font-family: Arial, sans-serif;
+}
+
+.quiz-add{
+  display: inline-block;
+  padding: 6px 12px;
+  margin-top: 12px;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.quiz-add:hover{
+  background: #218838;
+}
+.quiz-add-option{
+    display: inline-block;
+    padding: 6px 12px;
+    margin-top: 12px;
+    background: none;
+    color: #000000;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.quiz-questions {
+  margin-bottom: 16px;
+}
+
+.quiz-question {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.quiz-question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.quiz-question-header h4 {
+  margin: 0;
+  font-size: 18px;
+}
+.quiz-question-delete {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #c00;
+  cursor: pointer;
+}
+
+.quiz-prompt {
+  width: 92%;
+  padding: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.quiz-type {
+  display: block;
+  padding: 6px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.quiz-answer-label {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.quiz-options {
+  margin-bottom: 12px;
+}
+
+.quiz-option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.quiz-option-label {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+.quiz-option-label:hover {
+  background: #f9f9f9;
+}
+
+
+/* общий сброс нативного вида */
+.quiz-option-select[type="checkbox"],
+.quiz-option-select[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+/* радио (кружок) */
+.quiz-option-select[type="radio"] {
+  width: 18px; height: 18px;
+  border: 2px solid #28a745;
+  border-radius: 50%;
+  position: relative;
+}
+.quiz-option-select[type="radio"]::before {
+  content: '';
+  display: block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  transition: background 0.15s;
+}
+.quiz-option-select[type="radio"]:checked::before {
+  background: #28a745;
+}
+
+/* чекбокс (квадратик) */
+.quiz-option-select[type="checkbox"] {
+  width: 18px; height: 18px;
+  border: 2px solid #28a745;
+  border-radius: 4px;
+  position: relative;
+}
+.quiz-option-select[type="checkbox"]::before {
+  content: '';
+  display: block;
+  width: 5px; height: 10px;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-bottom: 2px solid transparent;
+  border-right: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+.quiz-option-select[type="checkbox"]:checked::before {
+  border-color: #28a745;  /* рисуем галочку псевдо-бордером */
+  border-right-color: #28a745;
+}
+
+/* Подсветка выбранных строк */
+.quiz-option-row.selected {
+  background: #e6f8ec;
+}
+
+
+.quiz-option-text {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.quiz-option-delete {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #c00;
+  cursor: pointer;
+}
+
+
+.quiz-option-row.selected .quiz-option-text {
+  border-color: #28a745;
+  font-weight: 600;
+}

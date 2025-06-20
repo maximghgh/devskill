@@ -232,7 +232,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.course__cardss{
+.course__cardss {
     width: 100%;
     height: 300px;
     background-repeat: no-repeat;
@@ -247,7 +247,7 @@ onMounted(async () => {
     transition: var(--transition-3);
 }
 .course__card_personal {
-    width: 336px;
+    width: 355px;
     padding: 26px 31px;
 }
 .course__card_personal {
@@ -268,8 +268,7 @@ onMounted(async () => {
     padding: 34px 44px;
     border-radius: 60px;
     color: #fff;
-    display: flex
-;
+    display: flex;
     justify-content: space-between;
     flex-direction: column;
     transition: var(--transition-3);

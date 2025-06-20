@@ -2,84 +2,6 @@
     <div>
         <div class="maincontainer">
             <div class="container">
-                <header class="header header_main">
-                    <div class="header__inner">
-                        <a href="/" class="header__logo">
-                            <img
-                                src="https://devskills.foncode.ru/img/logo.png"
-                            />
-                        </a>
-                        <nav>
-                            <a href="#">Банк знаний</a>
-                            <a href="#">Каталог</a>
-                            <a href="#">Для учителей</a>
-                            <a href="#">Стажировки</a>
-                            <a href="/news">Новости</a>
-                            <a href="/contacts">Контакты</a>
-                            <a href="/about">О нас</a>
-                        </nav>
-                        <div class="header__lk">
-                            <a
-                                href="https://devskills.foncode.ru/cabinet/profile"
-                                class="header__lk-img"
-                            >
-                                <img
-                                    src="https://devskills.foncode.ru/img/nofotolk.png"
-                                />
-                            </a>
-                            <div class="header__lk-name">
-                                <div class="personal-area personal-area_active">
-                                    <div class="personal-area__inner">
-                                        <!-- Показываем, если пользователь вошел -->
-                                        <div v-if="user" class="header__lk">
-                                            <a
-                                                href="/profile"
-                                                class="header__lk-img"
-                                            >
-                                                <img
-                                                    src="https://devskills.foncode.ru/img/nofotolk.png"
-                                                    width="40"
-                                                    height="40"
-                                                />
-                                            </a>
-                                            <div class="header__lk-name">
-                                                <a
-                                                    class="personal-area__username"
-                                                    >{{ user.name }}</a
-                                                >
-                                                <a
-                                                    href="#"
-                                                    @click="logout"
-                                                    class="personal-area__button"
-                                                    >Выйти</a
-                                                >
-                                            </div>
-                                        </div>
-                                        <!-- Показываем, если НЕ вошел -->
-                                        <div v-else>
-                                            <a
-                                                href="/login"
-                                                class="personal-area__username"
-                                                >Войти</a
-                                            >
-                                            <a
-                                                href="/register"
-                                                class="personal-area__username"
-                                                >Регистрация</a
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="menu-btn">
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                    </div>
-                </header>
-
                 <div class="b-popup_enter">
                     <div class="b-popup__content">
                         <div class="b-popup__title">
@@ -93,7 +15,7 @@
                         </div>
                         <div class="b-popup__block">
                             <div class="b-popup__block-right">
-                                <button class="b-popup__input" @click="resendLink">Ссылка</button>
+                                <button class="b-popup__input" @click="resendLink">Повторная ссылка</button>
                             </div>
                         </div>
                         <div v-if="statusMessage" class="status-message">

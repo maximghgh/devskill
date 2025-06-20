@@ -3,14 +3,17 @@
         <div class="header__inner">
             <div class="header__logo">
                 <a href="/">
-                    <img src="../../img/logo.svg" class="header__logo" alt="Логотип" />
+                    <img
+                        src="../../img/logo.svg"
+                        class="header__logo"
+                        alt="Логотип"
+                    />
                 </a>
             </div>
             <nav class="header__nav">
                 <a href="/">Банк знаний</a>
                 <a href="/catalog">Каталог</a>
                 <a href="/training">Для учителей</a>
-                <a href="#">Стажировки</a>
                 <a href="/news">Новости</a>
                 <a href="/contact">Контакты</a>
                 <a href="/about">О нас</a>
@@ -33,6 +36,12 @@
                                     class="avatar__user"
                                 />
                             </a>
+                            <a
+                                href="#"
+                                @click="logout"
+                                class="personal-area__button personal-area__button--none"
+                                >Выйти</a
+                            >
                             <div class="header__lk-name">
                                 <a
                                     href="/cabinet"
@@ -71,7 +80,6 @@
 </template>
 
 <script>
-
 export default {
     name: "HeaderComponent",
     data() {
@@ -104,7 +112,7 @@ export default {
 </script>
 
 <style scoped>
-.header__logo{
+.header__logo {
     height: 90px;
 }
 .avatar__user {
@@ -188,6 +196,9 @@ export default {
 @media (max-width: 450px) {
     .header__lk-name {
         display: none;
+    }
+    .personal-area__button--none{
+        display: block;
     }
 }
 </style>

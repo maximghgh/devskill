@@ -134,6 +134,9 @@ watch(
 </script>
 
 <style scoped>
+.avatar__user{
+    border-radius: 50%;
+}
 .header__logo {
     height: 90px;
 }

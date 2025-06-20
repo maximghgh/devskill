@@ -1,52 +1,126 @@
 <template>
-    <div>
-        <div class="block__info">
-            <a class="span__sctrelca" href="#" @click.prevent="goBack">🠔</a>
-            <h2>Статистика по ученикам</h2>
-        </div>
-        <table class="light-push-table">
-            <thead>
-                <tr>
-                    <th>Имя ученика</th>
-                    <th>Прогресс (%)</th>
-                    <th>Последняя дата прохождения</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="user in stats" :key="user.id">
-                    <td>{{ user.name }}</td>
-                    <!-- Округлим прогресс -->
-                    <td>{{ Math.round(user.progress_percent) }}%</td>
-                    <td v-if="user.last_completed_at">
-                        {{ new Date(user.last_completed_at).toLocaleString() }}
-                    </td>
-                    <td v-else>—</td>
-                </tr>
-            </tbody>
-        </table>
+  <div>
+    <div class="block__info">
+      <a class="span__sctrelca" href="#" @click.prevent="goBack">🠔</a>
+      <h2>Статистика по ученикам</h2>
     </div>
+
+    <table class="light-push-table">
+      <thead>
+        <tr>
+          <th>Имя ученика</th>
+          <th>Прогресс (%)</th>
+          <th>Последняя дата прохождения</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 1) используем paginatedStats -->
+        <tr v-for="user in paginatedStats" :key="user.id">
+          <td>{{ user.name }}</td>
+          <td>{{ Math.round(user.progress_percent) }}%</td>
+          <td v-if="user.last_completed_at">
+            {{ new Date(user.last_completed_at).toLocaleString() }}
+          </td>
+          <td v-else>—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 2) Навигация по страницам -->
+    <div class="pagination-users" v-if="totalPagesStats > 1">
+      <button
+        :disabled="currentPageStats === 1"
+        @click="currentPageStats--"
+      >‹ Назад</button>
+
+      <button
+        v-for="p in totalPagesStats"
+        :key="p"
+        :class="{ active: currentPageStats === p }"
+        @click="currentPageStats = p"
+      >{{ p }}</button>
+
+      <button
+        :disabled="currentPageStats === totalPagesStats"
+        @click="currentPageStats++"
+      >Вперёд ›</button>
+    </div>
+  </div>
 </template>
 
+
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 
 const stats = ref([]);
 
-onMounted(async () => {
-    try {
-        // Меняем URL, если у вас другая структура
-        const response = await fetch("/api/chapters/stats");
-        stats.value = await response.json();
-    } catch (error) {
-        console.error("Ошибка при загрузке статистики:", error);
-    }
+// 1. Пагинация
+const currentPageStats = ref(1);
+const pageSizeStats    = ref(5); // сколько строк на страницу, можно поменять
+const totalPagesStats  = computed(() =>
+  Math.ceil(stats.value.length / pageSizeStats.value)
+);
+const paginatedStats   = computed(() => {
+  const start = (currentPageStats.value - 1) * pageSizeStats.value;
+  return stats.value.slice(start, start + pageSizeStats.value);
 });
+// сбрасываем страницу на 1 при изменении данных
+watch(stats, () => { currentPageStats.value = 1 });
+
+onMounted(async () => {
+  try {
+    const response = await fetch("/api/chapters/stats");
+    stats.value = await response.json();
+  } catch (error) {
+    console.error("Ошибка при загрузке статистики:", error);
+  }
+});
+
 function goBack() {
   window.history.back();
 }
 </script>
 
+
 <style scoped>
+.pagination-users {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.pagination-users button {
+  min-width: 40px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.pagination-users button:hover:not(:disabled) {
+  background-color: #fff;
+  border-color: #888;
+  transform: translateY(-1px);
+}
+
+.pagination-users button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pagination-users button.active {
+  background-color: #698dc9;
+  border-color: #698dc9;
+  color: #fff;
+  font-weight: bold;
+}
 .block__info{
     position: relative;
     display: flex;

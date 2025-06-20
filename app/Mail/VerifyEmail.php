@@ -35,4 +35,5 @@ class VerifyEmail extends Mailable
                 'name' => $this->name,
             ]);
     }
+    
 }

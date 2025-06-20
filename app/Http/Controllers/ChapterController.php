@@ -190,6 +190,44 @@ class ChapterController extends Controller
         // 3. Возвращаем ответ (JSON)
         return response()->json($usersProgress);
     }
+    public function showteach(Request $request, $id)
+    {
+        // // Подгружаем главу, либо 404
+        // $chapter = Chapter::find($id);
 
+        // if (! $chapter) {
+        //     return response()->json(['message' => 'Chapter not found'], 404);
+        // }
+
+        // return response()->json($chapter);   // как и было
+        $chapter = Chapter::findOrFail($id);
+
+    // найдём прогресс для текущего user_id
+    // (если авторизация настроена — используйте auth()->id())
+    $userId = $request->input('user_id') ?? auth()->id();
+
+    $isCompleted = false;
+    if ($userId) {
+        $isCompleted = UserChapterProgress::where([
+            'user_id'    => $userId,
+            'chapter_id' => $chapter->id,
+        ])->whereNotNull('completed_at')->exists();
+    }
+
+    return response()->json([
+        'id'                => $chapter->id,
+        'topic_id'          => $chapter->topic_id,
+        'title'             => $chapter->title,
+        'content'           => $chapter->content,
+        'type'              => $chapter->type,
+        'video_url'         => $chapter->video_url,
+        'presentation_path' => $chapter->presentation_path,
+        'correct_answer'    => $chapter->correct_answer,
+        // вот он:
+        'is_completed'      => $isCompleted,
+        'created_at'        => $chapter->created_at,
+        'updated_at'        => $chapter->updated_at,
+    ]);
+    }
 
 }
