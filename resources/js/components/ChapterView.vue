@@ -76,7 +76,7 @@
       </div>
     </div>
 
-    <button v-if="!chapter.is_completed" @click="markChapterCompleted(chapter)" type="submit" class="button button--sub">
+    <button type="submit" class="button button--sub">
       Отправить тест
     </button>
   </form>

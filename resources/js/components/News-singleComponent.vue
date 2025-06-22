@@ -102,9 +102,6 @@
 
                         <!-- Форма ответа (подкомментария) для этого комментария -->
                         <div v-if="replyTo === comment.id" class="comment__one comment__one_respond">
-                            <div class="comment__avatar">
-                            <img src="/public/img/avatar.jpg" alt="Avatar" />
-                            </div>
                             <div class="comment__block">
                             <div class="comment__area">
                                 <textarea v-model="replyComment" placeholder="Мой комментарий..."></textarea>
@@ -122,12 +119,6 @@
                             v-for="child in comment.children"
                             :key="child.id"
                             >
-                            <div class="comment__avatar">
-                                <img
-                                :src="child.user_avatar ? `/storage/${child.user_avatar}` : '/public/img/avatar.jpg'"
-                                alt="Avatar"
-                                />
-                            </div>
                             <div class="comment__block">
                                 <div class="comment__name">
                                 {{ child.user_name ? child.user_name : currentUserName }}

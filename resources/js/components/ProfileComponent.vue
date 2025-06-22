@@ -341,4 +341,39 @@ async function uploadPhoto() {
 .modal__link:hover{
   text-decoration: underline;
 }
+@media all and (max-width: 490px) {
+    .infoblock__info-name-image img{
+        width: 250px;
+        height: 250px;
+    }
+    .infoblock__info-form {
+        align-items: center;
+        gap: 20px;
+        justify-content: center;
+    }
+    .infoblock__inner{
+      padding: 20px 20px 45px;
+      margin: 0 0 25px;
+    }
+}
+@media all and (max-width: 405px) {
+    .infoblock__info-name-image img{
+        width: 250px;
+        height: 250px;
+    }
+    .infoblock__info-form {
+        align-items: center;
+        gap: 20px;
+        justify-content: center;
+    }
+    .infoblock__inner{
+      padding: 20px 20px 45px;
+      margin: 0 0 25px;
+    }
+    .infoblock__info-filebtn,
+    .infoblock__button{
+      width: 120px;
+      font-size: 0.7em;
+    }
+}
 </style>

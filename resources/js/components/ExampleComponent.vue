@@ -248,7 +248,7 @@
                                                         </p>
                                                     </div>
                                                     <div class="block__bottom">
-                                                        <p class="block__difficul">
+                                                        <p class="block__difficul--level">
                                                             Уровень:&nbsp;
                                                             {{ difficultyTranslation[selectedCourse.difficulty] }}
                                                         </p>
@@ -876,11 +876,8 @@ function scrollToCourse() {
 .payment__h3 {
     margin: 0 0 20px;
 }
-.block-bg {
-    background-color: #ffffff3a;
-    padding: 15px;
-    border-radius: 15px;
-    text-align: justify;
+.block__difficul{
+    margin: 0 0 20px;
 }
 .block__logo {
     display: flex;
@@ -985,7 +982,6 @@ function scrollToCourse() {
     background-color: #727dcc81;
 }
 .form__input {
-    width: 414px;
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -994,13 +990,22 @@ function scrollToCourse() {
     margin: 0 0 30px;
 }
 .floating-label {
+    display: flex;
+    width: 100%;
     position: relative;
     margin-bottom: 16px;
+    flex-direction: column;
+}
+
+.form-group{
+    display: flex;
+    width: 100%;
+    position: relative;
+    flex-direction: column;
 }
 
 /* Стили для input */
 .floating-label input {
-    width: 414px;
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -1103,18 +1108,6 @@ function scrollToCourse() {
 .form-block {
     padding: 50px 30px;
 }
-.block__price {
-    background-color: #ffffff46;
-    color: #000;
-    padding: 10px 10px;
-    border-radius: 10px;
-    font-size: 16px;
-}
-.block__difficul {
-    font-size: 16px;
-    color: #ffffff;
-    margin: 0 0 15px;
-}
 .modal-content {
     overflow: hidden;
     display: grid;
@@ -1170,12 +1163,6 @@ function scrollToCourse() {
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
     }
-    .floating-label input {
-        width: 614px;
-    }
-    .form__input{
-        width: 614px;
-    }
     .modal-close {
         background-color: #ffffff;
     }
@@ -1210,7 +1197,6 @@ function scrollToCourse() {
         text-align: center;
     }
     .modal-content {
-        width: 500px;
         padding-top: 0px;
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
@@ -1242,20 +1228,15 @@ function scrollToCourse() {
         text-align: center;
         margin: 0 40px 25px;
     }
-    .radio-group {
-        width: 300px;
-    }
     .forma {
         display: grid;
         grid-template-columns: 1fr;
         justify-items: center;
     }
     .floating-label input {
-        width: 268px;
         padding: 15px;
     }
     .form__input {
-        width: 268px;
         padding: 15px;
     }
     .form-submit {
@@ -1282,7 +1263,6 @@ function scrollToCourse() {
         width: 150px;
     }
     .modal-content {
-        width: 400px;
         padding-top: 0px;
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
@@ -1295,8 +1275,8 @@ function scrollToCourse() {
     }
 }
 @media (max-width: 410px){
-    .modal-content{
-        width: 300px;
+    .block-info h2{
+        text-align: center;
     }
     .modal-content__block{
         display: flex;

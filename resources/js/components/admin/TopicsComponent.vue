@@ -21,7 +21,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(chapter, index) in chapters" :key="chapter.id">
+                    <tr v-for="(chapter, index) in paginatedChapters" :key="chapter.id">
                         <td>{{ index + 1 }}</td>
                         <td>{{ chapter.title }}</td>
                         <td>{{ chapter.type }}</td>
@@ -48,6 +48,24 @@
         </div>
         <div v-else>
             <p class="p__topic">Пока нет глав</p>
+        </div>
+        <div class="pagination-users" v-if="totalPagesChapters > 1">
+            <button
+                :disabled="currentPageChapters === 1"
+                @click="currentPageChapters--"
+            >‹ Назад</button>
+
+            <button
+                v-for="p in totalPagesChapters"
+                :key="p"
+                :class="{ active: currentPageChapters === p }"
+                @click="currentPageChapters = p"
+            >{{ p }}</button>
+
+            <button
+                :disabled="currentPageChapters === totalPagesChapters"
+                @click="currentPageChapters++"
+            >Вперёд ›</button>
         </div>
         <div v-if="editModalOpen" class="modal-overlay">
             <div class="modal-content">
@@ -244,7 +262,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import axios               from 'axios';
 import EditorJS            from '@editorjs/editorjs';
 import Header              from '@editorjs/header';
@@ -266,6 +284,22 @@ const topicId   = getTopicIdFromUrl();
  * ------------------------------------------------- */
 const topic    = ref({});
 const chapters = ref([]);
+
+const currentPageChapters = ref(1);
+const pageSizeChapters    = ref(6);
+
+const totalPagesChapters = computed(() =>
+  Math.ceil(chapters.value.length / pageSizeChapters.value)
+);
+
+const paginatedChapters = computed(() => {
+  const start = (currentPageChapters.value - 1) * pageSizeChapters.value;
+  return chapters.value.slice(start, start + pageSizeChapters.value);
+});
+
+watch(chapters, () => {
+  currentPageChapters.value = 1;
+});
 
 async function loadTopicAndChapters () {
   try {
@@ -445,7 +479,7 @@ async function submitChapter () {
     const fd = new FormData();
     fd.append('title', newChapter.value.title);
     fd.append('type' , selectedType.value);
-
+    fd.append('correct_answer', newChapter.value.correct_answer);
     /* контент */
     let contentPayload = {};
     if (selectedType.value === 'presentation' && quizEditor) {
@@ -484,6 +518,45 @@ function goBack () { window.history.back(); }
 
 
 <style scoped>
+.pagination-users {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.pagination-users button {
+  min-width: 40px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.pagination-users button:hover:not(:disabled) {
+  background-color: #fff;
+  border-color: #888;
+  transform: translateY(-1px);
+}
+
+.pagination-users button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pagination-users button.active {
+  background-color: #698dc9;
+  border-color: #698dc9;
+  color: #fff;
+  font-weight: bold;
+}
 .form-input--m{
   margin: 0 0 20px;
 }
@@ -694,7 +767,7 @@ function goBack () { window.history.back(); }
 }
 table.light-push-table {
     width: 1200px;
-    margin: 0 auto 60px;
+    margin: 0 auto ;
     border-collapse: collapse;
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

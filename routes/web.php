@@ -19,8 +19,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
-
 Route::view('/chapter/{id}', 'chapterview')   // resources/views/chapter.blade.php
      ->name('chapter.page');
 

@@ -44,6 +44,7 @@ class ChapterController extends Controller
         'title'   => 'required|string|max:255',
         'type'    => 'required|in:video,text,task,terms,presentation',
         'content' => 'nullable',
+        'correct_answer' => 'nullable|string',
         'file'    => 'nullable|file|max:20480',  // единое правило
     ]);
 
@@ -59,8 +60,6 @@ class ChapterController extends Controller
     if ($request->hasFile('file')) {
 
         $file       = $request->file('file');
-    
-        // ► как называется файл у пользователя
         $original   = $file->getClientOriginalName();        // docs.pdf
     
               // или любой алгоритм

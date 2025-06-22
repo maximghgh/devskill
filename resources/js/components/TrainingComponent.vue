@@ -82,7 +82,7 @@
                 <transition name="modal">
   <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
     <div class="modal-content__block">
-      <button class="modal-close" @click="closeModal">×</button>
+      <button class="modal-close" @click="closeModal">X</button>
 
       <!-- Экран формы -->
       <div v-if="!isSubmitted" class="modal-content">
@@ -97,7 +97,7 @@
           </div>
 
           <div class="block__bottom">
-            <p class="block__difficul">
+            <p class="block__difficul--level">
               Уровень: {{ difficultyTranslation[selectedCourse?.difficulty] }}
             </p>
             <div class="block__price">Цена: {{ selectedCourse?.price }} ₽</div>
@@ -577,7 +577,15 @@ function scrollToCourse() {
 </script>
 
 <style scoped>
-
+.block__top{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+}
+.block__difficul{
+    margin: 0 0 20px;
+}
 .block__logo{
     display: flex;
     align-items: center;
@@ -718,8 +726,20 @@ function scrollToCourse() {
 .payment__h3 {
     margin: 0 0 20px;
 }
+.floating-label {
+    display: flex;
+    width: 100%;
+    position: relative;
+    margin-bottom: 16px;
+    flex-direction: column;
+}
+.form-group{
+    display: flex;
+    width: 100%;
+    position: relative;
+    flex-direction: column;
+}
 .form__input {
-    width: 414px;
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -822,7 +842,6 @@ function scrollToCourse() {
     margin-bottom: 16px;
 }
 .floating-label input {
-    width: 414px;
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -981,12 +1000,6 @@ function scrollToCourse() {
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
     }
-    .floating-label input {
-        width: 614px;
-    }
-    .form__input{
-        width: 614px;
-    }
     .modal-close {
         background-color: #ffffff;
     }
@@ -1021,7 +1034,6 @@ function scrollToCourse() {
         text-align: center;
     }
     .modal-content {
-        width: 500px;
         padding-top: 0px;
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
@@ -1053,20 +1065,15 @@ function scrollToCourse() {
         text-align: center;
         margin: 0 40px 25px;
     }
-    .radio-group {
-        width: 300px;
-    }
     .forma {
         display: grid;
         grid-template-columns: 1fr;
         justify-items: center;
     }
     .floating-label input {
-        width: 268px;
         padding: 15px;
     }
     .form__input {
-        width: 268px;
         padding: 15px;
     }
     .form-submit {
@@ -1093,7 +1100,6 @@ function scrollToCourse() {
         width: 150px;
     }
     .modal-content {
-        width: 400px;
         padding-top: 0px;
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
@@ -1106,8 +1112,8 @@ function scrollToCourse() {
     }
 }
 @media (max-width: 410px){
-    .modal-content{
-        width: 300px;
+    .block-info h2{
+        text-align: center;
     }
     .modal-content__block{
         display: flex;

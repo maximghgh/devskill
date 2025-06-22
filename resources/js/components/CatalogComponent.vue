@@ -705,6 +705,12 @@ onMounted(async () => {
 <style scoped>
 
 /* Оверлей модалки */
+.block__top{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+}
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -818,7 +824,6 @@ onMounted(async () => {
     margin: 0 0 20px;
 }
 .form__input {
-    width: 414px;
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -839,6 +844,11 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
 }
+.block__logo {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+}
 .block-card {
   display: grid;
   grid-template-columns: repeat(2, 205px);
@@ -852,11 +862,12 @@ onMounted(async () => {
     width: 268px;
     padding: 15px;
   }
-  .block__logo {
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
+  .block__logo{
+        display: flex;
+        flex-direction: column;
+        gap: 15px !important;
+        margin: 0 0 20px;
+    }
 }
 
 /* Инпуты карт */
@@ -867,7 +878,12 @@ onMounted(async () => {
   font-size: 14px;
   margin-bottom: 30px;
 }
-
+.form-group{
+    display: flex;
+    width: 100%;
+    position: relative;
+    flex-direction: column;
+}
 /* Радиокнопки */
 .radio-group {
 width: 100%;
@@ -917,11 +933,13 @@ width: 100%;
 
 /* Поля формы с «плавающими» лейблами */
 .floating-label {
-  position: relative;
-  margin-bottom: 16px;
+    display: flex;
+    width: 100%;
+    position: relative;
+    margin-bottom: 16px;
+    flex-direction: column;
 }
 .floating-label input {
-  width: 414px;
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -1018,7 +1036,6 @@ width: 100%;
         gap: 10px;
     }
 }
-/* Адаптивные правки для модалок */
 @media (max-width: 1100px) {
      .modal__h2--auth{
         font-size: 30px;
@@ -1039,12 +1056,6 @@ width: 100%;
         grid-template-columns: 1fr;
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
-    }
-    .floating-label input {
-        width: 614px;
-    }
-    .form__input{
-        width: 614px;
     }
     .modal-close {
         background-color: #ffffff;
@@ -1080,7 +1091,6 @@ width: 100%;
         text-align: center;
     }
     .modal-content {
-        width: 500px;
         padding-top: 0px;
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
@@ -1112,20 +1122,15 @@ width: 100%;
         text-align: center;
         margin: 0 40px 25px;
     }
-    .radio-group {
-        width: 300px;
-    }
     .forma {
         display: grid;
         grid-template-columns: 1fr;
         justify-items: center;
     }
     .floating-label input {
-        width: 268px;
         padding: 15px;
     }
     .form__input {
-        width: 268px;
         padding: 15px;
     }
     .form-submit {
@@ -1152,7 +1157,6 @@ width: 100%;
         width: 150px;
     }
     .modal-content {
-        width: 400px;
         padding-top: 0px;
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
@@ -1165,8 +1169,8 @@ width: 100%;
     }
 }
 @media (max-width: 410px){
-    .modal-content{
-        width: 300px;
+    .block-info h2{
+        text-align: center;
     }
     .modal-content__block{
         display: flex;
@@ -1177,27 +1181,6 @@ width: 100%;
         max-width: 300px;
     }
 }
-@media (max-width: 650px) {
-    .course__menu {
-        display: flex;
-        align-items: unset;
-        justify-content: unset;
-        flex-wrap: unset;
-        gap: 20px;
-        overflow: auto;
-        margin: 0 -10px 40px;
-        padding: 0 10px 0;
-    }
-    .course__menu::-webkit-scrollbar {
-        display: none;
-    }
-    .course__menu-one {
-        height: 70px;
-        padding: 0px 20px;
-        border-radius: 25px;
-    }
-}
-
 @media (max-width: 650px) {
     .course__menu {
         display: flex;
