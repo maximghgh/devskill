@@ -401,21 +401,14 @@
                                                             class="form-input"
                                                         />
                                                     </div>
-                                                    <div class="form-group">
-                                                        <label
-                                                            class="form-label"
-                                                            >Количество
-                                                            тренажёров</label
-                                                        >
                                                         <input
                                                             v-model="
                                                                 editCourse.simulators
                                                             "
-                                                            type="number"
+                                                            type="hidden"
                                                             placeholder="Введите количество тренажёров"
                                                             class="form-input"
                                                         />
-                                                    </div>
                                                     <div class="form-group">
                                                         <label
                                                             class="form-label"
