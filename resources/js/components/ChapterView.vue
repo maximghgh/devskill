@@ -211,7 +211,7 @@ function submitQuiz() {
 }
 
 function goBack() {
-  window.history.back();
+  window.location.href = document.referrer || '/'; 
 }
 
 const storedUser = JSON.parse(localStorage.getItem("user") || "{}");

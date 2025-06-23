@@ -119,7 +119,7 @@
               <label :class="['radio-option',{active:selectedOption==='discount'}]">
                 <input type="radio" value="discount" v-model="selectedOption" />
                 <span class="custom-radio"></span>
-                <span class="custom-radio__text">Оплатить и получить скидку</span>
+                <span class="custom-radio__text">Оплатить курс</span>
               </label>
             </div>
 
@@ -143,7 +143,7 @@
             <!-- payment (отображается, когда выбран discount) -->
             <transition name="fade-slide">
               <div v-if="selectedOption==='discount'" class="payment-block space-y-4">
-                <h3 class="payment__h3">Оплата курса со скидкой</h3>
+                <h3 class="payment__h3">Оплата курса</h3>
 
                 <div class="radio-group">
                   <label :class="['radio-option',{active:selectedDiscountOption==='card'}]">
@@ -157,8 +157,10 @@
                 </div>
 
                 <div v-if="selectedDiscountOption==='card'" class="space-y-4">
-                  <input v-model="cardInfo.cardNumber" placeholder="0000 0000 0000 0000"
-                         class="form__input" v-mask="'#### #### #### ####'" />
+                    <div class="floating-label">
+                        <input v-model="cardInfo.cardNumber" placeholder="0000 0000 0000 0000" v-mask="'#### #### #### ####'" />
+                    </div>
+                  
                   <div class="block-card">
                     <input v-model="cardInfo.expiry" placeholder="ММ/ГГ"
                            class="form__input--card" v-mask="'##/##'" />
@@ -577,6 +579,10 @@ function scrollToCourse() {
 </script>
 
 <style scoped>
+.space-y-4{
+    width: 100%;
+    max-width: 500px;
+}
 .block__top{
     display: flex;
     align-items: center;
@@ -630,6 +636,7 @@ function scrollToCourse() {
     z-index: 10001 !important;
 }
 .modal-content {
+    overflow-x: hidden;
     overflow-y: auto;
     display: grid;
     grid-template-columns: 500px 1fr;
@@ -740,6 +747,8 @@ function scrollToCourse() {
     flex-direction: column;
 }
 .form__input {
+    width: 100%;
+    max-width: 414px;
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -770,7 +779,6 @@ function scrollToCourse() {
         grid-template-columns: 1fr;
     }
     .form__input--card {
-        width: 268px;
         padding: 15px;
     }
     .block__logo {
@@ -980,6 +988,12 @@ function scrollToCourse() {
     opacity: 1;
 }
 @media (max-width: 1100px) {
+    .space-y-4{
+        max-width: 640px;
+    }
+    .form__input{
+        max-width: 614px;
+    }
      .modal__h2--auth{
         font-size: 30px;
     }
@@ -1009,9 +1023,6 @@ function scrollToCourse() {
     .block-card{
         gap: 20px;
         grid-template-columns: repeat(2, 1fr);
-    }
-    .form__input--card{
-        width: 280px;
     }
     .auth-buttons{
         flex-direction: row;
@@ -1077,7 +1088,6 @@ function scrollToCourse() {
         padding: 15px;
     }
     .form-submit {
-        width: 300px;
         padding: 20px;
     }
     .block__price {
@@ -1109,6 +1119,16 @@ function scrollToCourse() {
     }
     .modal-close:hover {
         background-color: rgba(128, 128, 128, 0.637);
+    }
+}
+@media (max-width: 480px){
+    .block-card{
+        grid-template-columns: repeat(2, 175px);
+    }
+}
+@media (max-width: 428px){
+    .block-card{
+        grid-template-columns: repeat(2, 150px);
     }
 }
 @media (max-width: 410px){

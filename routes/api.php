@@ -34,7 +34,8 @@ Route::get('/consultations', [ConsultationController::class, 'index']);
 Route::post('/consultations/{id}/complete', [ConsultationController::class, 'complete']);
 Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus']);
 
-
+Route::get('/topics/{topic}/task-count', [ChapterController::class, 'taskCount']);
+Route::get('/courses/{course}/task-count', [CourseController::class, 'taskCount']);
 // прогресс пользователя
 Route::get('/course/{courseId}/topics', [CourseController::class, 'getTopicsWithProgress']);
 Route::post('/chapters/{chapter}/complete', [ChapterController::class, 'completeChapter']);

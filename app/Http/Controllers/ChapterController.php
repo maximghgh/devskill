@@ -228,5 +228,14 @@ class ChapterController extends Controller
         'updated_at'        => $chapter->updated_at,
     ]);
     }
+    public function taskCount($topicId)
+    {
+        $count = Chapter::where('topic_id', $topicId)
+                        ->where('type', 'task')
+                        ->count();
 
+        return response()->json([
+            'taskCount' => $count
+        ]);
+    }
 }

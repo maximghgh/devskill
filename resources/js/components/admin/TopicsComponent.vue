@@ -513,11 +513,16 @@ async function submitChapter () {
 /* ---------------------------------------------------
  *  Разное
  * ------------------------------------------------- */
-function goBack () { window.history.back(); }
+function goBack() {
+  window.location.href = document.referrer || '/'; 
+}
 </script>
 
 
 <style scoped>
+h2{
+    margin: 40px 0 40px;
+}
 .pagination-users {
   display: flex;
   align-items: center;

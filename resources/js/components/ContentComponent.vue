@@ -762,6 +762,7 @@ onMounted(() => {
     loadCourseComments();
     loadFaqs();
     loadCourses();
+
 });
 
 /* ======================================================

@@ -19,7 +19,7 @@ class CourseController extends Controller
             'duration'            => 'required|string|max:255',
             'description'         => 'nullable|string',
             'hours'               => 'required|integer',
-            'simulators'          => 'required|integer',
+            'simulators'          => 'nullable|integer|min:0',
             'difficulty'          => 'required|string',
             'editorData'          => 'required', // данные Editor.js
             'teachers'            => 'nullable|json', // ожидаем JSON-строку с массивом ID преподавателей
@@ -155,7 +155,10 @@ class CourseController extends Controller
         // if (isset($validated['selectedLanguages'])) {
         //     $course->language = json_decode($validated['selectedLanguages'], true);
         // }
-
+        if (array_key_exists('teachers', $validated)) {
+            $course->teachers = array_values(array_unique($validated['teachers']));
+            $course->save();  // ещё раз сохраняем, если нужен этот вариант
+        }
         // Обновляем направление, если передано
         if (isset($validated['selectedDirection'])) {
             $course->direction = $validated['selectedDirection'];
@@ -394,6 +397,19 @@ class CourseController extends Controller
             'course' => Course::find($courseId),
         ]);
     }
+    public function taskCount($courseId)
+    {
+        // получаем все id тем данного курса
+        $topicIds = \App\Models\Topic::where('course_id', $courseId)->pluck('id');
 
+        // считаем все главы-«тренажёры» среди этих тем
+        $count = \App\Models\Chapter::whereIn('topic_id', $topicIds)
+                ->where('type', 'task')
+                ->count();
+
+        return response()->json([
+        'taskCount' => $count
+        ]);
+    }
 
 }

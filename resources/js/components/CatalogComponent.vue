@@ -261,7 +261,7 @@
                                                             />
                                                             <span class="custom-radio"></span>
                                                             <span class="custom-radio__text">
-                                                                Оплатить и получить дополнительную скидку
+                                                                Оплатить курс
                                                             </span>
                                                         </label>
                                                     </div>
@@ -288,7 +288,7 @@
                                                         <label for="name">Имя</label>
                                                     </div>
 
-                                                    <div class="form-group">
+                                                    <div class="floating-label">
                                                         <input
                                                             id="phone"
                                                             type="tel"
@@ -296,7 +296,6 @@
                                                             v-model="formData.phone"
                                                             placeholder="+7 999 999-99-99"
                                                             v-mask="'+7 (###) ###-##-##'"
-                                                            class="form__input"
                                                         />
                                                     </div>
 
@@ -304,10 +303,10 @@
                                                     <transition name="fade-slide">
                                                         <div
                                                             v-if="selectedOption === 'discount'"
-                                                            class="payment-block"
+                                                            class="payment-block space-y-4"
                                                         >
                                                             <h3 class="payment__h3">
-                                                                Оплата курса со скидкой
+                                                                Оплата курса
                                                             </h3>
 
                                                             <div class="radio-group">
@@ -341,26 +340,18 @@
                                                             </div>
 
                                                             <!-- card fields -->
-                                                            <div v-if="selectedDiscountOption === 'card'">
-                                                                <div class="form-group">
-                                                                    <label for="cardNumber" class="form-label">
-                                                                        Номер карты:
-                                                                    </label>
+                                                            <div v-if="selectedDiscountOption === 'card'" class="space-y-4">
+                                                                <div class="floating-label">
                                                                     <input
                                                                         id="cardNumber"
                                                                         type="text"
                                                                         v-model="cardInfo.cardNumber"
                                                                         placeholder="0000 0000 0000 0000"
-                                                                        class="form__input"
                                                                         v-mask="'#### #### #### ####'"
                                                                     />
                                                                 </div>
-
                                                                 <div class="block-card">
                                                                     <div class="form-group">
-                                                                        <label for="cardExpiry" class="form-label">
-                                                                            Срок действия (ММ/ГГ):
-                                                                        </label>
                                                                         <input
                                                                             id="cardExpiry"
                                                                             type="text"
@@ -371,9 +362,6 @@
                                                                         />
                                                                     </div>
                                                                     <div class="form-group">
-                                                                        <label for="cardCVC" class="form-label">
-                                                                            CVC:
-                                                                        </label>
                                                                         <input
                                                                             id="cardCVC"
                                                                             type="text"
@@ -387,8 +375,6 @@
                                                             </div>
                                                         </div>
                                                     </transition>
-
-                                                    <div class="form-field form-field--button">
                                                         <input
                                                             class="form-submit form-submit--button"
                                                             type="submit"
@@ -396,7 +382,6 @@
                                                                 ? 'Заказать консультацию'
                                                                 : 'Оплатить'"
                                                         />
-                                                    </div>
                                                 </form>
                                             </div>
                                         </div>
@@ -823,6 +808,10 @@ onMounted(async () => {
 .payment__h3{
     margin: 0 0 20px;
 }
+.space-y-4{
+    width: 100%;
+    max-width: 500px;
+}
 .form__input {
     padding: 10px 12px;
     border: 1px solid #ccc;
@@ -859,7 +848,6 @@ onMounted(async () => {
     grid-template-columns: 1fr;
   }
   .form__input--card {
-    width: 268px;
     padding: 15px;
   }
   .block__logo{
@@ -1037,6 +1025,10 @@ width: 100%;
     }
 }
 @media (max-width: 1100px) {
+    .space-y-4{
+        width: 100%;
+        max-width: 640px;
+    }
      .modal__h2--auth{
         font-size: 30px;
     }
@@ -1066,9 +1058,6 @@ width: 100%;
     .block-card{
         gap: 20px;
         grid-template-columns: repeat(2, 1fr);
-    }
-    .form__input--card{
-        width: 280px;
     }
     .auth-buttons{
         flex-direction: row;
@@ -1134,7 +1123,6 @@ width: 100%;
         padding: 15px;
     }
     .form-submit {
-        width: 300px;
         padding: 20px;
     }
     .block__price {
@@ -1166,6 +1154,16 @@ width: 100%;
     }
     .modal-close:hover {
         background-color: rgba(128, 128, 128, 0.637);
+    }
+}
+@media (max-width: 480px){
+    .block-card{
+        grid-template-columns: repeat(2, 175px);
+    }
+}
+@media (max-width: 428px){
+    .block-card{
+        grid-template-columns: repeat(2, 150px);
     }
 }
 @media (max-width: 410px){
@@ -1245,7 +1243,7 @@ width: 100%;
         font-size: 1.4em;
     }
     .course__card-desc {
-        font-size: 21px;
+        font-size: 20px;
         font-family: JanoSansProRegular;
     }
     .course__menu-one {

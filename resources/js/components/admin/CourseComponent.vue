@@ -164,7 +164,13 @@ const editingTopic = ref({});
 async function loadTopics() {
     try {
         const response = await axios.get(`/admin/course/${courseId}/topics`);
-        topics.value = response.data.topics || [];
+        // сортируем по created_at
+        topics.value = (response.data.topics || [])
+            .slice() // чтобы не менять оригинал, если нужно
+            .sort((a, b) => {
+                // конвертируем строки в даты
+                return new Date(a.created_at) - new Date(b.created_at);
+            });
     } catch (error) {
         console.error("Ошибка при загрузке тем:", error);
     }
@@ -194,7 +200,7 @@ function toggleTopicForm() {
 
 // 6. Кнопка "Назад"
 function goBack() {
-    window.history.back();
+  window.location.href = '/admin'; 
 }
 
 // 7. Inline-редактирование

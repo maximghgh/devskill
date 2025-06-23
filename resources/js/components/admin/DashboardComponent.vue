@@ -713,17 +713,13 @@
                                                 class="form-textarea"
                                             ></textarea>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="form-label"
-                                                >Количество тренажёров</label
-                                            >
                                             <input
                                                 v-model="newCourse.simulators"
-                                                type="number"
+                                                type="hidden"
                                                 placeholder="Введите количество тренажёров"
                                                 class="form-input"
+                                                value="0"
                                             />
-                                        </div>
                                         <div class="form-group">
                                             <label class="form-label"
                                                 >Уровень сложности курса</label
@@ -1974,7 +1970,9 @@ async function submitForm() {
         formData.append("duration", newCourse.value.duration);
         formData.append("description", newCourse.value.description);
         formData.append("hours", newCourse.value.hours);
-        formData.append("simulators", newCourse.value.simulators);
+        if (newCourse.value.simulators != null) {
+            formData.append('simulators', newCourse.value.simulators);
+        }
         formData.append("difficulty", newCourse.value.difficulty);
         formData.append(
             "editorData",
@@ -2077,10 +2075,9 @@ async function updateCourse() {
         formData.append("hours", editCourse.value.hours);
         formData.append("simulators", editCourse.value.simulators);
         formData.append("difficulty", editCourse.value.difficulty);
-        formData.append(
-            "teachers",
-            JSON.stringify(editCourse.value.selectedTeachers)
-        );
+        
+        const uniqueTeachers = [...new Set(editCourse.value.selectedTeachers)];
+        formData.append("teachers", JSON.stringify(uniqueTeachers));
 
         formData.append(
             "selectedDirection",
@@ -2145,6 +2142,13 @@ async function openEditModal(course) {
             course.language.includes(lang.id)
         );
     }
+    const teacherIds = Array.isArray(course.teachers)
+    ? course.teachers.map(t => typeof t === 'object' ? t.id : t)
+    : []
+
+  // Кладём в v-model
+    editCourse.value.selectedTeachers = teacherIds;
+
     editCourse.value = {
         cardTitle: course.card_title || "",
         courseName: course.course_name || "",
@@ -2154,7 +2158,7 @@ async function openEditModal(course) {
         hours: course.hours || "",
         simulators: course.simulators || "",
         difficulty: course.difficulty || "basic",
-        selectedTeachers: course.teachers || [],
+        selectedTeachers: teacherIds || [],
 
         // Если course.direction — это ID, то просто присваиваем:
         selectedDirection: course.direction ?? null,

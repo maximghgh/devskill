@@ -234,7 +234,8 @@ onMounted(async () => {
 <style scoped>
 .course__cardss {
     width: 100%;
-    height: 300px;
+    height: 100%;
+    min-height: 300px;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
