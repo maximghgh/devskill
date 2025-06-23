@@ -859,16 +859,37 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .course__cards_personal,
 .course__cards_additional {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     padding: 40px 50px;
     background: #f2f2f8;
     border-radius: 60px;
 }
+.course__cards_cabinet {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(250px, 1fr));
+  gap: 12px;
+  width: 1065px;
+}
+@media (max-width: 1023px) {
+  .course__cards_cabinet {
+    grid-template-columns: repeat(2, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .course__cards_cabinet {
+    grid-template-columns: repeat(1, minmax(250px, 1fr));
+  }
+}
+
 .course__cards-inner {
     display: flex;
     flex-wrap: wrap;
     gap: 26px;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     width: 100%;
 }
 .course__cards-title {
@@ -1007,6 +1028,7 @@ input[type="number"]::-webkit-outer-spin-button {
         font-size: 1.5em;
     }
     .course__menu-persona {
+        /* flex-direction: column; */
         gap: 30px;
     }
 }
@@ -2210,6 +2232,9 @@ footer {
     }
 }
 @media (max-width: 650px) {
+    .course__menu-persona{
+        flex-direction: column;
+    }
     .course__menu {
         display: flex;
         align-items: unset;
@@ -2398,31 +2423,31 @@ footer {
         max-width: none;
         height: auto;
     }
-    .course-content__sidebar-cost{
+    .course-content__sidebar-cost {
         margin: 0;
         display: flex;
         align-items: center;
         justify-content: center;
     }
-    .button_sidebar{
+    .button_sidebar {
         margin: auto 0;
     }
-    .course-content p{
+    .course-content p {
         text-align: center;
     }
-    .course-content__sidebar-program{
+    .course-content__sidebar-program {
         margin: 0;
         display: flex;
         align-items: center;
     }
-    .course-content__sidebar-info{
+    .course-content__sidebar-info {
         margin: 0 0 0 !important;
         display: flex;
         align-items: center;
         flex-direction: column;
         justify-content: center;
     }
-    .course-content__top-img{
+    .course-content__top-img {
         width: 100%;
         height: auto;
     }
@@ -2437,7 +2462,7 @@ footer {
 }
 
 @media all and (max-width: 767px) {
-    .course__card-title{
+    .course__card-title {
         font-size: 22px;
         max-width: 200px;
     }
@@ -2547,7 +2572,7 @@ footer {
 }
 
 @media all and (max-width: 639px) {
-    .course-content__top-img{
+    .course-content__top-img {
         width: 100%;
         height: 400px;
     }

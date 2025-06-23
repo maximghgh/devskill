@@ -96,7 +96,7 @@
         </div>
 
         <!-- Сообщение, если тем нет -->
-        <div v-else>
+        <div v-else class="center">
             <p>Темы отсутствуют.</p>
         </div>
 
@@ -142,6 +142,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import { globalNotification } from "../../globalNotification";
 
 // 1. Функция для извлечения courseId из URL, например /admin/course/20
 function getCourseIdFromUrl() {
@@ -188,8 +189,12 @@ async function submitTopic() {
         }
         newTopic.value = { title: "", description: "" };
         showTopicForm.value = false;
+        globalNotification.categoryMessage = 'Тема создана'
+        globalNotification.type = "success";
     } catch (error) {
         console.error("Ошибка при создании темы:", error);
+        globalNotification.categoryMessage ="Заполните все поля для создания темы";
+        globalNotification.type = "error";
     }
 }
 
@@ -225,7 +230,11 @@ async function saveTopic() {
         }
         editingTopicId.value = null;
         editingTopic.value = {};
+        globalNotification.categoryMessage = 'Тема изменена'
+        globalNotification.type = "success";
     } catch (error) {
+        globalNotification.categoryMessage ="Ошибка обновления темы";
+        globalNotification.type = "error";
         console.error("Ошибка при обновлении темы:", error);
     }
 }
@@ -242,8 +251,12 @@ async function deleteTopic(topicId) {
         const response = await axios.delete(`/admin/topics/${topicId}`);
         // Удаляем тему из локального массива
         topics.value = topics.value.filter((t) => t.id !== topicId);
+        globalNotification.categoryMessage = 'Тема удалена'
+        globalNotification.type = "success";
     } catch (error) {
         console.error("Ошибка при удалении темы:", error);
+        globalNotification.categoryMessage = "Ошибка удаления темы";
+        globalNotification.type = "error";
     }
 }
 
@@ -254,6 +267,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.center{
+    text-align: center;
+}
 .btn--control{
     text-decoration: none;
     color: green;

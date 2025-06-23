@@ -126,7 +126,7 @@
                 @click.self="closeModal"
             >
                 <div class="modal-content__block">
-                    <button class="modal-close" @click="closeModal">×</button>
+                    <button class="modal-close" @click="closeModal"> × </button>
 
                     <!-- === Первый экран: форма === -->
                     <div
@@ -352,6 +352,25 @@
                 </div>
             </div>
         </transition>
+        <transition name="modal">
+            <div
+                v-if="showAuthModal"
+                class="modal-overlay modal-overlay--auth"
+                @click.self="showAuthModal = false"
+            >
+                <div class="modal-content__block modal-close--auth">
+                <button class="modal-close modal-close--auth" @click="showAuthModal = false"> × </button>
+                <div class="modal-content modal-content--auth">
+                    <h2 class="modal__h2--auth">Войдите или зарегистрируйтесь</h2>
+                    <p>Чтобы приобрести курс или заказать консультацию</p>
+                    <div class="auth-buttons">
+                    <a href="/login" class="button button_white--auth">Войти</a>
+                    <a href="/register" class="button button_white--auth">Регистрация</a>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -368,6 +387,13 @@ import ImageTool from "@editorjs/image";
 const AUTH_KEY = "user"; // имя ключа в localStorage
 const user = ref(null); //  FIX: раньше переменной не было
 
+const showAuthModal = ref(false);
+const openAuth = () => {
+    showAuthModal.value = true;
+};
+const closeAuth = () => {
+    showAuthModal.value = false;
+};
 /* пытаемся восстановить авторизованного пользователя */
 onMounted(() => {
     const stored = localStorage.getItem(AUTH_KEY);
@@ -386,6 +412,10 @@ const selectedCourse = ref(null);
 
 /* открыть / закрыть */
 function openModal(course) {
+    if (!user.value) {
+        showAuthModal.value = true;   // показываем окно авторизации
+        return;                       // дальше не идём
+    }
     selectedCourse.value = course;
     showModal.value = true;
 }
@@ -532,6 +562,16 @@ function downloadPdf(path) {
 </script>
 
 <style scoped>
+.space-y-4{
+    width: 100%;
+    max-width: 500px;
+}
+:deep(.image-tool__image-picture) {
+  max-width: none;
+  width: 100%;
+  height: auto;
+  display: block;
+}
 .block__logo {
     display: flex;
     align-items: center;
@@ -594,6 +634,7 @@ function downloadPdf(path) {
 
 /* Кнопка закрытия */
 .modal-close {
+    font-size: 20px;
     background: none;
     border: none;
     border-radius: 50%;

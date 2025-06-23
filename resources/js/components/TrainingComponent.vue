@@ -82,7 +82,7 @@
                 <transition name="modal">
   <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
     <div class="modal-content__block">
-      <button class="modal-close" @click="closeModal">X</button>
+      <button class="modal-close" @click="closeModal"> × </button>
 
       <!-- Экран формы -->
       <div v-if="!isSubmitted" class="modal-content">
@@ -203,7 +203,7 @@
                                 :src="
                                     teacher.photo
                                         ? `/storage/${teacher.photo}`
-                                        : '/public/img/teacher.jpg'
+                                        : '../../img/nofotolk.png'
                                 "
                                 alt="Teacher Image"
                             />
@@ -316,7 +316,7 @@
                 @click.self="showAuthModal = false"
             >
                 <div class="modal-content__block modal-close--auth">
-                <button class="modal-close modal-close--auth" @click="showAuthModal = false">X</button>
+                <button class="modal-close modal-close--auth" @click="showAuthModal = false"> × </button>
                 <div class="modal-content modal-content--auth">
                     <h2 class="modal__h2--auth">Войдите или зарегистрируйтесь</h2>
                     <p>Чтобы приобрести курс или заказать консультацию</p>
@@ -654,6 +654,7 @@ function scrollToCourse() {
 
 /* Кнопка закрытия */
 .modal-close {
+    font-size: 20px;
     background: none;
     border: none;
     border-radius: 50%;

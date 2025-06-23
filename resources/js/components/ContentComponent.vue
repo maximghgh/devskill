@@ -283,9 +283,8 @@ function toggleSolution() {
 }
 
 function goBack() {
-    window.history.back();
+    window.location.href = "/cabinet";
 }
-
 function selectTopic(topic) {
     console.log("Выбрали тему:", topic);
     selectedTopic.value = topic;

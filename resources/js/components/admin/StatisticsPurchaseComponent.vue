@@ -89,7 +89,7 @@ onMounted(async () => {
 });
 
 function goBack() {
-  window.history.back();
+    window.location.href = "/admin";
 }
 </script>
 <style scoped>

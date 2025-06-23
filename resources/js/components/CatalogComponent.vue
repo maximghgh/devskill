@@ -200,7 +200,7 @@
                                         <button
                                             class="modal-close"
                                             @click="closeModal"
-                                        >X</button>
+                                        > × </button>
 
                                         <div v-if="!isSubmitted" class="modal-content">
                                             <!-- info -->
@@ -468,7 +468,7 @@
                 @click.self="showAuthModal = false"
             >
                 <div class="modal-content__block modal-close--auth">
-                <button class="modal-close modal-close--auth" @click="showAuthModal = false">X</button>
+                <button class="modal-close modal-close--auth" @click="showAuthModal = false"> × </button>
                 <div class="modal-content modal-content--auth">
                     <h2 class="modal__h2--auth">Войдите или зарегистрируйтесь</h2>
                     <p>Чтобы приобрести курс или заказать консультацию</p>
@@ -737,6 +737,7 @@ onMounted(async () => {
 
 /* Кнопка закрытия */
 .modal-close {
+  font-size: 20px;
   background: none;
   border: none;
   border-radius: 50%;

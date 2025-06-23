@@ -43,7 +43,7 @@
                                     <!-- Если есть хотя бы один купленный курс -->
                                     <div
                                         v-if="purchasedCourses.length > 0"
-                                        class="course__cards"
+                                        class="course__cards_cabinet"
                                     >
                                         <div
                                             v-for="course in purchasedCourses"
@@ -248,7 +248,7 @@ onMounted(async () => {
     transition: var(--transition-3);
 }
 .course__card_personal {
-    width: 355px;
+    /* width: 355px; */
     padding: 26px 31px;
 }
 .course__card_personal {

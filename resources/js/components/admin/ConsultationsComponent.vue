@@ -52,7 +52,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-
+import { globalNotification } from "../../globalNotification";
 // Массив консультаций
 const consultations = ref([]);
 
@@ -97,14 +97,18 @@ async function handleStatusChange(item, index) {
 
         // Выходим из режима редактирования
         editingIndex.value = null;
+        globalNotification.categoryMessage = "Статус Изменен";
+        globalNotification.type = "success";
     } catch (error) {
         console.error("Ошибка при обновлении статуса:", error);
+        globalNotification.categoryMessage = "Ошибка обновления статуса";
+        globalNotification.type = "error";
     }
 }
 
 // Метод для кнопки «Назад»
 function goBack() {
-    window.history.back();
+    window.location.href = "/admin";
 }
 </script>
 

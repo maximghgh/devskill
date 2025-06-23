@@ -946,7 +946,7 @@
                                                         editingNews.content
                                                     "
                                                     placeholder="Введите краткое описание"
-                                                    class="form-textarea"
+                                                    class="form-textarea form-textarea--m"
                                                 ></textarea>
                                             </div>
                                             <!-- Изображение новости -->
@@ -1005,7 +1005,7 @@
                                         <textarea
                                             v-model="newNews.content"
                                             placeholder="Введите краткое описание"
-                                            class="form-textarea"
+                                            class="form-textarea form-textarea--m"
                                         ></textarea>
                                     </div>
                                     <div class="form-group">
@@ -2532,6 +2532,8 @@ async function saveEditingFaq() {
   });
   editingFaq.id = null;
   await loadFaqs();
+    globalNotification.categoryMessage = "Вопрос изменен";
+    globalNotification.type = "success";
 }
 function cancelEditingFaq() {
   editingFaq.id = null;
@@ -2611,7 +2613,9 @@ async function submitNews() {
 </script>
 
 <style scoped>
-
+.form-textarea--m{
+    width: 678px !important;
+}
 .modal-flex{
     display: flex;
     flex-direction: column;

@@ -226,7 +226,7 @@
                                             <button
                                                 class="modal-close"
                                                 @click="closeModal"
-                                            >X</button>
+                                            > × </button>
 
                                             <div v-if="!isSubmitted" class="modal-content">
                                                 <!-- info -->
@@ -419,7 +419,7 @@
                                             <div v-else class="modal__else">
                                                 <div class="else__info">
                                                     <h2>{{ successMessage }}</h2>
-                                                    <p v-if="selectedOption === 'consultation'">
+                                                    <p v-if="lastSubmittedOption === 'consultation'">
                                                         Скоро с вами свяжется специалист
                                                     </p>
                                                     <p v-else>
@@ -446,7 +446,7 @@
                 @click.self="showAuthModal = false"
             >
                 <div class="modal-content__block modal-close--auth">
-                <button class="modal-close modal-close--auth" @click="showAuthModal = false">X</button>
+                <button class="modal-close modal-close--auth" @click="showAuthModal = false"> × </button>
                 <div class="modal-content modal-content--auth">
                     <h2 class="modal__h2--auth">Войдите или зарегистрируйтесь</h2>
                     <p>Чтобы приобрести курс или заказать консультацию</p>
@@ -464,7 +464,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import axios from 'axios';
-
+const lastSubmittedOption = ref('');
 /* ------------------------------------------------------------------ */
 /* 1. Константы                                                       */
 /* ------------------------------------------------------------------ */
@@ -642,6 +642,7 @@ async function submitForm() {
 
     try {
         await axios.post(url, payload);
+        lastSubmittedOption.value = selectedOption.value;
         successMessage.value =
             selectedOption.value === 'consultation'
                 ? 'Спасибо за заявку!'
@@ -785,6 +786,7 @@ function scrollToCourse() {
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
     z-index: 10;
 }
 .modal__else {
@@ -1120,6 +1122,7 @@ function scrollToCourse() {
     border-radius: 8px;
 }
 .modal-close {
+    font-size: 20px;
     background: none;
     border: none;
     border-radius: 50%;

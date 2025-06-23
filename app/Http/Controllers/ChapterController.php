@@ -46,6 +46,7 @@ class ChapterController extends Controller
         'content' => 'nullable',
         'correct_answer' => 'nullable|string',
         'file'    => 'nullable|file|max:20480',  // единое правило
+        'video_url'       => 'nullable|string',  
     ]);
 
     // Привяжем к теме
@@ -97,7 +98,7 @@ class ChapterController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'type'  => 'required|string|in:video,text,task,terms',
+            'type'  => 'required|string|in:video,text,task,terms,presentation',
         ]);
 
         $chapter = Chapter::where('topic_id', $topicId)->findOrFail($chapterId);
