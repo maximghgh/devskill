@@ -395,7 +395,7 @@ async function submitForm(){
   try{
     await axios.post(url, payload);
     successMessage.value = selectedOption.value==='consultation'
-        ? 'Спасибо за заявку!' : 'Платёж прошёл';
+        ? 'Спасибо за заявку!' : 'Поздравляем с покупкой!';
     isSubmitted.value = true;
   }catch(e){
     console.error(e);
@@ -679,6 +679,7 @@ function scrollToCourse() {
     align-items: center;
 }
 .else__info {
+    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;

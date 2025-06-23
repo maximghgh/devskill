@@ -485,7 +485,7 @@ async function submit() {
         successText.value =
             option.value === "consultation"
                 ? "Спасибо за заявку!"
-                : "Платёж прошёл";
+                : "Поздравляем с покупкой!";
         submitted.value = true;
         emit("success"); // уведомляем родителя
     } catch (err) {

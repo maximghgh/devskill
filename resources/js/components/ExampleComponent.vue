@@ -799,11 +799,7 @@ function scrollToCourse() {
     justify-content: center;
     align-items: center;
 }
-.modal__else h2 {
-    font-weight: bold;
-    margin: 0 0 20px;
-    z-index: 10; /* располагаем на заднем плане */
-}
+
 
 .modal-content-wrapper {
     overflow: hidden;
