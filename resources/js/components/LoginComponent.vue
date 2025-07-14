@@ -204,9 +204,14 @@ const handleVerifyCode = async () => {
       // Перенаправляем в зависимости от роли
       if (userData.role === 3) {
         window.location.href = `/admin?verifiedUser=${base64User}`
-      } else {
+      } else if(userData.role === 2){
+        window.location.href = `/teacher?verifiedUser=${base64User}`
+      }
+      else if(userData.role === 1) {
         window.location.href = `/?verifiedUser=${base64User}`
       }
+        
+      
     }
   } catch (error) {
     errorMessage.value = 'Неверный код. Попробуйте снова.'

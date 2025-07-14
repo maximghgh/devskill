@@ -5,6 +5,10 @@ import VueTheMask from 'vue-the-mask';
 // import Register from './components/RegisterComponent.vue';
 import HeaderComponent from './components/HeaderComponent.vue';
 import FooterComponent from './components/FooterComponent.vue';
+
+// Импорт всех компонентов преподователя 
+import DashboardTeacher from './components/teacher/DashboardTeacher.vue';
+import HeaderteacherComponent from './components/teacher/Header-teacherComponent.vue';
 // Импорт всех компонентов для админ-панели
 
 import DashboardComponent from './components/admin/DashboardComponent.vue';
@@ -19,6 +23,7 @@ import ConsultationsComponent from './components/admin/ConsultationsComponent.vu
 import AddCourseComponent from './components/admin/AddCourseComponent.vue';
 
 // Импорт всех компонентов 
+import FinalTestPage from './components/FinalTestPage.vue';
 import ExampleComponent from './components/ExampleComponent.vue';
 import ProfileComponent from './components/ProfileComponent.vue';
 import CabinetComponent from './components/CabinetComponent.vue';
@@ -42,6 +47,10 @@ import ChapterView from './components/ChapterView.vue';
 // Создание приложения Vue
 const app = createApp({});
 
+//Регистрация компонентов преподователя 
+app.component('header-teacher-component', HeaderteacherComponent);
+app.component('dashboardteacher-component', DashboardTeacher);
+
 // Регистрация компонентов (имена в kebab-case) для админ-панели
 app.component('addcourse-component', AddCourseComponent);
 app.component('consultations-component', ConsultationsComponent);
@@ -55,6 +64,7 @@ app.component('cabinet-admin-component', CabinetadminComponent);
 app.component('profile-admin-component', ProfileadminComponent);
 // Регистрация компонентов (имена в kebab-case)
 app.component('header-component', HeaderComponent);
+app.component('finaltest-component', FinalTestPage);
 app.component('chapter-component', ChapterView);
 app.component('footer-component', FooterComponent);
 app.component('cpp-component', CppComponent);

@@ -30,7 +30,9 @@
                         />
                     </div>
                     <div class="progres">
-                        <div class="course-card__sub">Ваш прогресс</div>
+                        <div class="course-card__sub">
+                            Ваш прогресс: {{ progressPercentage }}%
+                        </div>
                         <div class="progress-bar">
                             <span
                                 :style="{ width: progressPercentage + '%' }"
@@ -138,6 +140,18 @@
                         </transition>
                     </li>
                 </ul>
+                <!-- Блок итогового теста -->
+                <div v-if="course.id" class="final-test-block">
+                    <h3>Финальная работа курса «{{ course.card_title }}»</h3>
+                    <p>Вы сможете пройти тест после завершения всех глав.</p>
+                    <a
+  v-if="course.id"
+  :href="`/final-test/${course.id}`"
+  class="button"
+>
+  Пройти тест
+</a>
+                </div>
             </div>
         </div>
     </div>
@@ -158,6 +172,11 @@ import iconVideo from "../../img/video.png";
 import iconTerms from "../../img/terms.png";
 import iconTask from "../../img/task.png";
 import iconPresentation from "../../img/presentation.png";
+
+function goToFinalTest() {
+  // ведёт на маршрут, который мы создали выше
+  window.location.href = `/final-test/${course.id}`;
+}
 
 const iconMap = {
     text: iconText,
@@ -542,23 +561,20 @@ function cancelReply() {
 }
 //прогресс
 const progressPercentage = computed(() => {
-    let totalChapters = 0;
-    let completedChapters = 0;
+  let totalPoints    = 0;
+  let completedPoints = 0;
 
-    topics.value.forEach((topic) => {
-        if (topic.chapters && topic.chapters.length) {
-            topic.chapters.forEach((chapter) => {
-                totalChapters++;
-                if (chapter.is_completed) {
-                    completedChapters++;
-                }
-            });
-        }
+  topics.value.forEach(topic => {
+    topic.chapters?.forEach(ch => {
+      const pts = Number(ch.points) || 0;   // защита от null
+      totalPoints += pts;
+      if (ch.is_completed) completedPoints += pts;
     });
+  });
 
-    return totalChapters
-        ? Math.round((completedChapters / totalChapters) * 100)
-        : 0;
+  return totalPoints
+    ? Math.round((completedPoints / totalPoints) * 100)
+    : 0;
 });
 
 const certificateUnlocked = computed(() => progressPercentage.value === 100);
@@ -917,6 +933,23 @@ async function dislikeComment(comment) {
 </script>
 
 <style scoped>
+.final-test-block span {
+    font-size: 12px;
+    display: block;
+    text-align: left;
+}
+.final-test-block h3 {
+    margin: 16px;
+}
+.final-test-block {
+    display: flex;
+    flex-direction: column;
+  margin: 2rem 0;
+  padding: 15px 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  text-align: center;
+}
 .backs{
     display: flex;
     height: 20px;

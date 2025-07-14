@@ -21,7 +21,7 @@ class PurchaseController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|integer',
             'payment_method' => 'required|in:card,sbp',
-            'payment_details' => 'nullable|json',
+            'payment_details' => 'nullable|json|min:0',
         ]);
 
         // Если payment_details пришёл как массив или объект

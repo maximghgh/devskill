@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ChapterController;
+use App\Http\Controllers\FinalTestController;
 use App\Models\Course;
 use App\Http\Controllers\ForgotPasswordController;
 
@@ -157,6 +158,14 @@ Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail'])->nam
 //         return view('admin.dashboard');
 //     })->name('admin.dashboard');
 // });
+Route::get('/teacher', function () {
+    return view('teacher');
+})->middleware(['auth', 'role:2']);
+
+Route::get('final-test/{course}', function ($course) {
+    // $course здесь — это число из URL (/final-test/45)
+    return view('final-test', ['courseId' => $course]);
+});
 Route::group([
     'prefix' => 'admin',
     'middleware' => ['auth', 'role:3'] // только залогиненным пользователям с role=3

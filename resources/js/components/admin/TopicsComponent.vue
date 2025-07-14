@@ -95,7 +95,14 @@
                                 required
                             />
                         </div>
-
+                        <div class="form-group">
+                            <label class="form-label">Баллы за главу</label>
+                            <input type="number"
+                                v-model.number="editingChapter.points"
+                                min="0"
+                                class="form-input" 
+                            />
+                        </div>
                         <!-- Поле "Тип" -->
                         <div class="form-group">
                             <label class="form-label">Тип</label>
@@ -204,6 +211,16 @@
                         v-model="newChapter.title"
                         required
                         class="form-input"
+                    />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Баллы за главу</label>
+                    <input
+                        type="number"
+                        v-model.number="newChapter.points"
+                        min="0"
+                        class="form-input"
+                        required
                     />
                 </div>
 
@@ -393,6 +410,8 @@ function initModalEditor() {
 }
 
 async function saveEditedChapter() {
+    const payload = { ...editingChapter.value };
+    payload.points = editingChapter.value.points;
     try {
         if (modalEditorInstance) {
             const data = await modalEditorInstance.save();
@@ -434,6 +453,7 @@ const blankChapter = {
     content: null,
     correct_answer: "",
     file: null, // общий инпут-файл
+    points: 0,
 };
 const newChapter = ref({ ...blankChapter });
 
@@ -553,7 +573,10 @@ async function submitChapter() {
 
         /* файл (если был) */
         if (newChapter.value.file) fd.append("file", newChapter.value.file);
-
+        fd.append('points', newChapter.value.points);
+for (let [key, val] of fd.entries()) {
+      console.log(`FormData: ${key} =`, val);
+    }
         /* запрос */
         const { data: res } = await axios.post(
             `/admin/topic/${topicId}/chapters`,

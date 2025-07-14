@@ -6,6 +6,7 @@ use App\Models\UserChapterProgress;
 use App\Models\Chapter;
 use App\Models\Topic;
 use Illuminate\Http\Request;
+use App\Models\FinalTest;
 
 class ChapterController extends Controller
 {
@@ -39,48 +40,60 @@ class ChapterController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request, $topicId)
-{
-    $validated = $request->validate([
-        'title'   => 'required|string|max:255',
-        'type'    => 'required|in:video,text,task,terms,presentation',
-        'content' => 'nullable',
-        'correct_answer' => 'nullable|string',
-        'file'    => 'nullable|file|max:20480',  // единое правило
-        'video_url'       => 'nullable|string',  
-    ]);
+    {
+        $data = $request->validate([
+            'title'          => 'required|string|max:255',
+            'type'           => 'required|in:video,text,task,terms,presentation',
+            'content'        => 'nullable',
+            'correct_answer' => 'nullable|string',
+            'file'           => 'nullable|file|max:20480',
+            'video_url'      => 'nullable|string',
+            'points'         => 'required|integer|min:0',
+        ]);
 
-    // Привяжем к теме
-    $validated['topic_id'] = $topicId;
+        // Обработка файла (если есть)...
+        $presentationPath = null;
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $path = $file->storeAs('public/chapters_files', $file->getClientOriginalName());
+            $presentationPath = str_replace('public/', 'storage/', $path);
+        }
 
-    // Сериализуем editor.js-поле, если надо
-    if (isset($validated['content']) && is_array($validated['content'])) {
-        $validated['content'] = json_encode($validated['content']);
+        if ($data['type'] === 'presentation') {
+            // — ТОЛЬКО в таблицу final_tests
+
+            $topic    = Topic::findOrFail($topicId);
+            $courseId = $topic->course_id;
+
+            FinalTest::create([
+                'topic_id'         => $topicId,
+                'chapter_id'       => $courseId,  // или опустите это поле, если в миграции nullable
+                'questions'        => is_string($data['content'])
+                                    ? json_decode($data['content'], true)
+                                    : ($data['content'] ?? []),
+                'presentation_path'=> $presentationPath,
+            ]);
+
+            return response()->json(['success' => true], 201);
+        }
+
+        // — для всех остальных типов: ТОЛЬКО в таблицу chapters
+        $chapter = Chapter::create([
+            'topic_id'         => $topicId,
+            'title'            => $data['title'],
+            'type'             => $data['type'],
+            'content'          => $data['content']        ?? null,
+            'correct_answer'   => $data['correct_answer'] ?? null,
+            'video_url'        => $data['video_url']      ?? null,
+            'presentation_path'=> $presentationPath,
+            'points'           => $data['points'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'chapter' => $chapter,
+        ], 201);
     }
-
-    // Если пришёл файл — сохраняем его в public и пишем путь в presentation_path
-    if ($request->hasFile('file')) {
-
-        $file       = $request->file('file');
-        $original   = $file->getClientOriginalName();        // docs.pdf
-    
-              // или любой алгоритм
-    
-        // кладём в storage/app/public/chapters_files/…
-        $path = $file->storeAs('public/chapters_files', $original);
-    
-        // путь, по которому фронт сможет достучаться:  /storage/chapters_files/…
-        $validated['presentation_path'] = str_replace('public/', 'storage/', $path);
-    }
-
-    $chapter = Chapter::create($validated);
-
-    return response()->json([
-        'success' => true,
-        'chapter' => $chapter->fresh(),
-    ], 201);
-}
-
-
 
     /**
      * Показать форму редактирования главы.
@@ -107,6 +120,7 @@ class ChapterController extends Controller
         $chapter->content        = $request->content; // JSON-контент, если используется Editor.js
         $chapter->video_url      = $request->video_url ?? null;
         $chapter->correct_answer = $request->correct_answer ?? null;
+        $chapter->points        = $request->points;
         $chapter->save();
 
         return response()->json([
@@ -239,4 +253,18 @@ class ChapterController extends Controller
             'taskCount' => $count
         ]);
     }
+    // в ChapterController.php
+    public function finalTest(Chapter $chapter)
+    {
+        // грузим связь finalTest (модель FinalTest с полем questions)
+        $ft = $chapter->finalTest;
+        if (! $ft) {
+            return response()->json(['message' => 'Test not found'], 404);
+        }
+        return response()->json([
+            'questions' => $ft->questions,   // массив {id, prompt, type, options, answer}
+            'settings'  => $ft->settings ?? [],
+        ]);
+    }
+
 }

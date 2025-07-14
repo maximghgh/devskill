@@ -18,6 +18,10 @@ use App\Http\Controllers\CourseCommentController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\FinalTestController;
+
+
+Route::get('/final-test/{course}', [FinalTestController::class, 'show']);
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -183,3 +187,5 @@ Route::prefix('admin/topic/{topicId}')->group(function () {
     Route::put('chapters/{chapterId}', [ChapterController::class, 'update']);
     Route::delete('chapters/{chapterId}', [ChapterController::class, 'destroy']);
 });
+
+Route::get('/chapters/{chapter}/final-test', [ChapterController::class, 'finalTest']);

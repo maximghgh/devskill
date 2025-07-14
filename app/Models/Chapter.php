@@ -21,10 +21,12 @@ class Chapter extends Model
         'order',
         'correct_answer',
         'presentation_path',   // ← добавили
+        'points',
     ];
 
     
     protected $casts = [
+        'points' => 'integer',
         'content' => 'json', // или 'json'
     ];
     
@@ -41,6 +43,10 @@ class Chapter extends Model
     public function progress()
     {
         return $this->hasMany(UserChapterProgress::class);
+    }
+    public function finalTest()
+    {
+        return $this->hasOne(FinalTest::class);
     }
     
 }

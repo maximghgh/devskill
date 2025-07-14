@@ -27,7 +27,7 @@ class CreateChaptersTable extends Migration
             $table->integer('order')->default(0);
 
             $table->string('correct_answer')->nullable();
-            
+            $table->integer('points')->default(0);
             $table->timestamps();
         });
     }
