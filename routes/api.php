@@ -20,8 +20,24 @@ use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FinalTestController;
 
-
+Route::post('/chapters/{chapter}/complete', [ChapterController::class,'complete']);
+Route::get('/courses/{course}/final-test', [FinalTestController::class,'show']);
 Route::get('/final-test/{course}', [FinalTestController::class, 'show']);
+Route::post('/final-tests/{test}', [FinalTestController::class,'submit']);
+Route::get('/final-tests/status', function (Request $r) {
+    $userId   = $r->input('user_id');
+    $courseId = $r->input('course_id');
+
+    $ft = \App\Models\FinalTest::where('course_id',$courseId)->first();
+    $passed = false;
+    if ($ft) {
+        $passed = \App\Models\UserFinalTest::where([
+            'user_id'       => $userId,
+            'final_test_id' => $ft->id,
+        ])->where('score','>=',$ft->pass_score)->exists();
+    }
+    return response()->json(['passed'=>$passed]);
+});
 /*
 |--------------------------------------------------------------------------
 | API Routes

@@ -145,12 +145,13 @@
                     <h3>Финальная работа курса «{{ course.card_title }}»</h3>
                     <p>Вы сможете пройти тест после завершения всех глав.</p>
                     <a
-  v-if="course.id"
-  :href="`/final-test/${course.id}`"
-  class="button"
->
-  Пройти тест
-</a>
+                        :href="`/final-test/${course.id}`"
+                        class="button"
+                        :class="{ 'button--disabled': !allChaptersCompleted }"
+                        :disabled="!allChaptersCompleted"
+                        >
+                        Пройти тест
+                    </a>
                 </div>
             </div>
         </div>
@@ -577,7 +578,16 @@ const progressPercentage = computed(() => {
     : 0;
 });
 
-const certificateUnlocked = computed(() => progressPercentage.value === 100);
+// 1) Главы закрыты? (все баллы набраны)
+const allChaptersCompleted = computed(() => progressPercentage.value === 100)
+
+// 2) Сдал ли пользователь итоговый тест
+const testPassed = ref(false)   // ← загрузим с бэка чуть ниже
+
+// 3) Сертификат доступен, когда пройдено всё + тест сдан
+const certificateUnlocked = computed(
+  () => allChaptersCompleted.value && testPassed.value
+)
 
 // 2) Идентификатор курса — либо из route params, либо из localStorage
 
@@ -773,7 +783,19 @@ onMounted(() => {
                 console.error("Ошибка при загрузке тем курса:", error)
             );
     }
-
+    // Загружаем результат итог. теста
+    if (storedUser.id && courseId.value) { 
+        try { 
+            const { data } = axios.get( 
+                `/api/final-tests/status`,   // сделайте такой энд-поинт 
+                { params: { user_id: storedUser.id, course_id: courseId.value } } 
+            ); 
+            // data: { passed: true/false } 
+            testPassed.value = !!data.passed; 
+        } catch (e) { 
+            console.warn('Не удалось получить статус теста', e); 
+        } 
+    }
     loadCourseComments();
     loadFaqs();
     loadCourses();

@@ -76,6 +76,7 @@
 import { ref, onMounted, inject } from 'vue'
 import axiosLib from 'axios'
 
+const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
 // props
 const props = defineProps({ courseId: [Number, String] })
 
@@ -98,13 +99,12 @@ onMounted(async () => {
   loading.value = true
 
   try {
-    const { data } = await axios.get(`/api/final-test/${props.courseId}`)
-
-    // сохраним данные курса
-    course.value = data.course
-
-    // найдём quiz-блок в JSON от EditorJS
-    const quizBlock = data.test.blocks.find(b => b.type === 'quiz')
+    const { data } = await axios.get(`/api/final-test/${props.courseId}`,{ params: { user_id: storedUser.id } })
+    course.value = data.course || {}
+    const root = data.questions ?? data.test
+    if (!root?.blocks) throw new Error('В ответе нет blocks') 
+  
+    const quizBlock = root.blocks.find(b => b.type === 'quiz')
     if (!quizBlock) throw new Error('Quiz-блок не найден')
 
     quizData.value = quizBlock.data
@@ -114,6 +114,12 @@ onMounted(async () => {
       userAnswers.value[q.id] = q.type === 'multiple' ? [] : null
     })
   } catch (e) {
+    if (e.response?.status === 403 &&
+        e.response.data?.message === 'chapters_incomplete') { 
+      error.value = 'Сначала пройдите все главы курса.'; 
+    } else { 
+      error.value = 'Не удалось загрузить тест.'; 
+    }
     console.error(e)
     error.value = 'Не удалось загрузить тест.'
   } finally {
