@@ -41,8 +41,34 @@ Route::get(
   '/final-test-results/{id}',
   [FinalTestResultController::class, 'show']
 );
-Route::post('admin/course/{course}/final-test', [FinalTestController::class, 'store'])
-     ->name('admin.course.final-test.store');
+Route::prefix('admin')->group(function(){
+    // получить итоговый тест
+    Route::get(
+      'course/{course}/final-test',
+      [FinalTestController::class, 'show']
+    );
+    // создать
+    Route::post(
+      'course/{course}/final-test',
+      [FinalTestController::class, 'store']
+    );
+    // обновить
+    Route::get(
+        'course/{course}/final-test/data',
+        [FinalTestController::class, 'getByCourse']
+    );
+    // удалить тест
+    Route::delete(
+        'course/{course}/final-test/data',
+        [FinalTestController::class, 'destroyByCourse']
+    );
+    // обновить тест
+    Route::match(
+      ['put','patch'],
+      'course/{course}/final-test/data',
+      [FinalTestController::class, 'updateByCourse']
+    );
+});
 /*
 |--------------------------------------------------------------------------
 | API Routes

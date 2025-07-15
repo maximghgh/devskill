@@ -137,13 +137,11 @@ class FinalTestController extends Controller
 
         return response()->json(['passed' => $passed]);
     }
-
     public function store(Request $r, int $courseId)
     {
         /* 1. Валидация входящего JSON */
         $data = $r->validate([
             'questions'  => 'required|array',                 // editor.save()
-            'pass_score' => 'required|integer|min:1|max:100', // 1‑100 %
             'topic_id'   => 'nullable|integer|exists:topics,id',
         ]);
 
@@ -153,7 +151,6 @@ class FinalTestController extends Controller
             [
                 'topic_id'   => $data['topic_id'] ?? null,    // null, если не передан
                 'questions'  => $data['questions'],           // Laravel сам сериализует
-                'pass_score' => $data['pass_score'],
             ]
         );
 
@@ -162,6 +159,52 @@ class FinalTestController extends Controller
             'saved' => true,
             'id'    => $test->id,
         ], 201);
+    }
+    public function getByCourse(int $courseId)
+    {
+        $test = FinalTest::where('chapter_id', $courseId)
+                         ->firstOrFail();
+
+        return response()->json([
+            'id'         => $test->id,
+            'questions'  => $test->questions,
+            'pass_score' => $test->pass_score,
+            'created_at' => $test->created_at,
+            'updated_at' => $test->updated_at,
+        ]);
+    }
+
+    /**
+     * Обновление (PUT).
+     */
+    public function updateByCourse(Request $r, int $courseId)
+    {
+        $data = $r->validate([
+            'questions'  => 'required|array',
+
+        ]);
+
+        $test = FinalTest::where('chapter_id', $courseId)
+                         ->firstOrFail();
+
+        $test->update([
+            'questions'  => $data['questions'],
+        ]);
+
+        return response()->json(['message' => 'Обновлено']);
+    }
+
+    /**
+     * Удаление (DELETE).
+     */
+    public function destroyByCourse(int $courseId)
+    {
+        $test = FinalTest::where('chapter_id', $courseId)
+                         ->firstOrFail();
+
+        $test->delete();
+
+        return response()->json(['message' => 'Удалено']);
     }
 }
 

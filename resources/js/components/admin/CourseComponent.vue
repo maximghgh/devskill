@@ -96,9 +96,22 @@
             <button class="type-button" @click="toggleTopicForm">
                 {{ showTopicForm ? "Отмена добавления темы" : "Добавить тему" }}
             </button>
-            <button class="type-button" @click="toggleFinalTestForm">
-                {{ showFinalTestForm ? "Отмена создания теста" : "Создать итоговый тест" }}
-            </button>
+            <div class="edit__testfinal">
+                <button class="type-button" @click="toggleFinalTestForm">
+                    {{
+                        showFinalTestForm
+                            ? "Отмена создания теста"
+                            : "Создать итоговый тест"
+                    }}
+                </button>
+                <button class="type-button" @click="onEditTestClick">
+                    {{
+                        showEditTestForm
+                            ? "Отмена редактирования теста"
+                            : "Редактировать тест"
+                    }}
+                </button>
+            </div>
         </div>
 
         <!-- Форма создания темы -->
@@ -144,6 +157,29 @@
                 </div>
             </form>
         </div>
+        <div v-if="showEditTestForm" class="course-form">
+            <h3>Редактировать итоговый тест</h3>
+            <form @submit.prevent="submitEditedTest">
+                <div class="form-group">
+                    <div
+                        id="editor-final-test-create"
+                        class="editor-container"
+                    ></div>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="form-button">
+                        Сохранить изменения
+                    </button>
+                    <button
+                        type="button"
+                        class="btn-delete"
+                        @click="deleteFinalTest"
+                    >
+                        Удалить тест
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </template>
 
@@ -154,163 +190,254 @@ import EditorJS from "@editorjs/editorjs";
 import QuizTool from "@/components/editorjs-quiz";
 import { globalNotification } from "../../globalNotification";
 
-// --- Извлечение ID из URL ---
+// ——————————————————————————
+// Извлечение ID курса из URL
+// ——————————————————————————
 function getCourseIdFromUrl() {
-  const parts = window.location.pathname.split("/");
-  return parts[parts.indexOf("course") + 1];
+    const parts = window.location.pathname.split("/");
+    return parts[parts.indexOf("course") + 1];
 }
 const courseId = getCourseIdFromUrl();
 
-function getTopicIdFromUrl() {
-  const parts = window.location.pathname.split("/");
-  return parts[parts.indexOf("topic") + 1];
-}
-const topicId = getTopicIdFromUrl();
-
-// --- Темы ---
+// ——————————————————————————
+// Состояние раздела «Темы»
+// ——————————————————————————
 const topics = ref([]);
 const showTopicForm = ref(false);
 const newTopic = ref({ title: "", description: "" });
 const editingTopicId = ref(null);
 const editingTopic = ref({});
 
-async function loadTopics() {
-  try {
-    const { data } = await axios.get(`/admin/course/${courseId}/topics`);
-    topics.value = (data.topics || []).sort(
-      (a, b) => new Date(a.created_at) - new Date(b.created_at)
-    );
-  } catch (e) {
-    console.error("Ошибка при загрузке тем:", e);
-  }
-}
-
-function toggleTopicForm() {
-  showTopicForm.value = !showTopicForm.value;
-}
-
-// Создание темы
-async function submitTopic() {
-  try {
-    const { data } = await axios.post(
-      `/admin/course/${courseId}/topics`,
-      newTopic.value
-    );
-    topics.value.push(data.topic);
-    newTopic.value = { title: "", description: "" };
-    showTopicForm.value = false;
-    globalNotification.categoryMessage = "Тема создана";
-    globalNotification.type = "success";
-  } catch (e) {
-    console.error("Ошибка создания темы:", e);
-    globalNotification.categoryMessage = "Заполните все поля";
-    globalNotification.type = "error";
-  }
-}
-
-// Редактирование темы
-function startEditingTopic(topic) {
-  editingTopicId.value = topic.id;
-  editingTopic.value = { ...topic };
-}
-async function saveTopic() {
-  try {
-    const { data } = await axios.put(
-      `/admin/topics/${editingTopic.value.id}`,
-      editingTopic.value
-    );
-    const idx = topics.value.findIndex((t) => t.id === data.topic.id);
-    topics.value[idx] = data.topic;
-    editingTopicId.value = null;
-    globalNotification.categoryMessage = "Тема изменена";
-    globalNotification.type = "success";
-  } catch (e) {
-    console.error("Ошибка обновления темы:", e);
-    globalNotification.categoryMessage = "Ошибка обновления";
-    globalNotification.type = "error";
-  }
-}
-function cancelEditingTopic() {
-  editingTopicId.value = null;
-}
-
-// Удаление темы
-async function deleteTopic(id) {
-  if (!confirm("Удалить тему?")) return;
-  try {
-    await axios.delete(`/admin/topics/${id}`);
-    topics.value = topics.value.filter((t) => t.id !== id);
-    globalNotification.categoryMessage = "Тема удалена";
-    globalNotification.type = "success";
-  } catch (e) {
-    console.error("Ошибка удаления темы:", e);
-    globalNotification.categoryMessage = "Ошибка удаления";
-    globalNotification.type = "error";
-  }
-}
-
-// --- Итоговый тест ---
+// ——————————————————————————
+// Состояние раздела «Итоговый тест»
+// ——————————————————————————
 const showFinalTestForm = ref(false);
+const showEditTestForm = ref(false);
 const passScore = ref(50);
 let quizEditor = null;
 
-// функция‑переключатель вместо двух open/close
-function toggleFinalTestForm() {
-  showFinalTestForm.value = !showFinalTestForm.value;
+// ——————————————————————————
+// Загрузка списка тем
+// ——————————————————————————
+async function loadTopics() {
+    try {
+        const { data } = await axios.get(`/admin/course/${courseId}/topics`);
+        topics.value = (data.topics || []).sort(
+            (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        );
+    } catch (e) {
+        console.error("Ошибка при загрузке тем:", e);
+    }
+}
+onMounted(loadTopics);
 
-  if (showFinalTestForm.value) {
-    // ждем, пока контейнер отрендерится, и запускаем редактор
-    nextTick(initQuizEditor);
-  } else if (quizEditor) {
-    // при закрытии — чистим
-    quizEditor.destroy();
-    quizEditor = null;
-  }
+// ——————————————————————————
+// Управление темами
+// ——————————————————————————
+function toggleTopicForm() {
+    showTopicForm.value = !showTopicForm.value;
 }
 
-function initQuizEditor() {
-  if (quizEditor) quizEditor.destroy();
-  quizEditor = new EditorJS({
-    holder: "editor-final-test-create",
-    tools: { quiz: QuizTool },
-    data: {
-      blocks: [
-        {
-          type: "quiz",
-          data: { questions: [], settings: { shuffle: false } },
+async function submitTopic() {
+    try {
+        const { data } = await axios.post(
+            `/admin/course/${courseId}/topics`,
+            newTopic.value
+        );
+        topics.value.push(data.topic);
+        newTopic.value = { title: "", description: "" };
+        showTopicForm.value = false;
+        globalNotification.categoryMessage = "Тема создана";
+        globalNotification.type = "success";
+    } catch (e) {
+        console.error("Ошибка создания темы:", e);
+        globalNotification.categoryMessage = "Заполните все поля";
+        globalNotification.type = "error";
+    }
+}
+
+function startEditingTopic(topic) {
+    editingTopicId.value = topic.id;
+    editingTopic.value = { ...topic };
+}
+
+async function saveTopic() {
+    try {
+        const { data } = await axios.put(
+            `/admin/topics/${editingTopic.value.id}`,
+            editingTopic.value
+        );
+        const idx = topics.value.findIndex((t) => t.id === data.topic.id);
+        if (idx !== -1) topics.value[idx] = data.topic;
+        editingTopicId.value = null;
+        globalNotification.categoryMessage = "Тема изменена";
+        globalNotification.type = "success";
+    } catch (e) {
+        console.error("Ошибка обновления темы:", e);
+        globalNotification.categoryMessage = "Ошибка обновления";
+        globalNotification.type = "error";
+    }
+}
+
+function cancelEditingTopic() {
+    editingTopicId.value = null;
+}
+
+async function deleteTopic(id) {
+    if (!confirm("Удалить тему?")) return;
+    try {
+        await axios.delete(`/admin/topics/${id}`);
+        topics.value = topics.value.filter((t) => t.id !== id);
+        globalNotification.categoryMessage = "Тема удалена";
+        globalNotification.type = "success";
+    } catch (e) {
+        console.error("Ошибка удаления темы:", e);
+        globalNotification.categoryMessage = "Ошибка удаления";
+        globalNotification.type = "error";
+    }
+}
+
+// ——————————————————————————
+// Инициализация EditorJS
+// ——————————————————————————
+function initQuizEditor(initialData = null) {
+    if (quizEditor) {
+        quizEditor.destroy();
+        quizEditor = null;
+    }
+    quizEditor = new EditorJS({
+        holder: "editor-final-test-create",
+        tools: { quiz: QuizTool },
+        data: initialData || {
+            blocks: [
+                {
+                    type: "quiz",
+                    data: { questions: [], settings: { shuffle: false } },
+                },
+            ],
         },
-      ],
-    },
-  });
+    });
+}
+
+// ——————————————————————————
+// Создание итогового теста
+// ——————————————————————————
+function toggleFinalTestForm() {
+    showFinalTestForm.value = !showFinalTestForm.value;
+    if (showFinalTestForm.value) {
+        nextTick(() => initQuizEditor());
+    } else if (quizEditor) {
+        quizEditor.destroy();
+        quizEditor = null;
+    }
 }
 
 async function submitFinalTest() {
-  try {
-    const saved = await quizEditor.save();
-    await axios.post(`/api/admin/course/${courseId}/final-test`, {
-      questions: saved,
-      pass_score: passScore.value,
-    });
-    globalNotification.categoryMessage = "Итоговый тест создан";
-    globalNotification.type = "success";
-    toggleFinalTestForm();
-  } catch (e) {
-    console.error("Ошибка создания теста:", e);
-    globalNotification.categoryMessage = "Ошибка создания теста";
-    globalNotification.type = "error";
-  }
+    try {
+        const saved = await quizEditor.save();
+        await axios.post(`/api/admin/course/${courseId}/final-test`, {
+            questions: saved,
+        });
+        globalNotification.categoryMessage = "Итоговый тест создан";
+        globalNotification.type = "success";
+        toggleFinalTestForm();
+    } catch (e) {
+        console.error("Ошибка создания теста:", e);
+        globalNotification.categoryMessage = "Ошибка создания теста";
+        globalNotification.type = "error";
+    }
 }
 
-// --- Навигация назад и загрузка тем ---
+// ——————————————————————————
+// Редактирование итогового теста
+// ——————————————————————————
+async function onEditTestClick() {
+    showEditTestForm.value = !showEditTestForm.value;
+
+    if (showEditTestForm.value) {
+        try {
+            const { data } = await axios.get(
+                `/api/admin/course/${courseId}/final-test/data`
+            );
+            passScore.value = data.pass_score;
+            await nextTick();
+            initQuizEditor(data.questions);
+        } catch (e) {
+            console.error("Ошибка при загрузке теста:", e);
+            globalNotification.categoryMessage = "Ошибка при загрузке теста";
+            globalNotification.type = "error";
+            showEditTestForm.value = false;
+        }
+    } else if (quizEditor) {
+        quizEditor.destroy();
+        quizEditor = null;
+    }
+}
+
+async function submitEditedTest() {
+    try {
+        const saved = await quizEditor.save();
+        await axios.put(`/api/admin/course/${courseId}/final-test/data`, {
+            questions: saved,
+        });
+        globalNotification.categoryMessage = "Тест обновлён";
+        globalNotification.type = "success";
+        onEditTestClick();
+    } catch (e) {
+        console.error("Ошибка при обновлении теста:", e);
+        globalNotification.categoryMessage = "Ошибка при обновлении теста";
+        globalNotification.type = "error";
+    }
+}
+
+async function deleteFinalTest() {
+    if (!confirm("Удалить итоговый тест?")) return;
+    try {
+        await axios.delete(`/api/admin/course/${courseId}/final-test/data`);
+        globalNotification.categoryMessage = "Тест удалён";
+        globalNotification.type = "success";
+        onEditTestClick();
+    } catch (e) {
+        console.error("Ошибка при удалении теста:", e);
+        globalNotification.categoryMessage = "Ошибка при удалении теста";
+        globalNotification.type = "error";
+    }
+}
+
+// ——————————————————————————
+// Навигация назад
+// ——————————————————————————
 function goBack() {
-  window.location.href = document.referrer || "/admin";
+    window.location.href = document.referrer || "/admin";
 }
-
-onMounted(loadTopics);
 </script>
 
-
 <style scoped>
+.btn-delete {
+    background: none;
+    border: none;
+    color: rgb(255, 0, 0);
+    font-size: 15px;
+    cursor: pointer;
+}
+.btn-delete:hover {
+    color: rgba(255, 0, 0, 0.822);
+}
+.form-buttons {
+    margin: 0 0 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.test-del {
+    text-decoration: none;
+}
+.edit__testfinal {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 20px;
+}
 .editor-container {
     padding: 10px;
     border: 1px solid #ccc;
@@ -403,7 +530,6 @@ onMounted(loadTopics);
     resize: none;
     min-height: 80px;
 }
-
 .form-button {
     width: 700px;
     background-color: #007bff;
