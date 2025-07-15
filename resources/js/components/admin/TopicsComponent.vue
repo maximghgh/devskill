@@ -581,7 +581,6 @@ for (let [key, val] of fd.entries()) {
         const { data: res } = await axios.post(
             `/admin/topic/${topicId}/chapters`,
             fd,
-            { headers: { "Content-Type": "multipart/form-data" } }
         );
         if (res.chapter) chapters.value.push(res.chapter);
 

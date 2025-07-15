@@ -144,14 +144,30 @@
                 <div v-if="course.id" class="final-test-block">
                     <h3>Финальная работа курса «{{ course.card_title }}»</h3>
                     <p>Вы сможете пройти тест после завершения всех глав.</p>
+
                     <a
+                        v-if="!testPassed"
                         :href="`/final-test/${course.id}`"
                         class="button"
                         :class="{ 'button--disabled': !allChaptersCompleted }"
                         :disabled="!allChaptersCompleted"
-                        >
+                    >
                         Пройти тест
                     </a>
+
+                    <div v-else class="test-passed-message">
+                        <div
+                            class="good__test"
+                        >
+                            <img
+                                width="15"
+                                height="15"
+                                src="../../img/circle.png"
+                                alt=""
+                            />
+                        </div>
+                        <span>Вы успешно справились с итоговым тестом!</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -738,7 +754,7 @@ const difficultyTranslation = {
 /* ======================================================
    4. onMounted – загрузка всех данных
 ===================================================== */
-onMounted(() => {
+onMounted( async() => {
     // Если course.value.id уже есть, используем его:
     if (course.value.id) {
         courseId.value = course.value.id;
@@ -783,23 +799,21 @@ onMounted(() => {
                 console.error("Ошибка при загрузке тем курса:", error)
             );
     }
-    // Загружаем результат итог. теста
-    if (storedUser.id && courseId.value) { 
-        try { 
-            const { data } = axios.get( 
-                `/api/final-tests/status`,   // сделайте такой энд-поинт 
-                { params: { user_id: storedUser.id, course_id: courseId.value } } 
-            ); 
-            // data: { passed: true/false } 
-            testPassed.value = !!data.passed; 
-        } catch (e) { 
-            console.warn('Не удалось получить статус теста', e); 
-        } 
-    }
+
     loadCourseComments();
     loadFaqs();
     loadCourses();
-
+    if (storedUser.id && courseId.value) {
+        try {
+        const { data } = await axios.get(
+            '/api/final-test/status',
+            { params: { user_id: storedUser.id, course_id: courseId.value } }
+        )
+        testPassed.value = !!data.passed
+        } catch (e) {
+        console.warn('Не удалось получить статус теста', e)
+        }
+    }
 });
 
 /* ======================================================
@@ -955,6 +969,16 @@ async function dislikeComment(comment) {
 </script>
 
 <style scoped>
+.test-passed-message{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.test-passed-message span {
+    text-align: center;
+    display: block;
+}
 .final-test-block span {
     font-size: 12px;
     display: block;

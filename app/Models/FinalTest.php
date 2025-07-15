@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class FinalTest extends Model
 {
     protected $table = 'final_tests';
-
+    protected $fillable = [
+        'topic_id',
+        'chapter_id',
+        'questions',
+    ];
     protected $casts = [
         'questions' => 'object',   // JSON → массив
     ];

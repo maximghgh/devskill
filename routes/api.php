@@ -19,25 +19,30 @@ use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FinalTestController;
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\FinalTestResultController;
 
 Route::post('/chapters/{chapter}/complete', [ChapterController::class,'complete']);
 Route::get('/courses/{course}/final-test', [FinalTestController::class,'show']);
-Route::get('/final-test/{course}', [FinalTestController::class, 'show']);
+Route::get('final-test/{courseId}', [FinalTestController::class, 'show'])
+     ->whereNumber('courseId');
 Route::post('/final-tests/{test}', [FinalTestController::class,'submit']);
-Route::get('/final-tests/status', function (Request $r) {
-    $userId   = $r->input('user_id');
-    $courseId = $r->input('course_id');
-
-    $ft = \App\Models\FinalTest::where('course_id',$courseId)->first();
-    $passed = false;
-    if ($ft) {
-        $passed = \App\Models\UserFinalTest::where([
-            'user_id'       => $userId,
-            'final_test_id' => $ft->id,
-        ])->where('score','>=',$ft->pass_score)->exists();
-    }
-    return response()->json(['passed'=>$passed]);
-});
+Route::post('/final-test/{course}/submit',[FinalTestController::class, 'check']
+);
+Route::get('/final-test/{course}/results',[FinalTestController::class, 'results']
+);
+Route::get(
+    '/teacher/{teacher}/students-results',
+    [TeacherController::class, 'studentsResults']
+);
+Route::get('/final-test-results', [FinalTestResultController::class, 'index']);
+Route::get('final-test/status', [FinalTestController::class, 'status']);
+Route::get(
+  '/final-test-results/{id}',
+  [FinalTestResultController::class, 'show']
+);
+Route::post('admin/course/{course}/final-test', [FinalTestController::class, 'store'])
+     ->name('admin.course.final-test.store');
 /*
 |--------------------------------------------------------------------------
 | API Routes

@@ -1,8 +1,11 @@
 <template>
   <div class="container ">
     <!-- Заголовок курса -->
+    <div class="backs">
+        <button @click="goBack" class="btn-back">Вернуться в личный кабинет</button>
+    </div>
     <h1 v-if="!loading && !error">
-      Итоговый тест: {{ course.title || 'Без названия' }}
+      Итоговый тест
     </h1>
 
     <!-- Сам квиз -->
@@ -76,6 +79,10 @@
 import { ref, onMounted, inject } from 'vue'
 import axiosLib from 'axios'
 
+function goBack() {
+    window.history.back();   // или history.back();
+}
+
 const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
 // props
 const props = defineProps({ courseId: [Number, String] })
@@ -128,6 +135,7 @@ onMounted(async () => {
 })
 
 function submitQuiz() {
+  // 1) Считаем правильные ответы
   const questions   = quizData.value.questions
   let correctCount  = 0
 
@@ -147,16 +155,62 @@ function submitQuiz() {
     }
   })
 
+  // 2) Считаем общий балл и процент
   const total = questions.length
+  const score = Math.round((correctCount / total) * 100)
+
   quizResult.value = {
     correctCount,
     total,
-    score: Math.round((correctCount / total) * 100),
+    score,
   }
+
+  // 3) Если меньше 50% — показываем сообщение и выходим
+  if (score < 50) {
+    alert('Нужно набрать не менее 50% для сохранения результата. Проверьте ответы и попробуйте снова.')
+    return
+  }
+
+  // 4) Иначе отправляем на бэк и возвращаемся назад
+  axios.post(
+    `/api/final-test/${props.courseId}/submit`,
+    {
+      user_id        : storedUser.id,
+      answers        : userAnswers.value,
+      correct_count  : correctCount,
+      total_questions: total,
+      score          : score,
+    }
+  )
+  .then(() => {
+    // возвращаемся на предыдущую страницу
+    window.history.back()
+  })
+  .catch(err => {
+    console.error('Result save failed', err)
+    alert('Ошибка при сохранении результата')
+  })
 }
+
+
 </script>
 
 <style scoped>
+.btn-back {
+    font-size: 15px;
+    background: none;
+    border: none;
+    color: #5b4bff;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+.backs{
+    display: flex;
+    height: 20px;
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+}
 .container {
     width: 100%;
     max-width: 1200px;

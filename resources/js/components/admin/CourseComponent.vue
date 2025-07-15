@@ -4,6 +4,7 @@
             <a class="span__sctrelca" href="#" @click.prevent="goBack">🠔</a>
             <h1>Темы курса</h1>
         </div>
+
         <!-- Таблица с темами -->
         <div v-if="topics.length">
             <table class="light-push-table light-push-table--s">
@@ -22,11 +23,10 @@
                     <tr v-for="(topic, index) in topics" :key="topic.id">
                         <td>{{ index + 1 }}</td>
 
-                        <!-- Режим редактирования для названия темы -->
+                        <!-- Inline‑редактирование -->
                         <td v-if="editingTopicId === topic.id">
                             <input
                                 v-model="editingTopic.title"
-                                type="text"
                                 class="form-input"
                             />
                         </td>
@@ -34,7 +34,6 @@
                             {{ topic.title }}
                         </td>
 
-                        <!-- Режим редактирования для описания -->
                         <td v-if="editingTopicId === topic.id">
                             <textarea
                                 v-model="editingTopic.description"
@@ -45,23 +44,18 @@
                             {{ topic.description }}
                         </td>
 
-                        <!-- Ссылка для добавления материала -->
                         <td>
                             <a
                                 :href="`/admin/topic/${topic.id}/chapters/create`"
                                 class="btn--control"
-                                >Добавить главу</a
                             >
+                                Добавить главу
+                            </a>
                         </td>
 
-                        <!-- Количество материала -->
                         <td>{{ topic.chapters_count }}</td>
 
-                        <!-- Редактирование: если тема редактируется, показываем кнопки "Сохранить" и "Отмена" -->
-                        <td
-                            class="topic__edit"
-                            v-if="editingTopicId === topic.id"
-                        >
+                        <td v-if="editingTopicId === topic.id">
                             <button class="btn__user--edit" @click="saveTopic">
                                 Сохранить
                             </button>
@@ -81,7 +75,6 @@
                             </button>
                         </td>
 
-                        <!-- Удаление -->
                         <td>
                             <button
                                 class="btn__user--delete"
@@ -94,40 +87,36 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Сообщение, если тем нет -->
         <div v-else class="center">
             <p>Темы отсутствуют.</p>
         </div>
 
-        <!-- Кнопка для показа/скрытия формы создания темы -->
-        <button class="type-button" @click="toggleTopicForm">
-            {{ showTopicForm ? "Отмена" : "Добавить тему" }}
-        </button>
+        <!-- Кнопки управления -->
+        <div class="btn_block" style="margin: 1rem 0">
+            <button class="type-button" @click="toggleTopicForm">
+                {{ showTopicForm ? "Отмена добавления темы" : "Добавить тему" }}
+            </button>
+            <button class="type-button" @click="toggleFinalTestForm">
+                {{ showFinalTestForm ? "Отмена создания теста" : "Создать итоговый тест" }}
+            </button>
+        </div>
 
         <!-- Форма создания темы -->
         <div v-if="showTopicForm" class="topic-form">
             <h2>Новая тема</h2>
             <form @submit.prevent="submitTopic" class="course-form">
                 <div class="form-group">
-                    <label for="title" class="form-label">Название темы:</label>
+                    <label class="form-label">Название темы:</label>
                     <input
-                        type="text"
-                        id="title"
                         v-model="newTopic.title"
                         required
-                        placeholder="Введите название темы"
                         class="form-input"
                     />
                 </div>
                 <div class="form-group">
-                    <label for="description" class="form-label"
-                        >Описание темы:</label
-                    >
+                    <label class="form-label">Описание темы:</label>
                     <textarea
-                        id="description"
                         v-model="newTopic.description"
-                        placeholder="Введите описание темы"
                         class="form-textarea"
                     ></textarea>
                 </div>
@@ -136,141 +125,209 @@
                 </button>
             </form>
         </div>
+
+        <!-- Форма создания итогового теста -->
+        <div v-if="showFinalTestForm" class="course-form">
+            <h3>Создать итоговый тест</h3>
+            <form @submit.prevent="submitFinalTest">
+                <div class="form-group">
+                    <div
+                        id="editor-final-test-create"
+                        class="editor-container"
+                    ></div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="form-button">
+                        Сохранить тест
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import axios from "axios";
+import EditorJS from "@editorjs/editorjs";
+import QuizTool from "@/components/editorjs-quiz";
 import { globalNotification } from "../../globalNotification";
 
-// 1. Функция для извлечения courseId из URL, например /admin/course/20
+// --- Извлечение ID из URL ---
 function getCourseIdFromUrl() {
-    const pathParts = window.location.pathname.split("/");
-    const idx = pathParts.indexOf("course");
-    return pathParts[idx + 1];
+  const parts = window.location.pathname.split("/");
+  return parts[parts.indexOf("course") + 1];
 }
 const courseId = getCourseIdFromUrl();
 
-// 2. Реактивные переменные
-const topics = ref([]); // Список тем
-const showTopicForm = ref(false); // Показ/скрытие формы "Добавить тему"
-const newTopic = ref({ title: "", description: "" });
+function getTopicIdFromUrl() {
+  const parts = window.location.pathname.split("/");
+  return parts[parts.indexOf("topic") + 1];
+}
+const topicId = getTopicIdFromUrl();
 
-// Inline-редактирование
+// --- Темы ---
+const topics = ref([]);
+const showTopicForm = ref(false);
+const newTopic = ref({ title: "", description: "" });
 const editingTopicId = ref(null);
 const editingTopic = ref({});
 
-// 3. Загрузка тем (GET /admin/course/{course}/topics)
 async function loadTopics() {
-    try {
-        const response = await axios.get(`/admin/course/${courseId}/topics`);
-        // сортируем по created_at
-        topics.value = (response.data.topics || [])
-            .slice() // чтобы не менять оригинал, если нужно
-            .sort((a, b) => {
-                // конвертируем строки в даты
-                return new Date(a.created_at) - new Date(b.created_at);
-            });
-    } catch (error) {
-        console.error("Ошибка при загрузке тем:", error);
-    }
+  try {
+    const { data } = await axios.get(`/admin/course/${courseId}/topics`);
+    topics.value = (data.topics || []).sort(
+      (a, b) => new Date(a.created_at) - new Date(b.created_at)
+    );
+  } catch (e) {
+    console.error("Ошибка при загрузке тем:", e);
+  }
 }
 
-// 4. Создание новой темы (POST /admin/course/{course}/topics)
-async function submitTopic() {
-    try {
-        const response = await axios.post(
-            `/admin/course/${courseId}/topics`,
-            newTopic.value
-        );
-        if (response.data.topic) {
-            topics.value.push(response.data.topic);
-        }
-        newTopic.value = { title: "", description: "" };
-        showTopicForm.value = false;
-        globalNotification.categoryMessage = 'Тема создана'
-        globalNotification.type = "success";
-    } catch (error) {
-        console.error("Ошибка при создании темы:", error);
-        globalNotification.categoryMessage ="Заполните все поля для создания темы";
-        globalNotification.type = "error";
-    }
-}
-
-// 5. Показ/скрытие формы добавления темы
 function toggleTopicForm() {
-    showTopicForm.value = !showTopicForm.value;
+  showTopicForm.value = !showTopicForm.value;
 }
 
-// 6. Кнопка "Назад"
-function goBack() {
-  window.location.href = '/admin'; 
+// Создание темы
+async function submitTopic() {
+  try {
+    const { data } = await axios.post(
+      `/admin/course/${courseId}/topics`,
+      newTopic.value
+    );
+    topics.value.push(data.topic);
+    newTopic.value = { title: "", description: "" };
+    showTopicForm.value = false;
+    globalNotification.categoryMessage = "Тема создана";
+    globalNotification.type = "success";
+  } catch (e) {
+    console.error("Ошибка создания темы:", e);
+    globalNotification.categoryMessage = "Заполните все поля";
+    globalNotification.type = "error";
+  }
 }
 
-// 7. Inline-редактирование
+// Редактирование темы
 function startEditingTopic(topic) {
-    editingTopicId.value = topic.id;
-    editingTopic.value = { ...topic }; // копируем поля темы
+  editingTopicId.value = topic.id;
+  editingTopic.value = { ...topic };
 }
-
 async function saveTopic() {
-    try {
-        // PATCH /admin/topics/{topic}
-        const response = await axios.put(
-            `/admin/topics/${editingTopic.value.id}`,
-            editingTopic.value
-        );
-        // Находим индекс темы и обновляем
-        const index = topics.value.findIndex(
-            (t) => t.id === editingTopic.value.id
-        );
-        if (index !== -1) {
-            topics.value[index] = response.data.topic;
-        }
-        editingTopicId.value = null;
-        editingTopic.value = {};
-        globalNotification.categoryMessage = 'Тема изменена'
-        globalNotification.type = "success";
-    } catch (error) {
-        globalNotification.categoryMessage ="Ошибка обновления темы";
-        globalNotification.type = "error";
-        console.error("Ошибка при обновлении темы:", error);
-    }
-}
-
-function cancelEditingTopic() {
+  try {
+    const { data } = await axios.put(
+      `/admin/topics/${editingTopic.value.id}`,
+      editingTopic.value
+    );
+    const idx = topics.value.findIndex((t) => t.id === data.topic.id);
+    topics.value[idx] = data.topic;
     editingTopicId.value = null;
-    editingTopic.value = {};
+    globalNotification.categoryMessage = "Тема изменена";
+    globalNotification.type = "success";
+  } catch (e) {
+    console.error("Ошибка обновления темы:", e);
+    globalNotification.categoryMessage = "Ошибка обновления";
+    globalNotification.type = "error";
+  }
+}
+function cancelEditingTopic() {
+  editingTopicId.value = null;
 }
 
-// 8. Удаление темы (DELETE /admin/topics/{topic})
-async function deleteTopic(topicId) {
-    if (!confirm("Вы действительно хотите удалить тему?")) return;
-    try {
-        const response = await axios.delete(`/admin/topics/${topicId}`);
-        // Удаляем тему из локального массива
-        topics.value = topics.value.filter((t) => t.id !== topicId);
-        globalNotification.categoryMessage = 'Тема удалена'
-        globalNotification.type = "success";
-    } catch (error) {
-        console.error("Ошибка при удалении темы:", error);
-        globalNotification.categoryMessage = "Ошибка удаления темы";
-        globalNotification.type = "error";
-    }
+// Удаление темы
+async function deleteTopic(id) {
+  if (!confirm("Удалить тему?")) return;
+  try {
+    await axios.delete(`/admin/topics/${id}`);
+    topics.value = topics.value.filter((t) => t.id !== id);
+    globalNotification.categoryMessage = "Тема удалена";
+    globalNotification.type = "success";
+  } catch (e) {
+    console.error("Ошибка удаления темы:", e);
+    globalNotification.categoryMessage = "Ошибка удаления";
+    globalNotification.type = "error";
+  }
 }
 
-// 9. Загрузка тем при монтировании
-onMounted(() => {
-    loadTopics();
-});
+// --- Итоговый тест ---
+const showFinalTestForm = ref(false);
+const passScore = ref(50);
+let quizEditor = null;
+
+// функция‑переключатель вместо двух open/close
+function toggleFinalTestForm() {
+  showFinalTestForm.value = !showFinalTestForm.value;
+
+  if (showFinalTestForm.value) {
+    // ждем, пока контейнер отрендерится, и запускаем редактор
+    nextTick(initQuizEditor);
+  } else if (quizEditor) {
+    // при закрытии — чистим
+    quizEditor.destroy();
+    quizEditor = null;
+  }
+}
+
+function initQuizEditor() {
+  if (quizEditor) quizEditor.destroy();
+  quizEditor = new EditorJS({
+    holder: "editor-final-test-create",
+    tools: { quiz: QuizTool },
+    data: {
+      blocks: [
+        {
+          type: "quiz",
+          data: { questions: [], settings: { shuffle: false } },
+        },
+      ],
+    },
+  });
+}
+
+async function submitFinalTest() {
+  try {
+    const saved = await quizEditor.save();
+    await axios.post(`/api/admin/course/${courseId}/final-test`, {
+      questions: saved,
+      pass_score: passScore.value,
+    });
+    globalNotification.categoryMessage = "Итоговый тест создан";
+    globalNotification.type = "success";
+    toggleFinalTestForm();
+  } catch (e) {
+    console.error("Ошибка создания теста:", e);
+    globalNotification.categoryMessage = "Ошибка создания теста";
+    globalNotification.type = "error";
+  }
+}
+
+// --- Навигация назад и загрузка тем ---
+function goBack() {
+  window.location.href = document.referrer || "/admin";
+}
+
+onMounted(loadTopics);
 </script>
 
+
 <style scoped>
-.center{
+.editor-container {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-height: 150px;
+    background-color: #fff;
+    margin: 10px 0 30px;
+}
+.btn_block {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.center {
     text-align: center;
 }
-.btn--control{
+.btn--control {
     text-decoration: none;
     color: green;
 }
@@ -365,8 +422,8 @@ onMounted(() => {
 }
 
 .type-button {
+    width: 480px;
     display: block;
-    margin: 35px auto;
     background-color: #007bff;
     color: #fff;
     border: none;
