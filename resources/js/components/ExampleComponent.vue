@@ -95,7 +95,7 @@
                                 </div>
                             </div>
                             <!-- Уровень -->
-                            <div class="course__sidebar-block">
+                            <div class="course__sidebar-block course__sidebar-block_noline">
                                 <div class="course__sidebar-title">Уровень</div>
                                 <div class="course__sidebar-check">
                                     <div
@@ -116,7 +116,7 @@
                                 </div>
                             </div>
                             <!-- Длительность -->
-                            <div
+                            <!-- <div
                                 class="course__sidebar-block course__sidebar-block_noline"
                             >
                                 <div class="course__sidebar-title">
@@ -136,7 +136,7 @@
                                         </label>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                         <!-- /sidebar -->
                         <!-- ===== Content ===== -->

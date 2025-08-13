@@ -95,12 +95,13 @@
                                 required
                             />
                         </div>
-                        <div class="form-group">
+                        <div class="form-group form--hidden">
                             <label class="form-label">Баллы за главу</label>
-                            <input type="number"
+                            <input
+                                type="hidden"
                                 v-model.number="editingChapter.points"
                                 min="0"
-                                class="form-input" 
+                                class="form-input"
                             />
                         </div>
                         <!-- Поле "Тип" -->
@@ -181,19 +182,19 @@
             <p class="form-label">Выберите тип главы:</p>
             <div class="button-group">
                 <button @click="selectType('video')" class="type-button">
-                    Видео
+                    Видео материал
                 </button>
                 <button @click="selectType('text')" class="type-button">
-                    Текст
+                    Текстовый материал
                 </button>
                 <button @click="selectType('task')" class="type-button">
-                    Задания
+                    Практическая работа
                 </button>
                 <button @click="selectType('terms')" class="type-button">
-                    Термины
+                    Лабораторная работа
                 </button>
                 <button @click="selectType('presentation')" class="type-button">
-                    Итоговый тест
+                    Тестирование
                 </button>
             </div>
         </div>
@@ -213,17 +214,18 @@
                         class="form-input"
                     />
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Баллы за главу</label>
+
+                <!-- Баллы -->
+                <!-- <div class="form-group">
+                    <label class="form-label form--hidden">Баллы за главу</label>
                     <input
-                        type="number"
+                        type="hidden"
                         v-model.number="newChapter.points"
                         min="0"
                         class="form-input"
                         required
                     />
-                </div>
-
+                </div> -->
                 <!-- Для видео: поле для ссылки и контейнер для редактора -->
                 <div v-if="selectedType === 'video'" class="form-group">
                     <div class="form-group form-group--margin">
@@ -279,12 +281,15 @@
                     <label class="form-label">Прикрепить файл (PDF/PPTX):</label>
                   </div> -->
                 </div>
-                <!-- <input
-                    type="file"
-                    accept=".pdf,.ppt,.pptx,video/*,image/*"
-                    @change="e => newChapter.file = e.target.files[0]"
-                    class="form-input"
-                /> -->
+                <div class="form-group">
+                    <label class="form-label">Загрузить файл к лекции</label>
+                    <input
+                        type="file"
+                        accept=".pdf,.ppt,.pptx,video/*,image/*"
+                        @change="(e) => (newChapter.file = e.target.files[0])"
+                        class="form-input"
+                    />
+                </div>
                 <!-- загрузка презентации -->
                 <button type="submit" class="form-button">
                     Добавить главу
@@ -564,8 +569,8 @@ async function submitChapter() {
         }
         let contentPayload = {};
         if (selectedType.value === "presentation" && quizEditor) {
-            const saved = await quizEditor.save();   // saved = {blocks:[{type:'quiz',…}]}
-            contentPayload = saved;  
+            const saved = await quizEditor.save(); // saved = {blocks:[{type:'quiz',…}]}
+            contentPayload = saved;
         } else if (editorInstance) {
             contentPayload = await editorInstance.save();
         }
@@ -573,14 +578,14 @@ async function submitChapter() {
 
         /* файл (если был) */
         if (newChapter.value.file) fd.append("file", newChapter.value.file);
-        fd.append('points', newChapter.value.points);
-for (let [key, val] of fd.entries()) {
-      console.log(`FormData: ${key} =`, val);
-    }
+        fd.append("points", newChapter.value.points);
+        for (let [key, val] of fd.entries()) {
+            console.log(`FormData: ${key} =`, val);
+        }
         /* запрос */
         const { data: res } = await axios.post(
             `/admin/topic/${topicId}/chapters`,
-            fd,
+            fd
         );
         if (res.chapter) chapters.value.push(res.chapter);
 
@@ -602,6 +607,10 @@ function goBack() {
 </script>
 
 <style scoped>
+.form--hidden {
+    display: none;
+}
+
 h2 {
     margin: 40px 0 40px;
 }
@@ -693,7 +702,6 @@ h2 {
     min-height: 150px;
     border: 1px solid #ccc;
     padding: 8px;
-    margin-bottom: 16px;
 }
 .btn__user--edit {
     cursor: pointer;

@@ -142,8 +142,8 @@ onMounted(async () => {
         loading.value = false;
     }
 });
-
-function submitQuiz() {
+const testPassed = ref(false);
+async function submitQuiz() {
     // 1) Считаем правильные ответы
     const questions = quizData.value.questions;
     const missing = questions.find(q => {
@@ -195,22 +195,24 @@ function submitQuiz() {
     }
 
     // 4) Иначе отправляем на бэк и возвращаемся назад
-    axios
-        .post(`/api/final-test/${props.courseId}/submit`, {
+    try {
+        await axios.post(`/api/final-test/${props.courseId}/submit`, {
             user_id: storedUser.id,
             answers: userAnswers.value,
             correct_count: correctCount,
             total_questions: total,
             score: score,
-        })
-        .then(() => {
-            // возвращаемся на предыдущую страницу
-            window.history.back();
-        })
-        .catch((err) => {
-            console.error("Result save failed", err);
-            alert("Ошибка при сохранении результата");
         });
+        
+        // Обновляем статус "Тест пройден" на странице курса
+        testPassed.value = true;
+
+        // Возвращаемся на страницу курса
+        window.location.href = `/content/${props.courseId}`; // Переход на страницу курса
+    } catch (err) {
+        console.error("Ошибка при сохранении результата", err);
+        alert("Ошибка при сохранении результата");
+    }
 }
 </script>
 

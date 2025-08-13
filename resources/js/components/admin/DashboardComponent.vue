@@ -202,6 +202,7 @@
                             </div>
                             <!-- Блок "Курсы" -->
                             <div v-else-if="item.id === 'courses'">
+                                <a class="link__add" href="/admin/addcourse">Cоздать курс +</a>
                                 <div class="admin__block">
                                     <div class="cou">
                                         <div class="div__link">
@@ -643,239 +644,6 @@
                                     </div>
                                 </div>
                                 <!-- Конец модального окна -->
-                                <!-- Форма создания нового курса -->
-                                <div class="course-form-container">
-                                    <h2>Создать новый курс</h2>
-                                    <form @submit.prevent="submitForm" class="course-form">
-                                        <div class="form-group">
-                                            <label class="form-label">Название на карточке</label>
-                                            <input
-                                                v-model="newCourse.cardTitle"
-                                                type="text"
-                                                placeholder="Введите название для карточки"
-                                                class="form-input"
-                                            />
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Название курса</label>
-                                            <input
-                                                v-model="newCourse.courseName"
-                                                type="text"
-                                                placeholder="Введите название курса"
-                                                class="form-input"
-                                            />
-                                        </div>
-                                            <div class="form-group">
-                                                <label class="form-label">Цена</label>
-                                                <input
-                                                    v-model="newCourse.price"
-                                                    type="number"
-                                                    placeholder="Введите цену"
-                                                    class="form-input"
-                                                />
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label"
-                                                    >Длительность в месяцах</label
-                                                >
-                                                <input
-                                                    v-model="newCourse.duration"
-                                                    type="text"
-                                                    placeholder="Введите от 1 до 24 месяцев"
-                                                    class="form-input"
-                                                />
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label"
-                                                    >Количество часов</label
-                                                >
-                                                <input
-                                                    v-model="newCourse.hours"
-                                                    type="number"
-                                                    placeholder="Введите количество часов"
-                                                    class="form-input"
-                                                />
-                                            </div>
-                                        <div class="form-group">
-                                            <label class="form-label"
-                                                >Описание</label
-                                            >
-                                            <textarea
-                                                v-model="newCourse.description"
-                                                placeholder="Введите описание"
-                                                class="form-textarea"
-                                            ></textarea>
-                                        </div>
-                                            <input
-                                                v-model="newCourse.simulators"
-                                                type="hidden"
-                                                placeholder="Введите количество тренажёров"
-                                                class="form-input"
-                                                value="0"
-                                            />
-                                        <div class="form-group">
-                                            <label class="form-label"
-                                                >Уровень сложности курса</label
-                                            >
-                                            <select
-                                                v-model="newCourse.difficulty"
-                                                class="form-input"
-                                            >
-                                                <option value="basic">
-                                                    Начинающий
-                                                </option>
-                                                <option value="middle">
-                                                    Средний
-                                                </option>
-                                                <option value="advanced">
-                                                    Продвинутый
-                                                </option>
-                                                <option value="mixed">
-                                                    Смешанный
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label"
-                                                >Выберите преподавателей</label
-                                            >
-                                            <select v-model="newCourse.selectedTeachers"
-                                                multiple
-                                                class="form-input"
-                                            >
-                                                <option
-                                                    class="option-form"
-                                                    v-for="teacher in teachers"
-                                                    :key="teacher.id"
-                                                    :value="teacher.id"
-                                                >
-                                                    {{ teacher.name }}
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label"
-                                                >Выберите направление</label
-                                            >
-                                            <select v-model="newCourse.selectedDirection" class="form-input">
-                                                <option>
-                                                    -- Выберите направление --
-                                                </option>
-                                                <option
-                                                    class="option-form"
-                                                    v-for="direction in directions"
-                                                    :key="direction.id"
-                                                    :value="direction.id"
-                                                >
-                                                    {{ direction.name }}
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Выберите языки программирования</label>
-                                            <!-- multiple позволяет выбрать сразу несколько пунктов -->
-                                            <Multiselect v-model="newCourse.selectedLanguages"
-                                                :options="languages"
-                                                :multiple="true"
-                                                track-by="id"
-                                                label="name"
-                                                placeholder="Нажмите на поле, чтобы выбрать язык"
-                                                :close-on-select="false"
-                                                :clear-on-select="false"
-                                                :preserve-search="true"
-                                            >
-                                                <!-- Кастомизация пункта выпадающего списка -->
-                                                <template
-                                                    #option="{
-                                                        option,
-                                                        selected,
-                                                    }"
-                                                >
-                                                    <div class="multiselect__option">
-                                                        <input
-                                                            type="checkbox"
-                                                            class="checkbox"
-                                                            :class="{
-                                                                'checkbox-checked':
-                                                                    selected,
-                                                            }"
-                                                        />
-                                                        <span class="checkmark">
-                                                            <svg
-                                                                class="checkmark__icon"
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path
-                                                                    d="M 20.292969 5.2929688 L 9 16.585938 L 4.7070312 12.292969 L 3.2929688 13.707031 
-                                                            L 9 19.414062 L 21.707031 6.7070312 L 20.292969 5.2929688 z"
-                                                                />
-                                                            </svg>
-                                                        </span>
-                                                        <span
-                                                            class="option-name"
-                                                            >{{
-                                                                option.name
-                                                            }}</span
-                                                        >
-                                                    </div>
-                                                </template>
-                                                <!-- Кастомизация заголовка списка -->
-                                                <template #selection="{ values }">
-                                                    <span class="selection-header">
-                                                        {{
-                                                            values
-                                                                .map(
-                                                                    (v) =>
-                                                                        v.name
-                                                                )
-                                                                .join(", ")
-                                                        }}
-                                                    </span>
-                                                </template>
-                                            </Multiselect>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Повышение квалификации</label>
-                                            <select v-model="newCourse.upgradeQualification" class="form-input">
-                                                <option value="0">Нет</option>
-                                                <option value="1">Да</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Логотип курса</label>
-                                            <input type="file"
-                                                accept="image/*"
-                                                class="form-input"
-                                                @change="onFileChange"
-                                            />
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Изображение для описания курса</label>
-                                            <input type="file"
-                                                accept="image/*"
-                                                class="form-input"
-                                                @change="onDescriptionImageChange"/>
-                                        </div>
-                                        <div class="form-group">
-                                            <label
-                                                class="form-label"
-                                                >PDF файл курса</label
-                                            >
-                                            <input
-                                            type="file"
-                                            accept="application/pdf"
-                                            class="form-input"
-                                            @change="onPdfChange"
-                                            />
-                                        </div>
-                                        <div
-                                            id="editorjs-create"
-                                            class="editor-container"
-                                        ></div>
-                                        <button type="submit" class="form-button">Отправить</button>
-                                    </form>
-                                </div>
                             </div>
                             <!-- Другие блоки (аналитика, FAQ, и т.д.) -->
                             <div v-else-if="item.id === 'news'">
@@ -1843,7 +1611,7 @@ watch(languages, () => (currentPageLangs.value = 1));
 
 //пагинация курсов
 const currentPageCourses = ref(1)
-const pageSizeCourses    = ref(4)
+const pageSizeCourses    = ref(8)
 
 const totalPagesCourses = computed(() =>
   Math.ceil(courses.value.length / pageSizeCourses.value)
@@ -2805,6 +2573,25 @@ async function submitNews() {
 
 .page__title {
     margin: 0 0 60px;
+}
+
+.link__add{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    text-decoration: none;
+    list-style: none;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    transition: 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.link__add:hover{
+    background: #007bff;
+    color: #ffffff;
 }
 
 h2 {

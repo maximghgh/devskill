@@ -8,7 +8,6 @@
 </head>
 <body>
     <div id="app">
-        <header-admin-component></header-admin-component>
         <addcourse-component></addcourse-component>
     </div>
 </body>
