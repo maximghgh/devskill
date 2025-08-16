@@ -1,135 +1,247 @@
 <template>
-    <div v-if="loading" class="loading">Загрузка…</div>
-
-    <div v-else class="container py-5">
+    <div class="maincontainer">
         <div class="backs">
-            <button @click="goBack" class="btn-back">Вернуться к курсу</button>
+            <button @click="goBack" class="btn-back">Вернуться к модулю</button>
         </div>
-        <h1>{{ chapter.title }}</h1>
+        <div v-if="loading" class="loading">Загрузка…</div>
 
-        <div v-if="chapter.type === 'video' && embedUrl">
-            <iframe
-                class="chapter-content"
-                width="100%"
-                height="400"
-                :src="embedUrl"
-                frameborder="0"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowfullscreen
-                webkitallowfullscreen
-                mozallowfullscreen
-            ></iframe>
-        </div>
-
-        <div v-if="hasContent" id="editorjs" class="chapter-content"></div>
-
-        <div v-if="isTask" class="task-block">
-            <button @click="showModal = true" class="answer">
-                Показать правильный ответ
-            </button>
-        </div>
-
-        <!-- Итоговый тест -->
-        <!-- Итоговый тест -->
-        <div v-if="quizData" class="final-quiz mb-5">
-            <form @submit.prevent="submitQuiz">
-                <div
-                    v-for="q in quizData.questions"
-                    :key="q.id"
-                    class="card mb-3"
-                >
-                    <div class="card-body">
-                        <!-- Вопрос -->
-                        <h5 class="card-title">{{ q.id }}. {{ q.prompt }}</h5>
-
-                        <!-- Варианты ответа -->
-                        <div class="quiz-options mt-3">
-                            <div
-                                v-for="(opt, i) in q.options"
-                                :key="i"
-                                class="form-check"
-                            >
-                                <!-- Радио для single -->
-                                <input
-                                    v-if="q.type === 'single'"
-                                    class="form-check-input quiz-input"
-                                    type="radio"
-                                    :name="'q' + q.id"
-                                    :id="'q' + q.id + '_' + i"
-                                    v-model="userAnswers[q.id]"
-                                    :value="i"
-                                    required
-                                />
-                                <!-- Чекбокс для multiple -->
-                                <input
-                                    v-else
-                                    class="form-check-input quiz-input"
-                                    type="checkbox"
-                                    :name="'q' + q.id"
-                                    :id="'q' + q.id + '_' + i"
-                                    v-model="userAnswers[q.id]"
-                                    :value="i"
-                                />
-                                <label
-                                    class="form-check-label"
-                                    :for="'q' + q.id + '_' + i"
-                                >
-                                    {{ opt }}
-                                </label>
-                            </div>
+        <div v-else class="container flex py-5">
+            <aside class="sidebar">
+                <!-- Карточка курса -->
+                <div class="card course-card">
+                    <div class="course-card__header">
+                        <div>
+                            <div class="course-card__label">Лекция</div>
+                            <div class="course-card__sub">{{ typeLabel }}:</div>
+                            <h2 class="course-card__title">
+                                {{ chapter.title }}
+                            </h2>
                         </div>
+                        <!-- <img
+                            :src="'/img/logo_placeholder.png'"
+                            alt="Изображение курса"
+                            width="93"
+                            height="92"
+                            class="logo_couerses"
+                        /> -->
                     </div>
                 </div>
 
-                <button type="submit" class="button button--sub">
-                    Проверить тест
-                </button>
-            </form>
+                <!-- Telegram-чат -->
+                <div class="card telegram-card">
+                    <div class="telegram-card__header">
+                        <h3>
+                            Напишите на почту, если у вас появились проблемы
+                        </h3>
+                    </div>
+                    <p>
+                        Мы быстро с вами свяжемся и поможем
+                        <a href="#">devskillreport@mail.ru</a>.
+                    </p>
+                </div>
+            </aside>
+            <div class="info__card-course">
+                <h1>{{ chapter.title }}</h1>
+                <div v-if="chapter.type === 'video' && embedUrl">
+                    <iframe
+                        class="chapter-content"
+                        width="100%"
+                        height="400"
+                        :src="embedUrl"
+                        frameborder="0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowfullscreen
+                        webkitallowfullscreen
+                        mozallowfullscreen
+                    ></iframe>
+                </div>
 
-            <div v-if="quizResult" class="alert alert-info mt-4" role="alert">
-                <h4 class="alert-heading">
-                    Ваш результат: {{ quizResult.score }}%
-                </h4>
-                <p>
-                    Правильно: {{ quizResult.correctCount }} из
-                    {{ quizResult.total }}
-                </p>
+                <div
+                    v-if="hasContent"
+                    id="editorjs"
+                    class="chapter-content"
+                ></div>
+
+                <!-- Итоговый тест -->
+                <!-- Итоговый тест -->
+                <div v-if="quizData" class="final-quiz mb-5">
+                    <form @submit.prevent="submitQuiz">
+                        <div
+                            v-for="q in quizData.questions"
+                            :key="q.id"
+                            class="card mb-3"
+                        >
+                            <div class="card-body">
+                                <!-- Вопрос -->
+                                <h5 class="card-title">
+                                    {{ q.id }}. {{ q.prompt }}
+                                </h5>
+
+                                <!-- Варианты ответа -->
+                                <div class="quiz-options mt-3">
+                                    <div
+                                        v-for="(opt, i) in q.options"
+                                        :key="i"
+                                        class="form-check"
+                                    >
+                                        <!-- Радио для single -->
+                                        <input
+                                            v-if="q.type === 'single'"
+                                            class="form-check-input quiz-input"
+                                            type="radio"
+                                            :name="'q' + q.id"
+                                            :id="'q' + q.id + '_' + i"
+                                            v-model="userAnswers[q.id]"
+                                            :value="i"
+                                            required
+                                        />
+                                        <!-- Чекбокс для multiple -->
+                                        <input
+                                            v-else
+                                            class="form-check-input quiz-input"
+                                            type="checkbox"
+                                            :name="'q' + q.id"
+                                            :id="'q' + q.id + '_' + i"
+                                            v-model="userAnswers[q.id]"
+                                            :value="i"
+                                        />
+                                        <label
+                                            class="form-check-label"
+                                            :for="'q' + q.id + '_' + i"
+                                        >
+                                            {{ opt }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="button button--sub">
+                            Проверить тест
+                        </button>
+                    </form>
+
+                    <div
+                        v-if="quizResult"
+                        class="alert alert-info mt-4"
+                        role="alert"
+                    >
+                        <h4 class="alert-heading">
+                            Ваш результат: {{ quizResult.score }}%
+                        </h4>
+                        <p>
+                            Правильно: {{ quizResult.correctCount }} из
+                            {{ quizResult.total }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Модальное окно -->
+                <div
+                    v-if="showModal"
+                    class="modal-overlay"
+                    @click.self="showModal = false"
+                >
+                    <div class="modal">
+                        <button class="modal-close" @click="showModal = false">
+                            ×
+                        </button>
+                        <h2>Правильный ответ</h2>
+                        <p>{{ chapter.correct_answer }}</p>
+                    </div>
+                </div>
+                <a
+                    v-if="chapter.presentation_path"
+                    :href="`../${chapter.presentation_path}`"
+                    download
+                    class="btn btn-download"
+                >
+                    Скачать учебный материал
+                </a>
+                <button
+                    v-if="!chapter.is_completed"
+                    @click="markChapterCompleted(chapter)"
+                    class="button button--sub"
+                >
+                    Отметить как пройдено
+                </button>
+                <div v-else>
+                    <p>Глава пройдена!</p>
+                </div>
+                <div v-if="isTask || isTerms" class="form">
+                    <h1 class="h1__form">Проверка работы</h1>
+                    <div class="task-submit-form">
+                        <form @submit.prevent="submitTask">
+                            <div>
+                                <textarea
+                                    placeholder="Написать сообщение"
+                                    id="taskMessage"
+                                    class="form-textarea"
+                                    v-model="taskMessage"
+                                    :disabled="loading"
+                                    rows="3"
+                                ></textarea>
+                            </div>
+                            <div class="form__bottom">
+                                <label class="file-upload">
+                                    <span class="file-upload__icon"
+                                        ><svg
+                                            version="1.1"
+                                            id="Layer_1"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            xmlns:xlink="http://www.w3.org/1999/xlink"
+                                            x="0px"
+                                            y="0px"
+                                            viewBox="0 0 507.963 507.963"
+                                            style="
+                                                enable-background: new 0 0
+                                                    507.963 507.963;
+                                            "
+                                            xml:space="preserve"
+                                        >
+                                            <g>
+                                                <g>
+                                                    <path
+                                                        d="M464.782,25.247c-49.8-37.9-115.8-28.9-153.6,20.8l-175.5,230.5c-20.7,27.1-15.4,66,11.7,86.7 c26.7,20.3,65.4,16.2,86.7-11.7l158.9-208.6c4.7-6.2,3.5-15-2.7-19.7c-6.2-4.7-15-3.5-19.7,2.7l-158.9,208.5 c-13.7,18-35.2,15.5-47.2,6.4c-14.8-11.2-17.7-32.5-6.4-47.3l175.5-230.5c28.1-37,76-44.5,114.2-15.4 c35.8,27.2,42.7,78.5,15.5,114.2l-203.1,266.7c-46.7,53.5-125.9,66.5-181.1,24.5c-56.8-43.1-67.8-124.5-24.6-181.2l133.3-175.1 c4.7-6.2,3.5-15-2.7-19.7c-6.2-4.7-15-3.5-19.7,2.7l-133.3,175.1c-52.5,69-39.2,168.1,29.9,220.6c68.4,52,171.2,35.1,220.6-29.8 l203.1-266.7C522.182,130.747,512.882,61.847,464.782,25.247z"
+                                                    />
+                                                </g>
+                                            </g></svg
+                                    ></span>
+                                    <span class="file-upload__text"
+                                        >Прикрепить файл (не более 100 МБ)</span
+                                    >
+                                    <input type="file" hidden />
+                                </label>
+                            </div>
+                            <div class="line"></div>
+                            <div class="teacher__block">
+                                <div class="teacher">
+                                    <label class="form-label" for=""
+                                        >Преподватель:</label
+                                    >
+                                    <img
+                                        :src="'https://devskills.foncode.ru/img/nofotolk.png'"
+                                        alt="Фото преподвателя"
+                                        class="form__img"
+                                    />
+                                    <label class="form-label" for=""
+                                        >Бандуков Максим Сергеевич</label
+                                    >
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    :disabled="loading"
+                                    class="button button--form"
+                                >
+                                    Отправить на проверку
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Модальное окно -->
-        <div
-            v-if="showModal"
-            class="modal-overlay"
-            @click.self="showModal = false"
-        >
-            <div class="modal">
-                <button class="modal-close" @click="showModal = false">
-                    ×
-                </button>
-                <h2>Правильный ответ</h2>
-                <p>{{ chapter.correct_answer }}</p>
-            </div>
-        </div>
-        <button
-            v-if="!chapter.is_completed"
-            @click="markChapterCompleted(chapter)"
-            class="button button--sub"
-        >
-            Отметить как пройдено
-        </button>
-        <div v-else>
-            <p>Глава пройдена!</p>
-        </div>
-
-        <a
-            v-if="chapter.presentation_path"
-            :href="presentationUrl"
-            download
-            class="btn btn-download"
-        >
-            Скачать презентацию
-        </a>
     </div>
 </template>
 
@@ -142,6 +254,34 @@ import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 
 axios.defaults.baseURL = "/api";
+
+//form teacher
+
+const taskMessage = ref(""); // Сообщение пользователя
+const Task = computed(() => chapter.value.type === "task");
+const isTerms = computed(() => chapter.value.type === "terms");
+
+async function submitTask() {
+    loading.value = true;
+    const formData = new FormData();
+    const fileInput = $refs.taskFileInput;
+
+    if (fileInput.files.length > 0) {
+        formData.append("file", fileInput.files[0]);
+    }
+    formData.append("message", taskMessage.value);
+    formData.append("chapter_id", chapter.value.id);
+
+    try {
+        await axios.post("/submitTask", formData); // Путь к API для отправки задания
+        alert("Задание отправлено на проверку!");
+    } catch (error) {
+        console.error("Ошибка при отправке задания", error);
+        alert("Произошла ошибка. Попробуйте снова.");
+    } finally {
+        loading.value = false;
+    }
+}
 
 // props
 const props = defineProps({ initId: Number });
@@ -174,7 +314,7 @@ const hasContent = computed(
     () => !!chapter.value.content && chapter.value.type !== quizType
 );
 const hasPresentation = computed(() => !!chapter.value.presentation_path);
-
+console.log(chapter.value.presentation_path);
 // анализ JSON теста
 const quizData = ref(null);
 
@@ -214,81 +354,104 @@ const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 
 async function fetchChapter() {
     if (!chapterId.value) {
-      alert("Не удалось определить ID главы");
-      return;
+        alert("Не удалось определить ID главы");
+        return;
     }
 
     try {
-      const { data } = await axios.get(`/chapter/${chapterId.value}`, {
-        params: { user_id: storedUser.id },
-      });
-      console.log('[fetchChapter] raw chapter.value:', data);
-      chapter.value = data;
+        const { data } = await axios.get(`/chapter/${chapterId.value}`, {
+            params: { user_id: storedUser.id },
+        });
+        console.log("[fetchChapter] raw chapter.value:", data);
+        chapter.value = data;
 
-      // только для "presentation" тестов
-      if (chapter.value.type === quizType && chapter.value.content) {
-        // 1) Сперва распарсим JSON
-        const raw = typeof chapter.value.content === 'string'
-          ? JSON.parse(chapter.value.content)
-          : chapter.value.content;
-        console.log('[fetchChapter] parsed raw:', raw);
+        // только для "presentation" тестов
+        if (chapter.value.type === quizType && chapter.value.content) {
+            // 1) Сперва распарсим JSON
+            const raw =
+                typeof chapter.value.content === "string"
+                    ? JSON.parse(chapter.value.content)
+                    : chapter.value.content;
+            console.log("[fetchChapter] parsed raw:", raw);
 
-        // 2) Если пришёл Editor.js-формат (с массивом blocks) — найдём блок quiz
-        let quizBlockData = null;
-        if (Array.isArray(raw.blocks)) {
-          console.log('[fetchChapter] all blocks:', raw.blocks);
-          const quizBlock = raw.blocks.find(b => b.type === 'quiz');
-          console.log('[fetchChapter] quizBlock:', quizBlock);
-          quizBlockData = quizBlock?.data || null;
+            // 2) Если пришёл Editor.js-формат (с массивом blocks) — найдём блок quiz
+            let quizBlockData = null;
+            if (Array.isArray(raw.blocks)) {
+                console.log("[fetchChapter] all blocks:", raw.blocks);
+                const quizBlock = raw.blocks.find((b) => b.type === "quiz");
+                console.log("[fetchChapter] quizBlock:", quizBlock);
+                quizBlockData = quizBlock?.data || null;
+            }
+
+            // 3) Если после этого нет вопросов — выходим
+            if (!quizBlockData || !Array.isArray(quizBlockData.questions)) {
+                console.warn(
+                    "[fetchChapter] нет вопросов, тест не инициализируется"
+                );
+                quizData.value = null;
+            } else {
+                // 4) Нормализуем типы и инициализируем ответы
+                quizBlockData.questions.forEach((q) => {
+                    if (q.type === 0 || q.type === "one") q.type = "single";
+                    if (q.type === 1 || q.type === "many") q.type = "multiple";
+                    userAnswers[q.id] = q.type === "single" ? null : [];
+                });
+                console.log(
+                    "[fetchChapter] normalized questions:",
+                    quizBlockData.questions
+                );
+
+                // 5) Записываем в реактивную переменную
+                quizData.value = quizBlockData;
+                console.log("[fetchChapter] final quizData:", quizData.value);
+            }
         }
-
-        // 3) Если после этого нет вопросов — выходим
-        if (!quizBlockData || !Array.isArray(quizBlockData.questions)) {
-          console.warn('[fetchChapter] нет вопросов, тест не инициализируется');
-          quizData.value = null;
-        } else {
-          // 4) Нормализуем типы и инициализируем ответы
-          quizBlockData.questions.forEach(q => {
-            if (q.type === 0 || q.type === 'one')   q.type = 'single';
-            if (q.type === 1 || q.type === 'many')  q.type = 'multiple';
-            userAnswers[q.id] = q.type === 'single' ? null : [];
-          });
-          console.log('[fetchChapter] normalized questions:', quizBlockData.questions);
-
-          // 5) Записываем в реактивную переменную
-          quizData.value = quizBlockData;
-          console.log('[fetchChapter] final quizData:', quizData.value);
-        }
-      }
     } catch (err) {
-      console.error(err);
-      alert("Не удалось загрузить главу");
-      return;
+        console.error(err);
+        alert("Не удалось загрузить главу");
+        return;
     }
-     loading.value = false;
-     if (hasContent.value) {
+    loading.value = false;
+    if (hasContent.value) {
         await nextTick();
         if (editor) await editor.destroy();
 
         editor = new EditorJS({
-          holder: 'editorjs',
-          readOnly: true,
-          tools: {
-            header: { class: Header, inlineToolbar: ['link'] },
-            list:   { class: List,   inlineToolbar: true },
-            image:  {
-              class: ImageTool,
-              config: {
-                endpoints: { byFile: '/api/uploadFile', byUrl: '/api/fetchUrl' }
-              }
-            }
-          },
-          data: typeof chapter.value.content === 'string'
-                  ? JSON.parse(chapter.value.content)
-                  : chapter.value.content || {}
+            holder: "editorjs",
+            readOnly: true,
+            tools: {
+                header: { class: Header, inlineToolbar: ["link"] },
+                list: { class: List, inlineToolbar: true },
+                image: {
+                    class: ImageTool,
+                    config: {
+                        endpoints: {
+                            byFile: "/api/uploadFile",
+                            byUrl: "/api/fetchUrl",
+                        },
+                    },
+                },
+            },
+            data:
+                typeof chapter.value.content === "string"
+                    ? JSON.parse(chapter.value.content)
+                    : chapter.value.content || {},
         });
-      }
+    }
 }
+
+
+const typeLabel = computed(() => {
+  const t = chapter.value?.type
+  switch (t) {
+    case 'video':        return 'Видео материал'
+    case 'task':         return 'Практическая работа'
+    case 'terms':        return 'Лабораторная работа'
+    case 'presentation': return 'Тест'
+    default:             return t || ''
+  }
+})
+
 async function markChapterCompleted(ch) {
     if (ch.is_completed) return;
     try {
@@ -306,6 +469,320 @@ onMounted(fetchChapter);
 </script>
 
 <style scoped>
+/* кнопка скачивания файла */
+.btn-download {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #617aff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin: 20px 0;
+}
+
+.btn-download:hover {
+    background-color: #4a3cbb;
+    transform: translateY(-2px);
+}
+/* форма */
+.form {
+    margin: 50px 0 0;
+}
+.file-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #5f6368; /* цвет текста */
+    font-size: 14px;
+}
+
+.file-upload__icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 14px;
+}
+.file-upload__icon svg {
+}
+.file-upload__text {
+    white-space: nowrap;
+}
+
+.file-upload:hover .file-upload__icon {
+    background-color: #e0e0e0;
+}
+
+.task-submit-form {
+    color: #fff;
+    padding: 10px 20px 20px 20px;
+    border-radius: 8px;
+    border: 1px solid #617aff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+.form-label {
+    color: #617aff;
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+}
+.form-textarea {
+    font-family: JanoSansProLight;
+    width: 100%;
+    max-width: 840px;
+    height: 100%;
+    min-height: 70px;
+    resize: none;
+    padding: 10px 0;
+    border: 1px solid #5e5e5e00;
+    border-radius: 6px;
+    font-size: 14px;
+
+    transition: border-color 0.3s ease;
+}
+.form-textarea::placeholder {
+    color: #617aff;
+}
+.teacher {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.teacher__block {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.form__img {
+    width: 30px;
+    height: 30px;
+}
+.line {
+    width: 100%;
+    border-bottom: 1px solid #617aff;
+    margin: 20px 0;
+}
+.form__bottom {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+.h1__form {
+    color: black;
+    z-index: 10000;
+    font-size: 26px;
+    text-align: left;
+}
+.form-input {
+    width: 100%;
+    max-width: 840px;
+    padding: 10px;
+    border: 1px solid #5e5e5e;
+    border-radius: 6px;
+    background-color: #3a4046;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: #5b4bff;
+    outline: none;
+}
+
+.button {
+    padding: 12px 20px;
+    background-color: #5b4bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #4a3cbb;
+}
+
+.button:disabled {
+    background-color: #33333380;
+    cursor: not-allowed;
+}
+.button--form {
+    max-width: 300px;
+    margin-top: 0 !important;
+}
+/* Картинка с куратором */
+.task-submit-form .task-message {
+    font-size: 14px;
+    color: #ccc;
+    margin-top: 20px;
+}
+
+.task-submit-form .task-message a {
+    color: #5b4bff;
+    text-decoration: none;
+}
+
+.task-submit-form .task-message a:hover {
+    text-decoration: underline;
+}
+
+/* Описание состояния куратором */
+.task-submit-form .curator-status {
+    font-size: 14px;
+    margin-top: 10px;
+    color: #ccc;
+}
+
+.task-submit-form .curator-status .status-text {
+    color: #fbbd08;
+    font-weight: 600;
+}
+
+/* элементы блоков */
+.backs {
+    display: flex;
+    height: 20px;
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+}
+.maincontainer {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: unset;
+}
+.info__card-course {
+    width: 100%;
+}
+.course-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.course-card__label {
+    color: #617aff;
+    font-size: 12px;
+    margin: 0 0 7px;
+}
+.course-card__title {
+    color: #617aff;
+    font-size: 20px;
+    margin: 4px 0;
+    margin: 0 0 7px;
+    text-align: left;
+}
+.course-card__sub {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #617aff;
+}
+.course-card__img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+.course-stats {
+    color: #617aff;
+    margin: 16px 0;
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    font-size: 14px;
+    opacity: 0.9;
+    justify-content: space-around;
+}
+
+.progres {
+    margin: 40px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.progress-bar {
+    height: 6px;
+    background: #ffffff;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar span {
+    display: block;
+    height: 100%;
+    background: #5b4bff;
+    transition: width 0.4s;
+}
+
+.button--disabled {
+    cursor: unset !important;
+    user-select: none;
+    width: 100%;
+    padding: 10px;
+    background: #33333380 !important;
+    color: #666;
+    border: none;
+    border-radius: 6px;
+    cursor: not-allowed;
+}
+
+/* Telegram-карточка */
+.telegram-card__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.telegram-card__header h3 {
+    font-size: 16px;
+    margin: 0;
+}
+.telegram-card p {
+    font-size: 13px;
+    line-height: 1.4;
+}
+.telegram-card a {
+    color: #5b4bff;
+    text-decoration: none;
+}
+.card {
+    width: 100%;
+    max-width: 500px;
+    background: #eaeaf4;
+    border-radius: 12px;
+    padding: 20px;
+}
+.sidebar {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.flex {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 40px;
+}
 .alert {
     display: flex;
     align-items: center;
@@ -449,9 +926,9 @@ onMounted(fetchChapter);
     cursor: pointer;
 }
 .container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 16px;
+    width: 100%;
+    max-width: 1240px;
+    margin: 25px auto;
 }
 .btn-back {
     font-size: 15px;

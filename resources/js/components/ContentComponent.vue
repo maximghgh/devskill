@@ -39,15 +39,6 @@
                             ></span>
                         </div>
                     </div>
-
-                    <button
-                        class="button"
-                        :class="{ 'button--disabled': !certificateUnlocked }"
-                        :disabled="!certificateUnlocked"
-                        @click="downloadCertificate"
-                    >
-                        Сертификат
-                    </button>
                 </div>
 
                 <!-- Telegram-чат -->
@@ -578,19 +569,18 @@ function cancelReply() {
 }
 //прогресс
 const progressPercentage = computed(() => {
-  let totalPoints    = 0;
-  let completedPoints = 0;
+  let totalChapters = 0;
+  let completedChapters = 0;
 
-  topics.value.forEach(topic => {
-    topic.chapters?.forEach(ch => {
-      const pts = Number(ch.points) || 0;   // защита от null
-      totalPoints += pts;
-      if (ch.is_completed) completedPoints += pts;
+  topics.value.forEach((topic) => {
+    topic.chapters.forEach((ch) => {
+      totalChapters++;
+      if (ch.is_completed) completedChapters++;
     });
   });
 
-  return totalPoints
-    ? Math.round((completedPoints / totalPoints) * 100)
+  return totalChapters
+    ? Math.round((completedChapters / totalChapters) * 100)
     : 0;
 });
 

@@ -59,24 +59,6 @@ class ChapterController extends Controller
             $presentationPath = str_replace('public/', 'storage/', $path);
         }
 
-        if ($data['type'] === 'presentation') {
-            // — ТОЛЬКО в таблицу final_tests
-
-            $topic    = Topic::findOrFail($topicId);
-            $courseId = $topic->course_id;
-
-            FinalTest::create([
-                'topic_id'         => $topicId,
-                'chapter_id'       => $courseId,  // или опустите это поле, если в миграции nullable
-                'questions'        => is_string($data['content'])
-                                    ? json_decode($data['content'], true)
-                                    : ($data['content'] ?? []),
-                'presentation_path'=> $presentationPath,
-            ]);
-
-            return response()->json(['success' => true], 201);
-        }
-
         // — для всех остальных типов: ТОЛЬКО в таблицу chapters
         $chapter = Chapter::create([
             'topic_id'         => $topicId,

@@ -110,9 +110,6 @@
         <label class="form-label">PDF файл курса</label>
         <input type="file" accept="application/pdf" class="form-input" @change="onPdf" />
       </div>
-
-      <textarea id="mytextarea"></textarea>
-
       <!-- EditorJS -->
       <div ref="editorHolder" class="editor-container"></div>
 
