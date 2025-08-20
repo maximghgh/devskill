@@ -411,5 +411,34 @@ class CourseController extends Controller
         'taskCount' => $count
         ]);
     }
+    public function getCoursesByTeacher(Request $request)
+    {
+        // Получаем teacher_id из тела POST-запроса
+        $teacherId = $request->input('teacher_id');
+
+        // Проверка, если teacher_id не передан
+        if (!$teacherId) {
+            return response()->json(['error' => 'Teacher ID is required'], 400);
+        }
+
+        try {
+            // Получаем курсы, где массив teachers содержит указанный teacher_id
+            $courses = Course::whereJsonContains('teachers', $teacherId)->get();
+
+            // Возвращаем найденные курсы
+            return response()->json($courses);
+        } catch (\Exception $e) {
+            // Логируем ошибку
+            \Log::error('Ошибка при получении курсов для преподавателя: ' . $e->getMessage());
+
+            // Возвращаем ошибку
+            return response()->json(['error' => 'Failed to fetch courses'], 500);
+        }
+    }
+
+
+
+
+
 
 }

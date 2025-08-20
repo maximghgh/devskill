@@ -1,5 +1,12 @@
 <template>
     <div class="center">
+        <div class="menu">
+            <ul class="menu__teacher">
+                <li class="menu__link">
+                    <a href="/taskstudent" class="aside__link">Проверка работ учеников</a>
+                </li>
+            </ul>
+        </div>
         <h2>Результаты тестирования пользователей</h2>
         <!-- Поисковая строка -->
         <div class="search">
@@ -169,6 +176,25 @@ function closeModal() {
 </script>
 
 <style scoped>
+.menu{
+    display: flex;
+    margin: 60px 0;
+}
+.aside__link {
+    color: #575adf;
+    text-decoration: none;
+    transition: 0.5s;
+}
+
+.aside__link--active {
+    color: #000;
+    text-decoration: underline;
+}
+
+.aside__link:hover {
+    transition: 0.5s;
+    text-decoration: underline;
+}
 .form-buttons {
     margin: 0 0 30px;
     display: flex;

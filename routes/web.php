@@ -91,6 +91,10 @@ Route::get('/admin/addcourse', function () {
     return view('admin.addcourse');
 })->name('admin.addcourse');
 
+Route::get('/taskstudent', function () {
+    return view('taskstudent');
+})->name('taskstudent');
+
 Route::get('/verify', function () {
     return view('verify');
 })->name('verify');
@@ -122,6 +126,8 @@ Route::get('/reset-password', function () {
 Route::get('/about', function () {
     return view('about');
 })->name('about');
+
+
 
 Route::get('/cpp', function () {
     return view('cpp');

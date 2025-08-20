@@ -65,7 +65,7 @@
                 <!-- Итоговый тест -->
                 <!-- Итоговый тест -->
                 <div v-if="quizData" class="final-quiz mb-5">
-                    <form @submit.prevent="submitQuiz">
+                    <form @submit.prevent="submitQuiz" class="test__course">
                         <div
                             v-for="q in quizData.questions"
                             :key="q.id"
@@ -440,17 +440,21 @@ async function fetchChapter() {
     }
 }
 
-
 const typeLabel = computed(() => {
-  const t = chapter.value?.type
-  switch (t) {
-    case 'video':        return 'Видео материал'
-    case 'task':         return 'Практическая работа'
-    case 'terms':        return 'Лабораторная работа'
-    case 'presentation': return 'Тест'
-    default:             return t || ''
-  }
-})
+    const t = chapter.value?.type;
+    switch (t) {
+        case "video":
+            return "Видео материал";
+        case "task":
+            return "Практическая работа";
+        case "terms":
+            return "Лабораторная работа";
+        case "presentation":
+            return "Тест";
+        default:
+            return t || "";
+    }
+});
 
 async function markChapterCompleted(ch) {
     if (ch.is_completed) return;
@@ -701,6 +705,11 @@ onMounted(fetchChapter);
     height: 60px;
     object-fit: contain;
 }
+.test__course {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 .course-stats {
     color: #617aff;
     margin: 16px 0;
@@ -767,7 +776,7 @@ onMounted(fetchChapter);
 }
 .card {
     width: 100%;
-    max-width: 500px;
+    /* max-width: 500px; */
     background: #eaeaf4;
     border-radius: 12px;
     padding: 20px;

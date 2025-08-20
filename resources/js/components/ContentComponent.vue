@@ -122,7 +122,7 @@
                                             </span>
                                         </div>
                                         <h5 class="chapter-card__title">
-                                            {{ topic.id }}.{{ ch.id }}
+                                            <!-- {{ topic.id }}.{{ ch.id }} -->
                                             {{ ch.title }}
                                         </h5>
                                     </a>

@@ -22,6 +22,8 @@ use App\Http\Controllers\FinalTestController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\FinalTestResultController;
 
+Route::post('/coursestaks', [CourseController::class, 'getCoursesByTeacher']);
+
 Route::post('/chapters/{chapter}/complete', [ChapterController::class,'complete']);
 Route::get('/courses/{course}/final-test', [FinalTestController::class,'show']);
 Route::get('final-test/{courseId}', [FinalTestController::class, 'show'])
