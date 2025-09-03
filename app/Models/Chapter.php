@@ -48,5 +48,9 @@ class Chapter extends Model
     {
         return $this->hasOne(FinalTest::class);
     }
+    public function course()
+    {
+        return $this->belongsTo(\App\Models\Course::class); // ожидает колонку chapters.course_id
+    }
     
 }

@@ -95,6 +95,17 @@ Route::get('/taskstudent', function () {
     return view('taskstudent');
 })->name('taskstudent');
 
+Route::get('/studencourse/{course__id}', function () {
+    return view('studencourse');
+})->name('studencourse');
+
+// Route::get('/studentsubmissions/{courseId}/{student_id}', function () {
+//     return view('studentsubmissions');
+// })->name('studentsubmissions');
+Route::get('/studentsubmissions/{courseId}/{studentId}', function ($courseId, $studentId) {
+    return view('studentsubmissions', compact('courseId','studentId'));
+});
+
 Route::get('/verify', function () {
     return view('verify');
 })->name('verify');

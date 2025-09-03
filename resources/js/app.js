@@ -10,6 +10,8 @@ import FooterComponent from './components/FooterComponent.vue';
 import DashboardTeacher from './components/teacher/DashboardTeacher.vue';
 import HeaderteacherComponent from './components/teacher/Header-teacherComponent.vue';
 import TaskStudent from './components/teacher/TaskStudent.vue';
+import StudentCourse from './components/teacher/StudentCourse.vue';
+import StudentSubmissions from './components/teacher/StudentSubmissions.vue';
 // Импорт всех компонентов для админ-панели
 
 import DashboardComponent from './components/admin/DashboardComponent.vue';
@@ -52,6 +54,8 @@ const app = createApp({});
 app.component('header-teacher-component', HeaderteacherComponent);
 app.component('dashboardteacher-component', DashboardTeacher);
 app.component('taskstudent-component', TaskStudent);
+app.component('studentcours-component', StudentCourse);
+app.component('studentsubmissions-component', StudentSubmissions);
 
 // Регистрация компонентов (имена в kebab-case) для админ-панели
 app.component('addcourse-component', AddCourseComponent);

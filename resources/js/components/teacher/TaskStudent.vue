@@ -3,9 +3,9 @@
         <h2>Список курсов</h2>
         <ol class="course-list">
             <li v-for="course in courses" :key="course.id" class="course-item">
-            <a href="" class="course-link">
-                {{ course.card_title }}
-            </a>
+              <a :href="`/studencourse/${course.id}`" class="course-link">
+                  {{ course.card_title }}
+              </a>
             </li>
         </ol>
     </div>

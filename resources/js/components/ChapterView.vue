@@ -168,7 +168,7 @@
                 <div v-else>
                     <p>Глава пройдена!</p>
                 </div>
-                <div v-if="isTask || isTerms" class="form">
+                <div v-if="(isTask || isTerms) && showSubmitForm" class="form">
                     <h1 class="h1__form">Проверка работы</h1>
                     <div class="task-submit-form">
                         <form @submit.prevent="submitTask">
@@ -210,7 +210,7 @@
                                     <span class="file-upload__text"
                                         >Прикрепить файл (не более 100 МБ)</span
                                     >
-                                    <input type="file" hidden />
+                                    <input type="file" hidden ref="taskFileInput" />
                                 </label>
                             </div>
                             <div class="line"></div>
@@ -240,7 +240,14 @@
                         </form>
                     </div>
                 </div>
+                <div v-if="mySubmission" class="submission-info">
+                    <!-- <p><b>Статус:</b> {{ statusLabel(mySubmission.status) }}</p> -->
+                    <p v-if="mySubmission.teacher_comment"><b>Комментарий преподавателя:</b> {{ mySubmission.teacher_comment }}</p>
+                    <!-- <p v-if="mySubmission.file_url"><b>Файл:</b> <a :href="mySubmission.file_url" target="_blank">Скачать</a></p> -->
+                    <p class="hint">{{ submissionMessage }}</p>
+                </div>
             </div>
+            
         </div>
     </div>
 </template>
@@ -255,224 +262,301 @@ import ImageTool from "@editorjs/image";
 
 axios.defaults.baseURL = "/api";
 
-//form teacher
+/* ---------- Состояние формы / моя отправка ---------- */
+const taskFileInput = ref(null);
+const taskMessage   = ref("");
+const mySubmission  = ref(null);   // объект отправки ИЛИ null
 
-const taskMessage = ref(""); // Сообщение пользователя
-const Task = computed(() => chapter.value.type === "task");
-const isTerms = computed(() => chapter.value.type === "terms");
-
-async function submitTask() {
-    loading.value = true;
-    const formData = new FormData();
-    const fileInput = $refs.taskFileInput;
-
-    if (fileInput.files.length > 0) {
-        formData.append("file", fileInput.files[0]);
-    }
-    formData.append("message", taskMessage.value);
-    formData.append("chapter_id", chapter.value.id);
-
-    try {
-        await axios.post("/submitTask", formData); // Путь к API для отправки задания
-        alert("Задание отправлено на проверку!");
-    } catch (error) {
-        console.error("Ошибка при отправке задания", error);
-        alert("Произошла ошибка. Попробуйте снова.");
-    } finally {
-        loading.value = false;
-    }
-}
-
-// props
-const props = defineProps({ initId: Number });
-
-// state
-const chapter = ref({});
-const loading = ref(true);
+/* ---------- Глава / отображение контента ---------- */
+const chapter   = ref({});
+const loading   = ref(true);
 const showModal = ref(false);
 let editor = null;
 
-// когда тип теста совпадает с этим значением, вместо редактора показываем форму
-const quizType = "presentation"; // или "final_test", как у вас настроено
-
-// id главы
-const chapterId = computed(
-    () => window.location.pathname.match(/\/chapter\/(\d+)/)?.[1] || null
+const quizType  = "presentation";
+const chapterId = computed(() =>
+  window.location.pathname.match(/\/chapter\/(\d+)/)?.[1] || null
 );
 const embedUrl = computed(() => {
-    // пример rutube URL из API: https://rutube.ru/video/11063d3d7e…/?r=wd
-    const url = chapter.value.video_url;
-    if (!url) return "";
-    // Переводим "/video/ID…/" → "/play/embed/ID…?autoplay=false"
-    const idPart = url.match(/\/video\/([^\/\?]+)/)?.[1];
-    if (!idPart) return url;
-    return `https://rutube.ru/play/embed/${idPart}?autoplay=false`;
+  const url = chapter.value.video_url;
+  if (!url) return "";
+  const idPart = url.match(/\/video\/([^\/\?]+)/)?.[1];
+  return idPart ? `https://rutube.ru/play/embed/${idPart}?autoplay=false` : url;
 });
-// хелперы
-const isTask = computed(() => chapter.value.type === "task");
-const hasContent = computed(
-    () => !!chapter.value.content && chapter.value.type !== quizType
-);
-const hasPresentation = computed(() => !!chapter.value.presentation_path);
-console.log(chapter.value.presentation_path);
-// анализ JSON теста
-const quizData = ref(null);
 
-// ответы пользователя
-// single -> число, multiple -> массив
-const userAnswers = reactive({});
-
-// результат
-const quizResult = ref(null);
-
-function submitQuiz() {
-    if (!quizData.value) return;
-    const qs = quizData.value.questions;
-    let correctCount = 0;
-    qs.forEach((q) => {
-        const ua = userAnswers[q.id];
-        if (q.type === "single" && ua === q.answer) correctCount++;
-        else if (
-            q.type === "multiple" &&
-            Array.isArray(ua) &&
-            ua.sort().toString() === q.answer.sort().toString()
-        )
-            correctCount++;
-    });
-    quizResult.value = {
-        score: Math.round((correctCount / qs.length) * 100),
-        correctCount,
-        total: qs.length,
-    };
-}
-
-function goBack() {
-    window.location.href = document.referrer || "/";
-}
-
-const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-
-async function fetchChapter() {
-    if (!chapterId.value) {
-        alert("Не удалось определить ID главы");
-        return;
-    }
-
-    try {
-        const { data } = await axios.get(`/chapter/${chapterId.value}`, {
-            params: { user_id: storedUser.id },
-        });
-        console.log("[fetchChapter] raw chapter.value:", data);
-        chapter.value = data;
-
-        // только для "presentation" тестов
-        if (chapter.value.type === quizType && chapter.value.content) {
-            // 1) Сперва распарсим JSON
-            const raw =
-                typeof chapter.value.content === "string"
-                    ? JSON.parse(chapter.value.content)
-                    : chapter.value.content;
-            console.log("[fetchChapter] parsed raw:", raw);
-
-            // 2) Если пришёл Editor.js-формат (с массивом blocks) — найдём блок quiz
-            let quizBlockData = null;
-            if (Array.isArray(raw.blocks)) {
-                console.log("[fetchChapter] all blocks:", raw.blocks);
-                const quizBlock = raw.blocks.find((b) => b.type === "quiz");
-                console.log("[fetchChapter] quizBlock:", quizBlock);
-                quizBlockData = quizBlock?.data || null;
-            }
-
-            // 3) Если после этого нет вопросов — выходим
-            if (!quizBlockData || !Array.isArray(quizBlockData.questions)) {
-                console.warn(
-                    "[fetchChapter] нет вопросов, тест не инициализируется"
-                );
-                quizData.value = null;
-            } else {
-                // 4) Нормализуем типы и инициализируем ответы
-                quizBlockData.questions.forEach((q) => {
-                    if (q.type === 0 || q.type === "one") q.type = "single";
-                    if (q.type === 1 || q.type === "many") q.type = "multiple";
-                    userAnswers[q.id] = q.type === "single" ? null : [];
-                });
-                console.log(
-                    "[fetchChapter] normalized questions:",
-                    quizBlockData.questions
-                );
-
-                // 5) Записываем в реактивную переменную
-                quizData.value = quizBlockData;
-                console.log("[fetchChapter] final quizData:", quizData.value);
-            }
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Не удалось загрузить главу");
-        return;
-    }
-    loading.value = false;
-    if (hasContent.value) {
-        await nextTick();
-        if (editor) await editor.destroy();
-
-        editor = new EditorJS({
-            holder: "editorjs",
-            readOnly: true,
-            tools: {
-                header: { class: Header, inlineToolbar: ["link"] },
-                list: { class: List, inlineToolbar: true },
-                image: {
-                    class: ImageTool,
-                    config: {
-                        endpoints: {
-                            byFile: "/api/uploadFile",
-                            byUrl: "/api/fetchUrl",
-                        },
-                    },
-                },
-            },
-            data:
-                typeof chapter.value.content === "string"
-                    ? JSON.parse(chapter.value.content)
-                    : chapter.value.content || {},
-        });
-    }
-}
+const isTask         = computed(() => chapter.value.type === "task");
+const isTerms        = computed(() => chapter.value.type === "terms");
+const hasContent     = computed(() => !!chapter.value.content && chapter.value.type !== quizType);
+const hasPresentation= computed(() => !!chapter.value.presentation_path);
 
 const typeLabel = computed(() => {
-    const t = chapter.value?.type;
-    switch (t) {
-        case "video":
-            return "Видео материал";
-        case "task":
-            return "Практическая работа";
-        case "terms":
-            return "Лабораторная работа";
-        case "presentation":
-            return "Тест";
-        default:
-            return t || "";
-    }
+  switch (chapter.value?.type) {
+    case "video":        return "Видео материал";
+    case "task":         return "Практическая работа";
+    case "terms":        return "Лабораторная работа";
+    case "presentation": return "Тест";
+    default:             return chapter.value?.type || "";
+  }
 });
 
-async function markChapterCompleted(ch) {
-    if (ch.is_completed) return;
-    try {
-        await axios.post(`/chapters/${ch.id}/complete`, {
-            user_id: storedUser.id,
-        });
-        ch.is_completed = true;
-        console.log(`Глава ${ch.id} отмечена как пройденная`);
-    } catch (error) {
-        console.error("Ошибка при завершении главы:", error);
+/* ---------- Тест ---------- */
+const quizData    = ref(null);
+const userAnswers = reactive({});
+const quizResult  = ref(null);
+
+function submitQuiz() {
+  if (!quizData.value) return;
+  const qs = quizData.value.questions;
+  let correctCount = 0;
+  qs.forEach((q) => {
+    const ua = userAnswers[q.id];
+    if (q.type === "single" && ua === q.answer) correctCount++;
+    else if (q.type === "multiple" && Array.isArray(ua) &&
+             ua.sort().toString() === q.answer.sort().toString()) correctCount++;
+  });
+  quizResult.value = {
+    score: Math.round((correctCount / qs.length) * 100),
+    correctCount,
+    total: qs.length,
+  };
+}
+
+/* ---------- Пользователь ---------- */
+const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+/* ---------- Вспомогательные ---------- */
+function statusLabel(s) {
+  const map = {
+    pending:   "Отправлено, ожидает проверки",
+    in_review: "На проверке",
+    approved:  "Зачтено",
+    rejected:  "Отправлено на доработку",
+  };
+  return map[s] ?? s;
+}
+
+/** Пустая ли «отправка». Нормализуем {}, [] и т.п. в отсутствие */
+function isEmptySubmission(s) {
+  if (!s) return true;                         // null/undefined/''/0/false
+  if (Array.isArray(s)) return s.length === 0;
+  if (typeof s === "object") return Object.keys(s).length === 0;
+  return false;
+}
+
+/* Текст под статусом */
+const submissionMessage = computed(() => {
+  const s = mySubmission.value;
+  if (!s) return "";
+  if (s.status === "approved")               return "Задание успешно пройдено!";
+  if (s.status === "rejected")               return "Задание отправлено на доработку.";
+  if (s.status === "pending" || s.status === "in_review")
+                                             return "Задание отправлено. Ожидайте проверки преподавателя.";
+  return statusLabel(s.status);
+});
+
+/* Показывать ли форму (только когда отправки действительно НЕТ) */
+const showSubmitForm = computed(() => isEmptySubmission(mySubmission.value) || mySubmission.value?.status === "rejected");
+/* Есть ли отправка — удобно для шаблона */
+const hasSubmission  = computed(() => !showSubmitForm.value);
+
+/* ---------- API: подтянуть Мою отправку ---------- */
+async function fetchMySubmission() {
+  try {
+    const url = `/chapter/${chapterId.value}/my-submission`;
+    const { data } = await axios.get(url, { params: { user_id: storedUser.id } });
+
+    // ЯВНО проверяем наличие ключа "submission"
+    let s;
+    if (data && typeof data === "object" && Object.prototype.hasOwnProperty.call(data, "submission")) {
+      s = data.submission;                // может быть null — это нормально
+    } else {
+      s = data;                            // сервер вернул сам объект отправки
     }
+
+    // нормализуем «пустые» значения в null
+    if (isEmptySubmission(s)) s = null;
+
+    mySubmission.value = s;
+  } catch (e) {
+    console.warn("Не удалось получить мою отправку:", e);
+    mySubmission.value = null;
+  }
+}
+
+
+/* ---------- API: загрузка главы ---------- */
+async function fetchChapter() {
+  if (!chapterId.value) {
+    alert("Не удалось определить ID главы");
+    return;
+  }
+  try {
+    const { data } = await axios.get(`/chapter/${chapterId.value}`, {
+      params: { user_id: storedUser.id },
+    });
+    chapter.value = data;
+
+    if (chapter.value.type === quizType && chapter.value.content) {
+      const raw = typeof chapter.value.content === "string"
+        ? JSON.parse(chapter.value.content)
+        : chapter.value.content;
+      let quizBlockData = null;
+      if (Array.isArray(raw.blocks)) {
+        const quizBlock = raw.blocks.find((b) => b.type === "quiz");
+        quizBlockData = quizBlock?.data || null;
+      }
+      if (quizBlockData && Array.isArray(quizBlockData.questions)) {
+        quizBlockData.questions.forEach((q) => {
+          if (q.type === 0 || q.type === "one") q.type = "single";
+          if (q.type === 1 || q.type === "many") q.type = "multiple";
+          userAnswers[q.id] = q.type === "single" ? null : [];
+        });
+        quizData.value = quizBlockData;
+      } else {
+        quizData.value = null;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Не удалось загрузить главу");
+    return;
+  }
+
+  loading.value = false;
+
+  if (hasContent.value) {
+    await nextTick();
+    if (editor) await editor.destroy();
+    editor = new EditorJS({
+      holder: "editorjs",
+      readOnly: true,
+      tools: {
+        header: { class: Header, inlineToolbar: ["link"] },
+        list:   { class: List, inlineToolbar: true },
+        image:  { class: ImageTool, config: { endpoints: { byFile: "/api/uploadFile", byUrl: "/api/fetchUrl" } } },
+      },
+      data: typeof chapter.value.content === "string"
+        ? JSON.parse(chapter.value.content)
+        : (chapter.value.content || {}),
+    });
+  }
+
+  // после главы — тянем мою отправку
+  await fetchMySubmission();
+}
+
+/* ---------- API: отправка задания ---------- */
+async function submitTask() {
+  if (loading.value) return;
+
+  const userId = storedUser?.id;
+  const chId   = chapter.value?.id;
+
+  const courseId =
+    chapter.value?.course_id ??
+    chapter.value?.course?.id ??
+    chapter.value?.topic?.course_id ??
+    null;
+
+  if (!userId) { alert("Ошибка: не определён пользователь."); return; }
+  if (!chId)   { alert("Ошибка: не определён ID главы.");   return; }
+
+  // Если задание отклонено, сбрасываем статус на "pending"
+  if (mySubmission.value?.status === "rejected") {
+    mySubmission.value.status = "pending";
+  }
+
+  loading.value = true;
+  try {
+    const formData = new FormData();
+
+    // файл обязателен
+    const fileEl = taskFileInput.value;
+    if (!fileEl || !fileEl.files || fileEl.files.length === 0) {
+      alert("Прикрепите файл с решением.");
+      loading.value = false; return;
+    }
+    const f = fileEl.files[0];
+
+    // простая валидация
+    const allowed = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/png", "image/jpeg",
+      "application/zip", "application/x-zip-compressed",
+      "application/x-rar-compressed", "application/x-7z-compressed",
+    ];
+    if (!allowed.includes(f.type)) {
+      alert("Недопустимый тип файла. Разрешены: PDF, DOC/DOCX, PNG/JPG, ZIP/RAR/7Z.");
+      loading.value = false; return;
+    }
+    const max = 100 * 1024 * 1024;
+    if (f.size > max) {
+      alert("Файл больше 100 МБ.");
+      loading.value = false; return;
+    }
+
+    formData.append("file", f);
+    formData.append("message", taskMessage.value || "");
+    formData.append("chapter_id", String(chId));
+    formData.append("user_id",    String(userId));
+    if (courseId) formData.append("course_id", String(courseId));
+
+    // отправка
+    const { data } = await axios.post("/submitTask", formData);
+
+    // очистка полей
+    taskMessage.value = "";
+    if (fileEl) fileEl.value = "";
+
+    // Показать статус сразу и подтянуть «истинный» объект с бэка
+    mySubmission.value = data?.submission || { status: "pending", comment: taskMessage.value };
+    await fetchMySubmission(); // чтобы заполнить file_url и т.п.
+
+    alert("Задание отправлено на проверку!");
+  } catch (e) {
+    console.error("Ошибка при отправке задания", e);
+    alert("Произошла ошибка. Попробуйте снова.");
+  } finally {
+    loading.value = false;
+  }
+}
+
+
+/* ---------- Прочее ---------- */
+function goBack() {
+  window.location.href = document.referrer || "/";
+}
+async function markChapterCompleted(ch) {
+  if (ch.is_completed) return;
+  try {
+    await axios.post(`/chapters/${ch.id}/complete`, { user_id: storedUser.id });
+    ch.is_completed = true;
+  } catch (e) {
+    console.error("Ошибка при завершении главы:", e);
+  }
 }
 
 onMounted(fetchChapter);
 </script>
 
+
+
 <style scoped>
+
+.submission-info{
+    margin: 20px 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: #5de47d75;
+}
+
 /* кнопка скачивания файла */
 .btn-download {
     display: inline-block;

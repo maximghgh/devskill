@@ -6,6 +6,7 @@ use App\Models\Course; // Не забудьте создать модель Cour
 use App\Models\Topic; // Не забудьте создать модель Course
 use App\Models\UserChapterProgress; // Не забудьте создать модель Course
 use Illuminate\Http\Request;
+use App\Models\Purchase;
 use App\Models\Language; // Ваша модель для языков
 
 class CourseController extends Controller
@@ -434,6 +435,26 @@ class CourseController extends Controller
             // Возвращаем ошибку
             return response()->json(['error' => 'Failed to fetch courses'], 500);
         }
+    }
+    // В файле app/Http/Controllers/CourseController.php // Импортируем модель покупок
+
+    public function showStudents($courseId)
+    {
+        // Получаем все покупки для данного курса
+        $purchases = Purchase::where('course_id', $courseId)->get();
+
+        // Если нет покупок, вернем пустой массив
+        if ($purchases->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // Получаем уникальных пользователей для этого курса
+        $students = $purchases->map(function ($purchase) {
+            return $purchase->user; // Получаем пользователя для каждой покупки
+        });
+
+        // Возвращаем студентов в формате JSON
+        return response()->json($students);
     }
 
 

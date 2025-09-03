@@ -21,8 +21,21 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FinalTestController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\FinalTestResultController;
+use App\Http\Controllers\TaskSubmissionController;
+use App\Http\Controllers\StudentController;
+//проверка задания и отправка задания
+Route::get('chapter/{chapter}/my-submission', [TaskSubmissionController::class, 'mySubmission']);
+Route::post('/submitTask', [TaskSubmissionController::class, 'store']);               // студент отправляет
+Route::get('/submissions', [TaskSubmissionController::class, 'index']);               // список (для кабинета студента/препода)
+Route::post('/submissions/{submission}/review', [TaskSubmissionController::class, 'review']); // проверка преподом
+Route::get('/submissions/{submission}/download', [TaskSubmissionController::class, 'download']); // опционально
+Route::get('/students/{courseId}', [StudentController::class, 'listByCourse']);
+Route::get('/course/{courseId}/student/{studentId}/submissions', [TaskSubmissionController::class, 'getByStudent']);
+Route::put('/submissions/{id}', [TaskSubmissionController::class, 'update']);
+
 
 Route::post('/coursestaks', [CourseController::class, 'getCoursesByTeacher']);
+Route::get('/students/{courseId}', [CourseController::class, 'showStudents']);
 
 Route::post('/chapters/{chapter}/complete', [ChapterController::class,'complete']);
 Route::get('/courses/{course}/final-test', [FinalTestController::class,'show']);
