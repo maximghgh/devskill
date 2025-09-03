@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 
 use Illuminate\Http\Request;
-use PDF;  // фасад from barryvdh/laravel-dompdf
+use PDF;  
 
 class CertificateController extends Controller
 {
@@ -17,7 +17,6 @@ class CertificateController extends Controller
             ]);
 
             // достаём курс из БД
-            // $course = Course::findOrFail($coursId);
             $logo = str_replace('\\','/', public_path('img/logo.svg'));
             $bg = str_replace('\\', '/', public_path('img/certificat.png'));
 

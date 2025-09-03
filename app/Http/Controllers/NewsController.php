@@ -12,7 +12,6 @@ class NewsController extends Controller
     // Получение списка новостей
     public function index()
     {
-        // Можно добавить пагинацию, например: News::paginate(10)
         $news = News::orderBy('created_at', 'desc')->get();
         return response()->json($news);
     }

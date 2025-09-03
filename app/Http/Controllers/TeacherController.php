@@ -15,7 +15,6 @@ class TeacherController extends Controller
     }
     public function studentsResults($teacherId)
     {
-        // 1) найдём все курсы, которые ведёт этот препод
         $courseIds = Course::whereJsonContains('teachers', $teacherId)
                    ->pluck('id')
                    ->toArray();
@@ -23,14 +22,12 @@ class TeacherController extends Controller
             return response()->json([], 200);
         }
 
-        // 2) выберем все результаты по этим курсам
         $rows = FinalTestResult::with('user')
             ->whereIn('course_id', $courseIds)
             ->get()
             ->map(function($r) {
                 return [
                     'student_name' => $r->user->name,
-                    // ответ на первый вопрос — приводим к массиву
                     'answer_q1'    => (array) ($r->answers[1] ?? []),
                 ];
             });

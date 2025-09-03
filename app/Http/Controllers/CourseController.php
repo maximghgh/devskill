@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course; // Не забудьте создать модель Course
-use App\Models\Topic; // Не забудьте создать модель Course
-use App\Models\UserChapterProgress; // Не забудьте создать модель Course
+use App\Models\Course; 
+use App\Models\Topic; 
+use App\Models\UserChapterProgress; 
 use Illuminate\Http\Request;
 use App\Models\Purchase;
-use App\Models\Language; // Ваша модель для языков
+use App\Models\Language;
 
 class CourseController extends Controller
 {
@@ -436,7 +436,6 @@ class CourseController extends Controller
             return response()->json(['error' => 'Failed to fetch courses'], 500);
         }
     }
-    // В файле app/Http/Controllers/CourseController.php // Импортируем модель покупок
 
     public function showStudents($courseId)
     {
