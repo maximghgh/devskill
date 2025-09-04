@@ -64,68 +64,45 @@
                         class="topic"
                     >
                         <!-- Заголовок раздела -->
-                        <div
-                            class="topic__header"
-                            @click="toggleTopic(topic.id)"
+                        <div class="topic__header"
+                            :class="{ 'is-locked': !isTopicUnlocked(topic) }"
+                            @click="toggleTopicSafe(topic)"
                         >
                             <span>{{ idx + 1 }}</span>
                             <h4>{{ topic.title }}</h4>
-                            <span
-                                class="toggle-caret"
-                                :class="{ 'is-open': openTopic === topic.id }"
-                            ></span>
+                            <span class="toggle-caret" :class="{ 'is-open': openTopic === topic.id }"></span>
                         </div>
                         <transition name="collapse">
                             <!-- ГЛАВЫ: карточки  -->
-                            <ul
-                                v-show="openTopic === topic.id"
-                                class="chapters-grid"
-                            >
+                            <ul v-show="isTopicOpen(topic.id)" class="chapters-grid">
                                 <li
-                                    v-for="ch in topic.chapters"
-                                    :key="ch.id"
-                                    class="chapter-card"
+                                v-for="ch in topic.chapters"
+                                :key="ch.id"
+                                class="chapter-card"
                                 >
-                                    <a
-                                        class="chapter-link"
-                                        :href="`/chapter/${ch.id}`"
-                                    >
-                                        <div
-                                            class="chapter-card__preview-wrapper"
-                                            :class="{
-                                                'is-completed': ch.is_completed,
-                                            }"
-                                        >
-                                            <div
-                                                v-show="ch.is_completed"
-                                                class="good"
-                                            >
-                                                <img
-                                                    width="15"
-                                                    height="15"
-                                                    src="../../img/circle.png"
-                                                    alt=""
-                                                />
-                                            </div>
-                                            <img
-                                                width="30"
-                                                height="50"
-                                                :src="getPreviewSrc(ch)"
-                                                :alt="ch.title"
-                                                class="chapter-card__preview"
-                                            />
-                                            <span
-                                                v-if="ch.is_completed"
-                                                class="chapter-card__badge"
-                                            >
-                                                <i class="icon-check"></i>
-                                            </span>
-                                        </div>
-                                        <h5 class="chapter-card__title">
-                                            <!-- {{ topic.id }}.{{ ch.id }} -->
-                                            {{ ch.title }}
-                                        </h5>
-                                    </a>
+                                <!-- управляемый клик, без прямого href -->
+                                <a
+                                    class="chapter-link"
+                                    href="#"
+                                    @click.prevent="openChapter(topic, ch)"
+                                >
+                                    <div class="chapter-card__preview-wrapper" :class="{ 'is-completed': ch.is_completed }">
+                                    <div v-show="ch.is_completed" class="good">
+                                        <img width="15" height="15" src="../../img/circle.png" alt="" />
+                                    </div>
+                                    <img
+                                        width="30"
+                                        height="50"
+                                        :src="getPreviewSrc(ch)"
+                                        :alt="ch.title"
+                                        class="chapter-card__preview"
+                                    />
+                                    <span v-if="ch.is_completed" class="chapter-card__badge">
+                                        <i class="icon-check"></i>
+                                    </span>
+                                    </div>
+                                    <h5 class="chapter-card__title">{{ ch.title }}</h5>
+                                </a>
                                 </li>
                             </ul>
                         </transition>
@@ -182,36 +159,52 @@ import iconTask from "../../img/task.png";
 import iconPresentation from "../../img/presentation.png";
 
 function goToFinalTest() {
-  // ведёт на маршрут, который мы создали выше
   window.location.href = `/final-test/${course.id}`;
 }
 
 const iconMap = {
-    text: iconText,
-    video: iconVideo,
-    terms: iconTerms,
-    task: iconTask,
-    presentation: iconPresentation,
+  text: iconText,
+  video: iconVideo,
+  terms: iconTerms,
+  task: iconTask,
+  presentation: iconPresentation,
 };
 
 function getPreviewSrc(chapter) {
-    // если у главы есть собственный preview, используем его
-    if (chapter.preview) return chapter.preview;
-    // иначе берём из маппинга по типу
-    return iconMap[chapter.type] || iconText; // text по умолчанию
+  if (chapter.preview) return chapter.preview;
+  return iconMap[chapter.type] || iconText; // text по умолчанию
 }
 
 dayjs.extend(relativeTime);
 dayjs.locale("ru");
 
-const openTopic = ref(null);
+// const openTopic = ref(null);
+// function toggleTopic(id) {
+//   openTopic.value = openTopic.value === id ? null : id;
+// }
+// --- многооткрывающийся аккордеон ---
+const openTopics = ref(new Set());
+
+function isTopicOpen(id) {
+  return openTopics.value.has(id);
+}
 
 function toggleTopic(id) {
-    openTopic.value = openTopic.value === id ? null : id;
+  // т.к. Set не реактивен, после изменения создаём новый Set
+  const s = new Set(openTopics.value);
+  if (s.has(id)) s.delete(id); else s.add(id);
+  openTopics.value = s;
+}
+
+// раскрыть все разделы (можно звать после загрузки тем)
+function openAllTopicsInitially() {
+  const s = new Set();
+  (topics.value || []).forEach(t => s.add(t.id));
+  openTopics.value = s;
 }
 
 /* ======================================================
-   1. Работа с курсом, темами и главами
+   1. Курс, темы, главы
 ===================================================== */
 const course = ref(window.initialCourseData || {});
 const topics = ref(course.value.topics || []);
@@ -219,746 +212,465 @@ const selectedTopic = ref(null);
 const selectedChapter = ref(null);
 
 let editorInstance = null;
-
 const showSolution = ref(false);
 
-//работа с файлами
+/* ---------- Файлы / презентации ---------- */
 const fileSrc = computed(() => {
-    const ch = selectedChapter.value;
-    if (!ch) return null;
-
-    // возможные поля, где хранится путь
-    let raw =
-        ch.file_path ||
-        ch.attachment_path ||
-        ch.presentation_path ||
-        ch.file ||
-        "";
-
-    if (!raw) return null;
-
-    // ① абсолютный URL
-    if (/^https?:\/\//i.test(raw)) return raw;
-
-    // ② начинается с /storage/
-    if (raw.startsWith("/storage/")) return raw;
-
-    // ③ начинается с storage/ (без слэша)
-    if (raw.startsWith("storage/")) return "/" + raw;
-
-    // ④ только имя файла
-    return "/storage/files/" + raw; // ← папку подберите под себя
+  const ch = selectedChapter.value;
+  if (!ch) return null;
+  let raw = ch.file_path || ch.attachment_path || ch.presentation_path || ch.file || "";
+  if (!raw) return null;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("/storage/")) return raw;
+  if (raw.startsWith("storage/")) return "/" + raw;
+  return "/storage/files/" + raw;
 });
+
 const presentationSrc = computed(() => {
-    const ch = selectedChapter.value;
-    if (!ch) return null;
-
-    let raw = ch.presentation_path || ch.presentation || ""; // все варианты
-
-    // ① Если бекенд вернул абсолютный URL («https://…») — ничего не делаем
-    if (/^https?:\/\//i.test(raw)) {
-        return raw;
-    }
-
-    // ② Если уже начинается с «/storage/» — оставляем как есть
-    if (raw.startsWith("/storage/")) {
-        return raw;
-    }
-
-    // ③ Если без ведущего слэша («storage/…») — добавляем «/»
-    if (raw.startsWith("storage/")) {
-        return "/" + raw; // → «/storage/…»
-    }
-
-    // ④ Если пришло только имя файла («my.pptx») или подпапка+имя
-    //    решаем, где у нас хранятся презентации
-    return "/storage/presentations/" + raw;
+  const ch = selectedChapter.value;
+  if (!ch) return null;
+  let raw = ch.presentation_path || ch.presentation || "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("/storage/")) return raw;
+  if (raw.startsWith("storage/")) return "/" + raw;
+  return "/storage/presentations/" + raw;
 });
 
 const presentationExt = computed(() => {
-    if (!presentationSrc.value) return "";
-    // ".pptx" или ".pdf" → "pptx" / "pdf"
-    return presentationSrc.value.split(".").pop().toLowerCase();
+  if (!presentationSrc.value) return "";
+  return presentationSrc.value.split(".").pop().toLowerCase();
 });
 
 const embeddedSrc = computed(() => {
-    if (!presentationSrc.value) return null;
-
-    // 1) PDF оставляем как есть
-    if (presentationExt.value === "pdf") {
-        return presentationSrc.value;
-    }
-
-    // 2) PPT / PPTX → Google viewer
-    if (["ppt", "pptx"].includes(presentationExt.value)) {
-        return (
-            "https://viewer.zoho.com/api/url?embed=true&url=" +
-            encodeURIComponent(location.origin + presentationSrc.value)
-        );
-        // location.origin нужен, если путь относительный (/storage/…)
-    }
-
-    // 3) Фолбэк – Office viewer (DOCX, XLSX и т.п.)
-    return (
-        "https://view.officeapps.live.com/op/embed.aspx?src=" +
-        encodeURIComponent(location.origin + presentationSrc.value)
-    );
+  if (!presentationSrc.value) return null;
+  if (presentationExt.value === "pdf") return presentationSrc.value;
+  if (["ppt", "pptx"].includes(presentationExt.value)) {
+    return "https://viewer.zoho.com/api/url?embed=true&url=" + encodeURIComponent(location.origin + presentationSrc.value);
+  }
+  return "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(location.origin + presentationSrc.value);
 });
 
 function toggleSolution() {
-    showSolution.value = !showSolution.value;
+  showSolution.value = !showSolution.value;
 }
 
 function goBack() {
-    window.location.href = "/cabinet";
+  window.location.href = "/cabinet";
 }
 function selectTopic(topic) {
-    console.log("Выбрали тему:", topic);
-    selectedTopic.value = topic;
-    selectedChapter.value = null;
-    destroyEditor();
+  selectedTopic.value = topic;
+  selectedChapter.value = null;
+  destroyEditor();
 }
-
 function deselectTopic() {
-    selectedTopic.value = null;
-    selectedChapter.value = null;
-    destroyEditor();
+  selectedTopic.value = null;
+  selectedChapter.value = null;
+  destroyEditor();
 }
-
 function selectChapter(chapter) {
-    console.log("Выбрали главу:", chapter);
-    selectedChapter.value = chapter;
+  selectedChapter.value = chapter;
 }
 
 function goToPrevChapter() {
-    if (
-        selectedTopic.value &&
-        selectedTopic.value.chapters &&
-        selectedChapter.value
-    ) {
-        const chapters = selectedTopic.value.chapters;
-        const index = chapters.findIndex(
-            (ch) => ch.id === selectedChapter.value.id
-        );
-        if (index > 0) selectChapter(chapters[index - 1]);
-    }
+  if (!selectedTopic.value || !selectedTopic.value.chapters || !selectedChapter.value) return;
+  const chapters = selectedTopic.value.chapters;
+  const index = chapters.findIndex(ch => ch.id === selectedChapter.value.id);
+  if (index > 0) selectChapter(chapters[index - 1]);
 }
 
 const showNextButton = ref(true);
-
 function goToNextChapter() {
-    // Сначала убираем кнопку плавно
-    showNextButton.value = false;
-    // Затем через задержку выполняем переход (примерно длительность анимации)
-    setTimeout(() => {
-        if (
-            selectedTopic.value &&
-            selectedTopic.value.chapters &&
-            selectedChapter.value
-        ) {
-            const chapters = selectedTopic.value.chapters;
-            const index = chapters.findIndex(
-                (ch) => ch.id === selectedChapter.value.id
-            );
-            if (index < chapters.length - 1) selectChapter(chapters[index + 1]);
-        }
-        // Опционально вернуть кнопку обратно, если она нужна для следующей главы
-        showNextButton.value = true;
-    }, 500);
+  showNextButton.value = false;
+  setTimeout(() => {
+    if (selectedTopic.value && selectedTopic.value.chapters && selectedChapter.value) {
+      const chapters = selectedTopic.value.chapters;
+      const index = chapters.findIndex(ch => ch.id === selectedChapter.value.id);
+      if (index < chapters.length - 1) selectChapter(chapters[index + 1]);
+    }
+    showNextButton.value = true;
+  }, 500);
 }
 
 const canGoPrev = computed(() => {
-    if (
-        !selectedTopic.value ||
-        !selectedTopic.value.chapters ||
-        !selectedChapter.value
-    )
-        return false;
-    const chapters = selectedTopic.value.chapters;
-    const index = chapters.findIndex(
-        (ch) => ch.id === selectedChapter.value.id
-    );
-    return index > 0;
+  if (!selectedTopic.value || !selectedTopic.value.chapters || !selectedChapter.value) return false;
+  const chapters = selectedTopic.value.chapters;
+  const index = chapters.findIndex(ch => ch.id === selectedChapter.value.id);
+  return index > 0;
 });
 const canGoNext = computed(() => {
-    if (
-        !selectedTopic.value ||
-        !selectedTopic.value.chapters ||
-        !selectedChapter.value
-    )
-        return false;
-    const chapters = selectedTopic.value.chapters;
-    const index = chapters.findIndex(
-        (ch) => ch.id === selectedChapter.value.id
-    );
-    return index < chapters.length - 1;
+  if (!selectedTopic.value || !selectedTopic.value.chapters || !selectedChapter.value) return false;
+  const chapters = selectedTopic.value.chapters;
+  const index = chapters.findIndex(ch => ch.id === selectedChapter.value.id);
+  return index < chapters.length - 1;
 });
 
+/* ---------- EditorJS ---------- */
 function destroyEditor() {
-    if (editorInstance && typeof editorInstance.destroy === "function") {
-        console.log("Уничтожаем предыдущий экземпляр Editor.js");
-        editorInstance.destroy();
-        editorInstance = null;
-    }
+  if (editorInstance && typeof editorInstance.destroy === "function") {
+    editorInstance.destroy();
+    editorInstance = null;
+  }
 }
-
 function initEditor(contentData) {
-    console.log("initEditor: пришли данные контента:", contentData);
-    destroyEditor();
-    if (typeof contentData === "string") {
-        try {
-            contentData = JSON.parse(contentData);
-            console.log("initEditor: успешно распарсили JSON:", contentData);
-        } catch (error) {
-            console.error("Ошибка парсинга JSON контента главы:", error);
-            contentData = {};
-        }
-    }
-    editorInstance = new EditorJS({
-        holder: "editorjs",
-        readOnly: true,
-        data: contentData,
-        tools: {
-            header: { class: Header, inlineToolbar: ["link"] },
-            list: { class: List, inlineToolbar: true },
-            image: {
-                class: ImageTool,
-                config: {
-                    endpoints: {
-                        byFile: "/api/uploadFile",
-                        byUrl: "/api/fetchUrl",
-                    },
-                },
-            },
-        },
-    });
-    console.log("EditorJS инициализирован в режиме read-only.");
+  destroyEditor();
+  if (typeof contentData === "string") {
+    try { contentData = JSON.parse(contentData); } catch { contentData = {}; }
+  }
+  editorInstance = new EditorJS({
+    holder: "editorjs",
+    readOnly: true,
+    data: contentData,
+    tools: {
+      header: { class: Header, inlineToolbar: ["link"] },
+      list: { class: List, inlineToolbar: true },
+      image: {
+        class: ImageTool,
+        config: { endpoints: { byFile: "/api/uploadFile", byUrl: "/api/fetchUrl" } },
+      },
+    },
+  });
 }
 
 watch(selectedChapter, (newChapter) => {
-    console.log("watch selectedChapter -> newChapter:", newChapter);
-    if (newChapter && newChapter.content) {
-        console.log(
-            "Тип главы:",
-            newChapter.type,
-            "Содержимое content:",
-            newChapter.content
-        );
-        if (
-            ["text", "task", "terms", "presentation"].includes(newChapter.type)
-        ) {
-            initEditor(newChapter.content);
-        } else if (newChapter.type === "video") {
-            console.log(
-                "Глава с видео. Editor.js не нужен, уничтожаем экземпляр."
-            );
-            destroyEditor();
-        } else {
-            console.warn(
-                "Неизвестный тип главы:",
-                newChapter.type,
-                "— уничтожаем Editor.js."
-            );
-            destroyEditor();
-        }
+  if (newChapter && newChapter.content) {
+    if (["text", "task", "terms", "presentation"].includes(newChapter.type)) {
+      initEditor(newChapter.content);
+    } else if (newChapter.type === "video") {
+      destroyEditor();
     } else {
-        console.log(
-            "Глава не выбрана или нет поля content. Уничтожаем Editor.js."
-        );
-        destroyEditor();
+      destroyEditor();
     }
+  } else {
+    destroyEditor();
+  }
 });
 
 /* ======================================================
-   2. Комментарии для курса
+   2. Комментарии
 ===================================================== */
 const courseComments = ref([]);
 const newComment = ref("");
 const replyTo = ref(null);
 const replyComment = ref("");
 const currentUserName = ref("Аноним");
-
-// Делаем courseId реактивной переменной
 const courseId = ref(null);
 
-function formatTime(dateString) {
-    return dayjs(dateString).fromNow();
-}
+function formatTime(dateString) { return dayjs(dateString).fromNow(); }
 
 async function loadCourseComments() {
-    try {
-        const response = await axios.get(
-            `/api/courses/${courseId.value}/comments`
-        );
-        courseComments.value = response.data;
-    } catch (error) {
-        console.error("Ошибка при загрузке комментариев:", error);
-    }
+  try {
+    const { data } = await axios.get(`/api/courses/${courseId.value}/comments`);
+    courseComments.value = data;
+  } catch (e) {
+    console.error("Ошибка при загрузке комментариев:", e);
+  }
 }
 
 async function submitComment() {
-    if (!newComment.value.trim()) return;
-    try {
-        // Формируем payload для комментария
-        const payload = { body: newComment.value };
-
-        // Извлекаем данные пользователя из localStorage, если они есть
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            if (parsedUser && parsedUser.id) {
-                payload.user_id = parsedUser.id;
-            }
-        }
-        const response = await axios.post(
-            `/api/courses/${courseId.value}/comments`,
-            payload
-        );
-        if (courseComments.value) {
-            courseComments.value.push(response.data);
-        } else {
-            courseComments.value = [response.data];
-        }
-        newComment.value = "";
-    } catch (error) {
-        console.error("Ошибка при отправке комментария:", error);
+  if (!newComment.value.trim()) return;
+  try {
+    const payload = { body: newComment.value };
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const u = JSON.parse(storedUser);
+      if (u?.id) payload.user_id = u.id;
     }
+    const { data } = await axios.post(`/api/courses/${courseId.value}/comments`, payload);
+    (courseComments.value || (courseComments.value = [])).push(data);
+    newComment.value = "";
+  } catch (e) {
+    console.error("Ошибка при отправке комментария:", e);
+  }
 }
 
-function replyToComment(comment) {
-    replyTo.value = comment.id;
-    replyComment.value = "";
-}
+function replyToComment(comment) { replyTo.value = comment.id; replyComment.value = ""; }
 
 async function submitReply(parentComment) {
-    if (!replyComment.value.trim()) return;
-    try {
-        const payload = {
-            body: replyComment.value,
-            parent_id: parentComment.id,
-        };
-        // Также добавляем данные пользователя, если они есть
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            if (parsedUser && parsedUser.id) {
-                payload.user_id = parsedUser.id;
-            }
-            if (parsedUser && parsedUser.name) {
-                payload.user_name = parsedUser.name;
-            }
-        }
-        const response = await axios.post(
-            `/api/courses/${courseId.value}/comments`,
-            payload
-        );
-        if (!parentComment.children) {
-            parentComment.children = [];
-        }
-        parentComment.children.push(response.data);
-        replyComment.value = "";
-        replyTo.value = null;
-    } catch (error) {
-        console.error("Ошибка при отправке ответа:", error);
+  if (!replyComment.value.trim()) return;
+  try {
+    const payload = { body: replyComment.value, parent_id: parentComment.id };
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const u = JSON.parse(storedUser);
+      if (u?.id) payload.user_id = u.id;
+      if (u?.name) payload.user_name = u.name;
     }
+    const { data } = await axios.post(`/api/courses/${courseId.value}/comments`, payload);
+    if (!parentComment.children) parentComment.children = [];
+    parentComment.children.push(data);
+    replyComment.value = ""; replyTo.value = null;
+  } catch (e) {
+    console.error("Ошибка при отправке ответа:", e);
+  }
 }
+function cancelReply() { replyComment.value = ""; replyTo.value = null; }
 
-function cancelReply() {
-    replyComment.value = "";
-    replyTo.value = null;
-}
-//прогресс
+/* ======================================================
+   3. Прогресс / тест / сертификат
+===================================================== */
 const progressPercentage = computed(() => {
-  let totalChapters = 0;
-  let completedChapters = 0;
-
-  topics.value.forEach((topic) => {
-    topic.chapters.forEach((ch) => {
-      totalChapters++;
-      if (ch.is_completed) completedChapters++;
-    });
-  });
-
-  return totalChapters
-    ? Math.round((completedChapters / totalChapters) * 100)
-    : 0;
+  let total = 0, done = 0;
+  topics.value.forEach(t => t.chapters.forEach(ch => { total++; if (ch.is_completed) done++; }));
+  return total ? Math.round((done / total) * 100) : 0;
 });
+const allChaptersCompleted = computed(() => progressPercentage.value === 100);
+const testPassed = ref(false);
+const certificateUnlocked = computed(() => allChaptersCompleted.value && testPassed.value);
 
-// 1) Главы закрыты? (все баллы набраны)
-const allChaptersCompleted = computed(() => progressPercentage.value === 100)
-
-// 2) Сдал ли пользователь итоговый тест
-const testPassed = ref(false)   // ← загрузим с бэка чуть ниже
-
-// 3) Сертификат доступен, когда пройдено всё + тест сдан
-const certificateUnlocked = computed(
-  () => allChaptersCompleted.value && testPassed.value
-)
-
-// 2) Идентификатор курса — либо из route params, либо из localStorage
-
-/* -------------------------------------------------
-   2. Достаём пользователя из localStorage
-   localStorage.setItem('user', JSON.stringify({id: 2, name: 'Иванов Иван'}))
---------------------------------------------------*/
 function getStoredUser() {
-    try {
-        return JSON.parse(localStorage.getItem("user") || "{}");
-    } catch (e) {
-        console.error("Не смог распарсить user из localStorage", e);
-        return {};
-    }
+  try { return JSON.parse(localStorage.getItem("user") || "{}"); }
+  catch { return {}; }
 }
 const stordUser = getStoredUser();
 
-/* -------------------------------------------------
-   3. Получаем id курса из URL
-      – ?course=42         -> 42
-      – /courses/42        -> 42
---------------------------------------------------*/
 function getCourseIdFromUrl() {
-    const url = new URL(window.location.href);
-
-    // 3.1 сначала ищем query-param
-    if (url.searchParams.has("course")) {
-        return url.searchParams.get("course");
-    }
-
-    // 3.2 иначе берём последнюю цифру в pathname
-    const match = url.pathname.match(/(\d+)(?!.*\d)/);
-    return match ? match[1] : null;
+  const url = new URL(window.location.href);
+  if (url.searchParams.has("course")) return url.searchParams.get("course");
+  const match = url.pathname.match(/(\d+)(?!.*\d)/);
+  return match ? match[1] : null;
 }
 const coursId = getCourseIdFromUrl();
 
-/* -------------------------------------------------
-   4. Клик по кнопке = обращение к API и скачивание
---------------------------------------------------*/
 async function downloadCertificate() {
-    if (!certificateUnlocked) return;
-
-    if (!stordUser.id || !stordUser.name) {
-        return alert("В localStorage нет данных пользователя");
-    }
-    if (!coursId) {
-        return alert("Не удалось определить ID курса из URL");
-    }
-
-    try {
-        const response = await axios.post(
-            `/api/courses/${coursId}/certificate`,
-            {
-                user_id: stordUser.id,
-                name: stordUser.name,
-                // Передавать название курса не нужно —
-                // бэкенд найдёт его по id. Если хотите —
-                // передайте отдельным полем.
-            },
-            { responseType: "blob" }
-        );
-
-        // Сохранить PDF
-        const blob = new Blob([response.data], { type: "application/pdf" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `certificate_${stordUser.id}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-    } catch (e) {
-        console.error(e);
-        alert("Ошибка при генерации сертификата");
-    }
+  if (!certificateUnlocked.value) return;
+  if (!stordUser.id || !stordUser.name) return alert("В localStorage нет данных пользователя");
+  if (!coursId) return alert("Не удалось определить ID курса из URL");
+  try {
+    const resp = await axios.post(`/api/courses/${coursId}/certificate`, { user_id: stordUser.id, name: stordUser.name }, { responseType: "blob" });
+    const blob = new Blob([resp.data], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `certificate_${stordUser.id}.pdf`; a.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.error(e); alert("Ошибка при генерации сертификата");
+  }
 }
 
-const storedUser = JSON.parse(localStorage.getItem("user"));
+const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 async function markChapterCompleted(chapter) {
-    if (chapter.is_completed) return;
-    try {
-        await axios.post(`/api/chapters/${chapter.id}/complete`, {
-            user_id: storedUser.id,
-        });
-
-        // 1. Вариант: прямо изменить у выбранной главы
-        chapter.is_completed = true;
-
-        // 2. Дополнительно найти эту главу внутри topics.value и проставить is_completed = true,
-        //    чтобы, если пользователь переключится между главами, данные были согласованы.
-        topics.value.forEach((topic) => {
-            topic.chapters.forEach((ch) => {
-                if (ch.id === chapter.id) {
-                    ch.is_completed = true;
-                }
-            });
-        });
-
-        console.log(`Глава ${chapter.id} отмечена как пройденная`);
-        console.log("После отметки: is_completed =", chapter.is_completed);
-    } catch (error) {
-        console.error("Ошибка при завершении главы:", error);
-    }
+  if (chapter.is_completed) return;
+  try {
+    await axios.post(`/api/chapters/${chapter.id}/complete`, { user_id: storedUser.id });
+    chapter.is_completed = true;
+    topics.value.forEach(t => t.chapters.forEach(ch => { if (ch.id === chapter.id) ch.is_completed = true; }));
+  } catch (e) {
+    console.error("Ошибка при завершении главы:", e);
+  }
 }
 
 /* ======================================================
-   3. Прочие данные: FAQ, курсы для повышения квалификации и маппинг сложности
+   4. Разблокировки: разделы и главы
+===================================================== */
+/** Индекс раздела */
+function topicIndex(topic) {
+  return topics.value.findIndex(t => t.id === topic.id);
+}
+/** Все главы в разделе завершены? */
+function isTopicFullyCompleted(topic) {
+  if (!topic || !Array.isArray(topic.chapters)) return false;
+  return topic.chapters.every(ch => !!ch.is_completed);
+}
+/** Можно раскрыть раздел?
+ *   - первый раздел — да
+ *   - иначе все предыдущие разделы должны быть полностью завершены
+ */
+function isTopicUnlocked(topic) {
+  const idx = topicIndex(topic);
+  if (idx <= 0) return true;
+  for (let i = 0; i < idx; i++) {
+    if (!isTopicFullyCompleted(topics.value[i])) return false;
+  }
+  return true;
+}
+/** Можно открыть главу?
+ *   - раздел разблокирован
+ *   - все предыдущие главы в разделе завершены
+ */
+// function isChapterUnlocked(topic, chapter) {
+//   if (!isTopicUnlocked(topic)) return false;
+//   const list = topic.chapters || [];
+//   const idx = list.findIndex(ch => ch.id === chapter.id);
+//   if (idx <= 0) return true;
+//   for (let i = 0; i < idx; i++) {
+//     if (!list[i].is_completed) return false;
+//   }
+//   return true;
+// }
+/** Безопасное раскрытие раздела */
+function toggleTopicSafe(topic) {
+  if (!isTopicUnlocked(topic)) {
+    alert("Сначала пройдите все главы в предыдущих разделах.");
+    return;
+  }
+  toggleTopic(topic.id);
+}
+/** Переход к главе */
+function openChapter(topic, chapter) {
+//   if (!isChapterUnlocked(topic, chapter)) {
+//     alert("Сначала завершите предыдущие главы в этом разделе.");
+//     return;
+//   }
+  window.location.href = `/chapter/${chapter.id}`;
+}
+
+/* ======================================================
+   5. FAQ, другие курсы
 ===================================================== */
 const faqQuestions = ref([]);
 async function loadFaqs() {
-    try {
-        const response = await axios.get("/api/faqs");
-        console.log("Полученные FAQ:", response.data);
-        faqQuestions.value = response.data.map((item) => ({
-            ...item,
-            isOpen: false,
-        }));
-    } catch (error) {
-        console.error("Ошибка при загрузке FAQ:", error);
-    }
+  try {
+    const { data } = await axios.get("/api/faqs");
+    faqQuestions.value = data.map(item => ({ ...item, isOpen: false }));
+  } catch (e) {
+    console.error("Ошибка при загрузке FAQ:", e);
+  }
 }
 
 const allCourses = ref([]);
-const upgradeCourses = computed(() => {
-    return allCourses.value.filter((c) => c.upgradequalification === 1);
-});
+const upgradeCourses = computed(() => allCourses.value.filter(c => c.upgradequalification === 1));
 async function loadCourses() {
-    try {
-        const response = await axios.get("/api/courses");
-        allCourses.value = response.data;
-    } catch (error) {
-        console.error("Ошибка при загрузке курсов:", error);
-    }
+  try {
+    const { data } = await axios.get("/api/courses");
+    allCourses.value = data;
+  } catch (e) {
+    console.error("Ошибка при загрузке курсов:", e);
+  }
 }
 
 const difficultyBgClass = {
-    basic: "block-info_bg-cyan",
-    middle: "block-info_bg-fiolet",
-    advanced: "block-info_bg-orange",
-    mixed: "block-info_bg-green",
+  basic: "block-info_bg-cyan",
+  middle: "block-info_bg-fiolet",
+  advanced: "block-info_bg-orange",
+  mixed: "block-info_bg-green",
 };
 const difficultyTranslation = {
-    basic: "Начинающий",
-    middle: "Средний",
-    advanced: "Продвинутый",
-    mixed: "Смешанный",
+  basic: "Начинающий",
+  middle: "Средний",
+  advanced: "Продвинутый",
+  mixed: "Смешанный",
 };
 
 /* ======================================================
-   4. onMounted – загрузка всех данных
+   6. onMounted
 ===================================================== */
-onMounted( async() => {
-    // Если course.value.id уже есть, используем его:
-    if (course.value.id) {
-        courseId.value = course.value.id;
-        console.log("Курс уже есть, id =", courseId.value);
-    } else {
-        // Если нет, пытаемся извлечь из URL
-        const parts = window.location.pathname.split("/");
-        const courseIdFromUrl = parts[parts.length - 1];
-        console.log("onMounted: извлекли courseId:", courseIdFromUrl);
-        courseId.value = courseIdFromUrl; // при необходимости можно parseInt
+onMounted(async () => {
+  if (course.value.id) {
+    courseId.value = course.value.id;
+  } else {
+    const parts = window.location.pathname.split("/");
+    const courseIdFromUrl = parts[parts.length - 1];
+    courseId.value = courseIdFromUrl;
 
-        // Дополнительно подгружаем темы
-        axios
-            .get(`/api/course/${courseIdFromUrl}/topics`, {
-                params: { user_id: storedUser.id },
-            })
-            .then((response) => {
-                topics.value = (response.data.topics || []).sort((a, b) => {
-                    // Сортируем сами темы
-                    return new Date(a.created_at) - new Date(b.created_at);
-                });
+    axios
+      .get(`/api/course/${courseIdFromUrl}/topics`, { params: { user_id: storedUser.id } })
+      .then((response) => {
+        topics.value = (response.data.topics || []).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        topics.value.forEach((topic) => {
+          topic.chapters.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        });
+        topics.value.forEach((topic) => {
+          topic.chapters.forEach((chapter) => {
+            if (typeof chapter.is_completed === "undefined") chapter.is_completed = false;
+          });
+        });
+        course.value = response.data.course || {};
+      })
+      .catch((error) => console.error("Ошибка при загрузке тем курса:", error));
+  }
 
-                // Теперь сортируем главы в каждой теме
-                topics.value.forEach((topic) => {
-                    topic.chapters.sort((a, b) => {
-                        return new Date(a.created_at) - new Date(b.created_at);
-                    });
-                });
+  loadCourseComments();
+  loadFaqs();
+  loadCourses();
 
-                // Гарантируем, что каждая глава имеет свойство is_completed
-                topics.value.forEach((topic) => {
-                    topic.chapters.forEach((chapter) => {
-                        if (typeof chapter.is_completed === "undefined") {
-                            chapter.is_completed = false;
-                        }
-                    });
-                });
-
-                course.value = response.data.course || {};
-            })
-            .catch((error) =>
-                console.error("Ошибка при загрузке тем курса:", error)
-            );
+  if (storedUser.id && courseId.value) {
+    try {
+      const { data } = await axios.get("/api/final-test/status", { params: { user_id: storedUser.id, course_id: courseId.value } });
+      testPassed.value = !!data.passed;
+    } catch (e) {
+      console.warn("Не удалось получить статус теста", e);
     }
-
-    loadCourseComments();
-    loadFaqs();
-    loadCourses();
-    if (storedUser.id && courseId.value) {
-        try {
-        const { data } = await axios.get(
-            '/api/final-test/status',
-            { params: { user_id: storedUser.id, course_id: courseId.value } }
-        )
-        testPassed.value = !!data.passed
-        } catch (e) {
-        console.warn('Не удалось получить статус теста', e)
-        }
-    }
+  }
 });
 
 /* ======================================================
-   5. Лайки и дизлайки
+   7. Лайки / дизлайки
 ===================================================== */
-// userVotes хранит текущее состояние голосов пользователя
 const userVotes = ref({});
-
-// Поиск комментария по ID в дереве при помощи BFS (без рекурсии).
-function findCommentByIdInTree(commentId, commentsArray) {
-    const queue = [...commentsArray];
-    while (queue.length > 0) {
-        const comment = queue.shift();
-        if (comment.id === commentId) {
-            return comment;
-        }
-        if (comment.children && comment.children.length > 0) {
-            queue.push(...comment.children);
-        }
-    }
-    return null;
+function findCommentByIdInTree(id, arr) {
+  const q = [...arr];
+  while (q.length) {
+    const c = q.shift();
+    if (c.id === id) return c;
+    if (c.children?.length) q.push(...c.children);
+  }
+  return null;
 }
-
-// Функция для оптимистичного обновления поля (likes или dislikes) в одном комментарии.
-function updateLocalCommentOptimistic(commentId, field, delta) {
-    const target = findCommentByIdInTree(commentId, courseComments.value);
-    if (target) {
-        if (typeof target[field] !== "number") {
-            target[field] = 0;
-        }
-        target[field] += delta;
-        console.log(
-            `Комментарий ${commentId}: поле ${field} изменено на ${delta}, теперь = ${target[field]}`
-        );
-    }
+function updateLocalCommentOptimistic(id, field, delta) {
+  const t = findCommentByIdInTree(id, courseComments.value || []);
+  if (!t) return;
+  if (typeof t[field] !== "number") t[field] = 0;
+  t[field] += delta;
 }
-
-// Функция для сохранения голосов в localStorage
 function saveUserVotes() {
-    localStorage.setItem("userVotes", JSON.stringify(userVotes.value));
+  localStorage.setItem("userVotes", JSON.stringify(userVotes.value));
 }
-
-// Функция для установки лайка
 async function likeComment(comment) {
-    const prevVote = userVotes.value[comment.id];
-
-    // Если уже стоит "like", то отменяем
-    if (prevVote === "like") {
-        updateLocalCommentOptimistic(comment.id, "likes", -1);
-        try {
-            await axios.post(
-                `/api/courses/${courseId.value}/comments/${comment.id}/unlike`
-            );
-            userVotes.value[comment.id] = undefined;
-            console.log("Лайк отменён");
-        } catch (error) {
-            console.error("Ошибка при отмене лайка:", error);
-            updateLocalCommentOptimistic(comment.id, "likes", 1); // откат
-        }
+  const prev = userVotes.value[comment.id];
+  if (prev === "like") {
+    updateLocalCommentOptimistic(comment.id, "likes", -1);
+    try { await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/unlike`); userVotes.value[comment.id] = undefined; }
+    catch { updateLocalCommentOptimistic(comment.id, "likes", 1); }
+  } else if (prev === "dislike") {
+    updateLocalCommentOptimistic(comment.id, "dislikes", -1);
+    updateLocalCommentOptimistic(comment.id, "likes", 1);
+    try {
+      await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/undislike`);
+      await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/like`);
+      userVotes.value[comment.id] = "like";
+    } catch {
+      updateLocalCommentOptimistic(comment.id, "dislikes", 1);
+      updateLocalCommentOptimistic(comment.id, "likes", -1);
     }
-    // Если стоит "dislike", снимаем дизлайк и ставим лайк
-    else if (prevVote === "dislike") {
-        updateLocalCommentOptimistic(comment.id, "dislikes", -1);
-        updateLocalCommentOptimistic(comment.id, "likes", 1);
-        try {
-            await axios.post(
-                `/api/courses/${courseId.value}/comments/${comment.id}/undislike`
-            );
-            await axios.post(
-                `/api/courses/${courseId.value}/comments/${comment.id}/like`
-            );
-            userVotes.value[comment.id] = "like";
-            console.log("Переключили с дизлайка на лайк");
-        } catch (error) {
-            console.error("Ошибка при переключении с дизлайка на лайк:", error);
-            // откат
-            updateLocalCommentOptimistic(comment.id, "dislikes", 1);
-            updateLocalCommentOptimistic(comment.id, "likes", -1);
-        }
-    }
-    // Если голос не был поставлен, ставим лайк
-    else {
-        updateLocalCommentOptimistic(comment.id, "likes", 1);
-        try {
-            await axios.post(
-                `/api/courses/${courseId.value}/comments/${comment.id}/like`
-            );
-            userVotes.value[comment.id] = "like";
-            console.log("Лайк поставлен");
-        } catch (error) {
-            console.error("Ошибка при лайке комментария:", error);
-            updateLocalCommentOptimistic(comment.id, "likes", -1); // откат
-        }
-    }
-    saveUserVotes();
+  } else {
+    updateLocalCommentOptimistic(comment.id, "likes", 1);
+    try { await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/like`); userVotes.value[comment.id] = "like"; }
+    catch { updateLocalCommentOptimistic(comment.id, "likes", -1); }
+  }
+  saveUserVotes();
 }
-
-// Функция для установки дизлайка
 async function dislikeComment(comment) {
-    const prevVote = userVotes.value[comment.id];
-
-    // Если уже стоит "dislike", то отменяем
-    if (prevVote === "dislike") {
-        updateLocalCommentOptimistic(comment.id, "dislikes", -1);
-        try {
-            await axios.post(
-                `/api/courses/${courseId.value}/comments/${comment.id}/undislike`
-            );
-            userVotes.value[comment.id] = undefined;
-            console.log("Дизлайк отменён");
-        } catch (error) {
-            console.error("Ошибка при отмене дизлайка:", error);
-            updateLocalCommentOptimistic(comment.id, "dislikes", 1); // откат
-        }
+  const prev = userVotes.value[comment.id];
+  if (prev === "dislike") {
+    updateLocalCommentOptimistic(comment.id, "dislikes", -1);
+    try { await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/undislike`); userVotes.value[comment.id] = undefined; }
+    catch { updateLocalCommentOptimistic(comment.id, "dislikes", 1); }
+  } else if (prev === "like") {
+    updateLocalCommentOptimistic(comment.id, "likes", -1);
+    updateLocalCommentOptimistic(comment.id, "dislikes", 1);
+    try {
+      await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/unlike`);
+      await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/dislike`);
+      userVotes.value[comment.id] = "dislike";
+    } catch {
+      updateLocalCommentOptimistic(comment.id, "likes", 1);
+      updateLocalCommentOptimistic(comment.id, "dislikes", -1);
     }
-    // Если стоит "like", то снимаем лайк и ставим дизлайк
-    else if (prevVote === "like") {
-        updateLocalCommentOptimistic(comment.id, "likes", -1);
-        updateLocalCommentOptimistic(comment.id, "dislikes", 1);
-        try {
-            await axios.post(
-                `/api/courses/${courseId.value}/comments/${comment.id}/unlike`
-            );
-            await axios.post(
-                `/api/courses/${courseId.value}/comments/${comment.id}/dislike`
-            );
-            userVotes.value[comment.id] = "dislike";
-            console.log("Переключили с лайка на дизлайк");
-        } catch (error) {
-            console.error("Ошибка при переключении с лайка на дизлайк:", error);
-            // откат
-            updateLocalCommentOptimistic(comment.id, "likes", 1);
-            updateLocalCommentOptimistic(comment.id, "dislikes", -1);
-        }
-    }
-    // Если голос не был поставлен, просто ставим дизлайк
-    else {
-        updateLocalCommentOptimistic(comment.id, "dislikes", 1);
-        try {
-            await axios.post(
-                `/api/courses/${courseId.value}/comments/${comment.id}/dislike`
-            );
-            userVotes.value[comment.id] = "dislike";
-            console.log("Дизлайк поставлен");
-        } catch (error) {
-            console.error("Ошибка при дизлайке комментария:", error);
-            updateLocalCommentOptimistic(comment.id, "dislikes", -1); // откат
-        }
-    }
-    saveUserVotes();
-    console.log(selectedChapter);
+  } else {
+    updateLocalCommentOptimistic(comment.id, "dislikes", 1);
+    try { await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/dislike`); userVotes.value[comment.id] = "dislike"; }
+    catch { updateLocalCommentOptimistic(comment.id, "dislikes", -1); }
+  }
+  saveUserVotes();
 }
 </script>
 
+
 <style scoped>
+/* стили для блокировки модуля*/
+.topic__header.is-locked { opacity: .6; cursor: not-allowed; }
+.chapter-link--locked    { pointer-events: none; opacity: .6; cursor: not-allowed; }
+.chapter-card.is-locked .chapter-card__preview-wrapper { filter: grayscale(1); }
+
 .test-passed-message{
     display: flex;
     justify-content: center;

@@ -63,79 +63,91 @@
                 ></div>
 
                 <!-- Итоговый тест -->
-                <!-- Итоговый тест -->
                 <div v-if="quizData" class="final-quiz mb-5">
-                    <form @submit.prevent="submitQuiz" class="test__course">
-                        <div
-                            v-for="q in quizData.questions"
-                            :key="q.id"
-                            class="card mb-3"
-                        >
-                            <div class="card-body">
-                                <!-- Вопрос -->
-                                <h5 class="card-title">
-                                    {{ q.id }}. {{ q.prompt }}
-                                </h5>
+                <form @submit.prevent="submitQuiz" class="test__course">
+                    <div v-for="q in quizData.questions" :key="q.id" class="card mb-3">
+                    <div class="card-body">
+                        <!-- вопрос -->
+                        <h5 class="card-title">{{ q.id }}. {{ q.prompt }}</h5>
 
-                                <!-- Варианты ответа -->
-                                <div class="quiz-options mt-3">
-                                    <div
-                                        v-for="(opt, i) in q.options"
-                                        :key="i"
-                                        class="form-check"
-                                    >
-                                        <!-- Радио для single -->
-                                        <input
-                                            v-if="q.type === 'single'"
-                                            class="form-check-input quiz-input"
-                                            type="radio"
-                                            :name="'q' + q.id"
-                                            :id="'q' + q.id + '_' + i"
-                                            v-model="userAnswers[q.id]"
-                                            :value="i"
-                                            required
-                                        />
-                                        <!-- Чекбокс для multiple -->
-                                        <input
-                                            v-else
-                                            class="form-check-input quiz-input"
-                                            type="checkbox"
-                                            :name="'q' + q.id"
-                                            :id="'q' + q.id + '_' + i"
-                                            v-model="userAnswers[q.id]"
-                                            :value="i"
-                                        />
-                                        <label
-                                            class="form-check-label"
-                                            :for="'q' + q.id + '_' + i"
-                                        >
-                                            {{ opt }}
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- SINGLE / MULTIPLE -->
+                        <div v-if="q.type === 'single' || q.type === 'multiple'" class="quiz-options mt-3">
+                        <div v-for="(opt, i) in q.options" :key="i" class="form-check">
+                            <!-- Радио -->
+                            <input
+                            v-if="q.type === 'single'"
+                            class="form-check-input quiz-input"
+                            type="radio"
+                            :name="'q' + q.id"
+                            :id="'q' + q.id + '_' + i"
+                            v-model="userAnswers[q.id]"
+                            :value="i"
+                            required
+                            />
+                            <!-- Чекбокс -->
+                            <input
+                            v-else
+                            class="form-check-input quiz-input"
+                            type="checkbox"
+                            :name="'q' + q.id"
+                            :id="'q' + q.id + '_' + i"
+                            v-model="userAnswers[q.id]"
+                            :value="i"
+                            />
+                            <label class="form-check-label" :for="'q' + q.id + '_' + i">
+                            {{ opt }}
+                            </label>
+                        </div>
                         </div>
 
-                        <button type="submit" class="button button--sub">
-                            Проверить тест
-                        </button>
-                    </form>
+                        <!-- SHORT -->
+                        <div v-else-if="q.type === 'short'" class="mt-3">
+                        <input
+                            type="text"
+                            class="form-control"
+                            v-model="userAnswers[q.id]"
+                            :placeholder="'Ваш ответ...'"
+                        />
+                        </div>
 
-                    <div
-                        v-if="quizResult"
-                        class="alert alert-info mt-4"
-                        role="alert"
-                    >
-                        <h4 class="alert-heading">
-                            Ваш результат: {{ quizResult.score }}%
-                        </h4>
-                        <p>
-                            Правильно: {{ quizResult.correctCount }} из
-                            {{ quizResult.total }}
-                        </p>
+                        <!-- IMAGE_SELECT -->
+                        <div v-else-if="q.type === 'image_select'" class="mt-3">
+                        <div
+                            v-for="(item, idx) in (q.items || [])"
+                            :key="idx"
+                            class="imgsel-row"
+                        >
+                            <img
+                            class="imgsel-image"
+                            :src="item.image"
+                            alt=""
+                            />
+                            <select
+                            class="form-select"
+                            v-model.number="userAnswers[q.id][idx]"
+                            >
+                            <option disabled :value="null">Выберите...</option>
+                            <option v-for="(opt, oi) in (item.options || [])" :key="oi" :value="oi">
+                                {{ opt }}
+                            </option>
+                            </select>
+                        </div>
+                        </div>
+
+
+                        <!-- Fallback (на всякий случай) -->
+                        <div v-else class="text-muted">Тип вопроса не поддержан.</div>
                     </div>
-                </div>
+                    </div>
 
+                    <button type="submit" class="button button--sub">Проверить тест</button>
+                </form>
+
+                <div v-if="quizResult" class="alert alert-info mt-4" role="alert">
+                    <h4 class="alert-heading">Ваш результат: {{ quizResult.score }}%</h4>
+                    <p>Правильно: {{ quizResult.correctCount }} из {{ quizResult.total }}</p>
+                </div>
+                </div>
                 <!-- Модальное окно -->
                 <div
                     v-if="showModal"
@@ -294,6 +306,7 @@ const typeLabel = computed(() => {
     case "video":        return "Видео материал";
     case "task":         return "Практическая работа";
     case "terms":        return "Лабораторная работа";
+    case "text":         return "Текстовый материал";
     case "presentation": return "Тест";
     default:             return chapter.value?.type || "";
   }
@@ -306,20 +319,49 @@ const quizResult  = ref(null);
 
 function submitQuiz() {
   if (!quizData.value) return;
+
   const qs = quizData.value.questions;
   let correctCount = 0;
+
   qs.forEach((q) => {
     const ua = userAnswers[q.id];
-    if (q.type === "single" && ua === q.answer) correctCount++;
-    else if (q.type === "multiple" && Array.isArray(ua) &&
-             ua.sort().toString() === q.answer.sort().toString()) correctCount++;
+
+    if (q.type === "single") {
+      if (ua === q.answer) correctCount++;
+      return;
+    }
+
+    if (q.type === "multiple") {
+      const a = Array.isArray(ua) ? [...ua].sort() : [];
+      const b = Array.isArray(q.answer) ? [...q.answer].sort() : [];
+      if (a.length === b.length && a.every((v, i) => v === b[i])) correctCount++;
+      return;
+    }
+
+    if (q.type === "short") {
+      const left  = (ua ?? "").toString().trim().toLowerCase();
+      const right = (q.answer ?? "").toString().trim().toLowerCase();
+      if (left && left === right) correctCount++;
+      return;
+    }
+
+    if (q.type === "image_select") {
+      const items = Array.isArray(q.items) ? q.items : [];
+      const user = Array.isArray(ua) ? ua : [];
+      const ok = items.length > 0
+        && items.every((it, idx) => user[idx] === it.answer);
+      if (ok) correctCount++;
+      return;
+    }
   });
+
   quizResult.value = {
-    score: Math.round((correctCount / qs.length) * 100),
+    score: qs.length ? Math.round((correctCount / qs.length) * 100) : 0,
     correctCount,
     total: qs.length,
   };
 }
+
 
 /* ---------- Пользователь ---------- */
 const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -397,25 +439,42 @@ async function fetchChapter() {
     chapter.value = data;
 
     if (chapter.value.type === quizType && chapter.value.content) {
-      const raw = typeof chapter.value.content === "string"
-        ? JSON.parse(chapter.value.content)
-        : chapter.value.content;
-      let quizBlockData = null;
-      if (Array.isArray(raw.blocks)) {
-        const quizBlock = raw.blocks.find((b) => b.type === "quiz");
-        quizBlockData = quizBlock?.data || null;
-      }
-      if (quizBlockData && Array.isArray(quizBlockData.questions)) {
-        quizBlockData.questions.forEach((q) => {
-          if (q.type === 0 || q.type === "one") q.type = "single";
-          if (q.type === 1 || q.type === "many") q.type = "multiple";
-          userAnswers[q.id] = q.type === "single" ? null : [];
-        });
-        quizData.value = quizBlockData;
-      } else {
-        quizData.value = null;
-      }
+  const raw = typeof chapter.value.content === "string"
+    ? JSON.parse(chapter.value.content)
+    : chapter.value.content;
+
+  let quizBlockData = null;
+  if (Array.isArray(raw.blocks)) {
+    const quizBlock = raw.blocks.find((b) => b.type === "quiz");
+    quizBlockData = quizBlock?.data || null;
+  }
+
+  if (quizBlockData && Array.isArray(quizBlockData.questions)) {
+  quizBlockData.questions.forEach((q) => {
+    if (q.type === 0 || q.type === "one") q.type = "single";
+    if (q.type === 1 || q.type === "many") q.type = "multiple";
+
+    if (q.type === "single") {
+      userAnswers[q.id] = null;
+    } else if (q.type === "multiple") {
+      userAnswers[q.id] = [];
+    } else if (q.type === "short") {
+      userAnswers[q.id] = "";
+    } else if (q.type === "image_select") {
+      if (!Array.isArray(q.items)) q.items = [];
+      // просто создаём массив ответов нужной длины
+      userAnswers[q.id] = Array(q.items.length).fill(null);
+      // ВАЖНО: НИКАК не меняем q.items[i].image — там уже https URL
     }
+  });
+
+  quizData.value = quizBlockData;
+} else {
+  quizData.value = null;
+}
+
+}
+
   } catch (err) {
     console.error(err);
     alert("Не удалось загрузить главу");
@@ -541,10 +600,169 @@ async function markChapterCompleted(ch) {
 onMounted(fetchChapter);
 </script>
 
-
-
 <style scoped>
+    .final-quiz {
+  display: block;
+  margin-top: 12px;
+}
 
+/* Сетка формы */
+.test__course {
+  display: grid;
+  gap: 18px;
+}
+
+/* Карточка вопроса */
+.card {
+  background: var(--quiz-bg);
+  border: 1px solid var(--quiz-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(17, 24, 39, 0.05);
+}
+.card-body {
+  padding: 16px 18px;
+}
+.card-title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--quiz-text);
+}
+
+/* Варианты (single/multiple) */
+.quiz-options {
+  display: grid;
+  gap: 10px;
+}
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--quiz-border);
+  border-radius: 10px;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.form-check:hover {
+  border-color: var(--quiz-accent);
+  box-shadow: 0 0 0 3px rgba(76, 125, 255, 0.12);
+}
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  /* современная подсветка выбранного */
+  accent-color: var(--quiz-accent);
+}
+.form-check-label {
+  line-height: 1.35;
+}
+/* выделяем выбранный вариант */
+.form-check-input:checked + .form-check-label {
+  font-weight: 600;
+}
+
+/* Поле короткого ответа */
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--quiz-border);
+  border-radius: 10px;
+  outline: none;
+}
+.form-control:focus {
+  border-color: var(--quiz-accent);
+  box-shadow: 0 0 0 3px rgba(76, 125, 255, 0.12);
+}
+
+/* ====== IMAGE_SELECT ====== */
+.imgsel-row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--quiz-border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.imgsel-image {
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+.form-select {
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--quiz-border);
+  border-radius: 10px;
+  outline: none;
+}
+.form-select:focus {
+  border-color: var(--quiz-accent);
+  box-shadow: 0 0 0 3px rgba(76, 125, 255, 0.12);
+}
+
+/* Кнопка «Проверить тест» — подгоним под твою button--sub */
+.button.button--sub {
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: var(--quiz-accent);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  transition: transform .05s ease, box-shadow .2s ease, filter .15s ease;
+}
+.button.button--sub:hover { filter: brightness(1.06); }
+.button.button--sub:active { transform: translateY(1px); }
+
+/* Результат */
+.alert {
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.alert-info {
+  background: #f0f6ff;
+  border: 1px solid #cfe1ff;
+}
+.alert-heading {
+  margin: 0 0 6px;
+}
+
+/* Адаптив: изображение и селект в столбик на узких экранах */
+@media (max-width: 700px) {
+  .imgsel-row {
+    grid-template-columns: 1fr;
+  }
+}
+.imgsel-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.imgsel-image {
+  max-width: 220px;
+  max-height: 140px;
+  object-fit: contain;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background: #fff;
+}
+.form-select {
+  padding: 8px 10px;
+  border: 1px solid #dcdce4;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+}
 .submission-info{
     margin: 20px 0;
     padding: 20px;
