@@ -18,6 +18,7 @@ import DashboardComponent from './components/admin/DashboardComponent.vue';
 import HeaderadminComponent from './components/admin/Header-adminComponent.vue';
 import CabinetadminComponent from './components/admin/Cabinet-adminComponent.vue';
 import ProfileadminComponent from './components/admin/Profile-adminComponent.vue';
+import ProfileteacherComponent from './components/teacher/Profile-teacherComponent.vue';
 import CourseComponent from './components/admin/CourseComponent.vue';
 import TopicsComponent from './components/admin/TopicsComponent.vue';
 import StatisticsComponent from './components/admin/StatisticsComponent.vue';
@@ -56,6 +57,7 @@ app.component('dashboardteacher-component', DashboardTeacher);
 app.component('taskstudent-component', TaskStudent);
 app.component('studentcours-component', StudentCourse);
 app.component('studentsubmissions-component', StudentSubmissions);
+app.component('profile-teacher-component', ProfileteacherComponent);
 
 // Регистрация компонентов (имена в kebab-case) для админ-панели
 app.component('addcourse-component', AddCourseComponent);

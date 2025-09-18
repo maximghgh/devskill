@@ -5,6 +5,9 @@
                 <li class="menu__link">
                     <a href="/taskstudent" class="aside__link">Проверка работ учеников</a>
                 </li>
+                <li class="menu__link">
+                    <a href="/taskstudent" class="aside__link aside__link--support">Техническая поддержка</a>
+                </li>
             </ul>
         </div>
         <h2>Результаты тестирования пользователей</h2>
@@ -176,16 +179,28 @@ function closeModal() {
 </script>
 
 <style scoped>
+.menu__teacher{
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+}
 .menu{
     display: flex;
     margin: 60px 0;
 }
+
 .aside__link {
     color: #575adf;
     text-decoration: none;
     transition: 0.5s;
 }
-
+.aside__link--support{
+    background: #575adf;
+    border-radius: 15px;
+    padding: 5px 10px;
+    color: #ffffff;
+}
 .aside__link--active {
     color: #000;
     text-decoration: underline;

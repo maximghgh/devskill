@@ -26,6 +26,8 @@ class CreateCoursesTable extends Migration
             $table->string('card_image')->nullable();
             $table->string('description_image')->nullable();
             $table->string('pdf_path')->nullable();
+            $table->date('start_date')->nullable()->index();
+            $table->date('end_date')->nullable()->index();
             $table->timestamps();
         });
     }

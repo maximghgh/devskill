@@ -181,7 +181,8 @@ Route::delete('/directions/{id}', [DirectionController::class, 'destroy']);
 
 // Получить комментарии для новости {id}
 Route::get('comments/news/{id}', [CommentController::class, 'index']);
-
+Route::get('/news/{news}/comments', [CommentController::class, 'adminindex']);
+Route::post('/news/{news}/comments', [CommentController::class, 'adminstore']);
 
 // Добавление частых вопросов
 Route::post('/faqs', [FaqController::class, 'store']);

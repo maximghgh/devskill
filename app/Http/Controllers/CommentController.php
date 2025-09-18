@@ -127,4 +127,48 @@ class CommentController extends Controller
         }
         return response()->json($comment);
     }
+
+    public function adminindex($newsId)
+    {
+        // Отдаём все комменты этой новости одним списком
+        // (дерево соберём на фронте)
+        return Comment::where('news_id', $newsId)
+            ->orderBy('created_at')
+            ->get();
+    }
+
+    public function adminstore(Request $request, $news) 
+    {
+        $data = $request->validate([
+            'body'       => 'required|string',
+            'parent_id'  => 'nullable|integer|exists:comments,id',
+            'user_id'    => 'nullable|integer|exists:users,id',
+            'user_name'  => 'nullable|string|max:255',
+        ]);
+
+        // если $news — модель, возьмём id; если плейн id — приведём к int
+        $newsId = is_object($news) ? $news->id : (int)$news;
+
+        $user = auth()->user(); // sanctum/web — как у тебя настроено
+
+        $comment = new Comment();
+        $comment->news_id   = $newsId;
+        $comment->parent_id = $data['parent_id'] ?? null;
+
+        if ($user) {
+            // при наличии авторизации — только из неё
+            $comment->user_id   = $user->id;
+            $comment->user_name = $user->name; // или 'Администратор', если так надо
+        } else {
+            // иначе — то, что пришло с фронта (с валидацией выше)
+            $comment->user_id   = $data['user_id']   ?? null;
+            $comment->user_name = $data['user_name'] ?? 'Гость';
+        }
+
+        $comment->body = $data['body'];
+        $comment->save();
+
+        return response()->json(['comment' => $comment], 201);
+    }
+
 }

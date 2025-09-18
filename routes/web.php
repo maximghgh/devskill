@@ -59,6 +59,10 @@ Route::get('/admin/profile', function () {
     return view('admin.profile');
 })->name('admin.profile');;
 
+Route::get('/teacher/profile', function () {
+    return view('teacher.profile');
+})->name('teacher.profile');;
+
 Route::get('/admin/statistics', function () {
     return view('admin.statistics');
 })->name('admin.statistics');

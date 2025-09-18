@@ -33,7 +33,7 @@
                             </a>
                             <div class="header__lk-name">
                                 <a
-                                    href="/admin/profile"
+                                    href="/teacher/profile"
                                     class="personal-area__username"
                                     >{{ user.name }}</a
                                 >

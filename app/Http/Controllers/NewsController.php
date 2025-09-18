@@ -40,7 +40,7 @@ class NewsController extends Controller
             'title'       => 'required|string|max:255',
             'content'     => 'required|string',
             'editor_data' => 'nullable', // JSON-данные EditorJS
-            'image'       => 'nullable|image|max:2048', // проверка файла: тип image и размер до 2 Мб
+            'image'       => 'nullable|image|max:102400', // проверка файла: тип image и размер до 2 Мб
         ]);
 
         // Обработка загрузки изображения

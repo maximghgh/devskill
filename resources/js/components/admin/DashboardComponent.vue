@@ -38,17 +38,34 @@
                             <!-- Блок "Все пользователи" -->
                             <div v-if="item.id === 'users'" class="user-block">
                                 <div class="filters">
-                                    <label for="roleFilter">Фильтр по роли:</label>
-                                    <select
-                                        id="roleFilter"
-                                        v-model="selectedRole"
-                                        class="role-filter"
-                                    >
-                                        <option value="all">Все роли</option>
-                                        <option value="3">Админ</option>
-                                        <option value="2">Преподаватель</option>
-                                        <option value="1">Ученик</option>
-                                    </select>
+                                    <label for="roleFilter">Поиск пользователя:</label>
+                                    <div class="search">
+                                        <select id="roleFilter" v-model="selectedRole" class="role-filter">
+                                            <option value="all">Все роли</option>
+                                            <option value="3">Админ</option>
+                                            <option value="2">Преподаватель</option>
+                                            <option value="1">Ученик</option>
+                                        </select>
+
+                                        <!-- Новое: поиск -->
+                                        <div class="searsh__users">
+                                            <input
+                                                v-model="searchQuery"
+                                                type="text"
+                                                class="search-filter"
+                                                placeholder="Поиск: ФИО, email, телефон, город, дата"
+                                                style="min-width:260px"
+                                            />
+                                            <button
+                                                v-if="searchQuery"
+                                                class="btn__user--edit"
+                                                @click="searchQuery = ''"
+                                                style="padding:6px 10px"
+                                            >
+                                                Очистить
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div v-if="filteredUsers.length > 0">
                                     <table class="light-push-table">
@@ -71,7 +88,7 @@
                                                 <td>{{ userItem.name }}</td>
                                                 <td>{{ userItem.email }}</td>
                                                 <td>{{ userItem.phone }}</td>
-                                                <td>{{ userItem.birthday }}</td>
+                                                <td>{{ formatBirthday(userItem.birthday) }}</td>
                                                 <td>{{ userItem.country }}</td>
                                                 <!-- роли -->
                                                 <td>
@@ -652,6 +669,7 @@
                                         <tr>
                                             <th>№</th>
                                             <th>Название новости</th>
+                                            <th>Просмотреть комментарии</th>
                                             <th>Редактировать</th>
                                             <th>Удалить</th>
                                         </tr>
@@ -660,6 +678,7 @@
                                         <tr v-for="(newsItem, index) in paginatedNews" :key="newsItem.id">
                                             <td>{{ index + 1 }}</td>
                                             <td>{{ newsItem.title }}</td>
+                                            <td><a href="#" @click.prevent="openComments(newsItem)">Просмотреть комментарии</a></td>
                                             <td>
                                                 <button class="btn__user--edit" @click="openNewsEditModal(newsItem)">Редактировать</button>
                                             </td>
@@ -712,15 +731,23 @@
                                             </div>
                                             <!-- Изображение новости -->
                                             <div class="form-group">
-                                                <label class="form-label"
-                                                    >Изображение новости</label
-                                                >
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    class="form-input"
-                                                    @change="onNewsImageChangeEdit"
-                                                />
+                                                <label class="form-label">Изображение новости</label>
+                                                <input type="file" accept="image/*" class="form-input" @change="onNewsImageChangeEdit" />
+                                            </div>
+                                            <div class="form-group">
+                                                <!-- превью и ссылка из БД -->
+                                                <label class="form-label">Текущее изображение:</label>
+                                                <div v-if="currentNewsFileUrl" class="image_db">
+                                                    <img v-if="currentNewsFileIsImage"
+                                                        :src="currentNewsFileUrl"
+                                                        alt="Изображение новости"
+                                                        class="image">
+                                                    <a :href="currentNewsFileUrl"
+                                                    :download="currentNewsFileName"
+                                                    target="_blank" rel="noopener">
+                                                    {{ currentNewsFileName }}
+                                                    </a>
+                                                </div>
                                             </div>
                                             <!-- Текст новости (EditorJS) -->
                                             <div class="form-group">
@@ -743,6 +770,61 @@
                                         </form>
                                     </div>
                                 </div>
+                                <!-- Модалка комментариев -->
+                                <div v-if="showCommentsModal" class="modal-overlay" @click.self="closeComments">
+                                    <div class="modal-content" style="max-width: 800px;">
+                                        <button class="close-button" @click="closeComments">×</button>
+                                        <h2>Комментарии к: «{{ currentCommentsNewsTitle }}»</h2>
+
+                                        <div v-if="commentsLoading" style="padding: 1rem;">Загрузка…</div>
+
+                                        <div v-else>
+                                        <div v-if="!commentsFlat.length" style="padding: .5rem 0;">Комментариев пока нет</div>
+
+                                        <div v-else class="comments-list" style="margin: 1rem 0;">
+                                            <div v-for="c in commentsFlat" :key="c.id"
+                                                class="comment-item"
+                                                :style="{ marginLeft: (c._level * 16) + 'px', borderLeft: c._level ? '2px solid #eee' : 'none', paddingLeft: '8px', marginBottom: '12px' }">
+                                            <div class="comment-head" style="font-size:14px;color:#666;">
+                                                <strong style="color:#222;">{{ c.user_name || ('Пользователь #'+c.user_id) }}</strong>
+                                                <span style="margin-left:8px;">•</span>
+                                                <span style="margin-left:8px;">{{ formatDateTime(c.created_at) }}</span>
+                                            </div>
+                                            <div class="comment-body" style="white-space:pre-wrap; margin:.25rem 0 .5rem;">
+                                                {{ c.body }}
+                                            </div>
+                                            <div class="comment-actions">
+                                                <button class="btn__user--edit" @click="toggleReply(c.id)">Ответить</button>
+                                                <button class="icon-btn icon-btn--danger"
+                                                    :disabled="commentDeleting[c.id]"
+                                                    :title="commentDeleting[c.id] ? 'Удаляем…' : 'Удалить комментарий'"
+                                                    @click="deleteComment(c.id)"
+                                                    aria-label="Удалить комментарий"
+                                                >
+                                                    Удалить комментарий
+                                                </button>
+                                            </div>
+
+                                            <div v-if="replyOpen[c.id]" class="reply-box" style="margin-top:.5rem;">
+                                                <textarea v-model="replyBodies[c.id]" class="form-textarea" placeholder="Ваш ответ..." />
+                                                <div style="text-align:right; margin-top:.5rem;">
+                                                <button class="form-button--small" @click="sendReply(c.id)">Отправить</button>
+                                                <button class="form-button--small" @click="toggleReply(c.id)">Отмена</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr/>
+                                    <h3 style="margin:.75rem 0;">Новый комментарий</h3>
+                                    <textarea v-model="newCommentBody" class="form-textarea" placeholder="Напишите комментарий..." />
+                                    <div style="text-align:right; margin-top:.5rem;">
+                                        <button class="form-button" @click="sendComment">Отправить</button>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+
                                 <h2 class="h2__margin">Опубликовать новость</h2>
                                 <form
                                     @submit.prevent="submitNews"
@@ -1228,6 +1310,31 @@ import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 import { globalNotification } from "../../globalNotification";
 
+const fmtShort = new Intl.DateTimeFormat('ru-RU', {
+  day: '2-digit', month: '2-digit', year: 'numeric'
+}); // 05.03.2025
+
+const fmtLong = new Intl.DateTimeFormat('ru-RU', {
+  day: '2-digit', month: 'long', year: 'numeric'
+}); // 05 марта 2025
+
+function toDateFromISO(iso) {
+  if (!iso) return null;
+  // Надёжный парсинг 'YYYY-MM-DD' без часовых поясов
+  if (typeof iso === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  const d = new Date(iso);
+  return isNaN(+d) ? null : d;
+}
+
+function formatBirthday(value, variant = 'short') {
+  const date = toDateFromISO(value);
+  if (!date) return '—';
+  return variant === 'long' ? fmtLong.format(date) : fmtShort.format(date);
+}
+
 /* =====================================
    1. Пользователи
 ===================================== */
@@ -1354,8 +1461,8 @@ async function submitNewsEdit () {
     fd.append('content',      editingNews.value.content);
     fd.append('editor_data', JSON.stringify(editingNews.value.editorData));
 
-    if (editingNews.newsImage) {          // ← файл теперь есть
-      fd.append('image', editingNews.newsImage);
+    if (editingNews.value.newsImage) {         // ← файл теперь есть
+      fd.append('image', editingNews.value.newsImage);
     }
     fd.append('_method', 'PATCH');        // spoof-patch
 
@@ -1378,7 +1485,7 @@ async function submitNewsEdit () {
 }
 /* Функция обработки выбора файла для редактирования изображения новости */
 function onNewsImageChangeEdit (e) {
-  editingNews.newsImage = e.target.files[0] || null;
+  editingNews.value.newsImage = e.target.files[0] || null;
 }
 
 function startEditingLanguage(langItem) {
@@ -1424,6 +1531,155 @@ function closeUserEditModal() {
    }
 }
 
+// Удалени комментария
+const commentDeleting = reactive({}); // { [id]: true|false }
+async function deleteComment(id) {
+  if (!id) return;
+  if (!confirm('Удалить этот комментарий и все его ответы?')) return;
+
+  try {
+    commentDeleting[id] = true;
+
+    // ВАРИАНТ 1 (проще): отдельный маршрут удаления по id
+    // ожидается DELETE /api/comments/{id}
+    await axios.delete(`/api/comments/${id}`);
+
+    // ВАРИАНТ 2 (если у тебя удаление повешено на news/{news}/comments/{id})
+    // раскомментируй строку ниже и закомментируй предыдущую:
+    // await axios.delete(`/api/news/${commentsNewsId.value}/comments/${id}`);
+
+    // Перечитываем список, чтобы убрать удалённые ветки
+    await loadComments(commentsNewsId.value);
+
+    globalNotification.categoryMessage = 'Комментарий удалён';
+    globalNotification.type = 'success';
+  } catch (e) {
+    console.error('Ошибка удаления комментария', e);
+    globalNotification.categoryMessage = 'Ошибка удаления комментария';
+    globalNotification.type = 'error';
+  } finally {
+    delete commentDeleting[id];
+  }
+}
+
+// модалка комментариев
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(+d)) return '—';
+  return d.toLocaleString('ru-RU', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+// ===== Комментарии к новости =====
+const showCommentsModal     = ref(false);
+const commentsLoading       = ref(false);
+const commentsNewsId        = ref(null);
+const currentCommentsNewsTitle = ref('');
+const commentsRaw           = ref([]);   // плоский список с бэка
+const replyOpen             = reactive({}); // { [commentId]: true|false }
+const replyBodies           = reactive({}); // { [commentId]: 'text' }
+const newCommentBody        = ref('');
+
+// Построение дерева и "списка с уровнями" для удобного рендера
+function buildTree(list) {
+  const map = {};
+  list.forEach(c => { c.children = []; map[c.id] = c; });
+  const roots = [];
+  list.forEach(c => {
+    const pid = c.parent_id;
+    if (pid && map[pid]) map[pid].children.push(c);
+    else roots.push(c);
+  });
+  return roots;
+}
+const commentsTree = computed(() => buildTree(commentsRaw.value));
+const commentsFlat = computed(() => {
+  const out = [];
+  const walk = (nodes, level = 0) => {
+    nodes.forEach(n => {
+      out.push({ ...n, _level: level });
+      if (n.children?.length) walk(n.children, level + 1);
+    });
+  };
+  walk(commentsTree.value);
+  return out;
+});
+
+// Открыть/закрыть модалку
+async function openComments(newsItem) {
+  commentsNewsId.value = newsItem.id;
+  currentCommentsNewsTitle.value = newsItem.title || '';
+  await loadComments(newsItem.id);
+  showCommentsModal.value = true;
+}
+function closeComments() {
+  showCommentsModal.value = false;
+  commentsRaw.value = [];
+  commentsNewsId.value = null;
+  currentCommentsNewsTitle.value = '';
+  // очистим состояния ответов
+  Object.keys(replyOpen).forEach(k => delete replyOpen[k]);
+  Object.keys(replyBodies).forEach(k => delete replyBodies[k]);
+  newCommentBody.value = '';
+}
+
+async function loadComments(newsId) {
+  commentsLoading.value = true;
+  try {
+    const { data } = await axios.get(`/api/news/${newsId}/comments`);
+    commentsRaw.value = Array.isArray(data) ? data : (data.comments || []);
+  } catch (e) {
+    console.error('Не удалось загрузить комментарии', e);
+    globalNotification.categoryMessage = 'Ошибка загрузки комментариев';
+    globalNotification.type = 'error';
+  } finally {
+    commentsLoading.value = false;
+  }
+}
+
+function toggleReply(id) {
+  replyOpen[id] = !replyOpen[id];
+}
+
+async function sendComment() {
+  const body = (newCommentBody.value || '').trim();
+  if (!body) return;
+
+  const current = JSON.parse(localStorage.getItem('user') || '{}');
+  console.log(current.id);
+  try {
+    await axios.post(`/api/news/${commentsNewsId.value}/comments`, { 
+        body,
+        user_id: current.id,
+        user_name: current.name
+    });
+    newCommentBody.value = '';
+    await loadComments(commentsNewsId.value);
+  } catch (e) {
+    console.error('Ошибка отправки комментария', e);
+    globalNotification.categoryMessage = 'Ошибка отправки комментария';
+    globalNotification.type = 'error';
+  }
+}
+
+async function sendReply(parentId) {
+  const body = (replyBodies[parentId] || '').trim();
+  if (!body) return;
+  try {
+    await axios.post(`/api/news/${commentsNewsId.value}/comments`, {
+      body, parent_id: parentId
+    });
+    replyBodies[parentId] = '';
+    replyOpen[parentId] = false;
+    await loadComments(commentsNewsId.value);
+  } catch (e) {
+    console.error('Ошибка отправки ответа', e);
+    globalNotification.categoryMessage = 'Ошибка отправки ответа';
+    globalNotification.type = 'error';
+  }
+}
 
 async function saveLanguage() {
     try {
@@ -1555,14 +1811,44 @@ async function deleteNews(newsId) {
 const user = ref(null);
 const users = ref([]);
 const selectedRole = ref("all");
+const searchQuery = ref("");
 const filteredUsers = computed(() => {
-    return selectedRole.value === "all"
-        ? users.value
-        : users.value.filter((u) => String(u.role) === selectedRole.value);
+  // 1) фильтр по роли
+  const base = selectedRole.value === "all"
+    ? users.value
+    : users.value.filter(u => String(u.role) === selectedRole.value);
+
+  // 2) текстовый поиск
+  const q = (searchQuery.value || "").trim().toLowerCase();
+  if (!q) return base;
+
+  const qDigits = q.replace(/\D/g, ""); // для поиска по телефону цифрами
+
+  return base.filter(u => {
+    const name    = (u.name    || "").toLowerCase();
+    const email   = (u.email   || "").toLowerCase();
+    const phone   = (u.phone   || "");
+    const phoneLc = phone.toLowerCase();
+    const phoneDg = phone.replace(/\D/g, "");
+    const country = (u.country || "").toLowerCase();
+    const bRaw    = (u.birthday || "");               // 'YYYY-MM-DD'
+    const bFmt    = formatBirthday(u.birthday) || ""; // 'ДД.ММ.ГГГГ'
+
+    return (
+      name.includes(q) ||
+      email.includes(q) ||
+      country.includes(q) ||
+      phoneLc.includes(q) ||
+      (qDigits && phoneDg.includes(qDigits)) ||
+      bRaw.includes(q) ||
+      bFmt.toLowerCase().includes(q)
+    );
+  });
 });
 
+
 const currentPageUsers = ref(1);
-const pageSizeUsers   = 4;
+const pageSizeUsers = 10;
 
 const totalPagesUsers = computed(() =>
   Math.ceil(filteredUsers.value.length / pageSizeUsers)
@@ -1573,10 +1859,8 @@ const paginatedUsers = computed(() => {
   return filteredUsers.value.slice(start, start + pageSizeUsers);
 });
 
-watch(selectedRole, () => {
-  currentPageUsers.value = 1;
-});
-
+watch(selectedRole, () => { currentPageUsers.value = 1; });
+watch(searchQuery,   () => { currentPageUsers.value = 1; });
 
 function getRoleName(role) {
     switch (role) {
@@ -2233,6 +2517,37 @@ function goToCourse(courseId) {
     console.log("Переход на курс с id:", courseId);
     window.location.href = `/cpp/${courseId}`;
 }
+// Путь, по которому Laravel раздаёт public-disk (storage:link)
+const PUBLIC_STORAGE_PREFIX = '/storage/';
+
+const currentNewsFileUrl = computed(() => {
+  // сервер может вернуть image / image_path / image_url — берём что есть
+  const raw = editingNews.value?.image
+          || editingNews.value?.image_path
+          || editingNews.value?.image_url
+          || '';
+  if (!raw) return '';
+
+  // уже абсолютный URL
+  if (/^https?:\/\//i.test(raw)) return raw;
+
+  // уже корневой путь, например "/storage/news_images/…"
+  if (raw.startsWith('/')) return raw;
+
+  // в БД просто "news_images/…"
+  // => делаем публичный URL: "/storage/news_images/…"
+  return PUBLIC_STORAGE_PREFIX + raw.replace(/^storage\//, '');
+});
+
+const currentNewsFileName = computed(() => {
+  const u = currentNewsFileUrl.value || '';
+  const name = u.split('/').pop() || '';
+  try { return decodeURIComponent(name); } catch { return name; }
+});
+
+const currentNewsFileIsImage = computed(() =>
+  /\.(png|jpe?g|gif|webp|svg)$/i.test(currentNewsFileUrl.value || '')
+);
 
 /* =====================================
    14. Добавление FAQ
@@ -2374,6 +2689,37 @@ async function submitNews() {
 </script>
 
 <style scoped>
+.icon-btn{
+  border:none; background:#f3f4f6; color:#6b7280; cursor:pointer;
+  padding:6px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;
+  transition:background .15s,color .15s, transform .05s;
+}
+.icon-btn:hover{ background:#e5e7eb; color:#111827 }
+.icon-btn:active{ transform:translateY(1px) }
+.icon-btn--danger{ background:#fee2e2; color:#b91c1c }
+.icon-btn--danger:hover{ background:#fecaca; color:#7f1d1d }
+.icon-btn[disabled]{ opacity:.6; cursor:not-allowed }
+
+.image{
+    width: 10%;
+    /* height: 75px; */
+}
+.image_db{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.search{
+    display: flex;
+    gap: 20px;
+}
+.search-filter{
+    font-family: JanoSansProLight;
+    padding: 7px 9px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+}
 .form-textarea--m{
     width: 678px !important;
 }
@@ -2394,7 +2740,6 @@ async function submitNews() {
 }
 .form-textarea{
     width: 100%;
-    margin: 20px 0 0;
 }
 /* пагинация */
 
@@ -2685,6 +3030,7 @@ h2 {
     border-radius: 4px;
     min-height: 150px;
     background-color: #fff;
+    max-width: 700px;
 }
 
 .form-button {
@@ -2737,7 +3083,7 @@ h2 {
 .filters {
     margin-bottom: 25px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
 }
 

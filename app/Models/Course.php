@@ -27,12 +27,16 @@ class Course extends Model
         'card_image',
         'description_image',
         'pdf_path',   
+        'start_date',
+        'end_date',
     ];
 
     protected $casts = [
         'editor_data' => 'array',
         'teachers'    => 'array',
         'language' => 'array',
+        'start_date'  => 'date',
+        'end_date'    => 'date',
     ];
 
     // Отношение "многие ко многим" с преподавателями

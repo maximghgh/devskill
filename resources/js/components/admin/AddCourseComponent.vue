@@ -17,6 +17,17 @@
         <input v-model="form.cardTitle" type="text" placeholder="Введите название для карточки" class="form-input" />
       </div>
 
+      <!-- Даты старта и конца -->
+      <div class="form-group">
+        <label class="form-label">Дата старта курса</label>
+        <input v-model="form.startDate" type="date" class="form-input form-input--date" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Дата конца курса</label>
+        <input v-model="form.endDate" type="date" class="form-input form-input--date" />
+      </div>
+
       <!-- Цена/длительность/часы -->
       <div class="form-group">
         <label class="form-label">Цена</label>
@@ -158,7 +169,9 @@ const form = ref({
   cardImage: null,
   descriptionImage: null,
   pdfFile: null,
-  editorData: {}
+  editorData: {},
+  startDate: '', // 'YYYY-MM-DD'
+  endDate:   ''
 })
 
 /** Источники для селектов */
@@ -261,7 +274,8 @@ async function submitForm () {
 
     // повышение квалификации (0/1)
     fd.append('upgradequalification', form.value.upgradeQualification)
-
+    fd.append('start_date', form.value.startDate || '');
+    fd.append('end_date',   form.value.endDate   || '');
     // файлы
     if (form.value.cardImage) fd.append('cardImage', form.value.cardImage)
     if (form.value.descriptionImage) fd.append('descriptionImage', form.value.descriptionImage)
@@ -312,7 +326,9 @@ function resetForm() {
     cardImage: null,
     descriptionImage: null,
     pdfFile: null,
-    editorData: {}
+    editorData: {},
+    startDate: '',
+    endDate: '',
   }
   // очистим EditorJS визуально
   if (editor.value) editor.value.clear()
@@ -324,6 +340,9 @@ function resetForm() {
 Либо убери scoped у общих классов, либо дублируй нужные правила здесь/в общем css. -->
 <style scoped>
 /* Минимум базовых стилей на случай scoped-родителя */
+.form-input--date{
+  font-family: JanoSansProLight;
+}
 .btn-back {
     text-decoration: none;
     margin-left: 50px;

@@ -30,6 +30,8 @@ class CourseController extends Controller
             'cardImage'           => 'nullable|file|image|max:5120', // до 5 МБ
             'descriptionImage'    => 'nullable|file|image|max:5120',
             'pdf'                  => 'nullable|file|mimes:pdf|max:20480',
+            'start_date'           => 'nullable|date',
+            'end_date'             => 'nullable|date|after_or_equal:start_date',
         ]);
 
         // $data['upgrade_qualification'] = $data['upgradeQualification'] === '1' ? true : false;
@@ -90,6 +92,8 @@ class CourseController extends Controller
             'card_image'         => $data['card_image'] ?? null,
             'description_image'  => $data['description_image'] ?? null,
             'pdf_path'             => $data['pdf_path'] ?? null, 
+            'start_date'           => $data['start_date'] ?? null, // YYYY-MM-DD
+            'end_date'             => $data['end_date']   ?? null,
         ];
         
         // Создаём запись в БД
@@ -128,6 +132,8 @@ class CourseController extends Controller
             'descriptionImage'    => 'nullable|image|max:2048',
             'editorData'          => 'required', // Если нужно editorData
             'pdf' => 'nullable|file|mimes:pdf|max:20480',
+            'start_date'           => 'nullable|date',
+            'end_date'             => 'nullable|date|after_or_equal:start_date',
         ]);
 
 

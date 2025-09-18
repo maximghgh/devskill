@@ -97,19 +97,16 @@
                 {{ showTopicForm ? "Отмена добавления темы" : "Добавить тему" }}
             </button>
             <div class="edit__testfinal">
-                <button class="type-button" @click="toggleFinalTestForm">
-                    {{
-                        showFinalTestForm
-                            ? "Отмена создания теста"
-                            : "Создать итоговый тест"
-                    }}
+                <button class="type-button"
+                        @click="toggleFinalTestForm"
+                        :disabled="showEditTestForm">
+                    {{ showFinalTestForm ? "Отмена создания теста" : "Создать итоговый тест" }}
                 </button>
-                <button class="type-button" @click="onEditTestClick">
-                    {{
-                        showEditTestForm
-                            ? "Отмена редактирования теста"
-                            : "Редактировать тест"
-                    }}
+
+                <button class="type-button"
+                        @click="onEditTestClick"
+                        :disabled="showFinalTestForm">
+                    {{ showEditTestForm ? "Отмена редактирования теста" : "Редактировать тест" }}
                 </button>
             </div>
         </div>
@@ -161,22 +158,11 @@
             <h3>Редактировать итоговый тест</h3>
             <form @submit.prevent="submitEditedTest">
                 <div class="form-group">
-                    <div
-                        id="editor-final-test-create"
-                        class="editor-container"
-                    ></div>
+                <div id="editor-final-test-edit" class="editor-container"></div>
                 </div>
                 <div class="form-buttons">
-                    <button type="submit" class="form-button">
-                        Сохранить изменения
-                    </button>
-                    <button
-                        type="button"
-                        class="btn-delete"
-                        @click="deleteFinalTest"
-                    >
-                        Удалить тест
-                    </button>
+                <button type="submit" class="form-button">Сохранить изменения</button>
+                <button type="button" class="btn-delete" @click="deleteFinalTest">Удалить тест</button>
                 </div>
             </form>
         </div>
@@ -215,7 +201,7 @@ const showFinalTestForm = ref(false);
 const showEditTestForm = ref(false);
 const passScore = ref(50);
 let quizEditor = null;
-
+let currentHolderId = null;
 // ——————————————————————————
 // Загрузка списка тем
 // ——————————————————————————
@@ -300,37 +286,41 @@ async function deleteTopic(id) {
 // ——————————————————————————
 // Инициализация EditorJS
 // ——————————————————————————
-function initQuizEditor(initialData = null) {
-    if (quizEditor) {
-        quizEditor.destroy();
-        quizEditor = null;
+function initQuizEditor(holderId, initialData = null) {
+  if (quizEditor) {
+    quizEditor.destroy();
+    quizEditor = null;
+  }
+  currentHolderId = holderId;
+  quizEditor = new EditorJS({
+    holder: holderId,
+    tools: { quiz: QuizTool },
+    data: initialData || {
+      blocks: [{ type: "quiz", data: { questions: [], settings: { shuffle: false } } }]
     }
-    quizEditor = new EditorJS({
-        holder: "editor-final-test-create",
-        tools: { quiz: QuizTool },
-        data: initialData || {
-            blocks: [
-                {
-                    type: "quiz",
-                    data: { questions: [], settings: { shuffle: false } },
-                },
-            ],
-        },
-    });
+  });
 }
 
 // ——————————————————————————
 // Создание итогового теста
 // ——————————————————————————
 function toggleFinalTestForm() {
-    showFinalTestForm.value = !showFinalTestForm.value;
-    if (showFinalTestForm.value) {
-        nextTick(() => initQuizEditor());
-    } else if (quizEditor) {
-        quizEditor.destroy();
-        quizEditor = null;
-    }
+  // если открыт блок редактирования — закрываем
+  if (showEditTestForm.value) {
+    showEditTestForm.value = false;
+  }
+
+  showFinalTestForm.value = !showFinalTestForm.value;
+
+  if (showFinalTestForm.value) {
+    nextTick(() => initQuizEditor('editor-final-test-create'));
+  } else if (quizEditor) {
+    quizEditor.destroy();
+    quizEditor = null;
+    currentHolderId = null;
+  }
 }
+
 
 async function submitFinalTest() {
     try {
@@ -352,27 +342,32 @@ async function submitFinalTest() {
 // Редактирование итогового теста
 // ——————————————————————————
 async function onEditTestClick() {
-    showEditTestForm.value = !showEditTestForm.value;
+  // если открыт блок создания — закрываем
+  if (showFinalTestForm.value) {
+    showFinalTestForm.value = false;
+  }
 
-    if (showEditTestForm.value) {
-        try {
-            const { data } = await axios.get(
-                `/api/admin/course/${courseId}/final-test/data`
-            );
-            passScore.value = data.pass_score;
-            await nextTick();
-            initQuizEditor(data.questions);
-        } catch (e) {
-            console.error("Ошибка при загрузке теста:", e);
-            globalNotification.categoryMessage = "Ошибка при загрузке теста";
-            globalNotification.type = "error";
-            showEditTestForm.value = false;
-        }
-    } else if (quizEditor) {
-        quizEditor.destroy();
-        quizEditor = null;
+  showEditTestForm.value = !showEditTestForm.value;
+
+  if (showEditTestForm.value) {
+    try {
+      const { data } = await axios.get(`/api/admin/course/${courseId}/final-test/data`);
+      passScore.value = data.pass_score;
+      await nextTick();
+      initQuizEditor('editor-final-test-edit', data.questions);
+    } catch (e) {
+      console.error("Ошибка при загрузке теста:", e);
+      globalNotification.categoryMessage = "Ошибка при загрузке теста";
+      globalNotification.type = "error";
+      showEditTestForm.value = false;
     }
+  } else if (quizEditor) {
+    quizEditor.destroy();
+    quizEditor = null;
+    currentHolderId = null;
+  }
 }
+
 
 async function submitEditedTest() {
     try {

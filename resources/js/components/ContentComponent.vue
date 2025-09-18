@@ -1,7 +1,9 @@
 <template>
     <div class="maincontainer">
         <div class="backs">
-            <button @click="goBack" class="btn-back">Вернуться в личный кабинет</button>
+            <button @click="goBack" class="btn-back">
+                Вернуться в личный кабинет
+            </button>
         </div>
         <div class="container flex">
             <!-- Левый сайдбар -->
@@ -64,45 +66,70 @@
                         class="topic"
                     >
                         <!-- Заголовок раздела -->
-                        <div class="topic__header"
+                        <div
+                            class="topic__header"
                             :class="{ 'is-locked': !isTopicUnlocked(topic) }"
                             @click="toggleTopicSafe(topic)"
                         >
                             <span>{{ idx + 1 }}</span>
                             <h4>{{ topic.title }}</h4>
-                            <span class="toggle-caret" :class="{ 'is-open': openTopic === topic.id }"></span>
+                            <span
+                                class="toggle-caret"
+                                :class="{ 'is-open': openTopic === topic.id }"
+                            ></span>
                         </div>
                         <transition name="collapse">
                             <!-- ГЛАВЫ: карточки  -->
-                            <ul v-show="isTopicOpen(topic.id)" class="chapters-grid">
+                            <ul
+                                v-show="isTopicOpen(topic.id)"
+                                class="chapters-grid"
+                            >
                                 <li
-                                v-for="ch in topic.chapters"
-                                :key="ch.id"
-                                class="chapter-card"
+                                    v-for="ch in topic.chapters"
+                                    :key="ch.id"
+                                    class="chapter-card"
                                 >
-                                <!-- управляемый клик, без прямого href -->
-                                <a
-                                    class="chapter-link"
-                                    href="#"
-                                    @click.prevent="openChapter(topic, ch)"
-                                >
-                                    <div class="chapter-card__preview-wrapper" :class="{ 'is-completed': ch.is_completed }">
-                                    <div v-show="ch.is_completed" class="good">
-                                        <img width="15" height="15" src="../../img/circle.png" alt="" />
-                                    </div>
-                                    <img
-                                        width="30"
-                                        height="50"
-                                        :src="getPreviewSrc(ch)"
-                                        :alt="ch.title"
-                                        class="chapter-card__preview"
-                                    />
-                                    <span v-if="ch.is_completed" class="chapter-card__badge">
-                                        <i class="icon-check"></i>
-                                    </span>
-                                    </div>
-                                    <h5 class="chapter-card__title">{{ ch.title }}</h5>
-                                </a>
+                                    <!-- управляемый клик, без прямого href -->
+                                    <a
+                                        class="chapter-link"
+                                        href="#"
+                                        @click.prevent="openChapter(topic, ch)"
+                                    >
+                                        <div
+                                            class="chapter-card__preview-wrapper"
+                                            :class="{
+                                                'is-completed': ch.is_completed,
+                                            }"
+                                        >
+                                            <div 
+                                                v-show="ch.is_completed"
+                                                class="good"
+                                            >
+                                                <img
+                                                    width="15"
+                                                    height="15"
+                                                    src="../../img/circle.png"
+                                                    alt=""
+                                                />
+                                            </div>
+                                            <img
+                                                width="30"
+                                                height="50"
+                                                :src="getPreviewSrc(ch)"
+                                                :alt="ch.title"
+                                                class="chapter-card__preview"
+                                            />
+                                            <span
+                                                v-if="ch.is_completed"
+                                                class="chapter-card__badge"
+                                            >
+                                                <i class="icon-check"></i>
+                                            </span>
+                                        </div>
+                                        <h5 class="chapter-card__title">
+                                            {{ ch.title }}
+                                        </h5>
+                                    </a>
                                 </li>
                             </ul>
                         </transition>
@@ -119,14 +146,12 @@
                         class="button"
                         :class="{ 'button--disabled': !allChaptersCompleted }"
                         :disabled="!allChaptersCompleted"
+                        @click.prevent="handleFinalTestClick"
                     >
                         Пройти тест
                     </a>
-
                     <div v-else class="test-passed-message">
-                        <div
-                            class="good__test"
-                        >
+                        <div class="good__test">
                             <img
                                 width="15"
                                 height="15"
@@ -136,6 +161,30 @@
                         </div>
                         <span>Вы успешно справились с итоговым тестом!</span>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div
+            v-if="showTestLockModal"
+            class="modal-overlay"
+            @click.self="closeTestLockModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="test-lock-title"
+        >
+            <div class="modal-content modal-content--center">
+                <h3 id="test-lock-title">
+                    Тест станет доступен после прохождения всего материала
+                </h3>
+                <p style="margin-top: 0.5rem">
+                    Ваш текущий прогресс:
+                    <strong>{{ progressPercentage }}%</strong>. Завершите все
+                    главы, чтобы открыть итоговый тест.
+                </p>
+                <div style="margin-top: 1rem; text-align: right">
+                    <button class="button" @click="closeTestLockModal">
+                        Понятно
+                    </button>
                 </div>
             </div>
         </div>
@@ -159,20 +208,20 @@ import iconTask from "../../img/task.png";
 import iconPresentation from "../../img/presentation.png";
 
 function goToFinalTest() {
-  window.location.href = `/final-test/${course.id}`;
+    window.location.href = `/final-test/${course.id}`;
 }
 
 const iconMap = {
-  text: iconText,
-  video: iconVideo,
-  terms: iconTerms,
-  task: iconTask,
-  presentation: iconPresentation,
+    text: iconText,
+    video: iconVideo,
+    terms: iconTerms,
+    task: iconTask,
+    presentation: iconPresentation,
 };
 
 function getPreviewSrc(chapter) {
-  if (chapter.preview) return chapter.preview;
-  return iconMap[chapter.type] || iconText; // text по умолчанию
+    if (chapter.preview) return chapter.preview;
+    return iconMap[chapter.type] || iconText; // text по умолчанию
 }
 
 dayjs.extend(relativeTime);
@@ -186,21 +235,22 @@ dayjs.locale("ru");
 const openTopics = ref(new Set());
 
 function isTopicOpen(id) {
-  return openTopics.value.has(id);
+    return openTopics.value.has(id);
 }
 
 function toggleTopic(id) {
-  // т.к. Set не реактивен, после изменения создаём новый Set
-  const s = new Set(openTopics.value);
-  if (s.has(id)) s.delete(id); else s.add(id);
-  openTopics.value = s;
+    // т.к. Set не реактивен, после изменения создаём новый Set
+    const s = new Set(openTopics.value);
+    if (s.has(id)) s.delete(id);
+    else s.add(id);
+    openTopics.value = s;
 }
 
 // раскрыть все разделы (можно звать после загрузки тем)
 function openAllTopicsInitially() {
-  const s = new Set();
-  (topics.value || []).forEach(t => s.add(t.id));
-  openTopics.value = s;
+    const s = new Set();
+    (topics.value || []).forEach((t) => s.add(t.id));
+    openTopics.value = s;
 }
 
 /* ======================================================
@@ -216,133 +266,182 @@ const showSolution = ref(false);
 
 /* ---------- Файлы / презентации ---------- */
 const fileSrc = computed(() => {
-  const ch = selectedChapter.value;
-  if (!ch) return null;
-  let raw = ch.file_path || ch.attachment_path || ch.presentation_path || ch.file || "";
-  if (!raw) return null;
-  if (/^https?:\/\//i.test(raw)) return raw;
-  if (raw.startsWith("/storage/")) return raw;
-  if (raw.startsWith("storage/")) return "/" + raw;
-  return "/storage/files/" + raw;
+    const ch = selectedChapter.value;
+    if (!ch) return null;
+    let raw =
+        ch.file_path ||
+        ch.attachment_path ||
+        ch.presentation_path ||
+        ch.file ||
+        "";
+    if (!raw) return null;
+    if (/^https?:\/\//i.test(raw)) return raw;
+    if (raw.startsWith("/storage/")) return raw;
+    if (raw.startsWith("storage/")) return "/" + raw;
+    return "/storage/files/" + raw;
 });
 
 const presentationSrc = computed(() => {
-  const ch = selectedChapter.value;
-  if (!ch) return null;
-  let raw = ch.presentation_path || ch.presentation || "";
-  if (/^https?:\/\//i.test(raw)) return raw;
-  if (raw.startsWith("/storage/")) return raw;
-  if (raw.startsWith("storage/")) return "/" + raw;
-  return "/storage/presentations/" + raw;
+    const ch = selectedChapter.value;
+    if (!ch) return null;
+    let raw = ch.presentation_path || ch.presentation || "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    if (raw.startsWith("/storage/")) return raw;
+    if (raw.startsWith("storage/")) return "/" + raw;
+    return "/storage/presentations/" + raw;
 });
 
 const presentationExt = computed(() => {
-  if (!presentationSrc.value) return "";
-  return presentationSrc.value.split(".").pop().toLowerCase();
+    if (!presentationSrc.value) return "";
+    return presentationSrc.value.split(".").pop().toLowerCase();
 });
 
 const embeddedSrc = computed(() => {
-  if (!presentationSrc.value) return null;
-  if (presentationExt.value === "pdf") return presentationSrc.value;
-  if (["ppt", "pptx"].includes(presentationExt.value)) {
-    return "https://viewer.zoho.com/api/url?embed=true&url=" + encodeURIComponent(location.origin + presentationSrc.value);
-  }
-  return "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(location.origin + presentationSrc.value);
+    if (!presentationSrc.value) return null;
+    if (presentationExt.value === "pdf") return presentationSrc.value;
+    if (["ppt", "pptx"].includes(presentationExt.value)) {
+        return (
+            "https://viewer.zoho.com/api/url?embed=true&url=" +
+            encodeURIComponent(location.origin + presentationSrc.value)
+        );
+    }
+    return (
+        "https://view.officeapps.live.com/op/embed.aspx?src=" +
+        encodeURIComponent(location.origin + presentationSrc.value)
+    );
 });
 
 function toggleSolution() {
-  showSolution.value = !showSolution.value;
+    showSolution.value = !showSolution.value;
 }
 
 function goBack() {
-  window.location.href = "/cabinet";
+    window.location.href = "/cabinet";
 }
 function selectTopic(topic) {
-  selectedTopic.value = topic;
-  selectedChapter.value = null;
-  destroyEditor();
+    selectedTopic.value = topic;
+    selectedChapter.value = null;
+    destroyEditor();
 }
 function deselectTopic() {
-  selectedTopic.value = null;
-  selectedChapter.value = null;
-  destroyEditor();
+    selectedTopic.value = null;
+    selectedChapter.value = null;
+    destroyEditor();
 }
 function selectChapter(chapter) {
-  selectedChapter.value = chapter;
+    selectedChapter.value = chapter;
 }
 
 function goToPrevChapter() {
-  if (!selectedTopic.value || !selectedTopic.value.chapters || !selectedChapter.value) return;
-  const chapters = selectedTopic.value.chapters;
-  const index = chapters.findIndex(ch => ch.id === selectedChapter.value.id);
-  if (index > 0) selectChapter(chapters[index - 1]);
+    if (
+        !selectedTopic.value ||
+        !selectedTopic.value.chapters ||
+        !selectedChapter.value
+    )
+        return;
+    const chapters = selectedTopic.value.chapters;
+    const index = chapters.findIndex(
+        (ch) => ch.id === selectedChapter.value.id
+    );
+    if (index > 0) selectChapter(chapters[index - 1]);
 }
 
 const showNextButton = ref(true);
 function goToNextChapter() {
-  showNextButton.value = false;
-  setTimeout(() => {
-    if (selectedTopic.value && selectedTopic.value.chapters && selectedChapter.value) {
-      const chapters = selectedTopic.value.chapters;
-      const index = chapters.findIndex(ch => ch.id === selectedChapter.value.id);
-      if (index < chapters.length - 1) selectChapter(chapters[index + 1]);
-    }
-    showNextButton.value = true;
-  }, 500);
+    showNextButton.value = false;
+    setTimeout(() => {
+        if (
+            selectedTopic.value &&
+            selectedTopic.value.chapters &&
+            selectedChapter.value
+        ) {
+            const chapters = selectedTopic.value.chapters;
+            const index = chapters.findIndex(
+                (ch) => ch.id === selectedChapter.value.id
+            );
+            if (index < chapters.length - 1) selectChapter(chapters[index + 1]);
+        }
+        showNextButton.value = true;
+    }, 500);
 }
 
 const canGoPrev = computed(() => {
-  if (!selectedTopic.value || !selectedTopic.value.chapters || !selectedChapter.value) return false;
-  const chapters = selectedTopic.value.chapters;
-  const index = chapters.findIndex(ch => ch.id === selectedChapter.value.id);
-  return index > 0;
+    if (
+        !selectedTopic.value ||
+        !selectedTopic.value.chapters ||
+        !selectedChapter.value
+    )
+        return false;
+    const chapters = selectedTopic.value.chapters;
+    const index = chapters.findIndex(
+        (ch) => ch.id === selectedChapter.value.id
+    );
+    return index > 0;
 });
 const canGoNext = computed(() => {
-  if (!selectedTopic.value || !selectedTopic.value.chapters || !selectedChapter.value) return false;
-  const chapters = selectedTopic.value.chapters;
-  const index = chapters.findIndex(ch => ch.id === selectedChapter.value.id);
-  return index < chapters.length - 1;
+    if (
+        !selectedTopic.value ||
+        !selectedTopic.value.chapters ||
+        !selectedChapter.value
+    )
+        return false;
+    const chapters = selectedTopic.value.chapters;
+    const index = chapters.findIndex(
+        (ch) => ch.id === selectedChapter.value.id
+    );
+    return index < chapters.length - 1;
 });
 
 /* ---------- EditorJS ---------- */
 function destroyEditor() {
-  if (editorInstance && typeof editorInstance.destroy === "function") {
-    editorInstance.destroy();
-    editorInstance = null;
-  }
+    if (editorInstance && typeof editorInstance.destroy === "function") {
+        editorInstance.destroy();
+        editorInstance = null;
+    }
 }
 function initEditor(contentData) {
-  destroyEditor();
-  if (typeof contentData === "string") {
-    try { contentData = JSON.parse(contentData); } catch { contentData = {}; }
-  }
-  editorInstance = new EditorJS({
-    holder: "editorjs",
-    readOnly: true,
-    data: contentData,
-    tools: {
-      header: { class: Header, inlineToolbar: ["link"] },
-      list: { class: List, inlineToolbar: true },
-      image: {
-        class: ImageTool,
-        config: { endpoints: { byFile: "/api/uploadFile", byUrl: "/api/fetchUrl" } },
-      },
-    },
-  });
+    destroyEditor();
+    if (typeof contentData === "string") {
+        try {
+            contentData = JSON.parse(contentData);
+        } catch {
+            contentData = {};
+        }
+    }
+    editorInstance = new EditorJS({
+        holder: "editorjs",
+        readOnly: true,
+        data: contentData,
+        tools: {
+            header: { class: Header, inlineToolbar: ["link"] },
+            list: { class: List, inlineToolbar: true },
+            image: {
+                class: ImageTool,
+                config: {
+                    endpoints: {
+                        byFile: "/api/uploadFile",
+                        byUrl: "/api/fetchUrl",
+                    },
+                },
+            },
+        },
+    });
 }
 
 watch(selectedChapter, (newChapter) => {
-  if (newChapter && newChapter.content) {
-    if (["text", "task", "terms", "presentation"].includes(newChapter.type)) {
-      initEditor(newChapter.content);
-    } else if (newChapter.type === "video") {
-      destroyEditor();
+    if (newChapter && newChapter.content) {
+        if (
+            ["text", "task", "terms", "presentation"].includes(newChapter.type)
+        ) {
+            initEditor(newChapter.content);
+        } else if (newChapter.type === "video") {
+            destroyEditor();
+        } else {
+            destroyEditor();
+        }
     } else {
-      destroyEditor();
+        destroyEditor();
     }
-  } else {
-    destroyEditor();
-  }
 });
 
 /* ======================================================
@@ -355,107 +454,169 @@ const replyComment = ref("");
 const currentUserName = ref("Аноним");
 const courseId = ref(null);
 
-function formatTime(dateString) { return dayjs(dateString).fromNow(); }
+function formatTime(dateString) {
+    return dayjs(dateString).fromNow();
+}
 
 async function loadCourseComments() {
-  try {
-    const { data } = await axios.get(`/api/courses/${courseId.value}/comments`);
-    courseComments.value = data;
-  } catch (e) {
-    console.error("Ошибка при загрузке комментариев:", e);
-  }
+    try {
+        const { data } = await axios.get(
+            `/api/courses/${courseId.value}/comments`
+        );
+        courseComments.value = data;
+    } catch (e) {
+        console.error("Ошибка при загрузке комментариев:", e);
+    }
 }
 
 async function submitComment() {
-  if (!newComment.value.trim()) return;
-  try {
-    const payload = { body: newComment.value };
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const u = JSON.parse(storedUser);
-      if (u?.id) payload.user_id = u.id;
+    if (!newComment.value.trim()) return;
+    try {
+        const payload = { body: newComment.value };
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            const u = JSON.parse(storedUser);
+            if (u?.id) payload.user_id = u.id;
+        }
+        const { data } = await axios.post(
+            `/api/courses/${courseId.value}/comments`,
+            payload
+        );
+        (courseComments.value || (courseComments.value = [])).push(data);
+        newComment.value = "";
+    } catch (e) {
+        console.error("Ошибка при отправке комментария:", e);
     }
-    const { data } = await axios.post(`/api/courses/${courseId.value}/comments`, payload);
-    (courseComments.value || (courseComments.value = [])).push(data);
-    newComment.value = "";
-  } catch (e) {
-    console.error("Ошибка при отправке комментария:", e);
-  }
 }
 
-function replyToComment(comment) { replyTo.value = comment.id; replyComment.value = ""; }
+function replyToComment(comment) {
+    replyTo.value = comment.id;
+    replyComment.value = "";
+}
 
 async function submitReply(parentComment) {
-  if (!replyComment.value.trim()) return;
-  try {
-    const payload = { body: replyComment.value, parent_id: parentComment.id };
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const u = JSON.parse(storedUser);
-      if (u?.id) payload.user_id = u.id;
-      if (u?.name) payload.user_name = u.name;
+    if (!replyComment.value.trim()) return;
+    try {
+        const payload = {
+            body: replyComment.value,
+            parent_id: parentComment.id,
+        };
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            const u = JSON.parse(storedUser);
+            if (u?.id) payload.user_id = u.id;
+            if (u?.name) payload.user_name = u.name;
+        }
+        const { data } = await axios.post(
+            `/api/courses/${courseId.value}/comments`,
+            payload
+        );
+        if (!parentComment.children) parentComment.children = [];
+        parentComment.children.push(data);
+        replyComment.value = "";
+        replyTo.value = null;
+    } catch (e) {
+        console.error("Ошибка при отправке ответа:", e);
     }
-    const { data } = await axios.post(`/api/courses/${courseId.value}/comments`, payload);
-    if (!parentComment.children) parentComment.children = [];
-    parentComment.children.push(data);
-    replyComment.value = ""; replyTo.value = null;
-  } catch (e) {
-    console.error("Ошибка при отправке ответа:", e);
-  }
 }
-function cancelReply() { replyComment.value = ""; replyTo.value = null; }
+function cancelReply() {
+    replyComment.value = "";
+    replyTo.value = null;
+}
 
 /* ======================================================
    3. Прогресс / тест / сертификат
 ===================================================== */
+const showTestLockModal = ref(false);
+
+function handleFinalTestClick() {
+    if (allChaptersCompleted.value) {
+        // всё пройдено — идём на тест
+        window.location.href = `/final-test/${course.value.id}`;
+    } else {
+        // не всё пройдено — показываем предупреждение
+        showTestLockModal.value = true;
+    }
+}
+
+function closeTestLockModal() {
+    showTestLockModal.value = false;
+}
+
 const progressPercentage = computed(() => {
-  let total = 0, done = 0;
-  topics.value.forEach(t => t.chapters.forEach(ch => { total++; if (ch.is_completed) done++; }));
-  return total ? Math.round((done / total) * 100) : 0;
+    let total = 0,
+        done = 0;
+    topics.value.forEach((t) =>
+        t.chapters.forEach((ch) => {
+            total++;
+            if (ch.is_completed) done++;
+        })
+    );
+    return total ? Math.round((done / total) * 100) : 0;
 });
 const allChaptersCompleted = computed(() => progressPercentage.value === 100);
 const testPassed = ref(false);
-const certificateUnlocked = computed(() => allChaptersCompleted.value && testPassed.value);
+const certificateUnlocked = computed(
+    () => allChaptersCompleted.value && testPassed.value
+);
 
 function getStoredUser() {
-  try { return JSON.parse(localStorage.getItem("user") || "{}"); }
-  catch { return {}; }
+    try {
+        return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+        return {};
+    }
 }
 const stordUser = getStoredUser();
 
 function getCourseIdFromUrl() {
-  const url = new URL(window.location.href);
-  if (url.searchParams.has("course")) return url.searchParams.get("course");
-  const match = url.pathname.match(/(\d+)(?!.*\d)/);
-  return match ? match[1] : null;
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("course")) return url.searchParams.get("course");
+    const match = url.pathname.match(/(\d+)(?!.*\d)/);
+    return match ? match[1] : null;
 }
 const coursId = getCourseIdFromUrl();
 
 async function downloadCertificate() {
-  if (!certificateUnlocked.value) return;
-  if (!stordUser.id || !stordUser.name) return alert("В localStorage нет данных пользователя");
-  if (!coursId) return alert("Не удалось определить ID курса из URL");
-  try {
-    const resp = await axios.post(`/api/courses/${coursId}/certificate`, { user_id: stordUser.id, name: stordUser.name }, { responseType: "blob" });
-    const blob = new Blob([resp.data], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `certificate_${stordUser.id}.pdf`; a.click();
-    URL.revokeObjectURL(url);
-  } catch (e) {
-    console.error(e); alert("Ошибка при генерации сертификата");
-  }
+    if (!certificateUnlocked.value) return;
+    if (!stordUser.id || !stordUser.name)
+        return alert("В localStorage нет данных пользователя");
+    if (!coursId) return alert("Не удалось определить ID курса из URL");
+    try {
+        const resp = await axios.post(
+            `/api/courses/${coursId}/certificate`,
+            { user_id: stordUser.id, name: stordUser.name },
+            { responseType: "blob" }
+        );
+        const blob = new Blob([resp.data], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `certificate_${stordUser.id}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error(e);
+        alert("Ошибка при генерации сертификата");
+    }
 }
 
 const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 async function markChapterCompleted(chapter) {
-  if (chapter.is_completed) return;
-  try {
-    await axios.post(`/api/chapters/${chapter.id}/complete`, { user_id: storedUser.id });
-    chapter.is_completed = true;
-    topics.value.forEach(t => t.chapters.forEach(ch => { if (ch.id === chapter.id) ch.is_completed = true; }));
-  } catch (e) {
-    console.error("Ошибка при завершении главы:", e);
-  }
+    if (chapter.is_completed) return;
+    try {
+        await axios.post(`/api/chapters/${chapter.id}/complete`, {
+            user_id: storedUser.id,
+        });
+        chapter.is_completed = true;
+        topics.value.forEach((t) =>
+            t.chapters.forEach((ch) => {
+                if (ch.id === chapter.id) ch.is_completed = true;
+            })
+        );
+    } catch (e) {
+        console.error("Ошибка при завершении главы:", e);
+    }
 }
 
 /* ======================================================
@@ -463,24 +624,24 @@ async function markChapterCompleted(chapter) {
 ===================================================== */
 /** Индекс раздела */
 function topicIndex(topic) {
-  return topics.value.findIndex(t => t.id === topic.id);
+    return topics.value.findIndex((t) => t.id === topic.id);
 }
 /** Все главы в разделе завершены? */
 function isTopicFullyCompleted(topic) {
-  if (!topic || !Array.isArray(topic.chapters)) return false;
-  return topic.chapters.every(ch => !!ch.is_completed);
+    if (!topic || !Array.isArray(topic.chapters)) return false;
+    return topic.chapters.every((ch) => !!ch.is_completed);
 }
 /** Можно раскрыть раздел?
  *   - первый раздел — да
  *   - иначе все предыдущие разделы должны быть полностью завершены
  */
 function isTopicUnlocked(topic) {
-  const idx = topicIndex(topic);
-  if (idx <= 0) return true;
-  for (let i = 0; i < idx; i++) {
-    if (!isTopicFullyCompleted(topics.value[i])) return false;
-  }
-  return true;
+    const idx = topicIndex(topic);
+    if (idx <= 0) return true;
+    for (let i = 0; i < idx; i++) {
+        if (!isTopicFullyCompleted(topics.value[i])) return false;
+    }
+    return true;
 }
 /** Можно открыть главу?
  *   - раздел разблокирован
@@ -498,19 +659,19 @@ function isTopicUnlocked(topic) {
 // }
 /** Безопасное раскрытие раздела */
 function toggleTopicSafe(topic) {
-  if (!isTopicUnlocked(topic)) {
-    alert("Сначала пройдите все главы в предыдущих разделах.");
-    return;
-  }
-  toggleTopic(topic.id);
+    if (!isTopicUnlocked(topic)) {
+        alert("Сначала пройдите все главы в предыдущих разделах.");
+        return;
+    }
+    toggleTopic(topic.id);
 }
 /** Переход к главе */
 function openChapter(topic, chapter) {
-//   if (!isChapterUnlocked(topic, chapter)) {
-//     alert("Сначала завершите предыдущие главы в этом разделе.");
-//     return;
-//   }
-  window.location.href = `/chapter/${chapter.id}`;
+    //   if (!isChapterUnlocked(topic, chapter)) {
+    //     alert("Сначала завершите предыдущие главы в этом разделе.");
+    //     return;
+    //   }
+    window.location.href = `/chapter/${chapter.id}`;
 }
 
 /* ======================================================
@@ -518,78 +679,92 @@ function openChapter(topic, chapter) {
 ===================================================== */
 const faqQuestions = ref([]);
 async function loadFaqs() {
-  try {
-    const { data } = await axios.get("/api/faqs");
-    faqQuestions.value = data.map(item => ({ ...item, isOpen: false }));
-  } catch (e) {
-    console.error("Ошибка при загрузке FAQ:", e);
-  }
+    try {
+        const { data } = await axios.get("/api/faqs");
+        faqQuestions.value = data.map((item) => ({ ...item, isOpen: false }));
+    } catch (e) {
+        console.error("Ошибка при загрузке FAQ:", e);
+    }
 }
 
 const allCourses = ref([]);
-const upgradeCourses = computed(() => allCourses.value.filter(c => c.upgradequalification === 1));
+const upgradeCourses = computed(() =>
+    allCourses.value.filter((c) => c.upgradequalification === 1)
+);
 async function loadCourses() {
-  try {
-    const { data } = await axios.get("/api/courses");
-    allCourses.value = data;
-  } catch (e) {
-    console.error("Ошибка при загрузке курсов:", e);
-  }
+    try {
+        const { data } = await axios.get("/api/courses");
+        allCourses.value = data;
+    } catch (e) {
+        console.error("Ошибка при загрузке курсов:", e);
+    }
 }
 
 const difficultyBgClass = {
-  basic: "block-info_bg-cyan",
-  middle: "block-info_bg-fiolet",
-  advanced: "block-info_bg-orange",
-  mixed: "block-info_bg-green",
+    basic: "block-info_bg-cyan",
+    middle: "block-info_bg-fiolet",
+    advanced: "block-info_bg-orange",
+    mixed: "block-info_bg-green",
 };
 const difficultyTranslation = {
-  basic: "Начинающий",
-  middle: "Средний",
-  advanced: "Продвинутый",
-  mixed: "Смешанный",
+    basic: "Начинающий",
+    middle: "Средний",
+    advanced: "Продвинутый",
+    mixed: "Смешанный",
 };
 
 /* ======================================================
    6. onMounted
 ===================================================== */
 onMounted(async () => {
-  if (course.value.id) {
-    courseId.value = course.value.id;
-  } else {
-    const parts = window.location.pathname.split("/");
-    const courseIdFromUrl = parts[parts.length - 1];
-    courseId.value = courseIdFromUrl;
+    if (course.value.id) {
+        courseId.value = course.value.id;
+    } else {
+        const parts = window.location.pathname.split("/");
+        const courseIdFromUrl = parts[parts.length - 1];
+        courseId.value = courseIdFromUrl;
 
-    axios
-      .get(`/api/course/${courseIdFromUrl}/topics`, { params: { user_id: storedUser.id } })
-      .then((response) => {
-        topics.value = (response.data.topics || []).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        topics.value.forEach((topic) => {
-          topic.chapters.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        });
-        topics.value.forEach((topic) => {
-          topic.chapters.forEach((chapter) => {
-            if (typeof chapter.is_completed === "undefined") chapter.is_completed = false;
-          });
-        });
-        course.value = response.data.course || {};
-      })
-      .catch((error) => console.error("Ошибка при загрузке тем курса:", error));
-  }
-
-  loadCourseComments();
-  loadFaqs();
-  loadCourses();
-
-  if (storedUser.id && courseId.value) {
-    try {
-      const { data } = await axios.get("/api/final-test/status", { params: { user_id: storedUser.id, course_id: courseId.value } });
-      testPassed.value = !!data.passed;
-    } catch (e) {
-      console.warn("Не удалось получить статус теста", e);
+        axios
+            .get(`/api/course/${courseIdFromUrl}/topics`, {
+                params: { user_id: storedUser.id },
+            })
+            .then((response) => {
+                topics.value = (response.data.topics || []).sort(
+                    (a, b) => new Date(a.created_at) - new Date(b.created_at)
+                );
+                topics.value.forEach((topic) => {
+                    topic.chapters.sort(
+                        (a, b) =>
+                            new Date(a.created_at) - new Date(b.created_at)
+                    );
+                });
+                topics.value.forEach((topic) => {
+                    topic.chapters.forEach((chapter) => {
+                        if (typeof chapter.is_completed === "undefined")
+                            chapter.is_completed = false;
+                    });
+                });
+                course.value = response.data.course || {};
+            })
+            .catch((error) =>
+                console.error("Ошибка при загрузке тем курса:", error)
+            );
     }
-  }
+
+    loadCourseComments();
+    loadFaqs();
+    loadCourses();
+
+    if (storedUser.id && courseId.value) {
+        try {
+            const { data } = await axios.get("/api/final-test/status", {
+                params: { user_id: storedUser.id, course_id: courseId.value },
+            });
+            testPassed.value = !!data.passed;
+        } catch (e) {
+            console.warn("Не удалось получить статус теста", e);
+        }
+    }
 });
 
 /* ======================================================
@@ -597,81 +772,124 @@ onMounted(async () => {
 ===================================================== */
 const userVotes = ref({});
 function findCommentByIdInTree(id, arr) {
-  const q = [...arr];
-  while (q.length) {
-    const c = q.shift();
-    if (c.id === id) return c;
-    if (c.children?.length) q.push(...c.children);
-  }
-  return null;
+    const q = [...arr];
+    while (q.length) {
+        const c = q.shift();
+        if (c.id === id) return c;
+        if (c.children?.length) q.push(...c.children);
+    }
+    return null;
 }
 function updateLocalCommentOptimistic(id, field, delta) {
-  const t = findCommentByIdInTree(id, courseComments.value || []);
-  if (!t) return;
-  if (typeof t[field] !== "number") t[field] = 0;
-  t[field] += delta;
+    const t = findCommentByIdInTree(id, courseComments.value || []);
+    if (!t) return;
+    if (typeof t[field] !== "number") t[field] = 0;
+    t[field] += delta;
 }
 function saveUserVotes() {
-  localStorage.setItem("userVotes", JSON.stringify(userVotes.value));
+    localStorage.setItem("userVotes", JSON.stringify(userVotes.value));
 }
 async function likeComment(comment) {
-  const prev = userVotes.value[comment.id];
-  if (prev === "like") {
-    updateLocalCommentOptimistic(comment.id, "likes", -1);
-    try { await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/unlike`); userVotes.value[comment.id] = undefined; }
-    catch { updateLocalCommentOptimistic(comment.id, "likes", 1); }
-  } else if (prev === "dislike") {
-    updateLocalCommentOptimistic(comment.id, "dislikes", -1);
-    updateLocalCommentOptimistic(comment.id, "likes", 1);
-    try {
-      await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/undislike`);
-      await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/like`);
-      userVotes.value[comment.id] = "like";
-    } catch {
-      updateLocalCommentOptimistic(comment.id, "dislikes", 1);
-      updateLocalCommentOptimistic(comment.id, "likes", -1);
+    const prev = userVotes.value[comment.id];
+    if (prev === "like") {
+        updateLocalCommentOptimistic(comment.id, "likes", -1);
+        try {
+            await axios.post(
+                `/api/courses/${courseId.value}/comments/${comment.id}/unlike`
+            );
+            userVotes.value[comment.id] = undefined;
+        } catch {
+            updateLocalCommentOptimistic(comment.id, "likes", 1);
+        }
+    } else if (prev === "dislike") {
+        updateLocalCommentOptimistic(comment.id, "dislikes", -1);
+        updateLocalCommentOptimistic(comment.id, "likes", 1);
+        try {
+            await axios.post(
+                `/api/courses/${courseId.value}/comments/${comment.id}/undislike`
+            );
+            await axios.post(
+                `/api/courses/${courseId.value}/comments/${comment.id}/like`
+            );
+            userVotes.value[comment.id] = "like";
+        } catch {
+            updateLocalCommentOptimistic(comment.id, "dislikes", 1);
+            updateLocalCommentOptimistic(comment.id, "likes", -1);
+        }
+    } else {
+        updateLocalCommentOptimistic(comment.id, "likes", 1);
+        try {
+            await axios.post(
+                `/api/courses/${courseId.value}/comments/${comment.id}/like`
+            );
+            userVotes.value[comment.id] = "like";
+        } catch {
+            updateLocalCommentOptimistic(comment.id, "likes", -1);
+        }
     }
-  } else {
-    updateLocalCommentOptimistic(comment.id, "likes", 1);
-    try { await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/like`); userVotes.value[comment.id] = "like"; }
-    catch { updateLocalCommentOptimistic(comment.id, "likes", -1); }
-  }
-  saveUserVotes();
+    saveUserVotes();
 }
 async function dislikeComment(comment) {
-  const prev = userVotes.value[comment.id];
-  if (prev === "dislike") {
-    updateLocalCommentOptimistic(comment.id, "dislikes", -1);
-    try { await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/undislike`); userVotes.value[comment.id] = undefined; }
-    catch { updateLocalCommentOptimistic(comment.id, "dislikes", 1); }
-  } else if (prev === "like") {
-    updateLocalCommentOptimistic(comment.id, "likes", -1);
-    updateLocalCommentOptimistic(comment.id, "dislikes", 1);
-    try {
-      await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/unlike`);
-      await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/dislike`);
-      userVotes.value[comment.id] = "dislike";
-    } catch {
-      updateLocalCommentOptimistic(comment.id, "likes", 1);
-      updateLocalCommentOptimistic(comment.id, "dislikes", -1);
+    const prev = userVotes.value[comment.id];
+    if (prev === "dislike") {
+        updateLocalCommentOptimistic(comment.id, "dislikes", -1);
+        try {
+            await axios.post(
+                `/api/courses/${courseId.value}/comments/${comment.id}/undislike`
+            );
+            userVotes.value[comment.id] = undefined;
+        } catch {
+            updateLocalCommentOptimistic(comment.id, "dislikes", 1);
+        }
+    } else if (prev === "like") {
+        updateLocalCommentOptimistic(comment.id, "likes", -1);
+        updateLocalCommentOptimistic(comment.id, "dislikes", 1);
+        try {
+            await axios.post(
+                `/api/courses/${courseId.value}/comments/${comment.id}/unlike`
+            );
+            await axios.post(
+                `/api/courses/${courseId.value}/comments/${comment.id}/dislike`
+            );
+            userVotes.value[comment.id] = "dislike";
+        } catch {
+            updateLocalCommentOptimistic(comment.id, "likes", 1);
+            updateLocalCommentOptimistic(comment.id, "dislikes", -1);
+        }
+    } else {
+        updateLocalCommentOptimistic(comment.id, "dislikes", 1);
+        try {
+            await axios.post(
+                `/api/courses/${courseId.value}/comments/${comment.id}/dislike`
+            );
+            userVotes.value[comment.id] = "dislike";
+        } catch {
+            updateLocalCommentOptimistic(comment.id, "dislikes", -1);
+        }
     }
-  } else {
-    updateLocalCommentOptimistic(comment.id, "dislikes", 1);
-    try { await axios.post(`/api/courses/${courseId.value}/comments/${comment.id}/dislike`); userVotes.value[comment.id] = "dislike"; }
-    catch { updateLocalCommentOptimistic(comment.id, "dislikes", -1); }
-  }
-  saveUserVotes();
+    saveUserVotes();
 }
 </script>
 
-
 <style scoped>
 /* стили для блокировки модуля*/
-.topic__header.is-locked { opacity: .6; cursor: not-allowed; }
-.chapter-link--locked    { pointer-events: none; opacity: .6; cursor: not-allowed; }
-.chapter-card.is-locked .chapter-card__preview-wrapper { filter: grayscale(1); }
+.modal-content--center {
+    text-align: center;
+}
+.topic__header.is-locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.chapter-link--locked {
+    pointer-events: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.chapter-card.is-locked .chapter-card__preview-wrapper {
+    filter: grayscale(1);
+}
 
-.test-passed-message{
+.test-passed-message {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -692,13 +910,13 @@ async function dislikeComment(comment) {
 .final-test-block {
     display: flex;
     flex-direction: column;
-  margin: 2rem 0;
-  padding: 15px 20px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  text-align: center;
+    margin: 2rem 0;
+    padding: 15px 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    text-align: center;
 }
-.backs{
+.backs {
     display: flex;
     height: 20px;
     width: 100%;
@@ -1065,7 +1283,6 @@ h2 {
 }
 
 .modal-overlay {
-    position: absolute;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
@@ -1084,6 +1301,7 @@ h2 {
 
 .modal-content h3 {
     margin: 0 0 10px;
+    font-weight: bold;
 }
 
 /* Анимация появления/исчезновения (fade) */
@@ -1213,26 +1431,26 @@ h2 {
     flex-direction: column;
     gap: 20px;
 }
-@media (max-width: 767px){
-    .btn-back{
+@media (max-width: 767px) {
+    .btn-back {
         left: 6%;
     }
-    .sidebar{
+    .sidebar {
         width: 250px;
     }
-    .logo_couerses{
+    .logo_couerses {
         width: 50px;
         height: 50px;
     }
 }
-@media (max-width: 680px){
-    .card{
+@media (max-width: 680px) {
+    .card {
         max-width: 100%;
     }
-    .sidebar{
+    .sidebar {
         width: 100%;
     }
-    .flex{
+    .flex {
         justify-content: center;
         flex-direction: column;
     }
