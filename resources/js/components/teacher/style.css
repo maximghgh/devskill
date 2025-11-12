@@ -1,0 +1,202 @@
+h2 {
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: var(--primary-600, #4e187b);
+    text-align: left;
+    margin-top: 72px;
+}
+
+h3 {
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    margin: 0 0 32px;
+}
+/* карточки информации */
+.info__block {
+    display: flex;
+    gap: 33px;
+    margin: 0 0 88px;
+}
+.info__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.info__card {
+    min-width: 420px;
+    background: var(--secondary-100, #f1f0fa);
+    padding: 28px 64px 28px 22px;
+    border-radius: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 44px;
+    box-shadow: 4px 4px 4px 0px #a2caff;
+}
+.info__text {
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: 0%;
+}
+.info__desc {
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: var(--primary-600, #4e187b);
+}
+.info__events {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 30px;
+    padding-top: 17px;
+    padding-right: 24px;
+    padding-bottom: 17px;
+    padding-left: 24px;
+    background: var(--secondary-100, #f1f0fa);
+    box-shadow: 4px 4px 4px 0px #a2caff;
+}
+.info__events-desc {
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 100%;
+    letter-spacing: 0%;
+}
+
+.center {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+}
+
+/* список курсов и мероприятий */
+.main {
+    display: flex;
+    gap: 30px;
+    margin: 0 0 88px;
+}
+.course__block {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.div {
+    width: 100%;
+}
+.events__block {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.course_card {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 10px;
+    opacity: 1;
+    border-radius: 30px;
+    padding-top: 8px;
+    padding-right: 16px;
+    padding-bottom: 8px;
+    padding-left: 16px;
+    border: 2px solid var(--primary-500, #7a2abd);
+}
+.course_card--s{
+    width: 48.75%;
+}
+.course__text {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.course__title {
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 146%;
+    letter-spacing: 0%;
+}
+.course__info {
+    display: flex;
+    gap: 35px;
+}
+.course__desc {
+    display: block;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 146%;
+    letter-spacing: 0%;
+}
+.course__link {
+    border-radius: 15px;
+    padding-top: 5px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+    padding-left: 15px;
+    background: var(--secondary-600, #41328f);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 146%;
+    letter-spacing: 0%;
+    color: #ffffff;
+    text-decoration: none;
+}
+.course__status {
+    background: #bde5b0;
+    border-radius: 15px;
+    padding: 0 15px;
+    position: absolute;
+    top: 8px;
+    right: 20px;
+
+    font-weight: 400;
+    font-size: 14px;
+    leading-trim: NONE;
+    line-height: 146%;
+    letter-spacing: 0%;
+    color: #000000;
+}
+
+.course__status--red{
+    background: #E5B0B0;
+}
+.pagination {
+    margin: 0 auto;
+    display: flex;
+    gap: 4px;
+}
+.pag--active{
+    cursor: pointer;
+    border: none;
+    width: 42px;
+    height: 8px;
+    border-radius: 23px;
+    background: var(--secondary-600, #41328F);
+}
+.pag{
+    cursor: pointer;
+    border: none;
+    width: 21px;
+    height: 8px;
+    border-radius: 23px;
+    background: var(--secondary-100, #F1F0FA);
+}
+
+/* страница курсов */
+
+.course{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;    
+}

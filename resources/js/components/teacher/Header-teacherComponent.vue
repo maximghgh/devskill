@@ -12,7 +12,11 @@
                     />
                 </a>
             </div>
-            <h3>Панель преподавателя</h3>
+            <nav class="header__nav">
+                <a href="/teacher">Панель преподователя</a>
+                <a href="/teacher">Журнал</a>
+                <a href="/teacher/course">Курсы</a>
+            </nav>
             <div class="header__lk">
                 <div class="personal-area personal-area_active">
                     <div class="personal-area__inner">
