@@ -2,7 +2,7 @@
     <header class="header header_main">
         <div class="header__inner">
             <div class="header__logos">
-                <a href="/admin">
+                <a href="/teacher">
                     <img
                         src="../../../img/logo.svg"
                         class="header__logo"
@@ -30,8 +30,8 @@
                                             : 'https://devskills.foncode.ru/img/nofotolk.png'
                                     "
                                     alt="Фото пользователя"
-                                    width="40"
-                                    height="40"
+                                    width="60"
+                                    height="60"
                                     class="avatar__user"
                                 />
                             </a>

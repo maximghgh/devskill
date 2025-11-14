@@ -13,6 +13,7 @@ import TaskStudent from './components/teacher/TaskStudent.vue';
 import StudentCourse from './components/teacher/StudentCourse.vue';
 import StudentSubmissions from './components/teacher/StudentSubmissions.vue';
 import CourseteacherComponent from './components/teacher/CourseteacherComponent.vue';
+import CourseEditComponent from './components/teacher/CourseEditComponent.vue';
 // Импорт всех компонентов для админ-панели
 
 import DashboardComponent from './components/admin/DashboardComponent.vue';
@@ -60,6 +61,7 @@ app.component('studentcours-component', StudentCourse);
 app.component('studentsubmissions-component', StudentSubmissions);
 app.component('profile-teacher-component', ProfileteacherComponent);
 app.component('courseteacher-component', CourseteacherComponent);
+app.component('course-edit-component', CourseEditComponent);
 
 // Регистрация компонентов (имена в kebab-case) для админ-панели
 app.component('addcourse-component', AddCourseComponent);

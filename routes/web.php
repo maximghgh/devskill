@@ -67,6 +67,10 @@ Route::get('/teacher/course', function () {
     return view('teacher.courseteacher');
 })->name('teacher.courseteacher');;
 
+Route::get('/teacher/course/id', function () {
+    return view('teacher.courseedit');
+})->name('teacher.courseedit');;
+
 Route::get('/admin/statistics', function () {
     return view('admin.statistics');
 })->name('admin.statistics');

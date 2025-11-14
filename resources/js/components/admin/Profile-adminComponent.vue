@@ -336,7 +336,8 @@ async function uploadPhoto() {
     left: 20px;
     top: -8px;
     background-color: #ffffff;
-    border: 1px solid #eeeef4;
+    border: 1px solid #6352C1;
+    border-radius: 10px;
     border-radius: 5px;
     padding: 5px 10px;
 }

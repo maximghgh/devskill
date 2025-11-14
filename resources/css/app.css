@@ -221,7 +221,6 @@ h2 {
     font-size: 2.15em;
     text-align: center;
     margin: 0 0 40px;
-    
 }
 .cooperation h2 {
     margin-bottom: 75px;
@@ -452,7 +451,7 @@ nav {
 nav a {
     display: block;
     color: #000;
-    font-size: 0.8em;
+    font-size: 18px;
     transition: var(--transition-3);
     text-decoration: none;
     border-bottom: 1px solid transparent;
@@ -479,8 +478,6 @@ nav a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
     gap: 10px;
 }
 .header__lk-img:hover {
@@ -499,8 +496,11 @@ nav a:hover {
 .personal-area__username {
     cursor: pointer;
     display: block;
-    font-size: 16px;
-    color: #575adf;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #005c94;
     text-decoration: none;
     transition: text-decoration 0.8s ease-in;
 }
@@ -509,7 +509,7 @@ nav a:hover {
 }
 .personal-area__button {
     color: #000;
-    font-size: 16px;
+    font-size: 18px;
     cursor: pointer;
     text-decoration: none;
     transition: text-decoration 0.8s ease-in;
@@ -529,17 +529,12 @@ nav a:hover {
 .header__link:hover {
     text-decoration: none;
 }
-.header__lk-name::after {
-    content: "\25BC";
-    color: #6d56c2;
-    position: absolute;
-    top: 50%;
-    right: -20px;
-    transform: translateY(-50%);
-}
+
 .personal-area__inner {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    width: 100%;
 }
 /* auth */
 .b-popup_enter {
@@ -868,21 +863,21 @@ input[type="number"]::-webkit-outer-spin-button {
     border-radius: 60px;
 }
 .course__cards_cabinet {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(250px, 1fr));
-  gap: 12px;
-  width: 1065px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(250px, 1fr));
+    gap: 12px;
+    width: 1065px;
 }
 @media (max-width: 1023px) {
-  .course__cards_cabinet {
-    grid-template-columns: repeat(2, minmax(250px, 1fr));
-  }
+    .course__cards_cabinet {
+        grid-template-columns: repeat(2, minmax(250px, 1fr));
+    }
 }
 
 @media (max-width: 767px) {
-  .course__cards_cabinet {
-    grid-template-columns: repeat(1, minmax(250px, 1fr));
-  }
+    .course__cards_cabinet {
+        grid-template-columns: repeat(1, minmax(250px, 1fr));
+    }
 }
 
 .course__cards-inner {
@@ -1035,6 +1030,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 /* infoblock */
 .infoblock {
+    margin: 72px 0;
 }
 .infoblock__wrapper {
     padding: var(--padding);
@@ -1043,7 +1039,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .infoblock__inner {
     padding: 40px 50px;
-    background: #f2f2f8;
+    background: #f1f0fa;
     border-radius: 60px;
     display: flex;
     flex-wrap: wrap;
@@ -1051,10 +1047,15 @@ input[type="number"]::-webkit-outer-spin-button {
     flex-direction: column;
 }
 .infoblock-title {
-    font-size: 1.6em;
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #4e187b;
 }
 .infoblock__info {
     display: flex;
+    align-items: center;
     gap: 58px;
 }
 @media (max-width: 767px) {
@@ -1072,8 +1073,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .infoblock__info-name-image img {
-    max-width: 330px;
-    height: 320px;
+    min-width: 280px;
+    height: 280px;
     border-radius: 18px;
 }
 .infoblock__info-form {
@@ -1088,19 +1089,40 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .infoblock__info-filebtn,
 .infoblock__button {
-    width: 150px;
-    height: 38px;
-    font-family: JanoSansProRegular;
-    font-size: 0.8em;
+    padding: 6px 17px;
+
     border-radius: 14px;
-    color: #fff;
-    background: #ccccde;
+    color: #ffffff;
+    background: #41328f;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 0;
     cursor: pointer;
     transition: var(--transition-3);
+
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 146%;
+    letter-spacing: 0%;
+}
+
+.infoblock__info-filebtn {
+    padding: 6px 17px;
+    border-radius: 14px;
+    color: #000;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #7a2abd;
+    cursor: pointer;
+    transition: var(--transition-3);
+    white-space: nowrap;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 146%;
+    letter-spacing: 0%;
 }
 .infoblock__info-filetext {
     text-align: center;
@@ -2233,7 +2255,7 @@ footer {
     }
 }
 @media (max-width: 650px) {
-    .course__menu-persona{
+    .course__menu-persona {
         flex-direction: column;
     }
     .course__menu {

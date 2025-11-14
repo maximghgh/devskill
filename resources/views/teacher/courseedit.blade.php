@@ -10,7 +10,7 @@
 <body>
     <div id="app">
         <header-teacher-component></header-teacher-component>
-        <profile-teacher-component></cabinet-component>
+        <course-edit-component></course-edit-component>
     </div>
 </body>
 </html>

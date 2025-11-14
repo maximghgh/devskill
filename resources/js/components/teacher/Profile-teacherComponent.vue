@@ -3,33 +3,11 @@
         <div class="maincontainer">
             <div class="container">
                 <section class="course">
-                    <div class="course__inner">
-                        <div class="course__content">
-                            <div class="course__menu course__menu-persona">
-                                <div class="course__menu-nickname">
-                                    <img 
-                                        :src="user.photo ? `/storage/${user.photo}` : 'https://devskills.foncode.ru/img/no_foto.jpg'" 
-                                        alt="Фото пользователя" class="course__menu-foto"
-                                    />
-                                    <div class="course__menu-name-admin">
-                                        {{ user.name }}
-                                        <span class="course__menu-desc">(Преподаватель)</span>
-                                    </div>
-                                </div>
-                                <div class="course__menu-block">
-                                    <a href="/teacher" class="course__menu-one">Вернуться на главную</a>
-                                    <div class="course__menu-one course__menu-one_active">
-                                        Личные данные
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </section>
                 <section class="infoblock block-tab block-tab_active">
                     <div class="infoblock__wrapper">
                         <div class="infoblock__inner">
-                            <div class="infoblock-title">Личные данные</div>
+                            <div class="infoblock-title">Личный кабинет</div>
                             <div class="infoblock__info">
                                 <div lang="infoblock__info-name">
                                     <div class="infoblock__info-name-image">
@@ -38,7 +16,7 @@
                                             alt="Фото пользователя" 
                                         />
                                     </div>
-                                    <form action="" class="infoblock__info-form">
+                                    <form action="" class="infoblock__info-form" @submit.prevent="saveProfile">
                                         <label class="infoblock__info-file">
                                             <input
                                                 type="file"
@@ -56,14 +34,12 @@
                                         </label>
                                         <input
                                             type="submit"
-                                            value="Добавить"
+                                            value="Сохранить"
                                             class="infoblock__button"
-                                            @click="uploadPhoto"
                                         />
                                     </form>
                                 </div>
                                 <form
-                                    @submit.prevent="updateProfile"
                                     class="infoblock__data"
                                 >
                                     <div class="infoblock__data-top">
@@ -98,16 +74,14 @@
                                             >
                                         </div>
                                         <div class="custom-input">
-                                            <label class="custom-label"
-                                                >Статус</label
-                                            >
                                             <input
-                                                class="custom-status"
                                                 type="text"
-                                                v-model="form.status"
-                                                placeholder="Ученик"
-                                                disabled
+                                                v-model="form.country"
+                                                placeholder="Страна + город"
                                             />
+                                            <label class="custom-label"
+                                                >Местоположение</label
+                                            >
                                         </div>
                                         <div class="custom-input">
                                             <input
@@ -125,23 +99,23 @@
                                             >
                                         </div>
                                         <div class="custom-input">
-                                            <input
-                                                type="text"
-                                                v-model="form.country"
-                                                placeholder="Страна + город"
-                                            />
                                             <label class="custom-label"
-                                                >Местоположение</label
+                                                >Должность</label
                                             >
+                                            <input
+                                                class="custom-status"
+                                                type="text"
+                                                v-model="form.status"
+                                                placeholder="Должность"
+                                            />
                                         </div>
                                     </div>
-                                    <input type="submit" value="Сохранить" />
                                 </form>
                                 <div v-if="showModal" class="modal-overlay">
                                     <div class="modal-content">
                                         <h2>Данные изменены</h2>
                                         <p>Перейти в профиль: 
-                                            <a class="modal__link" href="/admin/profile">Вернуться в профиль</a>
+                                            <a class="modal__link" href="/teacher/profile">Вернуться в профиль</a>
                                         </p>
                                     </div>
                                 </div>
@@ -268,6 +242,22 @@ const loadUserData = async () => {
   }
 };
 
+const saveProfile = async () => {
+  try {
+    // 1. Если есть выбранное фото – сначала загружаем его
+    if (selectedFile.value) {
+      await uploadPhoto(); // функция уже есть, переиспользуем
+    }
+
+    // 2. Затем обновляем профиль
+    await updateProfile();
+    // модалка уже открывается внутри updateProfile (showModal.value = true)
+  } catch (error) {
+    console.error("Ошибка при сохранении профиля:", error);
+  }
+};
+
+
 // Функция обновления профиля
 const updateProfile = async () => {
   try {
@@ -297,7 +287,6 @@ function onFileSelected(event) {
 // Функция загрузки фото
 async function uploadPhoto() {
   if (!selectedFile.value) {
-    alert("Сначала выберите файл!");
     return;
   }
   try {
@@ -315,7 +304,6 @@ async function uploadPhoto() {
       },
     });
     console.log("Фото обновлено:", response.data.user);
-    alert("Фото успешно загружено!");
     // Обновляем данные пользователя в localStorage и в реактивной переменной
     localStorage.setItem("user", JSON.stringify(response.data.user));
     user.value = response.data.user;
@@ -336,9 +324,9 @@ async function uploadPhoto() {
     left: 20px;
     top: -8px;
     background-color: #ffffff;
-    border: 1px solid #eeeef4;
-    border-radius: 5px;
-    padding: 5px 10px;
+    border: 1px solid #6352C1;
+    border-radius: 10px;
+    padding: 5px 11px;
 }
 .custom-status{
     color: #575adf;

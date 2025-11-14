@@ -90,6 +90,11 @@ h3 {
     flex-direction: column;
     gap: 16px;
 }
+.course__block--current {
+    flex-wrap: wrap;
+    flex-direction: row;
+    margin: 0 0 88px;
+}
 .div {
     width: 100%;
 }
@@ -113,7 +118,7 @@ h3 {
     padding-left: 16px;
     border: 2px solid var(--primary-500, #7a2abd);
 }
-.course_card--s{
+.course_card--s {
     width: 48.75%;
 }
 .course__text {
@@ -162,41 +167,688 @@ h3 {
 
     font-weight: 400;
     font-size: 14px;
-    leading-trim: NONE;
     line-height: 146%;
     letter-spacing: 0%;
     color: #000000;
 }
 
-.course__status--red{
-    background: #E5B0B0;
+.course__status--red {
+    background: #e5b0b0;
+}
+.course__status--yellow {
+    background: #e5dfb0;
 }
 .pagination {
     margin: 0 auto;
     display: flex;
     gap: 4px;
 }
-.pag--active{
+.pag--active {
     cursor: pointer;
     border: none;
     width: 42px;
     height: 8px;
     border-radius: 23px;
-    background: var(--secondary-600, #41328F);
+    background: var(--secondary-600, #41328f);
 }
-.pag{
+.pag {
     cursor: pointer;
     border: none;
     width: 21px;
     height: 8px;
     border-radius: 23px;
-    background: var(--secondary-100, #F1F0FA);
+    background: var(--secondary-100, #f1f0fa);
 }
 
 /* страница курсов */
 
-.course{
+.courseses {
     display: flex;
     flex-direction: column;
-    gap: 20px;    
+    gap: 20px;
+}
+
+/* страница подробнее о курсе у преподователя */
+
+.info__course {
+    display: flex;
+    gap: 28px;
+    margin: 0 0 72px;
+}
+.info__card--course {
+    min-width: 334px;
+    padding: 28px 57px 28px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+.info__desc--s {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 146%;
+    letter-spacing: 0%;
+}
+.info__card--center {
+    display: flex;
+    align-items: center;
+}
+.courses_h2 {
+    color: #7a2abd;
+}
+.topic__h2 {
+    color: #000000;
+}
+
+/* блоки для уроков */
+.blocks {
+    margin: 0 0 72px;
+}
+.blocks__title {
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 100%;
+    letter-spacing: 0%;
+
+    margin: 0 0 24px;
+    text-align: left;
+}
+
+.blocks__list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* === Блок курса === */
+
+.course-block {
+    border-radius: 30px;
+    border: 2px solid #7a2abd;
+    background-color: #ffffff;
+    padding: 16px 24px 18px;
+}
+
+.course-block__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.course-block__info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.course-block__title {
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 146%;
+    letter-spacing: 0%;
+    margin: 0;
+    color: #000000;
+}
+
+.course-block__status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* модификаторы статуса */
+.course-block__status-badge--completed {
+    background-color: #e5dfb0;
+}
+
+.course-block__status-badge--active {
+    background-color: #bde5b0;
+}
+
+.course-block__status-badge--closed {
+    background-color: #e5b0b0;
+}
+
+.course-block__controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Список уроков */
+
+.course-block__lessons {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.course-block__lesson {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-radius: 12px;
+    background-color: #f1f0fa;
+    font-size: 14px;
+}
+
+.course-block__lesson-title {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 146%;
+    letter-spacing: 0%;
+}
+
+.course-block__lesson-edit {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 146%;
+    letter-spacing: 0%;
+    color: #005c94;
+    border-bottom: 1px solid #34a7ff00;
+}
+
+.course-block__lesson-edit:hover {
+    color: #34a6ff;
+    border-bottom: 1px solid #34a6ff;
+}
+
+/* Свёрнутый блок */
+
+.course-block--collapsed .course-block__lessons {
+    display: none;
+}
+
+/* === Переключатель (отдельный БЭМ-блок switch) === */
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+.switch__input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch__slider {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background-color: #7a2abd;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.switch__slider::before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 5px;
+    top: 4px;
+    border-radius: 50%;
+    background-color: #d3bcf7;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    transition: 0.2s;
+}
+
+.switch__input:checked + .switch__slider {
+    background-color: #d3bcf7;
+}
+
+.switch__input:checked + .switch__slider::before {
+    background-color: #7a2abd;
+
+    transform: translateX(20px);
+}
+
+/* Стрелка-свёртка */
+
+.course-block__collapse {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.course-block__collapse-icon {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-right: 1px solid #000000;
+    border-bottom: 1px solid #000000;
+    transform: rotate(-135deg); /* стрелка вверх */
+    transition: transform 0.2s;
+}
+
+.course-block--collapsed .course-block__collapse-icon {
+    transform: rotate(45deg); /* стрелка вниз */
+}
+
+/* Адаптивность */
+
+@media (max-width: 600px) {
+    .course-block__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .course-block__controls {
+        align-self: stretch;
+        justify-content: flex-end;
+    }
+
+    .course-block__lesson {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+}
+
+.file {
+    margin: 0 0 72px;
+}
+
+.file__title {
+    font-size: 32px;
+    font-weight: 500;
+    margin: 0 0 24px;
+}
+
+.file__content {
+    display: flex;
+    align-items: flex-start;
+}
+
+/* список файлов слева */
+.file__desc {
+    display: flex;
+    flex-direction: column;
+}
+.file__list {
+    width: 600px;
+    list-style: none;
+    margin: 0 0 32px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 291px);
+    grid-template-rows: repeat(2, 75px);
+    gap: 18px;
+    row-gap: 28px;
+}
+
+.file__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.blocks__title--margin {
+    margin: 0 0 32px;
+}
+
+/* текстовая часть элемента */
+
+.file__info {
+    display: flex;
+    flex-direction: column;
+}
+
+.file__name {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0 0 5px;
+}
+
+.file__meta {
+    font-size: 12px;
+    color: #8a8a8a;
+    margin: 0 0 8px;
+}
+
+.file__download {
+    margin-top: 2px;
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: 13px;
+    color: #2f7be9;
+    cursor: pointer;
+    text-align: left;
+}
+
+.file__download:hover {
+    text-decoration: underline;
+}
+
+/* правая часть – dropzone */
+
+.file__drop {
+    flex: 1;
+    min-height: 220px;
+    background-color: #e9f2ff;
+    border-radius: 32px;
+    padding: 16px 25px;
+    box-shadow: 0 10px 20px rgba(132, 179, 255, 0.55);
+    display: flex;
+    align-items: stretch;
+}
+
+.file__drop-inner {
+    border-radius: 26px;
+    border: 2px dashed #9a9a9a;
+    padding: 40px 24px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.file__drop-text {
+    margin: 0 0 9px;
+    font-size: 14px;
+}
+
+.file__drop-button {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 16px;
+    background-color: #a2caff;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 146%;
+    letter-spacing: 0%;
+    text-align: center;
+    transition: background 0.3s ease-in-out;
+}
+
+.file__drop-button:hover {
+    background: #34a6ff;
+}
+
+/* input скрываем */
+
+.file__input {
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* адаптив */
+
+@media (max-width: 900px) {
+    .file__content {
+        flex-direction: column;
+    }
+
+    .file__drop {
+        width: 100%;
+    }
+}
+
+/* журнал */
+
+.journal {
+    margin: 0 0 72px;
+}
+
+/* Заголовок */
+
+.journal__title {
+    margin: 0 0 12px;
+    font-size: 30px;
+    font-weight: 500;
+}
+
+/* Месяцы */
+
+.journal__months {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.journal__month {
+    width: 94px;
+    padding: 4px 16px;
+    border-radius: 18px;
+    border: 1px solid #b6b2c8;
+    background-color: #ffffff;
+    cursor: pointer;
+
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+}
+
+.journal__month--active {
+    background-color: #41328F;
+    border-color: #5c3de6;
+    color: #ffffff;
+}
+
+/* Контейнер таблицы */
+
+.journal__table-wrapper {
+    border-radius: 18px;
+    border: 1px solid #c3bdd7;
+    padding: 10px 9px 35px;
+    overflow-x: auto;
+}
+
+/* Таблица */
+
+.journal__table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 780px;
+}
+
+/* Шапка */
+
+.journal__head-cell {
+    font-size: 10px;
+    font-weight: 400;
+    color: #777777;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.journal__head-cell--sticky {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-align: left;
+    padding-left: 4px;
+    padding-right: 20px;
+    min-width: 160px;
+}
+
+.journal__head-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    border-radius: 3px;
+    border: 1px solid #a36bff;
+    position: relative;
+    vertical-align: middle;
+}
+
+.journal__head-icon::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 4px;
+    height: 1px;
+    background-color: #a36bff;
+}
+
+.journal__head-title {
+    font-size: 13px;
+    color: #333333;
+    vertical-align: middle;
+}
+
+.journal__day {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px;
+    border-radius: 12px;
+}
+
+.journal__day-week {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #757b88;
+}
+
+.journal__day-date {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #000000;
+}
+
+.journal__head-cell--today .journal__day {
+    background-color: #41328F;
+    color: #ffffff;
+}
+.journal__head-cell--today .journal__day-week {
+    color: #c9c2b2;
+}
+.journal__head-cell--today .journal__day-date {
+    color: #faf4e5;
+}
+/* Строки */
+
+.journal__row {
+    height: 26px;
+}
+
+/* Ячейки */
+
+.journal__cell {
+    padding: 3px 5px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.journal__cell--name {
+    text-align: left;
+    padding-right: 16px;
+}
+
+.journal__student-index {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid #a2a2a2;
+    font-size: 11px;
+    align-items: center;
+    justify-content: center;
+    margin-right: 6px;
+}
+
+.journal__student-name {
+    white-space: nowrap;
+}
+
+/* обычные ячейки с текстом (5, 4, Н/Я) – просто текст */
+
+.journal__cell--value {
+    text-align: center;
+}
+
+/* ячейки текущего дня */
+
+.journal__cell--today {
+    text-align: center;
+}
+
+/* будущие слоты, как светло-лиловые квадратики */
+
+.journal__cell--future,
+.journal__cell--slot {
+    text-align: center;
+}
+
+/* слот внутри ячейки (квадратик/капсула) */
+
+.journal__slot {
+    padding: 11px 11px;
+    display: inline-flex;
+    min-width: 40px;
+    height: 36px;
+    border-radius: 6px;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+/* пустой серо-фиолетовый */
+
+.journal__slot--empty {
+    background-color: #f2eefc;
+}
+
+/* комментарий С – тоже серый, но текст внутри */
+
+.journal__slot--comment {
+    background-color: #f2eefc;
+}
+
+/* заполненный для текущего дня – более тёмная капсула */
+
+.journal__slot--filled {
+    background-color: #f1f0fa;
+}
+
+/* адаптив */
+
+@media (max-width: 900px) {
+    .journal {
+        padding: 16px;
+    }
+
+    .journal__table-wrapper {
+        padding: 8px;
+    }
 }
