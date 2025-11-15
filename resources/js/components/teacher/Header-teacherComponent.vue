@@ -14,7 +14,7 @@
             </div>
             <nav class="header__nav">
                 <a href="/teacher">Панель преподователя</a>
-                <a href="/teacher">Журнал</a>
+                <a href="/teacher/journal">Журнал</a>
                 <a href="/teacher/course">Курсы</a>
             </nav>
             <div class="header__lk">

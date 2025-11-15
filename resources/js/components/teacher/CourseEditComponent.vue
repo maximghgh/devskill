@@ -62,23 +62,25 @@
                             <span class="course-block__lesson-title"
                                 >1 урок. Основы HTML</span
                             >
-                            <button
+                            <a
                                 class="course-block__lesson-edit"
                                 type="button"
+                                href="/teacher/chapter/id"
                             >
                                 Редактировать
-                            </button>
+                            </a>
                         </li>
                         <li class="course-block__lesson">
                             <span class="course-block__lesson-title"
                                 >2 урок. Основы CSS</span
                             >
-                            <button
+                            <a
                                 class="course-block__lesson-edit"
                                 type="button"
+                                href="/teacher/chapter/id"
                             >
                                 Редактировать
-                            </button>
+                            </a>
                         </li>
                     </ul>
                 </article>
@@ -124,23 +126,25 @@
                             <span class="course-block__lesson-title"
                                 >1 урок. Основы HTML</span
                             >
-                            <button
+                            <a
                                 class="course-block__lesson-edit"
                                 type="button"
+                                href="/teacher/chapter/id"
                             >
                                 Редактировать
-                            </button>
+                            </a>
                         </li>
                         <li class="course-block__lesson">
                             <span class="course-block__lesson-title"
                                 >2 урок. Основы CSS</span
                             >
-                            <button
+                            <a
                                 class="course-block__lesson-edit"
                                 type="button"
+                                href="/teacher/chapter/id"
                             >
                                 Редактировать
-                            </button>
+                            </a>
                         </li>
                     </ul>
                 </article>
@@ -186,23 +190,25 @@
                             <span class="course-block__lesson-title"
                                 >1 урок. Основы HTML</span
                             >
-                            <button
+                            <a
                                 class="course-block__lesson-edit"
                                 type="button"
+                                href="/teacher/chapter/id"
                             >
                                 Редактировать
-                            </button>
+                            </a>
                         </li>
                         <li class="course-block__lesson">
                             <span class="course-block__lesson-title"
                                 >2 урок. Основы CSS</span
                             >
-                            <button
+                            <a
                                 class="course-block__lesson-edit"
                                 type="button"
+                                href="/teacher/chapter/id"
                             >
                                 Редактировать
-                            </button>
+                            </a>
                         </li>
                     </ul>
                 </article>
@@ -246,23 +252,25 @@
                             <span class="course-block__lesson-title"
                                 >1 урок. Основы HTML</span
                             >
-                            <button
+                            <a
                                 class="course-block__lesson-edit"
                                 type="button"
+                                href="/teacher/chapter/id"
                             >
                                 Редактировать
-                            </button>
+                            </a>
                         </li>
                         <li class="course-block__lesson">
                             <span class="course-block__lesson-title"
                                 >2 урок. Основы CSS</span
                             >
-                            <button
+                            <a
                                 class="course-block__lesson-edit"
                                 type="button"
+                                href="/teacher/chapter/id"
                             >
                                 Редактировать
-                            </button>
+                            </a>
                         </li>
                     </ul>
                 </article>

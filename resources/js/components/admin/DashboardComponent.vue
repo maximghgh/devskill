@@ -1,28 +1,31 @@
 <template>
     <div>
-        <div class="container">
+        <div class="containers">
             <aside>
-                <div class="menu">
+                <div class="menus">
                     <div class="aside__menu">
                         <!-- Меню -->
                         <ul class="aside__list">
-                            <li class="aside__item"
-                                v-for="(item, index) in menuItems"
-                                :key="index"
+                            <li
+                            class="aside__item"
+                            v-for="(item, index) in menuItems"
+                            :key="index"
                             >
-                                <a
-                                    :href="item.href"
-                                    :class="[
-                                        'aside__link',
-                                        {
-                                            'aside__link--active':
-                                                activeIndex === index,
-                                        },
-                                    ]"
-                                    @click.prevent="setActive(index)"
-                                >
-                                    {{ item.label }}
-                                </a>
+                            <a
+                                :href="item.href"
+                                :class="[
+                                'aside__link',
+                                { 'aside__link--active': activeIndex === index },
+                                ]"
+                                @click.prevent="setActive(index)"
+                            >
+                                <span class="aside__icon" v-if="item.icon">
+                                <img :src="item.icon" width="24" height="24" alt="" />
+                                </span>
+                                <span class="aside__text">
+                                {{ item.label }}
+                                </span>
+                            </a>
                             </li>
                         </ul>
                     </div>
@@ -35,43 +38,247 @@
                             v-show="activeIndex === index"
                         >
                             <h1 class="page__title">{{ item.label }}</h1>
-                            <!-- Блок "Все пользователи" -->
-                            <div v-if="item.id === 'users'" class="user-block">
-                                <div class="filters">
-                                    <label for="roleFilter">Поиск пользователя:</label>
-                                    <div class="search">
-                                        <select id="roleFilter" v-model="selectedRole" class="role-filter">
-                                            <option value="all">Все роли</option>
-                                            <option value="3">Админ</option>
-                                            <option value="2">Преподаватель</option>
-                                            <option value="1">Ученик</option>
-                                        </select>
-
-                                        <!-- Новое: поиск -->
-                                        <div class="searsh__users">
-                                            <input
-                                                v-model="searchQuery"
-                                                type="text"
-                                                class="search-filter"
-                                                placeholder="Поиск: ФИО, email, телефон, город, дата"
-                                                style="min-width:260px"
-                                            />
-                                            <button
-                                                v-if="searchQuery"
-                                                class="btn__user--edit"
-                                                @click="searchQuery = ''"
-                                                style="padding:6px 10px"
-                                            >
-                                                Очистить
-                                            </button>
+                            <div v-if="item.id === 'dashboard'" class="user-block">
+                                <span class="dashboard__desc">Добро пожаловать, Анастасия Филатова!</span>
+                                <div class="info__block-statistics">
+                                    <div class="statistics">
+                                        <div class="">
+                                            <h1 class="blocks__title--m">Статистика</h1>
+                                            <ul class="statistics__list">
+                                                <li class="statistics__item">
+                                                    <span class="statistics__text">Открытые обращения пользователей</span>
+                                                    <span class="statistics__text">12</span>            
+                                                </li>
+                                                <li class="statistics__item">
+                                                    <span class="statistics__text">Активные курсы</span>
+                                                    <span class="statistics__text">12</span>            
+                                                </li>
+                                                <li class="statistics__item">
+                                                    <span class="statistics__text">Завершенные курсы</span>
+                                                    <span class="statistics__text">1</span>            
+                                                </li>
+                                                <li class="statistics__item">
+                                                    <span class="statistics__text">Всего пользователей</span>
+                                                    <span class="statistics__text">123</span>            
+                                                </li>
+                                            </ul>
                                         </div>
+                                        <section class="activity">
+                                            <h1 class="blocks__title--m">Последняя активность</h1>
+
+                                            <ul class="activity__list">
+                                                <li class="activity__item">
+                                                    <div class="activity__content">
+                                                        <p class="activity__text">
+                                                            Новое обращение от пользователя Вася
+                                                        </p>
+                                                        <p class="activity__meta">
+                                                            <span class="activity__meta-icon">
+                                                                <img width="15" height="15" src="../../../img/admin/time.svg" alt="">
+                                                            </span>
+                                                            <span class="activity__meta-time">3 часа назад</span>
+                                                        </p>
+                                                    </div>
+                                                </li>
+
+                                                <li class="activity__item">
+                                                    <div class="activity__content">
+                                                        <p class="activity__text">
+                                                            Новый курс создан
+                                                        </p>
+                                                        <p class="activity__meta">
+                                                            <span class="activity__meta-icon">
+                                                                <img width="15" height="15" src="../../../img/admin/time.svg" alt="">
+                                                            </span>
+                                                            <span class="activity__meta-time">5 часов назад</span>
+                                                        </p>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </section>
+                                        <section class="activity">
+                                            <h1 class="blocks__title--m">Активность</h1>
+
+                                            <img src="../../../img/admin/active.png" alt="">
+                                        </section>
+                                        <section class="attention">
+                                            <h1 class="blocks__title--m">Требуют внимания</h1>
+
+                                            <ul class="attention__list">
+                                                <!-- Заявка 1 -->
+                                                <li class="attention__item attention__item--muted">
+                                                    <span class="attention__status"></span>
+
+                                                    <div class="attention__content">
+                                                        <p class="attention__topic">Вопрос о записи на курс</p>
+
+                                                        <p class="attention__from">От: Вася</p>
+                                                        <p class="attention__message">
+                                                            Не могу зайти на курс. Помогите!
+                                                        </p>
+
+                                                        <span class="attention__tag attention__tag--light">
+                                                            Вопрос
+                                                        </span>
+                                                    </div>
+                                                </li>
+
+                                                <!-- Заявка 2 -->
+                                                <li class="attention__item attention__item--active">
+                                                    <span class="attention__status"></span>
+
+                                                    <div class="attention__content">
+                                                        <p class="attention__topic">Технические проблемы</p>
+
+                                                        <p class="attention__from">От: Отец</p>
+                                                        <p class="attention__message">
+                                                            Я случайно поменял сыну пароль
+                                                        </p>
+
+                                                        <span class="attention__tag">
+                                                            От родителя
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </section>
+
                                     </div>
                                 </div>
+                            </div>
+                            <!-- Блок "Все пользователи" -->
+                            <div v-if="item.id === 'users'" class="user-block" id="users">
+                                <!-- верхняя строка: заголовок + счетчик + кнопка -->
+                                <div class="users-header">
+                                    <p class="users-subtitle">{{ usersTotalLabel }}</p>                                    
+                                </div>
+
+                                <!-- панель фильтров -->
+                                <div class="users-toolbar">
+                                    <div class="asdf">
+                                        <div class="users-toolbar__left">
+                                            <!-- Показать N пользователей -->
+                                            <label class="users-show">
+                                                Показать
+                                                <span class="users-show__select-wrap">
+                                                    <select v-model.number="pageSizeUsers" class="users-show__select">
+                                                        <option :value="10">10</option>
+                                                        <option :value="25">25</option>
+                                                        <option :value="50">50</option>
+                                                    </select>
+                                                </span>
+                                                пользователей
+                                            </label>
+
+                                            <!-- Фильтр ролей -->
+                                            <div class="users-roles">
+                                                <button
+                                                    type="button"
+                                                    class="users-roles__btn"
+                                                    @click="roleDropdownOpen = !roleDropdownOpen"
+                                                >
+                                                    Роли
+                                                    <span
+                                                        class="users-roles__chevron"
+                                                        :class="{ 'users-roles__chevron--open': roleDropdownOpen }"
+                                                    ></span>
+                                                </button>
+
+                                                <div
+                                                    v-if="roleDropdownOpen"
+                                                    class="users-roles__dropdown"
+                                                    @click.stop
+                                                >
+                                                    <p class="users-roles__title">Фильтр роль</p>
+
+                                                    <!-- используем RADIO, но стилизуем как чекбоксы -->
+                                                    <label class="users-roles__option">
+                                                        <input
+                                                            type="radio"
+                                                            value="all"
+                                                            v-model="selectedRole"
+                                                        />
+                                                        <span>Все роли</span>
+                                                    </label>
+                                                    <label class="users-roles__option">
+                                                        <input
+                                                            type="radio"
+                                                            value="1"
+                                                            v-model="selectedRole"
+                                                        />
+                                                        <span>Ученик</span>
+                                                    </label>
+                                                    <label class="users-roles__option">
+                                                        <input
+                                                            type="radio"
+                                                            value="2"
+                                                            v-model="selectedRole"
+                                                        />
+                                                        <span>Преподаватель</span>
+                                                    </label>
+                                                    <label class="users-roles__option">
+                                                        <input
+                                                            type="radio"
+                                                            value="3"
+                                                            v-model="selectedRole"
+                                                        />
+                                                        <span>Администратор</span>
+                                                    </label>
+
+                                                    <div class="users-roles__actions">
+                                                        <button
+                                                            type="button"
+                                                            class="btn users-roles__apply"
+                                                            @click="roleDropdownOpen = false"
+                                                        >
+                                                            Фильтр
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            class="btn users-roles__reset"
+                                                            @click="resetRoleFilter"
+                                                        >
+                                                            Сброс
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Поиск -->
+                                        <div class="users-toolbar__search">
+                                            <div class="users-search">
+                                                <span class="users-search__icon">
+                                                    <img width="13" height="13" src="../../../img/admin/search.svg" alt="">
+                                                </span>
+                                                <input
+                                                    v-model="searchQuery"
+                                                    type="text"
+                                                    class="users-search__input"
+                                                    placeholder="Поиск..."
+                                                />
+                                                <button
+                                                    v-if="searchQuery"
+                                                    type="button"
+                                                    class="users-search__clear"
+                                                    @click="searchQuery = ''"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="users-btn-new">
+                                        <span class="users-btn-desc">+</span> Новый пользователь
+                                    </button>
+                                </div>
+
+                                <!-- таблица пользователей -->
                                 <div v-if="filteredUsers.length > 0">
                                     <table class="light-push-table">
                                         <thead>
                                             <tr>
-                                                <th>№</th>
+                                                <th>ID</th>
                                                 <th>ФИО</th>
                                                 <th>Email</th>
                                                 <th>Телефон</th>
@@ -79,82 +286,92 @@
                                                 <th>Местоположение</th>
                                                 <th>Роль</th>
                                                 <th>Действия</th>
-                                                <th>Удалить пользователя</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(userItem, index) in paginatedUsers" :key="userItem.id">
-                                                <td>{{ index + 1 }}</td>
+                                            <tr
+                                                v-for="(userItem) in paginatedUsers"
+                                                :key="userItem.id"
+                                            >
+                                                <td>#{{ userItem.id }}</td>
                                                 <td>{{ userItem.name }}</td>
                                                 <td>{{ userItem.email }}</td>
                                                 <td>{{ userItem.phone }}</td>
                                                 <td>{{ formatBirthday(userItem.birthday) }}</td>
                                                 <td>{{ userItem.country }}</td>
+
                                                 <!-- роли -->
                                                 <td>
-                                                    <div v-if="editingUserId ===userItem.id">
+                                                    <div v-if="editingUserId === userItem.id">
                                                         <select
-                                                            v-model="
-                                                                editingUser.role
-                                                            "
+                                                            v-model="editingUser.role"
                                                             class="select"
                                                             style="
                                                                 padding: 5px;
-                                                                border: 1px solid
-                                                                    #ccc;
+                                                                border: 1px solid #ccc;
                                                                 border-radius: 4px;
                                                             "
                                                         >
-                                                            <option :value="3">
-                                                                Админ
-                                                            </option>
-                                                            <option :value="2">
-                                                                Преподаватель
-                                                            </option>
-                                                            <option :value="1">
-                                                                Ученик
-                                                            </option>
+                                                            <option :value="3">Админ</option>
+                                                            <option :value="2">Преподаватель</option>
+                                                            <option :value="1">Ученик</option>
                                                         </select>
                                                     </div>
-                                                    <div v-else @click="startEditing(userItem)" style="cursor: pointer">
-                                                        {{
-                                                            getRoleName(
-                                                                userItem.role
-                                                            )
-                                                        }}
+                                                    <div
+                                                        v-else
+                                                        @click="startEditing(userItem)"
+                                                        class="users-role-pill"
+                                                    >
+                                                        {{ getRoleName(userItem.role) }}
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <button class="btn__user--edit" @click="openUserEditModal(userItem)">Редактировать</button>
-                                                </td>
-                                                <td>
-                                                    <button class="btn__user--delete" @click="deleteUser(userItem.id)">Удалить пользователя</button>
+                                                    <button
+                                                        class="btn__user--edit"
+                                                        @click="openUserEditModal(userItem)"
+                                                    >
+                                                        <img width="24" height="24" src="../../../img/admin/edit.svg" alt="">
+                                                    </button>
+                                                    <button
+                                                        class="btn__user--delete"
+                                                        @click="deleteUser(userItem.id)"
+                                                    >
+                                                        <img width="24" height="24" src="../../../img/admin/trash.png" alt="">
+                                                    </button>
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 <div v-else>Нет пользователей</div>
+
+                                <!-- пагинация -->
                                 <div class="pagination-users" v-if="totalPagesUsers > 1">
                                     <button
                                         :disabled="currentPageUsers === 1"
                                         @click="currentPageUsers--"
-                                    >‹ Назад</button>
+                                    >
+                                        ‹ Назад
+                                    </button>
 
                                     <button
                                         v-for="p in totalPagesUsers"
                                         :key="p"
                                         :class="{ active: currentPageUsers === p }"
                                         @click="currentPageUsers = p"
-                                    >{{ p }}</button>
+                                    >
+                                        {{ p }}
+                                    </button>
 
                                     <button
                                         :disabled="currentPageUsers === totalPagesUsers"
                                         @click="currentPageUsers++"
-                                    >Вперёд ›</button>
+                                    >
+                                        Вперёд ›
+                                    </button>
                                 </div>
-                                
-                                <!-- Модальное окно -->
+
+                                <!-- модалка редактирования пользователя (оставляем как было) -->
                                 <div v-if="showUserEditModal" class="modal-overlay">
                                     <div class="modal-content modal-content--s">
                                         <button class="close-button" @click="closeUserEditModal">×</button>
@@ -217,39 +434,177 @@
                                     </div>
                                 </div>
                             </div>
+
                             <!-- Блок "Курсы" -->
-                            <div v-else-if="item.id === 'courses'">
-                                <a class="link__add" href="/admin/addcourse">Cоздать курс +</a>
+                            <div v-else-if="item.id === 'courses'" class="user-block" id="courses">
+                                <!-- шапка как у пользователей -->
+                                <div class="users-header">
+                                    <p class="users-subtitle">{{ coursesTotalLabel }}</p>
+                                </div>
+
+                                <!-- тулбар: количество, фильтр, поиск -->
+                                <div class="users-toolbar">
+                                    <div class="asdf">
+                                        <div class="users-toolbar__left">
+                                            <!-- Показать N курсов -->
+                                            <label class="users-show">
+                                                Показать
+                                                <span class="users-show__select-wrap">
+                                                    <select
+                                                        v-model.number="pageSizeCourses"
+                                                        class="users-show__select"
+                                                    >
+                                                        <option :value="10">10</option>
+                                                        <option :value="25">25</option>
+                                                        <option :value="50">50</option>
+                                                    </select>
+                                                </span>
+                                                курсов
+                                            </label>
+
+                                            <!-- Фильтр по уровню сложности -->
+                                            <div class="users-roles">
+                                                <button
+                                                    type="button"
+                                                    class="users-roles__btn"
+                                                    @click="
+                                                        courseDifficultyDropdownOpen =
+                                                            !courseDifficultyDropdownOpen
+                                                    "
+                                                >
+                                                    Уровень
+                                                    <span
+                                                        class="users-roles__chevron"
+                                                        :class="{
+                                                            'users-roles__chevron--open':
+                                                                courseDifficultyDropdownOpen,
+                                                        }"
+                                                    ></span>
+                                                </button>
+
+                                                <div
+                                                    v-if="courseDifficultyDropdownOpen"
+                                                    class="users-roles__dropdown"
+                                                    @click.stop
+                                                >
+                                                    <p class="users-roles__title">Фильтр по уровню</p>
+
+                                                    <label class="users-roles__option">
+                                                        <input
+                                                            type="radio"
+                                                            value="basic"
+                                                            v-model="selectedDifficulty"
+                                                        />
+                                                        <span class="users-roles__span">Базовый</span>
+                                                    </label>
+                                                    <label class="users-roles__option">
+                                                        <input
+                                                            type="radio"
+                                                            value="middle"
+                                                            v-model="selectedDifficulty"
+                                                        />
+                                                        <span class="users-roles__span">Средний</span>
+                                                    </label>
+                                                    <label class="users-roles__option">
+                                                        <input
+                                                            type="radio"
+                                                            value="advanced"
+                                                            v-model="selectedDifficulty"
+                                                        />
+                                                        <span class="users-roles__span">Продвинутый</span>
+                                                    </label>
+                                                    <label class="users-roles__option">
+                                                        <input
+                                                            type="radio"
+                                                            value="mixed"
+                                                            v-model="selectedDifficulty"
+                                                        />
+                                                        <span class="users-roles__span">Смешанный</span>
+                                                    </label>
+
+                                                    <div class="users-roles__actions">
+                                                        <button
+                                                            type="button"
+                                                            class="btn users-roles__apply"
+                                                            @click="courseDifficultyDropdownOpen = false"
+                                                        >
+                                                            Фильтр
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            class="btn users-roles__reset"
+                                                            @click="resetCourseDifficultyFilter"
+                                                        >
+                                                            Сброс
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Поиск по курсам -->
+                                        <div class="users-toolbar__search">
+                                            <div class="users-search">
+                                                <span class="users-search__icon">
+                                                    <img
+                                                        width="13"
+                                                        height="13"
+                                                        src="../../../img/admin/search.svg"
+                                                        alt=""
+                                                    />
+                                                </span>
+                                                <input
+                                                    v-model="searchCourseQuery"
+                                                    type="text"
+                                                    class="users-search__input"
+                                                    placeholder="Поиск курса..."
+                                                />
+                                                <button
+                                                    v-if="searchCourseQuery"
+                                                    type="button"
+                                                    class="users-search__clear"
+                                                    @click="searchCourseQuery = ''"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a class="users-btn-new" href="/admin/addcourse">
+                                        <span class="users-btn-desc">+</span> Новый курс
+                                    </a>
+                                </div>
+
+                                <!-- старый admin__block оставляем, только без link__add -->
                                 <div class="admin__block">
-                                    <div class="cou">
+                                    <!-- <div class="cou">
                                         <div class="div__link">
-                                            <a
-                                                class="course__links"
-                                                href="/admin/statistics"
-                                                >Статистика учеников</a
-                                            >
+                                            <a class="course__links" href="/admin/statistics">
+                                                Статистика учеников
+                                            </a>
                                             <a
                                                 class="course__links"
                                                 href="/admin/statisticspurchase"
-                                                >Cтатистика покупок пользователей</a
                                             >
-                                            <a
-                                                class="course__links"
-                                                href="/admin/consultations"
-                                                >Записи на консультации</a
-                                            >
+                                                Cтатистика покупок пользователей
+                                            </a>
+                                            <a class="course__links" href="/admin/consultations">
+                                                Записи на консультации
+                                            </a>
                                         </div>
-                                    </div>
+                                    </div> -->
+
                                     <div v-if="paginatedCourses.length">
                                         <table class="light-push-table">
                                             <thead>
                                                 <tr>
                                                     <th>№</th>
-                                                    <th>Название курса</th>
+                                                    <th>Курс</th>
+                                                    <th>Активен</th>
+                                                    <th>Дата создания</th>
+                                                    <th>Участники</th>
                                                     <th>Уровень</th>
-                                                    <th>Изменить курс</th>
-                                                    <th>Управлять курсом</th>
-                                                    <th>Удалить курс</th>
+                                                    <th>Действия</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -257,61 +612,88 @@
                                                     v-for="(course, index) in paginatedCourses"
                                                     :key="course.id"
                                                 >
+                                                    <td>{{ index + 1 }}</td>
+                                                    <td>{{ course.course_name }}</td>
+                                                    <td>Да</td>
+                                                    <td>{{ formatBirthday(course.created_at) }}</td>
+                                                    <td>0</td>
                                                     <td>
-                                                        {{ index + 1 }}
+                                                        <div class="users-role-pill">
+                                                            {{ difical(course.difficulty) }}
+                                                        </div>
                                                     </td>
                                                     <td>
-                                                        {{ course.course_name }}
-                                                    </td>
-                                                    <td>{{ course.difficulty }}</td>
-                                                    <td>
+                                                        <!-- твои кнопки действий как были -->
+                                                        <button
+                                                            class="btn__user--delete"
+                                                            @click.prevent="deleteCourse(course.id)"
+                                                        >
+                                                            <img
+                                                                width="24"
+                                                                height="24"
+                                                                src="../../../img/admin/trash.png"
+                                                                alt=""
+                                                            />
+                                                        </button>
                                                         <button
                                                             class="btn__user--edit"
-                                                            @click.prevent="
-                                                                openEditModal(
-                                                                    course
-                                                                )
-                                                            "
+                                                            @click.prevent="openEditModal(course)"
                                                         >
-                                                            Редактировать
+                                                            <img
+                                                                width="24"
+                                                                height="24"
+                                                                src="../../../img/admin/edit.svg"
+                                                                alt=""
+                                                            />
                                                         </button>
-                                                    </td>
-                                                    <td>
                                                         <a
                                                             class="btn--control"
                                                             :href="`/admin/course/${course.id}/topics/json`"
-                                                            >Управлять курсом</a
                                                         >
-                                                    </td>
-                                                    <td>
-                                                        <button class="btn__user--delete" @click.prevent="deleteCourse(course.id)">Удалить курс</button>
+                                                            <img
+                                                                width="24"
+                                                                height="24"
+                                                                src="../../../img/admin/book.png"
+                                                                alt=""
+                                                            />
+                                                        </a>
                                                     </td>
                                                 </tr>
                                             </tbody>
                                         </table>
-                                        <div class="pagination-users" v-if="totalPagesCourses > 1" style="margin-top: 20px;">
+
+                                        <!-- пагинация курсов (можно оставить как есть) -->
+                                        <div
+                                            class="pagination-users"
+                                            v-if="totalPagesCourses > 1"
+                                            style="margin-top: 20px"
+                                        >
                                             <button
-                                            :disabled="currentPageCourses === 1"
-                                            @click="currentPageCourses--"
-                                            >‹ Назад</button>
+                                                :disabled="currentPageCourses === 1"
+                                                @click="currentPageCourses--"
+                                            >
+                                                ‹ Назад
+                                            </button>
 
                                             <button
-                                            v-for="p in totalPagesCourses"
-                                            :key="p"
-                                            :class="{ active: currentPageCourses === p }"
-                                            @click="currentPageCourses = p"
-                                            >{{ p }}</button>
+                                                v-for="p in totalPagesCourses"
+                                                :key="p"
+                                                :class="{ active: currentPageCourses === p }"
+                                                @click="currentPageCourses = p"
+                                            >
+                                                {{ p }}
+                                            </button>
 
                                             <button
-                                            :disabled="currentPageCourses === totalPagesCourses"
-                                            @click="currentPageCourses++"
-                                            >Вперёд ›</button>
+                                                :disabled="currentPageCourses === totalPagesCourses"
+                                                @click="currentPageCourses++"
+                                            >
+                                                Вперёд ›
+                                            </button>
                                         </div>
                                     </div>
                                     <div v-else>Нет курсов</div>
                                 </div>
-
-                                <!-- Модальное окно редактирования курса -->
                                 <div v-if="showEditModal" class="modal-overlay">
                                     <div class="modal-content">
                                         <button
@@ -660,8 +1042,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Конец модального окна -->
                             </div>
+
                             <!-- Другие блоки (аналитика, FAQ, и т.д.) -->
                             <div v-else-if="item.id === 'news'">
                                 <table v-if="paginatedNews.length" class="light-push-table">
@@ -1309,6 +1691,16 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 import { globalNotification } from "../../globalNotification";
+import "./style.css"
+
+import iconDashboard from "./../../../img/admin/info.svg";
+import iconUsers     from "./../../../img/admin/users.svg";
+import iconCourses   from "./../../../img/admin/couse.svg";
+import iconCategory  from "./../../../img/admin/couse.svg";
+import iconNews      from "./../../../img/admin/newspaper.svg";
+import iconFaq       from "./../../../img/admin/newspaper.svg";
+
+
 
 const fmtShort = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit', month: '2-digit', year: 'numeric'
@@ -1317,6 +1709,21 @@ const fmtShort = new Intl.DateTimeFormat('ru-RU', {
 const fmtLong = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit', month: 'long', year: 'numeric'
 }); // 05 марта 2025
+
+function difical(difical) {
+    if (difical === "basic") {
+        return "Базовый";
+    } else if (difical === "mixed") {
+        return "Смешанный";
+    } else if (difical === "advanced") {
+        return "Продвинутый";
+    } else if (difical === "middle") {
+        return "Средний";
+    } 
+    else {
+        return ""; // или "—"
+    }
+}
 
 function toDateFromISO(iso) {
   if (!iso) return null;
@@ -1812,6 +2219,23 @@ const user = ref(null);
 const users = ref([]);
 const selectedRole = ref("all");
 const searchQuery = ref("");
+const roleDropdownOpen = ref(false);
+
+const usersTotalLabel = computed(() => {
+  const n = users.value.length;
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  let word = "пользователей";
+  if (mod10 === 1 && mod100 !== 11) word = "пользователь";
+  else if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) word = "пользователя";
+  return `Всего ${n} ${word}`;
+});
+
+function resetRoleFilter() {
+  selectedRole.value = "all";
+  roleDropdownOpen.value = false;
+}
+
 const filteredUsers = computed(() => {
   // 1) фильтр по роли
   const base = selectedRole.value === "all"
@@ -1848,19 +2272,22 @@ const filteredUsers = computed(() => {
 
 
 const currentPageUsers = ref(1);
-const pageSizeUsers = 10;
+const pageSizeUsers = ref(10);
 
-const totalPagesUsers = computed(() =>
-  Math.ceil(filteredUsers.value.length / pageSizeUsers)
-);
-
-const paginatedUsers = computed(() => {
-  const start = (currentPageUsers.value - 1) * pageSizeUsers;
-  return filteredUsers.value.slice(start, start + pageSizeUsers);
+const totalPagesUsers = computed(() => {
+  const size = pageSizeUsers.value || 1;
+  return Math.max(1, Math.ceil(filteredUsers.value.length / size));
 });
 
-watch(selectedRole, () => { currentPageUsers.value = 1; });
-watch(searchQuery,   () => { currentPageUsers.value = 1; });
+const paginatedUsers = computed(() => {
+  const size = pageSizeUsers.value || 10;
+  const start = (currentPageUsers.value - 1) * size;
+  return filteredUsers.value.slice(start, start + size);
+});
+
+watch([selectedRole, searchQuery, pageSizeUsers], () => {
+  currentPageUsers.value = 1;
+});
 
 function getRoleName(role) {
     switch (role) {
@@ -1880,6 +2307,53 @@ function getRoleName(role) {
 const courses = ref([]);
 const languages = ref([]); // Языки программирования
 
+const selectedDifficulty = ref("all");          // basic | middle | advanced | mixed | all
+const searchCourseQuery = ref("");
+const courseDifficultyDropdownOpen = ref(false);
+
+const coursesTotalLabel = computed(() => {
+  const n = courses.value.length;
+  if (!n) return "Нет курсов";
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  let word = "курсов";
+  if (mod10 === 1 && mod100 !== 11) word = "курс";
+  else if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) word = "курса";
+  return `Всего ${n} ${word}`;
+});
+
+function resetCourseDifficultyFilter() {
+  selectedDifficulty.value = "all";
+  courseDifficultyDropdownOpen.value = false;
+}
+
+// отфильтрованный список курсов
+const filteredCourses = computed(() => {
+  let base = courses.value;
+
+  // фильтр по уровню
+  if (selectedDifficulty.value !== "all") {
+    base = base.filter(
+      (c) => (c.difficulty || "").toString() === selectedDifficulty.value
+    );
+  }
+
+  // текстовый поиск
+  const q = (searchCourseQuery.value || "").trim().toLowerCase();
+  if (!q) return base;
+
+  return base.filter((c) => {
+    const name  = (c.course_name  || "").toLowerCase();
+    const title = (c.card_title   || "").toLowerCase();
+    const desc  = (c.description  || "").toLowerCase();
+    return (
+      name.includes(q) ||
+      title.includes(q) ||
+      desc.includes(q)
+    );
+  });
+});
+
 // ————— пагинация для Языков —————
 const currentPageLangs = ref(1);
 const pageSizeLangs    = ref(5);
@@ -1895,19 +2369,24 @@ watch(languages, () => (currentPageLangs.value = 1));
 
 //пагинация курсов
 const currentPageCourses = ref(1)
-const pageSizeCourses    = ref(8)
+const pageSizeCourses    = ref(10)
 
-const totalPagesCourses = computed(() =>
-  Math.ceil(courses.value.length / pageSizeCourses.value)
-)
+const totalPagesCourses = computed(() => {
+  const size = pageSizeCourses.value || 1;
+  return Math.max(1, Math.ceil(filteredCourses.value.length / size));
+});
 
 const paginatedCourses = computed(() => {
-  const start = (currentPageCourses.value - 1) * pageSizeCourses.value
-  return courses.value.slice(start, start + pageSizeCourses.value)
-})
+  const size = pageSizeCourses.value || 10;
+  const start = (currentPageCourses.value - 1) * size;
+  return filteredCourses.value.slice(start, start + size);
+});
 watch(courses, () => {
-  currentPageCourses.value = 1
-})
+  currentPageCourses.value = 1;
+});
+watch([selectedDifficulty, searchCourseQuery, pageSizeCourses], () => {
+  currentPageCourses.value = 1;
+});
 //открытие формы создания курса
 
 
@@ -2284,12 +2763,14 @@ async function deleteCourse(courseId) {
 ===================================== */
 const activeIndex = ref(0);
 const menuItems = [
-    { id: "users", label: "Пользователи", href: "#users" },
-    { id: "courses", label: "Курсы", href: "#courses" },
-    { id: "other", label: "Категории", href: "#other" },
-    { id: "news", label: "Новости", href: "#news" },
-    { id: "faq", label: "Частые вопросы", href: "#faq" },
+    { id: "dashboard", label: "Дашборд",        href: "#dashboard", icon: iconDashboard },
+    { id: "users",     label: "Пользователи",   href: "#users",     icon: iconUsers },
+    { id: "courses",   label: "Курсы",          href: "#courses",   icon: iconCourses },
+    { id: "other",     label: "Категории",      href: "#other",     icon: iconCategory },
+    { id: "news",      label: "Новости",        href: "#news",      icon: iconNews },
+    { id: "faq",       label: "Частые вопросы", href: "#faq",       icon: iconFaq },
 ];
+
 function saveActiveIndex() {
     localStorage.setItem("activeIndex", activeIndex.value);
 }
@@ -2688,594 +3169,3 @@ async function submitNews() {
 }
 </script>
 
-<style scoped>
-.icon-btn{
-  border:none; background:#f3f4f6; color:#6b7280; cursor:pointer;
-  padding:6px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;
-  transition:background .15s,color .15s, transform .05s;
-}
-.icon-btn:hover{ background:#e5e7eb; color:#111827 }
-.icon-btn:active{ transform:translateY(1px) }
-.icon-btn--danger{ background:#fee2e2; color:#b91c1c }
-.icon-btn--danger:hover{ background:#fecaca; color:#7f1d1d }
-.icon-btn[disabled]{ opacity:.6; cursor:not-allowed }
-
-.image{
-    width: 10%;
-    /* height: 75px; */
-}
-.image_db{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.search{
-    display: flex;
-    gap: 20px;
-}
-.search-filter{
-    font-family: JanoSansProLight;
-    padding: 7px 9px;
-    border: 1px solid #d0d0d0;
-    border-radius: 6px;
-    background-color: #f8f9fa;
-}
-.form-textarea--m{
-    width: 678px !important;
-}
-.modal-flex{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.button__edit__faq{
-    display: flex; gap: 20px;
-}
-.textarea{
-    resize: unset;
-    height: 80px;
-}
-.form-input--xl{
-    width: 800px;
-}
-.form-textarea{
-    width: 100%;
-}
-/* пагинация */
-
-.pagination-users {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 20px;
-  font-family: Arial, sans-serif;
-}
-
-.pagination-users button {
-  min-width: 40px;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #f9f9f9;
-  color: #333;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
-}
-
-.pagination-users button:hover:not(:disabled) {
-  background-color: #fff;
-  border-color: #888;
-  transform: translateY(-1px);
-}
-
-.pagination-users button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.pagination-users button.active {
-  background-color: #698dc9;
-  border-color: #698dc9;
-  color: #fff;
-  font-weight: bold;
-}
-/* // */
-.form-button--s{
-    width: 280px !important;
-}
-.modal-content--s{
-    width: 600px !important;
-}
-.course__links {
-    color: #0056b3;
-    text-decoration: none;
-}
-.course__links:hover {
-    text-decoration: underline;
-}
-.cou {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin: 0 0 30px;
-}
-.h2__margin {
-    margin: 40px 0;
-}
-.btn--control {
-    text-decoration: none;
-    color: green;
-}
-.btn__user--delete {
-    cursor: pointer;
-    background: none;
-    border: none;
-    color: red;
-}
-.select {
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #fff;
-}
-.btn__user--edit {
-    cursor: pointer;
-    border: none;
-    background: none;
-    color: #007bff;
-}
-.input__user--edit {
-    font-family: JanoSansProLight;
-    height: 100%;
-    font-size: 20px;
-    color: #000;
-    border: 1px solid #e0e0e0;
-    padding: 5px;
-    font-size: 14px;
-}
-::v-deep .multiselect__tags {
-    overflow: hidden;
-    padding: 12px 40px 0 12px; /* или больше, чтобы текст расположился ниже */
-}
-::v-deep .multiselect__input {
-    margin-top: 15px;
-    padding: 10px; /* или больше, чтобы текст расположился ниже */
-}
-::v-deep .multiselect__option {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    gap: 8px;
-    margin: 2px 0;
-    padding: 6px 8px;
-    border-radius: 6px;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-/* Лёгкий эффект при наведении */
-::v-deep .multiselect__option:hover {
-    background-color: #f7f5fa; /* светлый оттенок */
-    transform: scale(1.01);
-}
-
-/* Квадратик-превращённый-в-пузырь */
-::v-deep .checkbox {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%; /* делаем круг вместо квадрата */
-    border: 2px solid #b4b0c4; /* пастельный фиолетовый */
-    background-color: transparent;
-    transition: background-color 0.3s, border-color 0.3s;
-}
-
-/* Когда пункт выбран, цвет пузыря меняется */
-::v-deep .checkbox.checkbox-checked {
-    background-color: #a26ce9; /* насыщенный пастельный фиолетовый */
-    border-color: #a26ce9;
-}
-
-/* Обёртка для SVG */
-::v-deep .checkmark {
-    position: relative;
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    /* Можно наложить иконку поверх круга 
-     через position: absolute, если хотите */
-}
-
-/* SVG-галочка */
-::v-deep .checkmark__icon {
-    display: none;
-    fill: #fff;
-    width: 18px;
-    height: 18px;
-}
-
-/* Показываем галочку, когда чекбокс залит */
-::v-deep .checkbox.checkbox-checked + .checkmark .checkmark__icon {
-    display: block;
-}
-
-/* Название языка */
-::v-deep .option-name {
-    font-size: 14px;
-    color: #333;
-}
-
-/* Заголовок (слот selection) 
-   где перечисляются выбранные языки */
-::v-deep .selection-header {
-    font-weight: 500;
-    color: #6b6680;
-}
-
-::v-deep .selection-header {
-    margin: 0 0 20px;
-}
-
-.page__title {
-    margin: 0 0 60px;
-}
-
-.link__add{
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    text-decoration: none;
-    list-style: none;
-    color: #007bff;
-    border: 1px solid #007bff;
-    border-radius: 10px;
-    padding: 8px 12px;
-    transition: 0.3s ease-in-out;
-    z-index: 1000;
-}
-
-.link__add:hover{
-    background: #007bff;
-    color: #ffffff;
-}
-
-h2 {
-    font-size: 30px;
-    margin: 0 0 25px;
-}
-
-.option-form {
-    margin-bottom: 5px;
-}
-
-.course-form-container {
-    margin: 35px auto;
-    font-family: Arial, sans-serif;
-}
-
-.course-form,
-.edit-course-form {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 700px;
-    gap: 20px;
-    margin: 0 auto 40px;
-}
-
-.edit-course-form--small {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
-    gap: 20px;
-    margin: 0 auto 40px;
-}
-
-.category {
-    display: grid;
-    grid-template-columns: repeat(2, 600px);
-    justify-content: space-evenly;
-    row-gap: 50px;
-}
-
-.edit-course-form-container {
-    width: 100%;
-}
-
-.form-column {
-    flex: 1;
-    min-width: 280px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-label {
-    font-family: JanoSansProLight;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #333;
-}
-
-.form-label--small {
-    font-family: JanoSansProLight;
-    font-weight: bold;
-    margin-bottom: 8px;
-    text-align: center;
-    color: #333;
-}
-
-.form-input,
-.form-textarea {
-    font-family: JanoSansProLight;
-    outline: none;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-}
-
-.form-textarea {
-    resize: none;
-    min-height: 80px;
-}
-
-.editor-container {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    min-height: 150px;
-    background-color: #fff;
-    max-width: 700px;
-}
-
-.form-button {
-    width: 700px;
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin: 0 auto;
-}
-.form-button--small {
-    width: 100%;
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin: 0 auto;
-}
-
-.form-button:hover {
-    background-color: #0056b3;
-}
-
-.user-block {
-    width: 100%;
-}
-
-.menu {
-    width: 1440px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.container {
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.filters {
-    margin-bottom: 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* Стилизация контейнера select */
-.role-filter {
-    /* Установите максимальную ширину */
-    padding: 5px 6px;
-    font-size: 16px;
-    border: 1px solid #d0d0d0;
-    border-radius: 6px;
-    background-color: #f8f9fa;
-    /* Светлый фон */
-    color: #333;
-    outline: none;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
-
-/* Стилизация при наведении */
-.role-filter:hover {
-    border-color: #007bff;
-    /* Голубой оттенок */
-}
-
-/* Стилизация при фокусе */
-.role-filter:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
-}
-
-/* Стилизация опций */
-.role-filter option {
-    background-color: #ffffff;
-    padding: 10px;
-    font-size: 16px;
-}
-
-.aside__menu {
-    border-radius: 15px;
-    height: 100%;
-    padding: 25px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.aside__list {
-    display: flex;
-    gap: 20px;
-}
-
-.aside__item {
-    padding: 5px;
-}
-
-.aside__link {
-    color: #575adf;
-    text-decoration: none;
-    transition: 0.5s;
-}
-
-.aside__link--active {
-    color: #000;
-    text-decoration: underline;
-}
-
-.aside__link:hover {
-    transition: 0.5s;
-    text-decoration: underline;
-}
-
-
-
-table.light-push-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    margin: 0 0 30px;
-}
-
-
-.light-push-table--small {
-  width: 50%;        /* таблица займет 50% контейнера */
-  max-width: 600px;  /* при желании ограничьте максимальную ширину */
-  margin: 0 auto;    /* по центру */
-  box-sizing: border-box;
-}
-
-.light-push-table--small .light-push-table th,
-.light-push-table--small .light-push-table td {
-    font-size: 12px;
-    white-space: unset;
-}
-
-.light-push-table th,
-.light-push-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #e0e0e0;
-    text-align: left;
-    font-size: 14px;
-    /* Запрещает перенос текста */
-    text-overflow: ellipsis;
-    /* Добавляет многоточие при обрезке */
-}
-
-.light-push-table th {
-    text-align: center;
-    background-color: #f0f8ff;
-    /* Нежно-голубой цвет */
-    font-size: 17px;
-    font-weight: 600;
-    border-right: 1px solid #d0d0d0;
-    padding: 14px;
-}
-
-.light-push-table td {
-    border-right: 1px solid #f0f0f0;
-}
-
-.light-push-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-/* Выравнивание номера по центру и фиксированная ширина */
-.light-push-table td.number-cell {
-    text-align: center;
-    font-weight: bold;
-    font-size: 15px;
-    width: 120px;
-    /* Фиксированная ширина для номера */
-}
-
-/* Анимация при наведении */
-@keyframes rowHover {
-    from {
-        background-color: #ffffff;
-        transform: scale(1);
-    }
-
-    to {
-        background-color: #e0f7fa;
-        transform: scale(1.02);
-    }
-}
-
-.light-push-table tbody tr:hover {
-    animation: rowHover 0.3s ease forwards;
-}
-
-/* Убираем рамку справа у последнего столбца */
-.light-push-table th:last-child,
-.light-push-table td:last-child {
-    border-right: none;
-}
-
-/* Стили модального окна */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: flex;
-    align-items: flex-start;
-    /* Прижимаем окно к верхней границе, если контента много */
-    justify-content: center;
-    padding: 40px 20px;
-    /* Отступы вокруг окна */
-    overflow-y: auto;
-    /* Скролл при большом контенте */
-}
-
-.modal-content {
-    background: #fff;
-    width: 900px;
-    max-width: 90%;
-    /* Убираем max-height и overflow-y */
-    margin: 40px 0;
-    /* Дополнительные отступы сверху/снизу */
-    padding: 20px;
-    border-radius: 8px;
-    position: relative;
-}
-
-.close-button {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    background: transparent;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-}
-</style>

@@ -14,6 +14,8 @@ import StudentCourse from './components/teacher/StudentCourse.vue';
 import StudentSubmissions from './components/teacher/StudentSubmissions.vue';
 import CourseteacherComponent from './components/teacher/CourseteacherComponent.vue';
 import CourseEditComponent from './components/teacher/CourseEditComponent.vue';
+import ChapterEditComponent from './components/teacher/ChapterEditComponent.vue';
+import JournalComponet from './components/teacher/JournalComponet.vue';
 // Импорт всех компонентов для админ-панели
 
 import DashboardComponent from './components/admin/DashboardComponent.vue';
@@ -62,6 +64,8 @@ app.component('studentsubmissions-component', StudentSubmissions);
 app.component('profile-teacher-component', ProfileteacherComponent);
 app.component('courseteacher-component', CourseteacherComponent);
 app.component('course-edit-component', CourseEditComponent);
+app.component('chapter-edit-component', ChapterEditComponent);
+app.component('journal-component', JournalComponet);
 
 // Регистрация компонентов (имена в kebab-case) для админ-панели
 app.component('addcourse-component', AddCourseComponent);

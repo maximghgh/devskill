@@ -260,6 +260,24 @@ h3 {
     gap: 24px;
 }
 
+.blocks__button {
+    display: flex;
+    gap: 16px;
+    margin-top: 48px;
+}
+.link__back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 146%;
+    letter-spacing: 0%;
+    margin: 0 0 35px;
+    text-decoration: none;
+    color: #000000;
+}
 /* === Блок курса === */
 
 .course-block {
@@ -290,6 +308,47 @@ h3 {
     letter-spacing: 0%;
     margin: 0;
     color: #000000;
+}
+
+.course-block__input {
+    border: none;
+    background: none;
+}
+.course-block__input--date {
+    padding-left: 33px;
+    font-family: JanoSansProRegular;
+}
+.course-block__input--textarea {
+    font-family: JanoSansProRegular;
+}
+.course-block__item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.course-block__img {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    transform: translateY(-50%);
+}
+
+/* общий вид, чтобы не рисовал свой контрол */
+.course-block__input--date {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Chrome / Edge / Safari */
+.course-block__input--date::-webkit-calendar-picker-indicator,
+.course-block__input--date::-webkit-inner-spin-button {
+    display: none;
+}
+
+/* старый Edge / IE */
+.course-block__input--date::-ms-clear {
+    display: none;
 }
 
 .course-block__status-badge {
@@ -323,12 +382,13 @@ h3 {
 /* Список уроков */
 
 .course-block__lessons {
+    position: relative;
     list-style: none;
     padding: 0;
     margin: 16px 0 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
 }
 
 .course-block__lesson {
@@ -550,6 +610,12 @@ h3 {
     align-items: stretch;
 }
 
+.file__drop--flex {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
 .file__drop-inner {
     border-radius: 26px;
     border: 2px dashed #9a9a9a;
@@ -634,26 +700,28 @@ h3 {
 .journal__months {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 5px;
     margin-bottom: 10px;
 }
 
 .journal__month {
-    width: 94px;
+    width: 92px;
     padding: 4px 16px;
     border-radius: 18px;
     border: 1px solid #b6b2c8;
     background-color: #ffffff;
     cursor: pointer;
-
     font-weight: 400;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 100%;
     letter-spacing: 0%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .journal__month--active {
-    background-color: #41328F;
+    background-color: #41328f;
     border-color: #5c3de6;
     color: #ffffff;
 }
@@ -747,7 +815,7 @@ h3 {
 }
 
 .journal__head-cell--today .journal__day {
-    background-color: #41328F;
+    background-color: #41328f;
     color: #ffffff;
 }
 .journal__head-cell--today .journal__day-week {
@@ -851,4 +919,90 @@ h3 {
     .journal__table-wrapper {
         padding: 8px;
     }
+}
+
+/* страница журналов */
+
+.course-accordion {
+    margin-top: 24px;
+}
+
+/* элементы списка курсов */
+.course-accordion__item + .course-accordion__item {
+    margin-top: 8px;
+}
+
+/* шапка курса */
+.course-accordion__header {
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 999px;
+    border: none;
+    background: #f1f0fa;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0 0 12px;
+}
+.course-accordion__title {
+    font-family: JanoSansProRegular;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 146%;
+    letter-spacing: 0%;
+}
+
+.journal__months--bg{
+    padding: 11px 20px;
+    background: #F1F0FA;
+    border-radius: 25px;
+}
+/* когда открыт – чуть другие углы, как контейнер */
+.course-accordion__item--open .course-accordion__header {
+    background: #877cd4;
+    color: #ffffff;
+}
+
+/* стрелка */
+.course-accordion__chevron {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.course-accordion__chevron::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+    transform: rotate(45deg); /* вниз */
+    transition: transform 0.2s;
+}
+
+.course-accordion__item--open .course-accordion__chevron::before {
+    transform: rotate(-135deg); /* вверх */
+}
+
+/* тело аккордеона */
+.course-accordion__body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+}
+
+/* когда открыт – просто большое max-height */
+.course-accordion__item--open .course-accordion__body {
+    max-height: 1000px; /* если контент больше – увеличь число */
+}
+
+/* чтобы журнал визуально продолжал шапку */
+.course-accordion__body .journal {
+    margin-top: 0;
 }

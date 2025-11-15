@@ -67,6 +67,14 @@ Route::get('/teacher/course', function () {
     return view('teacher.courseteacher');
 })->name('teacher.courseteacher');;
 
+Route::get('/teacher/chapter/id', function () {
+    return view('teacher.chapteredit');
+})->name('teacher.chapteredit');;
+
+Route::get('/teacher/journal', function () {
+    return view('teacher.journal');
+})->name('teacher.journal');;
+
 Route::get('/teacher/course/id', function () {
     return view('teacher.courseedit');
 })->name('teacher.courseedit');;
