@@ -1,3 +1,12 @@
+.avatar__admin {
+    border-radius: 8px;
+}
+.avatar__user {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
 .icon-btn {
     border: none;
     background: #f3f4f6;
@@ -502,8 +511,8 @@ h2 {
 .users-roles__btn {
     padding: 8px 16px 8px 13px;
     border-radius: 10px;
-    border: 1px solid #dedede;
-    background: #727272;
+    border: 1px solid #ffffff;
+    background: #41328f;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -600,8 +609,8 @@ h2 {
 
 /* состояние checked – серый квадрат + видимая галочка */
 .users-roles__option input:checked {
-    background: #727272;
-    border-color: #727272;
+    background: #41328f;
+    border-color: #ffffff;
 }
 
 .users-roles__option input:checked::before {
@@ -629,7 +638,10 @@ h2 {
     padding-right: 10px;
     padding-bottom: 8px;
     padding-left: 10px;
-    background: #727272;
+    background: #41328f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     font-family: JanoSansProRegular;
     font-weight: 400;

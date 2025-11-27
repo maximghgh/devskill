@@ -294,7 +294,12 @@
                                                 :key="userItem.id"
                                             >
                                                 <td>#{{ userItem.id }}</td>
-                                                <td>{{ userItem.name }}</td>
+                                                <td class="avatar__user">
+                                                    <img 
+                                                        :src="userItem.photo ? `/storage/${userItem.photo}` : 'https://devskills.foncode.ru/img/no_foto.jpg'" 
+                                                        alt="Фото пользователя" width="32" height="32" class="avatar__admin"
+                                                    />
+                                                    {{ userItem.name }}</td>
                                                 <td>{{ userItem.email }}</td>
                                                 <td>{{ userItem.phone }}</td>
                                                 <td>{{ formatBirthday(userItem.birthday) }}</td>
@@ -598,7 +603,7 @@
                                         <table class="light-push-table">
                                             <thead>
                                                 <tr>
-                                                    <th>№</th>
+                                                    <th>ID</th>
                                                     <th>Курс</th>
                                                     <th>Активен</th>
                                                     <th>Дата создания</th>
@@ -613,7 +618,12 @@
                                                     :key="course.id"
                                                 >
                                                     <td>{{ index + 1 }}</td>
-                                                    <td>{{ course.course_name }}</td>
+                                                    <td class="avatar__user">
+                                                    <img 
+                                                        :src="course.card_image ? `${course.card_image}` : 'https://devskills.foncode.ru/img/no_foto.jpg'" 
+                                                        alt="Фото пользователя" width="25" height="25" class="avatar__admin"
+                                                    />
+                                                    {{ course.course_name }}</td>
                                                     <td>Да</td>
                                                     <td>{{ formatBirthday(course.created_at) }}</td>
                                                     <td>0</td>
@@ -1049,11 +1059,10 @@
                                 <table v-if="paginatedNews.length" class="light-push-table">
                                     <thead>
                                         <tr>
-                                            <th>№</th>
+                                            <th>ID</th>
                                             <th>Название новости</th>
                                             <th>Просмотреть комментарии</th>
-                                            <th>Редактировать</th>
-                                            <th>Удалить</th>
+                                            <th>Действие</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1062,10 +1071,29 @@
                                             <td>{{ newsItem.title }}</td>
                                             <td><a href="#" @click.prevent="openComments(newsItem)">Просмотреть комментарии</a></td>
                                             <td>
-                                                <button class="btn__user--edit" @click="openNewsEditModal(newsItem)">Редактировать</button>
-                                            </td>
-                                            <td>
-                                                <button class="btn__user--delete" @click="deleteNews(newsItem.id)">Удалить</button>
+                                                <!-- твои кнопки действий как были -->
+                                                <button
+                                                    class="btn__user--delete"
+                                                    @click="deleteNews(newsItem.id)"
+                                                >
+                                                    <img
+                                                        width="24"
+                                                        height="24"
+                                                        src="../../../img/admin/trash.png"
+                                                        alt=""
+                                                    />
+                                                </button>
+                                                <button
+                                                    class="btn__user--edit"
+                                                    @click="openNewsEditModal(newsItem)"
+                                                >
+                                                    <img
+                                                        width="24"
+                                                        height="24"
+                                                        src="../../../img/admin/edit.svg"
+                                                        alt=""
+                                                    />
+                                                </button>
                                             </td>
                                         </tr>
                                     </tbody>
