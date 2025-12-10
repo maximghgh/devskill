@@ -161,6 +161,7 @@
     background-color: #fff;
 }
 .btn__user--edit {
+    padding: 0;
     cursor: pointer;
     border: none;
     background: none;
@@ -262,7 +263,7 @@
     line-height: 100%;
     letter-spacing: 0%;
     color: #7a2abd;
-    margin: 0 0 16px;
+    margin: 0 0 40px;
     text-align: left;
 }
 
@@ -284,11 +285,11 @@
     background: #007bff;
     color: #ffffff;
 }
-
+/* 
 h2 {
     font-size: 30px;
     margin: 0 0 25px;
-}
+} */
 
 .option-form {
     margin-bottom: 5px;
@@ -413,10 +414,6 @@ h2 {
 } */
 /* ===== Блок пользователей ===== */
 
-.user-block {
-    margin-top: 32px;
-}
-
 /* заголовок + счетчик + кнопка */
 .users-header {
     display: flex;
@@ -442,14 +439,14 @@ h2 {
 
 .users-btn-new {
     border: none;
-    border-radius: 8px;
+    border-radius: 30px;
     padding: 8px 16px;
-    background: #727272;
+    background: #41328f;
     color: #fff;
     cursor: pointer;
     font-family: JanoSansProRegular;
-    font-style: Bold;
-    font-size: 12px;
+    font-weight: 500;
+    font-size: 16px;
     line-height: 100%;
     letter-spacing: 0%;
     text-decoration: none;
@@ -467,7 +464,7 @@ h2 {
     justify-content: space-between;
     gap: 16px;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
 }
 
@@ -489,16 +486,27 @@ h2 {
     position: relative;
 }
 
-.users-show__select {
-    padding: 4px 9px 4px 9px;
-    border-radius: 8px;
-    border: 1px solid #dedede;
-    background: #f6f6f6;
+.select__icon {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+}
 
+.users-show__select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 9px 13px 9px 10px;
+    border-radius: 8px;
+    border: none;
+    background: #f1f0fa;
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px 10px;
     font-family: JanoSansProRegular;
     font-weight: 500;
     font-style: Medium;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 100%;
     letter-spacing: 0%;
 }
@@ -665,13 +673,16 @@ h2 {
 
 /* поиск */
 .asdf {
+    width: 100%;
     display: flex;
     justify-content: space-between;
-    gap: 12px;
+    gap: 20px;
 }
+/* .users-toolbar__search{
+    width: 500px;
+} */
 .users-search {
     position: relative;
-    min-width: 260px;
 }
 
 .users-search__icon {
@@ -684,8 +695,8 @@ h2 {
 }
 
 .users-search__input {
+    width: 500px;
     font-family: JanoSansProRegular;
-    width: 107px;
     padding: 7px 0 7px 28px;
     border-radius: 8px;
     border: 1px solid #9e9e9e;
@@ -809,9 +820,8 @@ h2 {
     background: var(--secondary-600, #41328f);
     color: #ffffff;
 }
-
 table.light-push-table {
-    width: 1200px;
+    width: 1000px;
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -844,7 +854,6 @@ table.light-push-table {
 }
 
 .light-push-table th {
-    text-align: center;
     padding: 14px;
 
     font-weight: 700;
@@ -1150,4 +1159,960 @@ table.light-push-table {
 .attention__tag--light {
     background: #e7f0ff;
     color: #727272;
+}
+
+/* модалка */
+
+/* ===== Dialog styles (converted from SCSS to CSS) ===== */
+.form__admin {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+.dialog {
+    font-family: JanoSansProRegular;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 11 !important;
+}
+.date {
+    display: flex;
+    gap: 30px;
+}
+.date_start {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+/* Containers */
+.dialog__container {
+    width: 100%;
+    max-width: 1063px;
+    max-height: 85vh;
+    background-color: white;
+    border-radius: 10px;
+    padding: 30px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    overflow-y: auto;
+}
+
+.dialog__container_small {
+    max-width: 675px !important;
+}
+
+.dialog__container_x-small {
+    max-width: 430px !important;
+}
+
+.dialog__container_custom {
+    width: 100%;
+    max-width: 1126px;
+    max-height: 85vh;
+    background-color: white;
+    border-radius: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.dialog__container_custom_small {
+    max-width: 675px;
+}
+
+.dialog__container_custom_x-small {
+    max-width: 430px;
+}
+
+/* Inner */
+.dialog__inner {
+    padding: 30px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__inner {
+        gap: 20px;
+        padding: 20px;
+    }
+}
+
+/* Header */
+.dialog__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__header {
+        margin-bottom: 15px;
+    }
+}
+
+.dialog__header p {
+    font-size: 30px;
+    letter-spacing: 1px;
+}
+
+@media screen and (max-width: 991.98px) {
+    .dialog__header p {
+        font-size: 24px;
+    }
+}
+
+/* Close button */
+.dialog__close {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f3f4f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.dialog__close:hover {
+    transition: 0.2s;
+    background-color: #d9dadc;
+}
+
+.dialog__close svg {
+    width: 40px;
+}
+
+/* Tabs */
+.dialog__tabs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: clip;
+    min-height: 20px;
+}
+
+.dialog__tabs_item {
+    font-size: 20px;
+    color: #999;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-wrap: nowrap;
+    user-select: none;
+}
+
+.dialog__tabs_item.active {
+    color: #41328f !important;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__tabs_item {
+        font-size: 16px;
+    }
+}
+
+.dialog__tabs_item.locked {
+    cursor: not-allowed;
+}
+
+.dialog__tabs_item.done {
+    color: #121212;
+}
+
+/* Buttons row */
+.dialog__btns {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+@media screen and (max-width: 575.98px) {
+    .dialog__btns {
+        justify-content: unset;
+    }
+    .dialog__btns .main__btn {
+        max-width: unset;
+        width: 100%;
+    }
+}
+
+.dialog__btn {
+    max-width: unset;
+}
+
+/* Content */
+.dialog__content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.dialog__content.is-readonly {
+    pointer-events: none;
+}
+
+.dialog__content.is-readonly .dialog__btns {
+    pointer-events: auto;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__content {
+        gap: 20px;
+    }
+}
+
+/* Component blocks */
+.dialog__component {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__component {
+        width: 100%;
+    }
+}
+
+.dialog__component.small {
+    max-width: 220px;
+    width: 100%;
+}
+
+.dialog__component.medium {
+    max-width: 385px;
+    width: 100%;
+}
+
+.dialog__component.large {
+    max-width: 500px;
+    width: 100%;
+}
+
+@media screen and (max-width: 991.98px) {
+    .dialog__component.small,
+    .dialog__component.medium,
+    .dialog__component.large {
+        max-width: unset;
+    }
+}
+
+/* Prize */
+.dialog__prize {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dialog__prize_container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 30px;
+}
+
+@media screen and (max-width: 991.98px) {
+    .dialog__prize_container {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+}
+
+@media screen and (max-width: 575.98px) {
+    .dialog__prize_container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.dialog__prize_item {
+    display: flex;
+    gap: 8px;
+}
+
+.dialog__prize_header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.dialog__prize_content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.dialog__prize_title {
+    font-size: 20px;
+    font-family: "Cera";
+}
+
+.dialog__prize_text {
+    text-transform: uppercase;
+    font-size: 16px;
+    font-family: "Cera";
+}
+
+.dialog__prize_number {
+    margin-top: 4px;
+    color: #999;
+    font-size: 13px;
+}
+
+.dialog__prize_btns {
+    display: flex;
+}
+
+@media screen and (max-width: 575.98px) {
+    .dialog__prize_btns {
+        transform: scale(0.8);
+    }
+}
+
+.dialog__prize_btns svg {
+    cursor: pointer;
+}
+
+/* Titles */
+.dialog__title {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    letter-spacing: 2%;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__title {
+        font-size: 14px;
+    }
+}
+
+.dialog__title_container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dialog__title.large {
+    font-size: 20px;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__title.large {
+        font-size: 16px;
+    }
+}
+
+.dialog__title_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Text */
+.dialog__text {
+    font-size: 16px;
+    color: #999;
+}
+
+@media screen and (max-width: 991.98px) {
+    .dialog__text {
+        font-size: 14px;
+    }
+}
+
+/* Input */
+.dialog__input {
+    font-size: 16px;
+    border-radius: 12px;
+    background: none;
+    padding: 12px 16px;
+    border: 1px solid #9e9e9e;
+}
+.dialog__input--m {
+    width: 220px;
+}
+
+.dialog__input:focus {
+    outline: 1px solid #121212;
+}
+.dialog__input::placeholder {
+    font-family: JanoSansProRegular;
+}
+
+.dialog__input.error {
+    background-color: #feefec;
+    border: 1px solid #ff0000;
+    color: #ff0000;
+}
+
+.dialog__input.error::placeholder {
+    color: #ff0000;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__input {
+        font-size: 14px;
+    }
+}
+
+.dialog__input_short {
+    max-width: 67px;
+    width: 100%;
+}
+
+.dialog__input_medium {
+    max-width: 163px;
+    width: 100%;
+}
+
+@media screen and (max-width: 991.98px) {
+    .dialog__input_short,
+    .dialog__input_medium {
+        max-width: unset;
+    }
+}
+
+.dialog__input_reset {
+    display: flex;
+    gap: 24px;
+}
+
+.dialog__input_reset select {
+    min-width: 200px;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__input_reset {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .dialog__input_reset select {
+        max-width: unset !important;
+    }
+}
+
+/* Input buttons group */
+.dialog__input_btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 34px;
+}
+
+.dialog__input_btns_small {
+    gap: 24px;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__input_btns {
+        gap: 20px;
+    }
+}
+
+/* Phone modifier */
+@media screen and (max-width: 767.98px) {
+    .dialog__input_btns-phone {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px !important;
+    }
+    .dialog__input_btns-phone input {
+        width: calc(100% - 32px) !important;
+    }
+}
+
+/* Textarea */
+.dialog__textarea {
+    font-size: 16px;
+    height: 220px;
+    border-radius: 8px;
+    background: none;
+    padding: 12px 16px;
+    outline: none;
+    border: 1px solid #9e9e9e;
+    resize: none;
+    min-height: 136px;
+}
+
+.dialog__textarea::placeholder {
+    font-family: JanoSansProRegular;
+}
+
+.dialog__textarea.error {
+    background-color: #feefec;
+    border: 1px solid #ff0000;
+    color: #ff0000;
+}
+
+.dialog__textarea.error::placeholder {
+    color: #ff0000;
+}
+
+/* Checkbox */
+.dialog__checkbox {
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.dialog__checkbox .custom-checkbox {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #e80024;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: background-color 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialog__checkbox .custom-checkbox svg {
+    height: 10px;
+}
+
+.dialog__checkbox .custom-checkbox.active {
+    background-color: #e80024;
+    border-color: #e80024;
+}
+
+.dialog__checkbox p {
+    font-size: 16px;
+}
+
+/* Block row */
+.dialog__block {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.dialog__block--date {
+    display: flex;
+    flex-direction: column;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__block {
+        gap: 20px;
+    }
+}
+
+/* Select */
+.dialog__select {
+    font-family: JanoSansProRegular;
+    border: 1px solid #9e9e9e;
+    color: #121212;
+    background: url("data:image/svg+xml,%3Csvg width='8' height='6' viewBox='0 0 8 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%23E80024' stroke-width='1.5'/%3E%3C/svg%3E")
+        no-repeat right 0.75rem center;
+    background-color: #fff;
+    background-size: 8px 6px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+.dialog__select option {
+    font-family: JanoSansProRegular;
+}
+.dialog__select_black {
+    border: 2px solid black;
+    color: black;
+    background: url("data:image/svg+xml,%3Csvg width='8' height='6' viewBox='0 0 8 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%23000000' stroke-width='1.5'/%3E%3C/svg%3E")
+        no-repeat right 0.75rem center;
+}
+
+/* Horizontal */
+.dialog__horizontal {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+@media screen and (max-width: 575.98px) {
+    .dialog__horizontal {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+/* Info */
+.dialog__info {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    width: 100%;
+}
+
+@media screen and (max-width: 991.98px) {
+    .dialog__info {
+        width: 100%;
+    }
+}
+
+/* Tags */
+.dialog__tags {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+}
+
+.dialog__tag {
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    padding: 4px 16px;
+    gap: 4px;
+    border-radius: 10px;
+    border: 2px solid #ef0000;
+    color: #e80024;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__tag {
+        font-size: 10px;
+        text-wrap: nowrap;
+        padding: 2px 10px;
+    }
+}
+
+.dialog__tag_placeholder {
+    font-size: 18px;
+    color: #e80024;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__tag_placeholder {
+        font-size: 14px;
+    }
+}
+
+/* Plus row */
+.dialog__plus {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.dialog__plus p {
+    color: #e80024;
+    font-size: 16px;
+}
+
+/* Evaluation */
+.dialog__eva {
+    color: #e80024;
+    font-size: 22px;
+    text-transform: uppercase;
+}
+
+.dialog__eva_container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.dialog__eva_item {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.dialog__eva_title {
+    color: #121212;
+    font-size: 20px;
+    font-family: Cera;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__eva_title {
+        font-size: 18px;
+    }
+}
+
+.dialog__eva_number {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+@media screen and (max-width: 575.98px) {
+    .dialog__eva_number {
+        display: none;
+    }
+}
+
+.dialog__eva_number-active {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.dialog__eva_number p {
+    color: #e80024;
+    font-size: 22px;
+    font-weight: 600;
+    width: 38px;
+    height: 38px;
+    border: 1px solid #e80024;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__eva_number p {
+        font-size: 18px;
+    }
+}
+
+.dialog__eva_number p.active {
+    background-color: #e80024;
+    color: #fff;
+    transition: 0.2s;
+}
+
+/* Award */
+.dialog__award {
+    display: flex;
+    gap: 30px;
+}
+
+@media screen and (max-width: 767.98px) {
+    .dialog__award {
+        gap: 20px;
+    }
+}
+
+@media screen and (max-width: 575.98px) {
+    .dialog__award {
+        flex-direction: column;
+    }
+}
+
+.dialog__award_img {
+    object-fit: cover;
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+}
+
+.dialog__award_content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dialog__award_title {
+    color: #121212;
+    font-size: 16px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.dialog__award_text {
+    font-size: 16px;
+}
+
+/* Line */
+.dialog__line {
+    padding-bottom: 30px;
+    border-bottom: 1px solid #f3f4f7;
+}
+
+/* ===== Tooltip / Help styles ===== */
+
+/* Контейнер заголовка с иконкой-подсказкой */
+.title-with-help {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Триггер тултипа */
+.help-tt {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: start;
+    line-height: 0; /* чтобы svg не тянул высоту */
+    width: 300px;
+}
+
+@media screen and (max-width: 575.98px) {
+    .help-tt {
+        width: 100px;
+    }
+}
+
+.help-tt__icon {
+    cursor: pointer;
+}
+
+/* Показ по :hover (и по фокусу с клавиатуры) */
+.help-tt:hover .tooltip,
+.help-tt:hover .tooltipSquare,
+.help-tt:focus-within .tooltip,
+.help-tt:focus-within .tooltipSquare {
+    visibility: visible;
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* 1-в-1 из вашего проекта */
+.tooltipSquare {
+    position: absolute;
+    top: 100%;
+    left: 0.5%;
+    width: 13px;
+    height: 13px;
+    background: #fff;
+    z-index: 1001;
+    transform: translate(-5%, 3px) rotate(45deg) !important;
+    border-left: 1px solid #e0e3e8;
+    border-top: 1px solid #e0e3e8;
+
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s;
+    pointer-events: none;
+}
+
+.tooltip {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translate(-50%, 3px) !important;
+    max-width: 300px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    background: #fff;
+    color: #4b576a;
+    border: 1px solid #e0e3e8;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s;
+    pointer-events: none;
+}
+
+@media screen and (max-width: 575.98px) {
+    .tooltip {
+        left: 25%;
+        min-width: 150px;
+        font-size: 14px;
+    }
+}
+
+.tooltip p {
+    text-align: start;
+    margin: 0;
+    line-height: 16px;
+}
+
+.tooltip .tooltip__btn {
+    margin: 5px 0 0 0;
+    padding: 5px 10px;
+    border-radius: 10px;
+    border: 1px solid #acbbcd;
+    background: #ebedef;
+    cursor: default;
+    width: fit-content;
+    font-weight: normal;
+    line-height: 14px;
+    height: 22px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.dialog__file-input {
+    display: none;
+}
+
+.dialog__dropzone {
+    background: #F1F0FA;
+    border-radius: 10px;
+    padding: 18px 16px;
+    min-height: 127px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    text-align: center;
+
+    border: 1px solid transparent;
+    transition: 0.15s ease;
+}
+
+.dialog__dropzone.is-dragging {
+    border-color: #e80024;
+    background: #feefec;
+}
+
+.dialog__dropzone_title {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    letter-spacing: 2%;
+    text-align: center;
+    color: #9e9e9e;
+}
+
+.dialog__dropzone_sub {
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+}
+.main__btn{
+    cursor: pointer;
+
+    border-radius: 30px;
+    padding: 12px 16px 12px 16px;
+    border: 1px solid #41328F;
+    background: #41328F;
+
+    font-family: JanoSansProRegular;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #FFFFFF;
+
+}
+
+.main__btn--white{
+    background: none;
+    color: #41328F;
 }

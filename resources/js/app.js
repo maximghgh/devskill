@@ -6,6 +6,10 @@ import VueTheMask from 'vue-the-mask';
 import HeaderComponent from './components/HeaderComponent.vue';
 import FooterComponent from './components/FooterComponent.vue';
 
+// Импорт всех компонентов студентов
+import DashBoardStudentComponent from './components/student/DashBoardStudentComponent.vue';
+import HeaderStudentComponent from './components/student/Header-studentComponent.vue';
+
 // Импорт всех компонентов преподователя 
 import DashboardTeacher from './components/teacher/DashboardTeacher.vue';
 import HeaderteacherComponent from './components/teacher/Header-teacherComponent.vue';
@@ -54,6 +58,10 @@ import ChapterView from './components/ChapterView.vue';
 
 // Создание приложения Vue
 const app = createApp({});
+
+//Регистрация компонентов преподователя 
+app.component('dashboardstudent-component', DashBoardStudentComponent);
+app.component('header-student-component', HeaderStudentComponent);
 
 //Регистрация компонентов преподователя 
 app.component('header-teacher-component', HeaderteacherComponent);

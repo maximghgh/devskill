@@ -275,10 +275,6 @@ h2 {
     color: #000;
     border: 2px solid #fff;
 }
-.button_white:hover {
-    background: transparent;
-    color: #fff;
-}
 .button_offer-main {
     font-size: 1.2em;
     width: 270px;
@@ -313,7 +309,6 @@ h2 {
 .button_transparent {
     height: 45px;
     width: 100%;
-    /* max-width: 172px; */
     border: 2px solid #fff;
     color: #fff;
     font-family: JanoSansProRegular;
@@ -735,6 +730,7 @@ nav a:hover {
     margin-bottom: 23px;
 }
 .course__sidebar-check {
+    margin-top: 24px;
 }
 .course__sidebar-oncheck {
     height: 39px;
@@ -744,7 +740,7 @@ nav a:hover {
 .course__sidebar-input label {
     font-size: 0.9em;
     font-family: JanoSansProRegular;
-    padding: 0 0 0 58px;
+    padding: 0 0 0 51px;
     height: 39px;
     display: flex;
     align-items: center;
@@ -760,6 +756,7 @@ nav a:hover {
     width: 39px;
     height: 39px;
     border: 3px solid #e9e9f2;
+    background: #ffffff;
     color: #7059ad;
     box-sizing: border-box;
     border-radius: 12px;
@@ -806,9 +803,9 @@ input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-.course__content {
+/* .course__content {
     width: 100%;
-}
+} */
 .course__menu {
     margin-top: 20px;
     margin-bottom: 40px;
@@ -838,6 +835,7 @@ input[type="number"]::-webkit-outer-spin-button {
     height: 46px;
     display: flex;
     align-items: center;
+    -webkit-user-select: none;
     user-select: none;
     transition: var(--transition-3);
     text-decoration: none;
@@ -849,9 +847,8 @@ input[type="number"]::-webkit-outer-spin-button {
 .course__cards {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 28px;
     align-items: center;
-    justify-content: space-between;
 }
 .course__cards_personal,
 .course__cards_additional {
@@ -946,22 +943,29 @@ input[type="number"]::-webkit-outer-spin-button {
     position: absolute;
     top: 20px;
     right: 20px;
-    width: 80px;
 }
 .course__card-image img {
-    width: 80px;
-    height: auto;
+    width: 74px;
+    height: 74px;
+}
+.categorys {
+    margin-bottom: 100px;
 }
 .course__card-title {
     font-family: JanoSansProBold;
-    font-size: 25px;
+    font-size: 32px;
     margin: 0 0 5px;
     max-width: 80%;
 }
-.course__card-desc {
-    font-size: 1.05em;
+/* .course__card-desc {
+    width: 67%;
     font-family: JanoSansProRegular;
-}
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 146%;
+    letter-spacing: 0%;
+    color: #4B4B4B;
+} */
 .course__card-price {
     font-family: JanoSansProSemiBold;
     font-size: 1.4em;

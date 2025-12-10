@@ -34,7 +34,7 @@
                 </section>
 
                 <!-- ================= Категории ================= -->
-                <section class="category">
+                <section class="categorys">
                     <div class="category__inner">
                         <div class="category__one category__one_back1">
                             <div class="category__one-inner">
@@ -503,10 +503,10 @@ const pages = computed(() =>
 /* 4. Фильтры                                                         */
 /* ------------------------------------------------------------------ */
 const levelOptions = [
-    { value: 'basic',    label: 'Начинающий' },
-    { value: 'middle',   label: 'Средний' },
-    { value: 'advanced', label: 'Продвинутый' },
-    { value: 'mixed',    label: 'Смешанный' },
+    { value: "basic", label: "Начинающий" },
+    { value: "middle", label: "Средний" },
+    { value: "advanced", label: "Продвинутый" },
+    { value: "mixed", label: "Смешанный" },
 ];
 
 const selectedDifficulties = ref([]);

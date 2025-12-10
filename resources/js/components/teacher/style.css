@@ -1,4 +1,4 @@
-h2 {
+.h2 {
     font-weight: 400;
     font-size: 40px;
     line-height: 100%;
@@ -235,6 +235,13 @@ h3 {
 }
 .courses_h2 {
     color: #7a2abd;
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: var(--primary-600, #4e187b);
+    text-align: left;
+    margin-top: 44px;
 }
 .topic__h2 {
     color: #000000;
@@ -418,6 +425,7 @@ h3 {
     letter-spacing: 0%;
     color: #005c94;
     border-bottom: 1px solid #34a7ff00;
+    text-decoration: none;
 }
 
 .course-block__lesson-edit:hover {
@@ -954,9 +962,9 @@ h3 {
     letter-spacing: 0%;
 }
 
-.journal__months--bg{
+.journal__months--bg {
     padding: 11px 20px;
-    background: #F1F0FA;
+    background: #f1f0fa;
     border-radius: 25px;
 }
 /* когда открыт – чуть другие углы, как контейнер */

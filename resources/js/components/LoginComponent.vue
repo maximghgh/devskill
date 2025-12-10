@@ -202,8 +202,10 @@ const handleVerifyCode = async () => {
       const base64User = encodeURIComponent(toBase64(JSON.stringify(userData)))
       
       // Перенаправляем в зависимости от роли
-      if (userData.role === 3) {
-        window.location.href = `/admin?verifiedUser=${base64User}`
+      if (userData.role === 4) {
+        window.location.href = `/student?verifiedUser=${base64User}`
+      } else if(userData.role === 3){
+      window.location.href = `/admin?verifiedUser=${base64User}`
       } else if(userData.role === 2){
         window.location.href = `/teacher?verifiedUser=${base64User}`
       }

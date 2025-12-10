@@ -13,7 +13,7 @@ class UserController extends Controller
     public function index()
     {
         // Получаем всех пользователей
-        $users = User::select('id', 'name', 'email', 'phone', 'country', 'role', 'birthday', 'created_at', 'photo', 'position')
+        $users = User::select('id', 'name', 'email', 'phone', 'country', 'role', 'birthday', 'created_at', 'photo', 'position','inn')
                      ->orderBy('id', 'asc')
                      ->get();
 

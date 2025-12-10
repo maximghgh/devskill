@@ -26,9 +26,11 @@ class AuthController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:5',
+                'inn'      => 'required|digits_between:10,12',
             ], [
                 'email.unique' => 'Пользователь с такой почтой уже существует.',
                 'password.min' => 'Пароль должен содержать не менее 5 символов.',
+                'inn.digits_between' => 'ИНН должен содержать 10 или 12 цифр.',
             ]);
 
             // Создаём временную запись с данными пользователя
@@ -36,6 +38,7 @@ class AuthController extends Controller
                 'name'       => $request->name,
                 'email'      => $request->email,
                 'password'   => Hash::make($request->password),
+                'inn'        => $request->inn,
                 'token'      => sha1($request->email . now()),
                 'expires_at' => Carbon::now()->addMinutes(60),
             ]);
@@ -85,6 +88,7 @@ class AuthController extends Controller
             'name'              => $pendingUser->name,
             'email'             => $pendingUser->email,
             'password'          => $pendingUser->password, // уже зашифрован
+            'inn'               => $pendingUser->inn,
             'email_verified_at' => now()
         ]);
 

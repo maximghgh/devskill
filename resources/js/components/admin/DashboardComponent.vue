@@ -20,7 +20,7 @@
                                 @click.prevent="setActive(index)"
                             >
                                 <span class="aside__icon" v-if="item.icon">
-                                <img :src="item.icon" width="24" height="24" alt="" />
+                                <img :src="item.icon" width="24" height="24" alt="" fill="white" />
                                 </span>
                                 <span class="aside__text">
                                 {{ item.label }}
@@ -33,7 +33,7 @@
                         <div v-for="(item, index) in menuItems"
                             :key="index"
                             :id="item.id"
-                            class="block"
+                            class="blockek"
                             style="margin-top: 20px"
                             v-show="activeIndex === index"
                         >
@@ -148,10 +148,6 @@
                             </div>
                             <!-- Блок "Все пользователи" -->
                             <div v-if="item.id === 'users'" class="user-block" id="users">
-                                <!-- верхняя строка: заголовок + счетчик + кнопка -->
-                                <div class="users-header">
-                                    <p class="users-subtitle">{{ usersTotalLabel }}</p>                                    
-                                </div>
 
                                 <!-- панель фильтров -->
                                 <div class="users-toolbar">
@@ -166,6 +162,7 @@
                                                         <option :value="25">25</option>
                                                         <option :value="50">50</option>
                                                     </select>
+                                                    <img class="select__icon" src="../../../img/admin/select.svg" alt="">
                                                 </span>
                                                 пользователей
                                             </label>
@@ -268,9 +265,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button type="button" class="users-btn-new">
+                                    <!-- <button type="button" class="users-btn-new">
                                         <span class="users-btn-desc">+</span> Новый пользователь
-                                    </button>
+                                    </button> -->
                                 </div>
 
                                 <!-- таблица пользователей -->
@@ -280,10 +277,8 @@
                                             <tr>
                                                 <th>ID</th>
                                                 <th>ФИО</th>
-                                                <th>Email</th>
+                                                <th>Дата регистрации</th>
                                                 <th>Телефон</th>
-                                                <th>День рождения</th>
-                                                <th>Местоположение</th>
                                                 <th>Роль</th>
                                                 <th>Действия</th>
                                             </tr>
@@ -300,10 +295,8 @@
                                                         alt="Фото пользователя" width="32" height="32" class="avatar__admin"
                                                     />
                                                     {{ userItem.name }}</td>
-                                                <td>{{ userItem.email }}</td>
+                                                <td>{{ formatBirthday(userItem.created_at) }}</td>
                                                 <td>{{ userItem.phone }}</td>
-                                                <td>{{ formatBirthday(userItem.birthday) }}</td>
-                                                <td>{{ userItem.country }}</td>
 
                                                 <!-- роли -->
                                                 <td>
@@ -442,10 +435,6 @@
 
                             <!-- Блок "Курсы" -->
                             <div v-else-if="item.id === 'courses'" class="user-block" id="courses">
-                                <!-- шапка как у пользователей -->
-                                <div class="users-header">
-                                    <p class="users-subtitle">{{ coursesTotalLabel }}</p>
-                                </div>
 
                                 <!-- тулбар: количество, фильтр, поиск -->
                                 <div class="users-toolbar">
@@ -554,7 +543,7 @@
                                                     <img
                                                         width="13"
                                                         height="13"
-                                                        src="../../../img/admin/search.svg"
+                                                        src="../../../img/admin/search.png"
                                                         alt=""
                                                     />
                                                 </span>
@@ -574,10 +563,14 @@
                                                 </button>
                                             </div>
                                         </div>
+                                        <button
+                                            type="button"
+                                            class="users-btn-new"
+                                            @click="showCreateCourse = true"
+                                            >
+                                            <span class="users-btn-desc">+</span> Добавить курс
+                                        </button>
                                     </div>
-                                    <a class="users-btn-new" href="/admin/addcourse">
-                                        <span class="users-btn-desc">+</span> Новый курс
-                                    </a>
                                 </div>
 
                                 <!-- старый admin__block оставляем, только без link__add -->
@@ -603,8 +596,8 @@
                                         <table class="light-push-table">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
                                                     <th>Курс</th>
+                                                    <th>Автор</th>
                                                     <th>Активен</th>
                                                     <th>Дата создания</th>
                                                     <th>Участники</th>
@@ -614,16 +607,16 @@
                                             </thead>
                                             <tbody>
                                                 <tr
-                                                    v-for="(course, index) in paginatedCourses"
+                                                    v-for="(course) in paginatedCourses"
                                                     :key="course.id"
                                                 >
-                                                    <td>{{ index + 1 }}</td>
                                                     <td class="avatar__user">
                                                     <img 
                                                         :src="course.card_image ? `${course.card_image}` : 'https://devskills.foncode.ru/img/no_foto.jpg'" 
                                                         alt="Фото пользователя" width="25" height="25" class="avatar__admin"
                                                     />
-                                                    {{ course.course_name }}</td>
+                                                    {{ course.course_name ? `${course.course_name}` : 'Неизвестно' }}</td>
+                                                    <td>{{ course.teacher ? `${course.teacher}` : 'Неизвестно' }}</td>
                                                     <td>Да</td>
                                                     <td>{{ formatBirthday(course.created_at) }}</td>
                                                     <td>0</td>
@@ -656,7 +649,7 @@
                                                                 alt=""
                                                             />
                                                         </button>
-                                                        <a
+                                                        <!-- <a
                                                             class="btn--control"
                                                             :href="`/admin/course/${course.id}/topics/json`"
                                                         >
@@ -666,7 +659,7 @@
                                                                 src="../../../img/admin/book.png"
                                                                 alt=""
                                                             />
-                                                        </a>
+                                                        </a> -->
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -1060,8 +1053,9 @@
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Название новости</th>
-                                            <th>Просмотреть комментарии</th>
+                                            <th>Заголовок</th>
+                                            <th>Дата</th>
+                                            <th>Комментарии</th>
                                             <th>Действие</th>
                                         </tr>
                                     </thead>
@@ -1069,6 +1063,7 @@
                                         <tr v-for="(newsItem, index) in paginatedNews" :key="newsItem.id">
                                             <td>{{ index + 1 }}</td>
                                             <td>{{ newsItem.title }}</td>
+                                            <td>{{ formatBirthday(newsItem.created_at) }}</td>
                                             <td><a href="#" @click.prevent="openComments(newsItem)">Просмотреть комментарии</a></td>
                                             <td>
                                                 <!-- твои кнопки действий как были -->
@@ -1706,6 +1701,7 @@
                 </div>
             </aside>
         </div>
+        <CreateCourseDialog v-model="showCreateCourse" />
     </div>
 </template>
 
@@ -1719,6 +1715,7 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 import { globalNotification } from "../../globalNotification";
+import CreateCourseDialog from "./CreateHackathon.vue"; 
 import "./style.css"
 
 import iconDashboard from "./../../../img/admin/info.svg";
@@ -1728,7 +1725,7 @@ import iconCategory  from "./../../../img/admin/couse.svg";
 import iconNews      from "./../../../img/admin/newspaper.svg";
 import iconFaq       from "./../../../img/admin/newspaper.svg";
 
-
+const showCreateCourse = ref(false);
 
 const fmtShort = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit', month: '2-digit', year: 'numeric'
@@ -2319,6 +2316,8 @@ watch([selectedRole, searchQuery, pageSizeUsers], () => {
 
 function getRoleName(role) {
     switch (role) {
+        case 4:
+            return "Родитель";
         case 3:
             return "Админ";
         case 2:

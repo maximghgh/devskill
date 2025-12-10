@@ -195,6 +195,11 @@ Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail'])->nam
 //         return view('admin.dashboard');
 //     })->name('admin.dashboard');
 // });
+
+Route::get('/student', function () {
+    return view('student.dashboardstud');
+})->middleware(['auth', 'role:4']);
+
 Route::get('/teacher', function () {
     return view('teacher');
 })->middleware(['auth', 'role:2']);

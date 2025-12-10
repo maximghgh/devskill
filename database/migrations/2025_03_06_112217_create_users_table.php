@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('password');
             $table->timestamps(); // created_at и updated_at
             $table->string('photo')->nullable()->after('password');
+            $table->string('inn', 12)->nullable()->after('phone');
         });
     }
 
