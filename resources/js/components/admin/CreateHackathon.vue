@@ -1,6 +1,6 @@
 <script setup>
 import {computed, defineAsyncComponent, onMounted, reactive, ref, watch} from 'vue'
-import ConfirmDialog from './Tab/ConfirmDialog.vue'
+// import ConfirmDialog from './Tab/ConfirmDialog.vue'
 
 import OverviewTab      from './Tab/Overview.vue'
 // import ResourcesTab     from './Tab/Resources.vue'
@@ -13,11 +13,13 @@ import OverviewTab      from './Tab/Overview.vue'
 const props = defineProps({
     modelValue : Boolean,
     hackathon  : { type:Array, default:() => [] },
+    isEdit     : { type: Boolean, default: false },
     tabs       : { type:Array, default:() => [] },
     tags       : { type:Array, default:() => [] },
     admin      : { type:Boolean, default:() => false },
     update_published: { type:Boolean, default:true },
 })
+
 const isAdmin = computed(() => !!props.admin)
 const updatePublished = computed(() => props.update_published !== false)
 

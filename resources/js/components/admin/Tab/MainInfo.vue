@@ -1,4 +1,5 @@
 <script setup>
+import openCreateCourseDialog from "../DashboardComponent.vue"
 import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import axios from "axios";
 import Multiselect from "vue-multiselect";
@@ -27,7 +28,7 @@ const emit = defineEmits(["saved", "cancel", "dirty", "saving"]);
 
 /** Локальная форма (твоя структура) */
 const form = ref({
-    cardTitle: "",
+    cardTitle: "123123",
     courseName: "",
     price: "",
     duration: "",
@@ -48,6 +49,17 @@ const form = ref({
 });
 
 // поля файлов
+
+const teacherSelectModel = ref(null);
+
+watch(teacherSelectModel, (val) => {
+    if (!val) {
+        form.value.selectedTeachers = [];
+    } else {
+        form.value.selectedTeachers = [val];
+    }
+});
+
 
 const cardInputRef = ref(null);
 const descInputRef = ref(null);
@@ -150,6 +162,56 @@ async function loadLanguages() {
     languages.value = data;
 }
 
+function fillFormFromDraft() {
+    if (!props.isEdit || !props.draft) return;
+
+    const c = props.draft;
+
+    form.value.cardTitle   = c.card_title   ?? "";
+    form.value.courseName  = c.course_name  ?? "";
+    form.value.price       = c.price        ?? "";
+    form.value.duration    = c.duration     ?? "";
+    form.value.description = c.description  ?? "";
+    form.value.hours       = c.hours        ?? "";
+    form.value.simulators  = c.simulators   ?? "";
+    form.value.difficulty  = c.difficulty   ?? "basic";
+
+    // даты
+    form.value.startDate = c.start_date ? String(c.start_date).slice(0, 10) : "";
+    form.value.endDate   = c.end_date   ? String(c.end_date).slice(0, 10)   : "";
+
+    // преподаватели -> массив ID
+    const teacherIds = Array.isArray(c.teachers)
+        ? c.teachers.map(t => (typeof t === "object" ? t.id : t))
+        : [];
+    form.value.selectedTeachers = teacherIds;
+    teacherSelectModel.value = teacherIds[0] ?? null;
+
+    // направление
+    form.value.selectedDirection = c.direction ?? null;
+
+    // языки: backend отдаёт либо массив ID, либо массив объектов
+    let langIds = [];
+    if (Array.isArray(c.language)) {
+        if (c.language.length && typeof c.language[0] === "object") {
+            langIds = c.language.map(l => l.id);
+        } else {
+            langIds = c.language.map(id => Number(id));
+        }
+    }
+    form.value.selectedLanguages = languages.value.filter(l =>
+        langIds.includes(l.id)
+    );
+
+    // повышение квалификации
+    form.value.upgradeQualification = c.upgradequalification ?? 0;
+
+    // EditorJS данные
+    form.value.editorData = c.editor_data || {};
+}
+
+
+
 /** Editor init */
 function initEditor() {
     if (!editorHolder.value) return;
@@ -216,11 +278,17 @@ function resetForm() {
         startDate: "",
         endDate: "",
     };
+
+    teacherSelectModel.value = null;
+    cardFileName.value = "";
+    descFileName.value = "";
+
     isDirty.value = false;
     emit("dirty", false);
 
     if (editor.value) editor.value.clear();
 }
+
 
 /** Cancel */
 function cancel() {
@@ -235,39 +303,39 @@ async function save() {
     emit("saving", true);
 
     try {
-        // 1) гарантируем, что editorData актуальна
+        // 1) сохраняем данные из EditorJS
         if (editor.value) {
             const data = await editor.value.save();
             form.value.editorData = data;
         }
 
-        // 2) FormData
+        // 2) общая часть FormData
         const fd = new FormData();
-        fd.append("cardTitle", form.value.cardTitle);
-        fd.append("courseName", form.value.courseName);
-        fd.append("price", form.value.price);
-        fd.append("duration", form.value.duration);
+        fd.append("cardTitle",   form.value.cardTitle);
+        fd.append("courseName",  form.value.courseName);
+        fd.append("price",       form.value.price);
+        fd.append("duration",    form.value.duration);
         fd.append("description", form.value.description);
-        fd.append("hours", form.value.hours);
+        fd.append("hours",       form.value.hours);
 
         if (form.value.simulators != null) {
             fd.append("simulators", form.value.simulators);
         }
 
-        fd.append("difficulty", form.value.difficulty);
-        fd.append("editorData", JSON.stringify(form.value.editorData));
+        fd.append("difficulty",  form.value.difficulty);
+        fd.append("editorData",  JSON.stringify(form.value.editorData));
 
         // преподаватели (массив ID)
         fd.append("teachers", JSON.stringify(form.value.selectedTeachers));
 
-        // языки как массив ID
+        // языки (массив ID)
         const languageIds = form.value.selectedLanguages.map((l) => l.id);
         fd.append("language", JSON.stringify(languageIds));
 
-        // направление (ID)
+        // направление
         fd.append("direction", form.value.selectedDirection ?? "");
 
-        // повышение квалификации (0/1)
+        // повышение квалификации
         fd.append(
             "upgradequalification",
             String(form.value.upgradeQualification ?? 0)
@@ -275,49 +343,60 @@ async function save() {
 
         // даты
         fd.append("start_date", form.value.startDate || "");
-        fd.append("end_date", form.value.endDate || "");
+        fd.append("end_date",   form.value.endDate   || "");
 
         // файлы
-        if (form.value.cardImage) fd.append("cardImage", form.value.cardImage);
-        if (form.value.descriptionImage)
-            fd.append("descriptionImage", form.value.descriptionImage);
-        if (form.value.pdfFile) fd.append("pdf", form.value.pdfFile);
+        if (form.value.cardImage)        fd.append("cardImage",        form.value.cardImage);
+        if (form.value.descriptionImage) fd.append("descriptionImage", form.value.descriptionImage);
+        if (form.value.pdfFile)          fd.append("pdf",              form.value.pdfFile);
 
-        // 3) POST
-        const { data } = await axios.post("/api/courses", fd, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
+        let data;
 
-        // уведомление
-        if (globalNotification) {
-            globalNotification.categoryMessage = "Курс создан";
+        if (!props.isEdit) {
+            // ---------- СОЗДАНИЕ ----------
+            const resp = await axios.post("/api/courses", fd, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            data = resp.data;
+
+            globalNotification.categoryMessage = "Основная информация курса сохранена";
+            globalNotification.type = "success";
+        } else {
+            // ---------- РЕДАКТИРОВАНИЕ ----------
+            const id = props.draft?.id;
+            if (!id) throw new Error("Нет id курса для редактирования");
+
+            const resp = await axios.post(`/api/courses/${id}`, fd, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            data = resp.data;
+
+            globalNotification.categoryMessage = "Курс обновлён";
             globalNotification.type = "success";
         }
 
-        // Попытка достать slug/id для логики модалки
-        const slug =
-            data?.course?.slug ??
-            data?.slug ??
+        // достаём id/slug для родителя
+        const courseId =
             data?.course?.id ??
+            data?.course?.slug ??
             data?.id ??
+            data?.slug ??
             null;
 
-        if (slug != null && props.draft) {
-            props.draft.slug = slug;
+        if (courseId != null && props.draft) {
+            props.draft.courseId = courseId;
+            props.draft.slug     = courseId;
         }
 
         isDirty.value = false;
         emit("dirty", false);
 
-        emit("saved", { slug, data });
-
-        // если хочешь чистить форму после успеха:
-        // resetForm()
+        emit("saved", { courseId, data });
     } catch (err) {
-        console.error("Ошибка при создании курса:", err);
+        console.error("Ошибка при сохранении курса:", err);
         if (globalNotification) {
             globalNotification.categoryMessage =
-                "Заполните все поля для создания курса";
+                "Заполните все поля для сохранения курса";
             globalNotification.type = "error";
         }
     } finally {
@@ -325,12 +404,33 @@ async function save() {
     }
 }
 
+
+
 defineExpose({ save });
 
 onMounted(async () => {
     await Promise.all([loadUsers(), loadDirections(), loadLanguages()]);
+
+    // если открываем в режиме редактирования и draft есть – зальём данные в форму
+    if (props.isEdit && props.draft) {
+        fillFormFromDraft();
+    }
+
     initEditor();
 });
+
+watch(
+    () => props.draft,
+    (val) => {
+        if (props.isEdit && val) {
+            fillFormFromDraft(val);
+            // обновим EditorJS начальными данными
+            if (editor.value) {
+                editor.value.render(form.value.editorData || {});
+            }
+        }
+    }
+);
 
 onBeforeUnmount(() => {
     if (editor.value) editor.value.destroy();

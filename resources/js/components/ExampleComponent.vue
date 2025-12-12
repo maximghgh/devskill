@@ -7,8 +7,7 @@
                 <section class="offer offer_main">
                     <div class="offer__inner offer__inner_main">
                         <h1>
-                            Повышайте свои знания и навыки вместе с
-                            Институтом образовательных технологий
+                            Повышайте свои знания и навыки вместе со Школьным Универститетом ИжГТУ имени М.Т. Калашникова
                         </h1>
                         <div class="offer__desc">
                             Наши курсы прошли более 15&nbsp;000&nbsp;школьников и
@@ -181,7 +180,7 @@
                                             />
                                         </div>
                                         <div class="course__card-title">
-                                            {{ course.card_title }}
+                                            {{ course.course_name }}
                                         </div>
                                         <div class="course__card-buttons">
                                             <div class="course__card-price">

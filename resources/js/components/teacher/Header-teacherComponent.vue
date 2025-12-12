@@ -4,7 +4,7 @@
             <div class="header__logos">
                 <a href="/teacher">
                     <img
-                        src="../../../img/logo.svg"
+                        src="../../../img/logo.png"
                         class="header__logo"
                         alt="Логотип"
                         height="90"

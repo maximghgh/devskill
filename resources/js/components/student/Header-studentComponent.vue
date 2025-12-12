@@ -4,7 +4,7 @@
             <div class="header__logo">
                 <a href="/student">
                     <img
-                        src="../../img/logo.svg"
+                        src="../../../img/logo.png"
                         class="header__logo"
                         alt="Логотип"
                     />

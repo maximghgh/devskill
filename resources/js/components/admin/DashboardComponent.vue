@@ -566,7 +566,7 @@
                                         <button
                                             type="button"
                                             class="users-btn-new"
-                                            @click="showCreateCourse = true"
+                                            @click="openCreateCourseDialog"
                                             >
                                             <span class="users-btn-desc">+</span> Добавить курс
                                         </button>
@@ -640,15 +640,11 @@
                                                         </button>
                                                         <button
                                                             class="btn__user--edit"
-                                                            @click.prevent="openEditModal(course)"
+                                                            @click.prevent="openEditCourseDialog(course)"
                                                         >
-                                                            <img
-                                                                width="24"
-                                                                height="24"
-                                                                src="../../../img/admin/edit.svg"
-                                                                alt=""
-                                                            />
+                                                            <img width="24" height="24" src="../../../img/admin/edit.svg" alt="">
                                                         </button>
+
                                                         <!-- <a
                                                             class="btn--control"
                                                             :href="`/admin/course/${course.id}/topics/json`"
@@ -1701,7 +1697,14 @@
                 </div>
             </aside>
         </div>
+        <!-- Создание курса -->
+        <!-- Редактирование курса -->
         <CreateCourseDialog v-model="showCreateCourse" />
+        <EditCourseDialog
+            v-model="showEditCourse"
+            :course="selectedCourse"
+            @saved="loadCourses"
+        />
     </div>
 </template>
 
@@ -1716,6 +1719,7 @@ import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 import { globalNotification } from "../../globalNotification";
 import CreateCourseDialog from "./CreateHackathon.vue"; 
+import EditCourseDialog from "./EditCourseDialog.vue"; 
 import "./style.css"
 
 import iconDashboard from "./../../../img/admin/info.svg";
@@ -1725,7 +1729,27 @@ import iconCategory  from "./../../../img/admin/couse.svg";
 import iconNews      from "./../../../img/admin/newspaper.svg";
 import iconFaq       from "./../../../img/admin/newspaper.svg";
 
+// уже есть
 const showCreateCourse = ref(false);
+const showEditCourse = ref(false);
+
+function openCreateCourseDialog() {
+  showCreateCourse.value = true;
+}
+
+function openEditCourseDialog(course) {
+  selectedCourse.value = course;
+  showEditCourse.value = true;
+}
+
+// вызывается при сохранении в модалке создания
+function handleCourseCreated(payload) {
+  // payload я сделаю в модалке как { course: ..., data: ... }
+  showCreateCourseDialog.value = false;
+  loadCourses();                             // перечитываем список
+}
+
+// === РЕДАКТИРОВАНИЕ ===
 
 const fmtShort = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit', month: '2-digit', year: 'numeric'

@@ -189,7 +189,7 @@ h1 {
     text-align: left;
 }
 .offer__inner_main h1 {
-    margin-bottom: 90px;
+    margin-bottom: 80px;
     text-align: left;
 }
 .offer_about h1 {
@@ -432,6 +432,9 @@ header {
     width: 100%;
     height: 100%;
 }
+.header__inner--admin {
+    max-width: 1320px;
+}
 .header__logo {
 }
 .header__logo img {
@@ -441,7 +444,7 @@ nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 14px;
+    gap: 67px;
 }
 nav a {
     display: block;
@@ -1498,6 +1501,7 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: var(--margin);
 }
 .category__one {
+    background: #7281d0;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -1557,7 +1561,7 @@ input[type="number"]::-webkit-outer-spin-button {
     background-position: right;
 }
 .category__one_back1 {
-    background-image: url("../img/bg_courses_c.jpg");
+    background-image: url("../img/bg_courses1_c.jpg");
 }
 
 /* contacts */

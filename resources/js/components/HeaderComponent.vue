@@ -4,16 +4,14 @@
             <div class="header__logo">
                 <a href="/">
                     <img
-                        src="../../img/logo.svg"
+                        src="../../img/logo.png"
                         class="header__logo"
                         alt="Логотип"
                     />
                 </a>
             </div>
             <nav class="header__nav">
-                <a href="/">Банк знаний</a>
                 <a href="/catalog">Каталог</a>
-                <a href="/training">Для учителей</a>
                 <a href="/news">Новости</a>
                 <a href="/contact">Контакты</a>
                 <a href="/about">О нас</a>

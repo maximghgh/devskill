@@ -1,10 +1,10 @@
 <template>
     <header class="header header_main">
-        <div class="header__inner">
+        <div class="header__inner header__inner--admin">
             <div class="header__logos">
                 <a href="/admin">
                     <img
-                        src="../../../img/logo.svg"
+                        src="../../../img/logo.png"
                         class="header__logo"
                         alt="Логотип"
                         height="90"
@@ -12,7 +12,7 @@
                     />
                 </a>
             </div>
-            <h3>Панель администратора</h3>
+            <h3>Админ-панель</h3>
             <div class="header__lk">
                 <div class="personal-area personal-area_active">
                     <div class="personal-area__inner">
