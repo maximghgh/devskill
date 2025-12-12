@@ -36,7 +36,7 @@ const form = ref({
   courseName: "",
   price: "",
   duration: "",
-  description: "",
+  description: "123",
   hours: "",
   simulators: "",
   difficulty: "basic",

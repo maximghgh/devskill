@@ -117,7 +117,7 @@ class CourseController extends Controller
             'cardTitle'           => 'nullable|string|max:255',
             'courseName'          => 'required|string|max:255',
             'price'               => 'required|numeric',
-            'duration'            => 'required|string',
+            'duration'            => 'string',
             'description'         => 'nullable|string',
             'hours'               => 'nullable|integer',
             'simulators'          => 'nullable|integer',

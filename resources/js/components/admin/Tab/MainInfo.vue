@@ -526,8 +526,8 @@ onBeforeUnmount(() => {
                 class="dialog__input dialog__select"
                 :disabled="isDisabled"
             >
-                <option value="basic">ДПО</option>
-                <option value="middle">ДПО детское</option>
+                <option value="basic">Базовый</option>
+                <option value="middle">Средний</option>
                 <option value="advanced">Продвинутый</option>
                 <option value="mixed">Смешанный</option>
             </select>
