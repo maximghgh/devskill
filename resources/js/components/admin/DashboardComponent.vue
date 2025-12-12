@@ -91,11 +91,11 @@
         </div>
 
         <!-- Диалоги курсов (как у тебя было) -->
-        <CreateCourseDialog v-model="showCreateCourse" @saved="loadCourses" />
+        <CreateCourseDialog v-model="showCreateCourse" @courseSaved="upsertCourse" />
         <EditCourseDialog
             v-model="showEditCourse"
             :course="selectedCourse"
-            @saved="loadCourses"
+            @updated="upsertCourse"
         />
     </div>
 </template>
@@ -175,6 +175,12 @@ const languages = ref([]);
 const directions = ref([]);
 const newsItems = ref([]);
 const faqs = ref([]);
+
+function upsertCourse(course) {
+  const idx = courses.value.findIndex(c => c.id === course.id);
+  if (idx === -1) courses.value = [course, ...courses.value];
+  else courses.value = courses.value.map(c => c.id === course.id ? course : c);
+}
 
 function base64ToUtf8(str) {
     return decodeURIComponent(escape(atob(str)));

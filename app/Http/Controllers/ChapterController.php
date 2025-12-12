@@ -48,7 +48,7 @@ class ChapterController extends Controller
             'correct_answer' => 'nullable|string',
             'file'           => 'nullable|file|max:20480',
             'video_url'      => 'nullable|string',
-            'points'         => 'required|integer|min:0',
+            'points'         => 'nullable|integer|min:0',
         ]);
 
         // Обработка файла (если есть)...
@@ -68,7 +68,7 @@ class ChapterController extends Controller
             'correct_answer'   => $data['correct_answer'] ?? null,
             'video_url'        => $data['video_url']      ?? null,
             'presentation_path'=> $presentationPath,
-            'points'           => $data['points'],
+            'points'           => $data['points'] ?? 0,
         ]);
 
         return response()->json([
@@ -102,7 +102,7 @@ class ChapterController extends Controller
         $chapter->content        = $request->content; // JSON-контент, если используется Editor.js
         $chapter->video_url      = $request->video_url ?? null;
         $chapter->correct_answer = $request->correct_answer ?? null;
-        $chapter->points        = $request->points;
+        $chapter->points         = $request->input('points', $chapter->points ?? 0);
         $chapter->save();
 
         return response()->json([

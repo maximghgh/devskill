@@ -80,14 +80,6 @@
                                     >Продвинутый</span
                                 >
                             </label>
-                            <label class="users-roles__option">
-                                <input
-                                    type="radio"
-                                    value="mixed"
-                                    v-model="selectedDifficulty"
-                                />
-                                <span class="users-roles__span">Смешанный</span>
-                            </label>
 
                             <div class="users-roles__actions">
                                 <button
@@ -186,7 +178,7 @@
                             <td>0</td>
 
                             <td>
-                                <div class="users-role-pill">
+                                <div class="users-role-pill" :class="difficultyClass(course.difficulty)">
                                     {{ difficultyLabel(course.difficulty) }}
                                 </div>
                             </td>
@@ -199,7 +191,7 @@
                                     <img
                                         width="24"
                                         height="24"
-                                        src="../../../img/admin/trash.png"
+                                        src="../../../../img/admin/trash.png"
                                         alt=""
                                     />
                                 </button>
@@ -213,7 +205,7 @@
                                     <img
                                         width="24"
                                         height="24"
-                                        src="../../../img/admin/edit.svg"
+                                        src="../../../../img/admin/edit.svg"
                                         alt=""
                                     />
                                 </button>
@@ -276,6 +268,16 @@ const emit = defineEmits([
 
 const { formatBirthday } = useDateFormatters();
 const { difficultyLabel } = useDifficultyLabel();
+
+function difficultyClass(diff) {
+  const d = String(diff || "").toLowerCase();
+
+  if (d === "basic") return "users-role-pill--basic";
+  if (d === "middle") return "users-role-pill--middle";
+  if (d === "advanced") return "users-role-pill--advanced";
+
+  return "users-role-pill--default";
+}
 
 function setCourses(next) {
     emit("update:courses", next);
@@ -347,3 +349,21 @@ async function deleteCourse(courseId) {
     }
 }
 </script>
+
+<style scoped>
+.users-role-pill--basic{
+  background: #BDE5B0;
+}
+
+.users-role-pill--middle{
+  background: #E5DFB0;
+}
+
+.users-role-pill--advanced{
+  background: #E5B0B0;
+}
+
+.users-role-pill--default{
+  background: #e9e9e9;
+}
+</style>

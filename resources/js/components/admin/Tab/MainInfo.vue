@@ -1,6 +1,5 @@
 <script setup>
-import openCreateCourseDialog from "../DashboardComponent.vue"
-import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from "vue";
 import axios from "axios";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.css";
@@ -10,25 +9,256 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 
-// поправь путь если нужно
 import { globalNotification } from "@/globalNotification";
 
 const props = defineProps({
-    draft: { type: Object, default: () => ({ slug: null }) },
-    allTags: { type: Array, default: () => [] }, // не используем, оставлено для совместимости
-    isEdit: { type: Boolean, default: false },
+  draft: { type: Object, default: () => ({ slug: null }) },
+  allTags: { type: Array, default: () => [] }, // не используем, оставлено для совместимости
+  isEdit: { type: Boolean, default: false },
 
-    // эти props прилетают из оболочки модалки
-    admin: { type: Boolean, default: false },
-    readonly: { type: Boolean, default: false },
-    hackathonSlug: { type: String, default: "" }, // чтобы не ругался Vue
+  // эти props прилетают из оболочки модалки
+  admin: { type: Boolean, default: false },
+  readonly: { type: Boolean, default: false },
+  hackathonSlug: { type: String, default: "" }, // чтобы не ругался Vue
 });
 
 const emit = defineEmits(["saved", "cancel", "dirty", "saving"]);
 
-/** Локальная форма (твоя структура) */
+/** Локальная форма */
 const form = ref({
-    cardTitle: "123123",
+  cardTitle: "",
+  courseName: "",
+  price: "",
+  duration: "",
+  description: "",
+  hours: "",
+  simulators: "",
+  difficulty: "basic",
+  selectedTeachers: [],
+  selectedLanguages: [],
+  selectedDirection: null,
+  upgradeQualification: 0,
+  cardImage: null,
+  descriptionImage: null,
+  pdfFile: null,
+  editorData: {},
+  startDate: "",
+  endDate: "",
+});
+
+/** Состояние селекта преподавателя (у тебя один преподаватель) */
+const teacherSelectModel = ref(null);
+watch(teacherSelectModel, (val) => {
+  form.value.selectedTeachers = val ? [val] : [];
+});
+
+/** Файлы (UI) */
+const cardInputRef = ref(null);
+const descInputRef = ref(null);
+
+const cardFileName = ref("");
+const descFileName = ref("");
+
+const isDraggingCard = ref(false);
+const isDraggingDesc = ref(false);
+
+const isDisabled = computed(() => props.readonly || props.admin);
+
+/** Trigger/Drop helpers */
+function triggerCardSelect() {
+  if (isDisabled.value) return;
+  cardInputRef.value?.click();
+}
+function triggerDescSelect() {
+  if (isDisabled.value) return;
+  descInputRef.value?.click();
+}
+
+function onCardImage(e) {
+  form.value.cardImage = e.target.files?.[0] || null;
+}
+function onDescriptionImage(e) {
+  form.value.descriptionImage = e.target.files?.[0] || null;
+}
+function onPdf(e) {
+  form.value.pdfFile = e.target.files?.[0] || null;
+}
+
+function handleCardChange(e) {
+  const f = e.target.files?.[0] || null;
+  onCardImage(e);
+  cardFileName.value = f ? f.name : "";
+}
+function handleDescChange(e) {
+  const f = e.target.files?.[0] || null;
+  onDescriptionImage(e);
+  descFileName.value = f ? f.name : "";
+}
+
+function onDropCard(e) {
+  if (isDisabled.value) return;
+  isDraggingCard.value = false;
+  const file = e.dataTransfer?.files?.[0];
+  if (!file) return;
+
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  cardInputRef.value.files = dt.files;
+
+  onCardImage({ target: cardInputRef.value });
+  cardFileName.value = file.name;
+}
+
+function onDropDesc(e) {
+  if (isDisabled.value) return;
+  isDraggingDesc.value = false;
+  const file = e.dataTransfer?.files?.[0];
+  if (!file) return;
+
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  descInputRef.value.files = dt.files;
+
+  onDescriptionImage({ target: descInputRef.value });
+  descFileName.value = file.name;
+}
+
+/** Источники для селектов */
+const users = ref([]);
+const directions = ref([]);
+const languages = ref([]);
+
+const teachers = computed(() =>
+  users.value.filter((u) => String(u.role) === "2" || u.role === 2)
+);
+
+async function loadUsers() {
+  const { data } = await axios.get("/api/users");
+  users.value = data;
+}
+async function loadDirections() {
+  const { data } = await axios.get("/api/directions");
+  directions.value = data;
+}
+async function loadLanguages() {
+  const { data } = await axios.get("/api/languages");
+  languages.value = data;
+}
+
+/** EditorJS */
+const editor = ref(null);
+const editorHolder = ref(null);
+
+function destroyEditor() {
+  if (editor.value) {
+    editor.value.destroy();
+    editor.value = null;
+  }
+}
+
+function initEditor() {
+  if (!editorHolder.value) return;
+
+  destroyEditor();
+
+  editor.value = new EditorJS({
+    holder: editorHolder.value,
+    placeholder: "Добавьте контент для нового курса...",
+    data: form.value.editorData,
+    tools: {
+      header: { class: Header, inlineToolbar: ["link"] },
+      list: { class: List, inlineToolbar: true },
+      image: {
+        class: ImageTool,
+        config: {
+          endpoints: {
+            byFile: "/api/uploadFile",
+            byUrl: "/api/fetchUrl",
+          },
+        },
+      },
+    },
+    async onChange() {
+      try {
+        const data = await editor.value.save();
+        form.value.editorData = data;
+      } catch {
+        // молча
+      }
+    },
+  });
+}
+
+/** Dirty tracking (не ставим dirty при автозаполнении) */
+const isDirty = ref(false);
+const isHydrating = ref(false);
+
+watch(
+  form,
+  () => {
+    if (isHydrating.value) return;
+    if (!isDirty.value) {
+      isDirty.value = true;
+      emit("dirty", true);
+    }
+  },
+  { deep: true }
+);
+
+function fillFormFromDraft(draft = props.draft) {
+  if (!props.isEdit || !draft) return;
+
+  isHydrating.value = true;
+  try {
+    const c = draft;
+
+    form.value.cardTitle = c.card_title ?? "22222";
+    form.value.courseName = c.course_name ?? "";
+    form.value.price = c.price ?? "";
+    form.value.duration = c.duration ?? "";
+    form.value.description = c.description ?? "";
+    form.value.hours = c.hours ?? "";
+    form.value.simulators = c.simulators ?? "";
+    form.value.difficulty = c.difficulty ?? "basic";
+
+    form.value.startDate = c.start_date ? String(c.start_date).slice(0, 10) : "";
+    form.value.endDate = c.end_date ? String(c.end_date).slice(0, 10) : "";
+
+    const teacherIds = Array.isArray(c.teachers)
+      ? c.teachers.map((t) => (typeof t === "object" ? t.id : t))
+      : [];
+    form.value.selectedTeachers = teacherIds;
+    teacherSelectModel.value = teacherIds[0] ?? null;
+
+    form.value.selectedDirection = c.direction ?? null;
+
+    let langIds = [];
+    if (Array.isArray(c.language)) {
+      if (c.language.length && typeof c.language[0] === "object") {
+        langIds = c.language.map((l) => l.id);
+      } else {
+        langIds = c.language.map((id) => Number(id));
+      }
+    }
+    form.value.selectedLanguages = languages.value.filter((l) => langIds.includes(l.id));
+
+    form.value.upgradeQualification = c.upgradequalification ?? 0;
+
+    form.value.editorData = c.editor_data || {};
+  } finally {
+    // важно: dirty не должен становиться true при автозаполнении
+    isDirty.value = false;
+    emit("dirty", false);
+    isHydrating.value = false;
+  }
+}
+
+/** Reset */
+function resetForm() {
+  isHydrating.value = true;
+
+  form.value = {
+    cardTitle: "",
     courseName: "",
     price: "",
     duration: "",
@@ -46,396 +276,168 @@ const form = ref({
     editorData: {},
     startDate: "",
     endDate: "",
-});
+  };
 
-// поля файлов
+  teacherSelectModel.value = null;
+  cardFileName.value = "";
+  descFileName.value = "";
 
-const teacherSelectModel = ref(null);
+  isDirty.value = false;
+  emit("dirty", false);
+  isHydrating.value = false;
 
-watch(teacherSelectModel, (val) => {
-    if (!val) {
-        form.value.selectedTeachers = [];
-    } else {
-        form.value.selectedTeachers = [val];
-    }
-});
-
-
-const cardInputRef = ref(null);
-const descInputRef = ref(null);
-
-const cardFileName = ref("");
-const descFileName = ref("");
-
-const isDraggingCard = ref(false);
-const isDraggingDesc = ref(false);
-
-function triggerCardSelect() {
-    if (isDisabled.value) return;
-    cardInputRef.value?.click();
+  // очистка EditorJS безопасно
+  if (editor.value?.render) {
+    editor.value.render({ blocks: [] });
+  }
 }
 
-function triggerDescSelect() {
-    if (isDisabled.value) return;
-    descInputRef.value?.click();
+/** Cancel */
+function cancel() {
+  resetForm();
+  emit("cancel");
 }
 
-function handleCardChange(e) {
-    const f = e.target.files?.[0] || null;
-    onCardImage(e); // твоя функция
-    cardFileName.value = f ? f.name : "";
-}
+/** Save */
+async function save() {
+  if (isDisabled.value) return;
 
-function handleDescChange(e) {
-    const f = e.target.files?.[0] || null;
-    onDescriptionImage(e); // твоя функция
-    descFileName.value = f ? f.name : "";
-}
+  emit("saving", true);
 
-function onDropCard(e) {
-    if (isDisabled.value) return;
-    isDraggingCard.value = false;
-    const file = e.dataTransfer?.files?.[0];
-    if (!file) return;
-
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    cardInputRef.value.files = dt.files;
-
-    onCardImage({ target: cardInputRef.value });
-    cardFileName.value = file.name;
-}
-
-function onDropDesc(e) {
-    if (isDisabled.value) return;
-    isDraggingDesc.value = false;
-    const file = e.dataTransfer?.files?.[0];
-    if (!file) return;
-
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    descInputRef.value.files = dt.files;
-
-    onDescriptionImage({ target: descInputRef.value });
-    descFileName.value = file.name;
-}
-
-/** Источники для селектов */
-const users = ref([]);
-const directions = ref([]);
-const languages = ref([]);
-
-const teachers = computed(() =>
-    users.value.filter((u) => String(u.role) === "2" || u.role === 2)
-);
-
-/** EditorJS */
-const editor = ref(null);
-const editorHolder = ref(null);
-
-/** Dirty-tracking */
-const isDirty = ref(false);
-watch(
-    form,
-    () => {
-        if (!isDirty.value) {
-            isDirty.value = true;
-            emit("dirty", true);
-        }
-    },
-    { deep: true }
-);
-
-const isDisabled = computed(() => props.readonly || props.admin);
-
-/** Загрузка данных */
-async function loadUsers() {
-    const { data } = await axios.get("/api/users");
-    users.value = data;
-}
-async function loadDirections() {
-    const { data } = await axios.get("/api/directions");
-    directions.value = data;
-}
-async function loadLanguages() {
-    const { data } = await axios.get("/api/languages");
-    languages.value = data;
-}
-
-function fillFormFromDraft() {
-    if (!props.isEdit || !props.draft) return;
-
-    const c = props.draft;
-
-    form.value.cardTitle   = c.card_title   ?? "";
-    form.value.courseName  = c.course_name  ?? "";
-    form.value.price       = c.price        ?? "";
-    form.value.duration    = c.duration     ?? "";
-    form.value.description = c.description  ?? "";
-    form.value.hours       = c.hours        ?? "";
-    form.value.simulators  = c.simulators   ?? "";
-    form.value.difficulty  = c.difficulty   ?? "basic";
-
-    // даты
-    form.value.startDate = c.start_date ? String(c.start_date).slice(0, 10) : "";
-    form.value.endDate   = c.end_date   ? String(c.end_date).slice(0, 10)   : "";
-
-    // преподаватели -> массив ID
-    const teacherIds = Array.isArray(c.teachers)
-        ? c.teachers.map(t => (typeof t === "object" ? t.id : t))
-        : [];
-    form.value.selectedTeachers = teacherIds;
-    teacherSelectModel.value = teacherIds[0] ?? null;
-
-    // направление
-    form.value.selectedDirection = c.direction ?? null;
-
-    // языки: backend отдаёт либо массив ID, либо массив объектов
-    let langIds = [];
-    if (Array.isArray(c.language)) {
-        if (c.language.length && typeof c.language[0] === "object") {
-            langIds = c.language.map(l => l.id);
-        } else {
-            langIds = c.language.map(id => Number(id));
-        }
-    }
-    form.value.selectedLanguages = languages.value.filter(l =>
-        langIds.includes(l.id)
-    );
-
-    // повышение квалификации
-    form.value.upgradeQualification = c.upgradequalification ?? 0;
-
-    // EditorJS данные
-    form.value.editorData = c.editor_data || {};
-}
-
-
-
-/** Editor init */
-function initEditor() {
-    if (!editorHolder.value) return;
-
+  try {
+    // 1) сохраняем данные из EditorJS
     if (editor.value) {
-        editor.value.destroy();
-        editor.value = null;
+      const data = await editor.value.save();
+      form.value.editorData = data;
     }
 
-    editor.value = new EditorJS({
-        holder: editorHolder.value,
-        placeholder: "Добавьте контент для нового курса...",
-        data: form.value.editorData,
-        tools: {
-            header: { class: Header, inlineToolbar: ["link"] },
-            list: { class: List, inlineToolbar: true },
-            image: {
-                class: ImageTool,
-                config: {
-                    endpoints: {
-                        byFile: "/api/uploadFile",
-                        byUrl: "/api/fetchUrl",
-                    },
-                },
-            },
-        },
-        async onChange() {
-            const data = await editor.value.save();
-            form.value.editorData = data;
-        },
-    });
-}
+    const ct = (form.value.cardTitle || form.value.courseName || "").trim();
+    if (!ct) throw new Error("Заполните краткое название (cardTitle)");
+    form.value.cardTitle = ct;
 
-/** Хендлеры файлов */
-function onCardImage(e) {
-    form.value.cardImage = e.target.files?.[0] || null;
-}
-function onDescriptionImage(e) {
-    form.value.descriptionImage = e.target.files?.[0] || null;
-}
-function onPdf(e) {
-    form.value.pdfFile = e.target.files?.[0] || null;
-}
+    // 2) FormData
+    const fd = new FormData();
+    fd.append("cardTitle", form.value.cardTitle);
+    fd.append("courseName", form.value.courseName);
+    fd.append("price", form.value.price);
+    fd.append("duration", form.value.duration);
+    fd.append("description", form.value.description);
+    fd.append("hours", form.value.hours);
 
-/** Reset */
-function resetForm() {
-    form.value = {
-        cardTitle: "",
-        courseName: "",
-        price: "",
-        duration: "",
-        description: "",
-        hours: "",
-        simulators: "",
-        difficulty: "basic",
-        selectedTeachers: [],
-        selectedLanguages: [],
-        selectedDirection: null,
-        upgradeQualification: 0,
-        cardImage: null,
-        descriptionImage: null,
-        pdfFile: null,
-        editorData: {},
-        startDate: "",
-        endDate: "",
-    };
+    if (form.value.simulators != null) fd.append("simulators", form.value.simulators);
 
-    teacherSelectModel.value = null;
-    cardFileName.value = "";
-    descFileName.value = "";
+    fd.append("difficulty", form.value.difficulty);
+    fd.append("editorData", JSON.stringify(form.value.editorData));
+
+    fd.append("teachers", JSON.stringify(form.value.selectedTeachers));
+
+    const languageIds = form.value.selectedLanguages.map((l) => l.id);
+    fd.append("language", JSON.stringify(languageIds));
+
+    fd.append("direction", form.value.selectedDirection ?? "");
+
+    fd.append("upgradequalification", String(form.value.upgradeQualification ?? 0));
+
+    fd.append("start_date", form.value.startDate || "");
+    fd.append("end_date", form.value.endDate || "");
+
+    if (form.value.cardImage) fd.append("cardImage", form.value.cardImage);
+    if (form.value.descriptionImage) fd.append("descriptionImage", form.value.descriptionImage);
+    if (form.value.pdfFile) fd.append("pdf", form.value.pdfFile);
+
+    let data;
+
+    if (!props.isEdit) {
+      // CREATE
+      const resp = await axios.post("/api/courses", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      data = resp.data;
+
+      globalNotification.categoryMessage = "Основная информация курса сохранена";
+      globalNotification.type = "success";
+    } else {
+      // EDIT
+      const id = props.draft?.id;
+      if (!id) throw new Error("Нет id курса для редактирования");
+
+      const resp = await axios.post(`/api/courses/${id}`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      data = resp.data;
+
+      globalNotification.categoryMessage = "Курс обновлён";
+      globalNotification.type = "success";
+    }
+
+    // !!! ВАЖНО: course объявляем, чтобы не падало после успешного создания
+    const course = data?.course ?? data;
+    const courseId = course?.id ?? data?.id ?? null;
+
+    if (props.draft) {
+        props.draft.courseId = courseId;
+        props.draft.slug = courseId; // важно: НЕ id
+    }
 
     isDirty.value = false;
     emit("dirty", false);
 
-    if (editor.value) editor.value.clear();
+    emit("saved", {
+      slug: courseId,
+      courseId,
+      course,
+      data,
+    });
+  } catch (err) {
+    console.error("Ошибка при сохранении курса:", err);
+
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Ошибка при сохранении курса";
+
+    globalNotification.categoryMessage = msg;
+    globalNotification.type = "error";
+  } finally {
+    emit("saving", false);
+  }
 }
-
-
-/** Cancel */
-function cancel() {
-    resetForm();
-    emit("cancel");
-}
-
-/** Основной save для модалки */
-async function save() {
-    if (isDisabled.value) return;
-
-    emit("saving", true);
-
-    try {
-        // 1) сохраняем данные из EditorJS
-        if (editor.value) {
-            const data = await editor.value.save();
-            form.value.editorData = data;
-        }
-
-        // 2) общая часть FormData
-        const fd = new FormData();
-        fd.append("cardTitle",   form.value.cardTitle);
-        fd.append("courseName",  form.value.courseName);
-        fd.append("price",       form.value.price);
-        fd.append("duration",    form.value.duration);
-        fd.append("description", form.value.description);
-        fd.append("hours",       form.value.hours);
-
-        if (form.value.simulators != null) {
-            fd.append("simulators", form.value.simulators);
-        }
-
-        fd.append("difficulty",  form.value.difficulty);
-        fd.append("editorData",  JSON.stringify(form.value.editorData));
-
-        // преподаватели (массив ID)
-        fd.append("teachers", JSON.stringify(form.value.selectedTeachers));
-
-        // языки (массив ID)
-        const languageIds = form.value.selectedLanguages.map((l) => l.id);
-        fd.append("language", JSON.stringify(languageIds));
-
-        // направление
-        fd.append("direction", form.value.selectedDirection ?? "");
-
-        // повышение квалификации
-        fd.append(
-            "upgradequalification",
-            String(form.value.upgradeQualification ?? 0)
-        );
-
-        // даты
-        fd.append("start_date", form.value.startDate || "");
-        fd.append("end_date",   form.value.endDate   || "");
-
-        // файлы
-        if (form.value.cardImage)        fd.append("cardImage",        form.value.cardImage);
-        if (form.value.descriptionImage) fd.append("descriptionImage", form.value.descriptionImage);
-        if (form.value.pdfFile)          fd.append("pdf",              form.value.pdfFile);
-
-        let data;
-
-        if (!props.isEdit) {
-            // ---------- СОЗДАНИЕ ----------
-            const resp = await axios.post("/api/courses", fd, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-            data = resp.data;
-
-            globalNotification.categoryMessage = "Основная информация курса сохранена";
-            globalNotification.type = "success";
-        } else {
-            // ---------- РЕДАКТИРОВАНИЕ ----------
-            const id = props.draft?.id;
-            if (!id) throw new Error("Нет id курса для редактирования");
-
-            const resp = await axios.post(`/api/courses/${id}`, fd, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-            data = resp.data;
-
-            globalNotification.categoryMessage = "Курс обновлён";
-            globalNotification.type = "success";
-        }
-
-        // достаём id/slug для родителя
-        const courseId =
-            data?.course?.id ??
-            data?.course?.slug ??
-            data?.id ??
-            data?.slug ??
-            null;
-
-        if (courseId != null && props.draft) {
-            props.draft.courseId = courseId;
-            props.draft.slug     = courseId;
-        }
-
-        isDirty.value = false;
-        emit("dirty", false);
-
-        emit("saved", { courseId, data });
-    } catch (err) {
-        console.error("Ошибка при сохранении курса:", err);
-        if (globalNotification) {
-            globalNotification.categoryMessage =
-                "Заполните все поля для сохранения курса";
-            globalNotification.type = "error";
-        }
-    } finally {
-        emit("saving", false);
-    }
-}
-
-
 
 defineExpose({ save });
 
 onMounted(async () => {
-    await Promise.all([loadUsers(), loadDirections(), loadLanguages()]);
+  await Promise.all([loadUsers(), loadDirections(), loadLanguages()]);
 
-    // если открываем в режиме редактирования и draft есть – зальём данные в форму
-    if (props.isEdit && props.draft) {
-        fillFormFromDraft();
-    }
+  if (props.isEdit && props.draft) {
+    fillFormFromDraft(props.draft);
+  }
 
-    initEditor();
+  await nextTick();
+  initEditor();
 });
 
 watch(
-    () => props.draft,
-    (val) => {
-        if (props.isEdit && val) {
-            fillFormFromDraft(val);
-            // обновим EditorJS начальными данными
-            if (editor.value) {
-                editor.value.render(form.value.editorData || {});
-            }
-        }
+  () => props.draft,
+  async (val) => {
+    if (props.isEdit && val) {
+      fillFormFromDraft(val);
+
+      // обновим EditorJS начальными данными
+      if (editor.value?.render) {
+        editor.value.render(form.value.editorData || { blocks: [] });
+      }
     }
+  }
 );
 
 onBeforeUnmount(() => {
-    if (editor.value) editor.value.destroy();
+  destroyEditor();
 });
+
+// Экспорт хендлеров, которые используются в template
+// (в <script setup> они и так доступны, но оставляю список для ясности)
 </script>
+
 
 <template>
     <div class="form__admin">

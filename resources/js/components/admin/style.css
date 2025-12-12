@@ -1,3 +1,11 @@
+.title__header{
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 18px;
+    letter-spacing: 0%;
+    color: #41328F;
+}
+
 .avatar__admin {
     border-radius: 8px;
 }
@@ -822,6 +830,7 @@ h2 {
     color: #ffffff;
 }
 table.light-push-table {
+    font-family: JanoSansProRegular;
     width: 1000px;
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -838,8 +847,43 @@ table.light-push-table {
     box-sizing: border-box;
 }
 
+.topics-table .col-narrow {
+  width: 48px;
+  white-space: nowrap;
+}
+
+.topics-table .col-actions {
+  width: 121px;              /* под 3 иконки */
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* чтобы иконки не растягивали колонку */
+.topics-table .col-actions button {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.col-btn{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 121px;
+    padding: 8.5px !important;
+}
+.btn__user--delete{
+    padding: 0;
+}
+
+.btn__edit{
+    display: flex;
+    gap: 16px;
+}
+
 .light-push-table--small .light-push-table th,
 .light-push-table--small .light-push-table td {
+    font-family: JanoSansProRegular;
     font-size: 12px;
     white-space: unset;
 }

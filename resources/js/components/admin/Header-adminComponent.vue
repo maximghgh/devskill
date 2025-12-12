@@ -12,7 +12,7 @@
                     />
                 </a>
             </div>
-            <h3>Админ-панель</h3>
+            <h3 class="title__header">Админ-панель</h3>
             <div class="header__lk">
                 <div class="personal-area personal-area_active">
                     <div class="personal-area__inner">

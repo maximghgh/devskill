@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import axios from "axios";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.css";
@@ -36,7 +36,7 @@ const form = ref({
   courseName: "",
   price: "",
   duration: "",
-  description: "123",
+  description: "",
   hours: "",
   simulators: "",
   difficulty: "basic",
@@ -68,6 +68,144 @@ const teacherSelectModel = computed({
 const editor = ref(null);
 const editorHolder = ref(null);
 
+function initEditor() {
+  if (!editorHolder.value) return;
+
+  if (editor.value) {
+    editor.value.destroy();
+    editor.value = null;
+  }
+
+  editor.value = new EditorJS({
+    holder: editorHolder.value,
+    data: form.value.editorData || { blocks: [] },
+    placeholder: "Редактируйте контент курса...",
+    tools: {
+      header: { class: Header, inlineToolbar: ["link"] },
+      list: { class: List, inlineToolbar: true },
+      image: {
+        class: ImageTool,
+        config: {
+          endpoints: {
+            byFile: "/api/uploadFile",
+            byUrl: "/api/fetchUrl",
+          },
+        },
+      },
+    },
+    async onChange() {
+      const data = await editor.value.save();
+      form.value.editorData = data;
+    },
+  });
+}
+
+// =======================
+// Dropzone для 2 картинок
+// =======================
+const cardInputRef = ref(null);
+const descInputRef = ref(null);
+
+const cardFileName = ref("");
+const descFileName = ref("");
+
+const isDraggingCard = ref(false);
+const isDraggingDesc = ref(false);
+
+// текущие файлы из курса (если бэк отдаёт пути)
+const currentCardPath = computed(() => {
+  // подстрой под свои поля если отличаются
+  return (
+    props.course?.card_image ||
+    props.course?.cardImage ||
+    props.course?.card_image_path ||
+    props.course?.cardImagePath ||
+    null
+  );
+});
+
+const currentDescPath = computed(() => {
+  return (
+    props.course?.description_image ||
+    props.course?.descriptionImage ||
+    props.course?.description_image_path ||
+    props.course?.descriptionImagePath ||
+    null
+  );
+});
+
+const currentCardName = computed(() => {
+  if (!currentCardPath.value) return "";
+  return String(currentCardPath.value).split("/").pop();
+});
+
+const currentDescName = computed(() => {
+  if (!currentDescPath.value) return "";
+  return String(currentDescPath.value).split("/").pop();
+});
+
+const cardUrl = computed(() => makeFileUrl(currentCardPath.value));
+const descUrl = computed(() => makeFileUrl(currentDescPath.value));
+
+function makeFileUrl(path) {
+  if (!path) return "#";
+  const p = String(path);
+  if (p.startsWith("http://") || p.startsWith("https://")) return p;
+  return `/${p}`;
+}
+
+function triggerCardSelect() {
+  cardInputRef.value?.click();
+}
+function triggerDescSelect() {
+  descInputRef.value?.click();
+}
+
+function handleCardChange(e) {
+  const f = e.target.files?.[0] || null;
+  form.value.cardImage = f;
+  cardFileName.value = f ? f.name : "";
+}
+function handleDescChange(e) {
+  const f = e.target.files?.[0] || null;
+  form.value.descriptionImage = f;
+  descFileName.value = f ? f.name : "";
+}
+
+function onDropCard(e) {
+  isDraggingCard.value = false;
+  const file = e.dataTransfer?.files?.[0];
+  if (!file) return;
+
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  cardInputRef.value.files = dt.files;
+
+  handleCardChange({ target: cardInputRef.value });
+}
+
+function onDropDesc(e) {
+  isDraggingDesc.value = false;
+  const file = e.dataTransfer?.files?.[0];
+  if (!file) return;
+
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  descInputRef.value.files = dt.files;
+
+  handleDescChange({ target: descInputRef.value });
+}
+
+// =======================
+// helpers для даты (input type=date требует YYYY-MM-DD)
+// =======================
+function toDateInput(val) {
+  if (!val) return "";
+  const s = String(val);
+  // если ISO "2025-12-02T..." — берём первые 10 символов
+  return s.length >= 10 ? s.slice(0, 10) : s;
+}
+
 // =======================
 // Загрузка справочников
 // =======================
@@ -93,9 +231,7 @@ function fillFormFromCourse(course) {
   // языки: массив id или объектов
   let selectedLangs = [];
   if (Array.isArray(course.language) && languages.value.length > 0) {
-    const ids = course.language.map((l) =>
-      typeof l === "object" ? l.id : l
-    );
+    const ids = course.language.map((l) => (typeof l === "object" ? l.id : Number(l)));
     selectedLangs = languages.value.filter((lang) => ids.includes(lang.id));
   }
 
@@ -120,59 +256,18 @@ function fillFormFromCourse(course) {
     cardImage: null,
     descriptionImage: null,
     pdfFile: null,
-    editorData: course.editor_data || {},
-    startDate: course.start_date || "",
-    endDate: course.end_date || "",
+    editorData: course.editor_data || { blocks: [] },
+    startDate: toDateInput(course.start_date),
+    endDate: toDateInput(course.end_date),
   };
 
-  initEditor();
-}
+  // сброс выбранных новых файлов в dropzone
+  cardFileName.value = "";
+  descFileName.value = "";
+  isDraggingCard.value = false;
+  isDraggingDesc.value = false;
 
-// =======================
-// EditorJS init
-// =======================
-function initEditor() {
-  if (!editorHolder.value) return;
-  if (editor.value) {
-    editor.value.destroy();
-    editor.value = null;
-  }
-
-  editor.value = new EditorJS({
-    holder: editorHolder.value,
-    data: form.value.editorData,
-    placeholder: "Редактируйте контент курса...",
-    tools: {
-      header: { class: Header, inlineToolbar: ["link"] },
-      list: { class: List, inlineToolbar: true },
-      image: {
-        class: ImageTool,
-        config: {
-          endpoints: {
-            byFile: "/api/uploadFile",
-            byUrl: "/api/fetchUrl",
-          },
-        },
-      },
-    },
-    async onChange() {
-      const data = await editor.value.save();
-      form.value.editorData = data;
-    },
-  });
-}
-
-// =======================
-// файлы
-// =======================
-function onCardImage(e) {
-  form.value.cardImage = e.target.files?.[0] || null;
-}
-function onDescriptionImage(e) {
-  form.value.descriptionImage = e.target.files?.[0] || null;
-}
-function onPdf(e) {
-  form.value.pdfFile = e.target.files?.[0] || null;
+  nextTick(() => initEditor());
 }
 
 // =======================
@@ -194,21 +289,16 @@ async function save() {
     fd.append("duration", form.value.duration);
     fd.append("description", form.value.description);
     fd.append("hours", form.value.hours);
-    if (form.value.simulators != null) {
-      fd.append("simulators", form.value.simulators);
-    }
+    if (form.value.simulators != null) fd.append("simulators", form.value.simulators);
     fd.append("difficulty", form.value.difficulty);
 
     const uniqueTeachers = [...new Set(form.value.selectedTeachers)];
     fd.append("teachers", JSON.stringify(uniqueTeachers));
 
     fd.append("direction", form.value.selectedDirection ?? "");
-    fd.append(
-      "upgradequalification",
-      String(form.value.upgradeQualification ?? 0)
-    );
+    fd.append("upgradequalification", String(form.value.upgradeQualification ?? 0));
 
-    // даты
+    // даты (уже YYYY-MM-DD)
     fd.append("start_date", form.value.startDate || "");
     fd.append("end_date", form.value.endDate || "");
 
@@ -217,16 +307,14 @@ async function save() {
 
     fd.append("editorData", JSON.stringify(form.value.editorData));
 
+    // файлы
     if (form.value.cardImage) fd.append("cardImage", form.value.cardImage);
-    if (form.value.descriptionImage)
-      fd.append("descriptionImage", form.value.descriptionImage);
+    if (form.value.descriptionImage) fd.append("descriptionImage", form.value.descriptionImage);
     if (form.value.pdfFile) fd.append("pdf", form.value.pdfFile);
 
-    const { data } = await axios.post(
-      `/api/courses/${props.course.id}`,
-      fd,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+    const { data } = await axios.post(`/api/courses/${props.course.id}`, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
     globalNotification.categoryMessage = "Курс обновлён";
     globalNotification.type = "success";
@@ -247,6 +335,7 @@ onMounted(async () => {
   fillFormFromCourse(props.course);
 });
 
+// если курс меняется — перезаполним
 watch(
   () => props.course,
   (c) => {
@@ -254,10 +343,19 @@ watch(
   }
 );
 
+// если языки загрузились позже — перезаполним, чтобы selectedLanguages подтянулись
+watch(
+  () => languages.value.length,
+  (len) => {
+    if (len && props.course) fillFormFromCourse(props.course);
+  }
+);
+
 onBeforeUnmount(() => {
   if (editor.value) editor.value.destroy();
 });
 </script>
+
 
 <template>
   <div class="form__admin">
@@ -306,7 +404,6 @@ onBeforeUnmount(() => {
                 v-model="form.startDate"
                 type="date"
                 class="dialog__input dialog__input--m"
-                value='{{form.startDate}}'
               />
             </div>
           </div>
@@ -338,16 +435,15 @@ onBeforeUnmount(() => {
     <input v-model="form.simulators" type="hidden" />
 
     <!-- Уровень -->
-    <div class="dialog__component medium">
+    <div class="dialog__component">
       <p class="dialog__title">Уровень курса</p>
       <select
         v-model="form.difficulty"
         class="dialog__input dialog__select"
       >
-        <option value="basic">ДПО</option>
-        <option value="middle">ДПО детское</option>
+        <option value="basic">Базовый</option>
+        <option value="middle">Средний</option>
         <option value="advanced">Продвинутый</option>
-        <option value="mixed">Смешанный</option>
       </select>
     </div>
 
@@ -397,26 +493,103 @@ onBeforeUnmount(() => {
 
     <!-- Файлы -->
     <div class="dialog__block dialog__block--date">
-      <div class="dialog__component">
-        <p class="dialog__title">Логотип курса (если нужно обновить)</p>
-        <input
-          type="file"
-          accept="image/*"
-          class="dialog__input"
-          @change="onCardImage"
-        />
-      </div>
+  <!-- ЛОГОТИП -->
+  <div class="dialog__component">
+    <div class="dialog__title_container">
+      <p class="dialog__title">Логотип курса</p>
+    </div>
 
-      <div class="dialog__component">
-        <p class="dialog__title">Изображение для описания (если нужно обновить)</p>
-        <input
-          type="file"
-          accept="image/*"
-          class="dialog__input"
-          @change="onDescriptionImage"
-        />
+    <!-- <p class="dialog__file-current" v-if="currentCardPath">
+      Текущий файл:
+      <a class="dialog__file-link" :href="cardUrl" target="_blank" rel="noopener">
+        {{ currentCardName }}
+      </a>
+    </p>
+    <p class="dialog__file-current dialog__file-current--empty" v-else>
+      Файл не прикреплён
+    </p> -->
+
+    <input
+      ref="cardInputRef"
+      type="file"
+      accept="image/*"
+      class="dialog__file-input"
+      @change="handleCardChange"
+    />
+
+    <div
+      class="dialog__dropzone"
+      :class="{ 'is-dragging': isDraggingCard }"
+      @click="triggerCardSelect"
+      @dragenter.prevent="isDraggingCard = true"
+      @dragover.prevent="isDraggingCard = true"
+      @dragleave.prevent="isDraggingCard = false"
+      @drop.prevent="onDropCard"
+    >
+      <p class="dialog__dropzone_title">
+        {{
+          cardFileName
+            ? cardFileName
+            : currentCardName
+              ? `Заменить файл: ${currentCardName}`
+              : "Перетащите или выберите файл"
+        }}
+      </p>
+      <p v-if="!cardFileName" class="dialog__dropzone_title dialog__dropzone_hint">
+        (JPG или PNG)
+      </p>
+    </div>
+  </div>
+
+  <!-- ИЗОБРАЖЕНИЕ ДЛЯ ОПИСАНИЯ -->
+  <div class="dialog__component">
+      <div class="dialog__title_container">
+        <p class="dialog__title">Изображение для описания курса</p>
+      </div>
+<!-- 
+      <p class="dialog__file-current" v-if="currentDescPath">
+        Текущий файл:
+        <a class="dialog__file-link" :href="descUrl" target="_blank" rel="noopener">
+          {{ currentDescName }}
+        </a>
+      </p>
+      <p class="dialog__file-current dialog__file-current--empty" v-else>
+        Файл не прикреплён
+      </p> -->
+
+      <input
+        ref="descInputRef"
+        type="file"
+        accept="image/*"
+        class="dialog__file-input"
+        @change="handleDescChange"
+      />
+
+      <div
+        class="dialog__dropzone"
+        :class="{ 'is-dragging': isDraggingDesc }"
+        @click="triggerDescSelect"
+        @dragenter.prevent="isDraggingDesc = true"
+        @dragover.prevent="isDraggingDesc = true"
+        @dragleave.prevent="isDraggingDesc = false"
+        @drop.prevent="onDropDesc"
+      >
+        <p class="dialog__dropzone_title">
+          {{
+            descFileName
+              ? descFileName
+              : currentDescName
+                ? `Заменить файл: ${currentDescName}`
+                : "Перетащите или выберите файл"
+          }}
+        </p>
+        <p v-if="!descFileName" class="dialog__dropzone_title dialog__dropzone_hint">
+          (JPG или PNG)
+        </p>
       </div>
     </div>
+  </div>
+
 
     <!-- EditorJS -->
     <div class="dialog__component">
