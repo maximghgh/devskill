@@ -366,8 +366,8 @@ export default {
 }
 
 .role-btn--active {
-    border-color: #2b6cb0;
-    background: #2b6cb0;
+    border-color: #575adf;
+    background: #575adf;
     color: #fff;
 }
 

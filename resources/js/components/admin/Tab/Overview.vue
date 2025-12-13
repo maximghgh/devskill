@@ -21,7 +21,11 @@ const emit = defineEmits(["saved", "cancel", "dirty", "saving"]);
 const API = "/admin";
 
 // id курса берём из draft, который лежит в обёртке CreateHackathon
-const courseId = computed(() => props.draft?.courseId ?? props.draft?.slug ?? null);
+const courseId = computed(() =>
+  props.draft?.courseId ??
+  props.draft?.id ??
+  (Number.isFinite(+props.draft?.slug) ? +props.draft.slug : null)
+);
 
 const topics = ref([]);
 // экран: список тем или уроки конкретной темы

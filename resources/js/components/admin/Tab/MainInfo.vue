@@ -358,7 +358,11 @@ async function save() {
       globalNotification.type = "success";
     } else {
       // EDIT
-      const id = props.draft?.id;
+      const id =
+        props.draft?.id ??
+        props.draft?.courseId ??
+        (Number.isFinite(+props.draft?.slug) ? +props.draft.slug : null);
+
       if (!id) throw new Error("Нет id курса для редактирования");
 
       const resp = await axios.post(`/api/courses/${id}`, fd, {
@@ -374,20 +378,36 @@ async function save() {
     const course = data?.course ?? data;
     const courseId = course?.id ?? data?.id ?? null;
 
+    // if (props.draft) {
+    //     props.draft.courseId = courseId;
+    //     props.draft.slug = courseId; // важно: НЕ id
+    // }
+
     if (props.draft) {
-        props.draft.courseId = courseId;
-        props.draft.slug = courseId; // важно: НЕ id
+      props.draft.courseId = courseId;
+      props.draft.id = courseId; // ✅ важно
+      // slug НЕ трогаем числом. Если бэк вернул slug — можно сохранить:
+      if (course?.slug) props.draft.slug = course.slug;
     }
 
     isDirty.value = false;
     emit("dirty", false);
 
+    // emit("saved", {
+    //   slug: courseId,
+    //   courseId,
+    //   course,
+    //   data,
+    // });
     emit("saved", {
-      slug: courseId,
+      id: courseId,
       courseId,
+      slug: course?.slug ?? props.draft?.slug ?? null,
       course,
       data,
     });
+
+
   } catch (err) {
     console.error("Ошибка при сохранении курса:", err);
 
@@ -443,7 +463,7 @@ onBeforeUnmount(() => {
     <div class="form__admin">
         <!-- 1) Полное название -->
         <div class="dialog__component">
-            <p class="dialog__title">Полное название курса *</p>
+            <p class="dialog__title">Полное название курса</p>
             <input
                 v-model="form.courseName"
                 type="text"

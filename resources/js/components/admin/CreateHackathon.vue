@@ -23,8 +23,7 @@ const props = defineProps({
 const isAdmin = computed(() => !!props.admin)
 const updatePublished = computed(() => props.update_published !== false)
 
-const draft = reactive({ slug: null, courseId: null })
-
+const draft = reactive({ slug: null, courseId: null, id: null })
 const created    = ref(false)
 
 const saving = ref(false)
@@ -102,6 +101,7 @@ function cancelLeave () {
     pendingTab.value   = null
 }
 function resetDialog () {
+    draft.id = null
     draft.slug  = null
     draft.courseId = null
     created.value = false
@@ -137,7 +137,8 @@ function onTabSaved(payload) {
 
   if (courseId != null) {
     draft.courseId = courseId;
-    draft.slug = courseId;      // у тебя “slug” фактически используется как id
+    draft.id = courseId;          // ✅
+    if (course?.slug) draft.slug = course.slug;      // у тебя “slug” фактически используется как id
     created.value = true;
     active.value = 1;           // <-- 100% переход на вкладку "Темы"
   }
