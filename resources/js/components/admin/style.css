@@ -1,9 +1,9 @@
-.title__header{
+.title__header {
     font-weight: 500;
     font-size: 18px;
     line-height: 18px;
     letter-spacing: 0%;
-    color: #41328F;
+    color: #41328f;
     margin: 0;
 }
 
@@ -834,7 +834,7 @@ h2 {
 .aside__link--active .aside__icon svg path {
     fill: #ffffff;
 }
-.hadle{
+.hadle {
     max-width: 121px;
     display: flex;
     gap: 10px;
@@ -851,14 +851,14 @@ table.light-push-table {
 }
 
 .light-push-table th:last-child,
-.light-push-table td:last-child{
-  max-width: 121px;
-  width: 121px;          /* фиксируем, чтобы точно не растягивалась */
-  white-space: nowrap;   /* чтобы не переносило кнопки */
+.light-push-table td:last-child {
+    max-width: 121px;
+    width: 121px; /* фиксируем, чтобы точно не растягивалась */
+    white-space: nowrap; /* чтобы не переносило кнопки */
 }
 
 .light-push-table tbody tr:nth-child(odd) {
-    background-color: #eeeeee;
+    background-color: #F1F0FA;
 }
 .light-push-table--small {
     width: 50%; /* таблица займет 50% контейнера */
@@ -868,35 +868,35 @@ table.light-push-table {
 }
 
 .topics-table .col-narrow {
-  width: 48px;
-  white-space: nowrap;
+    width: 48px;
+    white-space: nowrap;
 }
 
 .topics-table .col-actions {
-  width: 121px;              /* под 3 иконки */
-  white-space: nowrap;
-  text-align: center;
+    width: 121px; /* под 3 иконки */
+    white-space: nowrap;
+    text-align: center;
 }
 
 /* чтобы иконки не растягивали колонку */
 .topics-table .col-actions button {
-  padding: 0;
-  width: 32px;
-  height: 32px;
+    padding: 0;
+    width: 32px;
+    height: 32px;
 }
 
-.col-btn{
+.col-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 121px;
     padding: 8.5px !important;
 }
-.btn__user--delete{
+.btn__user--delete {
     padding: 0;
 }
 
-.btn__edit{
+.btn__edit {
     display: flex;
     gap: 16px;
 }
@@ -1289,7 +1289,7 @@ table.light-push-table {
     overflow-x: hidden;
 }
 
-.dialog__container_custom--s{
+.dialog__container_custom--s {
     max-width: 727px;
 }
 
@@ -1335,7 +1335,7 @@ table.light-push-table {
     line-height: 100%;
     letter-spacing: 2%;
     vertical-align: middle;
-    color: #41328F;
+    color: #41328f;
     margin: 0;
 }
 
@@ -1367,13 +1367,13 @@ table.light-push-table {
     width: 40px;
 }
 
-.topic__top{
+.topic__top {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin: 0 0 36px;
 }
-.block__title{
+.block__title {
     font-weight: 400;
     font-size: 20px;
     line-height: 100%;
@@ -1381,7 +1381,7 @@ table.light-push-table {
     color: #121212;
 }
 
-.block__title--clear{
+.block__title--clear {
     margin: 0 0 40px;
 }
 /* Tabs */
@@ -1740,7 +1740,7 @@ table.light-push-table {
     min-height: 136px;
 }
 
-.dialog__textarea--s{
+.dialog__textarea--s {
     height: 180px;
 }
 
@@ -2151,7 +2151,7 @@ table.light-push-table {
 }
 
 .dialog__dropzone {
-    background: #F1F0FA;
+    background: #f1f0fa;
     border-radius: 10px;
     padding: 18px 16px;
     min-height: 127px;
@@ -2187,13 +2187,13 @@ table.light-push-table {
     color: #999;
     margin-top: 4px;
 }
-.main__btn{
+.main__btn {
     cursor: pointer;
 
     border-radius: 30px;
     padding: 12px 16px 12px 16px;
-    border: 1px solid #41328F;
-    background: #41328F;
+    border: 1px solid #41328f;
+    background: #41328f;
 
     font-family: JanoSansProRegular;
     font-weight: 500;
@@ -2202,13 +2202,12 @@ table.light-push-table {
     leading-trim: NONE;
     line-height: 100%;
     letter-spacing: 0%;
-    color: #FFFFFF;
-
+    color: #ffffff;
 }
 
-.main__btn--white{
+.main__btn--white {
     background: none;
-    color: #41328F;
+    color: #41328f;
 }
 
 /* tooltip */
@@ -2216,10 +2215,9 @@ table.light-push-table {
 .tooltip-container {
     position: relative;
     display: inline-block;
-  }
+}
 
-
-  .tooltip {
+.tooltip {
     position: absolute;
     bottom: calc(100% + 15px);
     left: 50%;
@@ -2235,10 +2233,10 @@ table.light-push-table {
     visibility: hidden;
     transition: all 0.3s ease;
     border: 1px solid rgba(229, 231, 235, 1);
-  }
+}
 
-  /* Tooltip arrow */
-  .tooltip::after {
+/* Tooltip arrow */
+.tooltip::after {
     content: "";
     position: absolute;
     top: 100%;
@@ -2247,44 +2245,44 @@ table.light-push-table {
     border-width: 8px;
     border-style: solid;
     border-color: #ffffff transparent transparent transparent;
-  }
+}
 
-  .tooltip-container:hover .tooltip {
+.tooltip-container:hover .tooltip {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
-  }
+}
 
-  @keyframes glow {
+@keyframes glow {
     0% {
-      text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
     }
     50% {
-      text-shadow: 0 0 20px rgba(99, 102, 241, 0.7);
+        text-shadow: 0 0 20px rgba(99, 102, 241, 0.7);
     }
     100% {
-      text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
     }
-  }
+}
 
-  .tooltip strong {
+.tooltip strong {
     animation: glow 2s infinite;
     font-weight: 600;
-  }
+}
 
-  .tooltip i {
+.tooltip i {
     margin-right: 6px;
     color: #6366f1;
-  }
+}
 
-  .users-search__input {
+.users-search__input {
     max-width: 430px;
 }
 .users-search__input:focus {
-    border: 1px solid #41328F;
+    border: 1px solid #41328f;
 }
 
-.breadcrumbs{
+.breadcrumbs {
     display: flex;
     gap: 8px;
     align-items: center;
@@ -2292,12 +2290,64 @@ table.light-push-table {
 }
 .breadcrumbs__old {
     font-size: 18px;
-    color: #9E9E9E;
+    color: #9e9e9e;
     text-decoration: none;
     font-weight: 600;
 }
 .breadcrumbs__new {
     font-size: 18px;
-    color: #41328F;
+    color: #41328f;
     font-weight: 600;
+}
+
+.status-tabs {
+    font-family: JanoSansProRegular;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 35px;
+}
+
+.status-tabs__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+    color: #111;
+}
+
+.status-tabs__tab--active {
+    font-weight: 600;
+}
+
+.status-tabs__label {
+    font-family: JanoSansProRegular;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #41328f;
+}
+
+.status-tabs__badge {
+    font-family: JanoSansProRegular;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #d4d1f0; /* как на скрине (светло-фиолетовый) */
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+}
+.line{
+    height: 26px;
+    border-left: 1px solid  #E0E0E0;
 }

@@ -107,7 +107,7 @@
                             <img
                                 width="13"
                                 height="13"
-                                src="../../../img/admin/search.svg"
+                                src="../../../../img/admin/search.png"
                                 alt=""
                             />
                         </span>
