@@ -4,93 +4,125 @@
             <div class="container">
                 <section class="contacts">
                     <div class="contacts__inner">
-                        <div class="contacts__block">
-                            <div class="contacts__img">
-                                <img src="../../img/technic.png" />
+                        <p class="contacts__name">Контакты</p>
+                        <div class="contacts__content">
+                            <div class="contacts__block">
+                                <div class="contacts__img">
+                                    <img src="../../img/technic.png" />
+                                </div>
+                                <div class="contacts__title">Технический отдел</div>
+                                <div class="contacts__desc">
+                                    Описание о том, какие вопросы можно задавать
+                                </div>
+                                <div class="contacts__contact contacts_mail">
+                                    <svg width="21" height="17" viewBox="0 0 21 17">
+                                        <image
+                                            width="21"
+                                            height="17"
+                                            xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAARCAYAAAAyhueAAAABZElEQVQ4jaWUvU4CQRSFv0UtlMKKQmOo0M5GLLQm9BbGwthY8QZ2hsT4EjYkFJhYGXsSfAREKo2FFpBQUEKMiubCWTLuj7h6mtl75txvM7Oz4zUaT1vABbAJDIAhybUILAH3QMmgz0D2D6A4vaQE/AQKwB7QignHqaW+gjjZlJZsagM3QB44+8U2DJXLq68tf2DQEeABKzLfgTKwC9RDqInqmi8rj/qNM0oF3ozCpjugCBwBfXl91UXNu/npylzoq8YqcAVkVNeAHeBcY01+RrlqoP8b1H/uAgdAEziW9wicakR+U7lukOVCfX1oXAUqwDWQk5dTXdE8Tn6q+RBystmu7LhsA5fAIbA2Ix8JjZKBTiL8SEUt/9+K+lCh5cyQF+gfP3j6vXrykl4ofr4njmd7mlZht1UHWE4Itfy6cxrSBjWQGbcJYb7sj3pw6o5B93WfbgBvumBCZ+8HzekuXRjDofQFpONNGsfTT40AAAAASUVORK5CYII="
+                                        />
+                                    </svg>
+                                    <p>eedu@istu.ru</p>
+                                </div>
+                                <div class="contacts__contact contacts_phone">
+                                    <svg width="13" height="25" viewBox="0 0 13 25">
+                                        <image
+                                            width="13"
+                                            height="25"
+                                            xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAZCAYAAADqrKTxAAABFUlEQVQ4je3Uuy5EURTG8d/MnIk7QYHQqfReQK8VtUiUEiqFp1BJxFMoSaaTeAEVInHrKEgQ1yyWMGbcev9kZ2fv9X17rZOctUq12n4PVjCJElpQRqtXznGX93tYKLCGqRRcYCuFm+jDMgYyPo6NME14pzOFkWkIvehST7XIY6TdRVuKBjGHB2zjFo/5yHCRLy9h3c90R/lRxhM6fmGQuqKch3JDuDmVv4jr+Df9m5qbSg2Rbyin4fprSR030VdFtkY1Iy9/ce79uPzwYDRk+0tZtdr+aQ6Nk9yD6JsDjORQCe7zvhKZIkt0b6w3NjCP2RwsH7mKb9ppUvsxDnN95iEyzWA1p1KUEmVMYxRjOEtXlH6ExWeNuDJXtYhfrQAAAABJRU5ErkJggg=="
+                                        />
+                                    </svg>
+                                    <p>8 (3412) 77-60-55, доб. 5160</p>
+                                </div>
                             </div>
-                            <div class="contacts__title">Технический отдел</div>
-                            <div class="contacts__desc">
-                                Описание о том, какие вопросы можно задавать
+                            <div class="contacts__block">
+                                <div class="contacts__img">
+                                    <img src="../../img/organization.png" />
+                                </div>
+                                <div class="contacts__title">
+                                    Организация мероприятий
+                                </div>
+                                <div class="contacts__desc">
+                                    Описание о том, какие вопросы можно задавать
+                                </div>
+                                <div class="contacts__contact contacts_mail">
+                                    <svg width="21" height="17" viewBox="0 0 21 17">
+                                        <image
+                                            width="21"
+                                            height="17"
+                                            xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAARCAYAAAAyhueAAAABZElEQVQ4jaWUvU4CQRSFv0UtlMKKQmOo0M5GLLQm9BbGwthY8QZ2hsT4EjYkFJhYGXsSfAREKo2FFpBQUEKMiubCWTLuj7h6mtl75txvM7Oz4zUaT1vABbAJDIAhybUILAH3QMmgz0D2D6A4vaQE/AQKwB7QignHqaW+gjjZlJZsagM3QB44+8U2DJXLq68tf2DQEeABKzLfgTKwC9RDqInqmi8rj/qNM0oF3ozCpjugCBwBfXl91UXNu/npylzoq8YqcAVkVNeAHeBcY01+RrlqoP8b1H/uAgdAEziW9wicakR+U7lukOVCfX1oXAUqwDWQk5dTXdE8Tn6q+RBystmu7LhsA5fAIbA2Ix8JjZKBTiL8SEUt/9+K+lCh5cyQF+gfP3j6vXrykl4ofr4njmd7mlZht1UHWE4Itfy6cxrSBjWQGbcJYb7sj3pw6o5B93WfbgBvumBCZ+8HzekuXRjDofQFpONNGsfTT40AAAAASUVORK5CYII="
+                                        />
+                                    </svg>
+                                    <p>eedu@istu.ru</p>
+                                </div>
+                                <div class="contacts__contact contacts_phone">
+                                    <svg width="13" height="25" viewBox="0 0 13 25">
+                                        <image
+                                            width="13"
+                                            height="25"
+                                            xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAZCAYAAADqrKTxAAABFUlEQVQ4je3Uuy5EURTG8d/MnIk7QYHQqfReQK8VtUiUEiqFp1BJxFMoSaaTeAEVInHrKEgQ1yyWMGbcev9kZ2fv9X17rZOctUq12n4PVjCJElpQRqtXznGX93tYKLCGqRRcYCuFm+jDMgYyPo6NME14pzOFkWkIvehST7XIY6TdRVuKBjGHB2zjFo/5yHCRLy9h3c90R/lRxhM6fmGQuqKch3JDuDmVv4jr+Df9m5qbSg2Rbyin4fprSR030VdFtkY1Iy9/ce79uPzwYDRk+0tZtdr+aQ6Nk9yD6JsDjORQCe7zvhKZIkt0b6w3NjCP2RwsH7mKb9ppUvsxDnN95iEyzWA1p1KUEmVMYxRjOEtXlH6ExWeNuDJXtYhfrQAAAABJRU5ErkJggg=="
+                                        />
+                                    </svg>
+                                    <p>8 (3412) 77-60-55, доб. 5160</p>
+                                </div>
                             </div>
-                            <div class="contacts__contact contacts_mail">
-                                <svg width="21" height="17" viewBox="0 0 21 17">
-                                    <image
-                                        width="21"
-                                        height="17"
-                                        xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAARCAYAAAAyhueAAAABZElEQVQ4jaWUvU4CQRSFv0UtlMKKQmOo0M5GLLQm9BbGwthY8QZ2hsT4EjYkFJhYGXsSfAREKo2FFpBQUEKMiubCWTLuj7h6mtl75txvM7Oz4zUaT1vABbAJDIAhybUILAH3QMmgz0D2D6A4vaQE/AQKwB7QignHqaW+gjjZlJZsagM3QB44+8U2DJXLq68tf2DQEeABKzLfgTKwC9RDqInqmi8rj/qNM0oF3ozCpjugCBwBfXl91UXNu/npylzoq8YqcAVkVNeAHeBcY01+RrlqoP8b1H/uAgdAEziW9wicakR+U7lukOVCfX1oXAUqwDWQk5dTXdE8Tn6q+RBystmu7LhsA5fAIbA2Ix8JjZKBTiL8SEUt/9+K+lCh5cyQF+gfP3j6vXrykl4ofr4njmd7mlZht1UHWE4Itfy6cxrSBjWQGbcJYb7sj3pw6o5B93WfbgBvumBCZ+8HzekuXRjDofQFpONNGsfTT40AAAAASUVORK5CYII="
-                                    />
-                                </svg>
-                                <p>eedu@istu.ru</p>
-                            </div>
-                            <div class="contacts__contact contacts_phone">
-                                <svg width="13" height="25" viewBox="0 0 13 25">
-                                    <image
-                                        width="13"
-                                        height="25"
-                                        xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAZCAYAAADqrKTxAAABFUlEQVQ4je3Uuy5EURTG8d/MnIk7QYHQqfReQK8VtUiUEiqFp1BJxFMoSaaTeAEVInHrKEgQ1yyWMGbcev9kZ2fv9X17rZOctUq12n4PVjCJElpQRqtXznGX93tYKLCGqRRcYCuFm+jDMgYyPo6NME14pzOFkWkIvehST7XIY6TdRVuKBjGHB2zjFo/5yHCRLy9h3c90R/lRxhM6fmGQuqKch3JDuDmVv4jr+Df9m5qbSg2Rbyin4fprSR030VdFtkY1Iy9/ce79uPzwYDRk+0tZtdr+aQ6Nk9yD6JsDjORQCe7zvhKZIkt0b6w3NjCP2RwsH7mKb9ppUvsxDnN95iEyzWA1p1KUEmVMYxRjOEtXlH6ExWeNuDJXtYhfrQAAAABJRU5ErkJggg=="
-                                    />
-                                </svg>
-                                <p>8 (3412) 77-60-55, доб. 5160</p>
+                            <div class="contacts__block">
+                                <div class="contacts__img">
+                                    <img src="../../img/general.png" />
+                                </div>
+                                <div class="contacts__title">Общие вопросы</div>
+                                <div class="contacts__desc">
+                                    Описание о том, какие вопросы можно задавать
+                                </div>
+                                <div class="contacts__contact contacts_mail">
+                                    <svg width="21" height="17" viewBox="0 0 21 17">
+                                        <image
+                                            width="21"
+                                            height="17"
+                                            xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAARCAYAAAAyhueAAAABZElEQVQ4jaWUvU4CQRSFv0UtlMKKQmOo0M5GLLQm9BbGwthY8QZ2hsT4EjYkFJhYGXsSfAREKo2FFpBQUEKMiubCWTLuj7h6mtl75txvM7Oz4zUaT1vABbAJDIAhybUILAH3QMmgz0D2D6A4vaQE/AQKwB7QignHqaW+gjjZlJZsagM3QB44+8U2DJXLq68tf2DQEeABKzLfgTKwC9RDqInqmi8rj/qNM0oF3ozCpjugCBwBfXl91UXNu/npylzoq8YqcAVkVNeAHeBcY01+RrlqoP8b1H/uAgdAEziW9wicakR+U7lukOVCfX1oXAUqwDWQk5dTXdE8Tn6q+RBystmu7LhsA5fAIbA2Ix8JjZKBTiL8SEUt/9+K+lCh5cyQF+gfP3j6vXrykl4ofr4njmd7mlZht1UHWE4Itfy6cxrSBjWQGbcJYb7sj3pw6o5B93WfbgBvumBCZ+8HzekuXRjDofQFpONNGsfTT40AAAAASUVORK5CYII="
+                                        />
+                                    </svg>
+                                    <p>eedu@istu.ru</p>
+                                </div>
+                                <div class="contacts__contact contacts_phone">
+                                    <svg width="13" height="25" viewBox="0 0 13 25">
+                                        <image
+                                            width="13"
+                                            height="25"
+                                            xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAZCAYAAADqrKTxAAABFUlEQVQ4je3Uuy5EURTG8d/MnIk7QYHQqfReQK8VtUiUEiqFp1BJxFMoSaaTeAEVInHrKEgQ1yyWMGbcev9kZ2fv9X17rZOctUq12n4PVjCJElpQRqtXznGX93tYKLCGqRRcYCuFm+jDMgYyPo6NME14pzOFkWkIvehST7XIY6TdRVuKBjGHB2zjFo/5yHCRLy9h3c90R/lRxhM6fmGQuqKch3JDuDmVv4jr+Df9m5qbSg2Rbyin4fprSR030VdFtkY1Iy9/ce79uPzwYDRk+0tZtdr+aQ6Nk9yD6JsDjORQCe7zvhKZIkt0b6w3NjCP2RwsH7mKb9ppUvsxDnN95iEyzWA1p1KUEmVMYxRjOEtXlH6ExWeNuDJXtYhfrQAAAABJRU5ErkJggg=="
+                                        />
+                                    </svg>
+                                    <p>8 (3412) 77-60-55, доб. 5160</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="contacts__block">
-                            <div class="contacts__img">
-                                <img src="../../img/organization.png" />
+                    </div>
+                </section>
+                <section class="contacts" style="margin-top: 100px">
+                    <div class="contacts__inner">
+                        <p class="contacts__name">Столкнулись с проблемой или ошибкой на сайте?</p>
+                        <div class="contacts__form">
+                            <div class="contacts__title">Сообщить об ошибке</div>
+                            <div class="dialog__component">
+                                <p class="dialog__title">Описание проблемы</p>
+                                <textarea
+                                    style="background: #FFFFFF"
+                                    class="dialog__textarea"
+                                    placeholder="Введите описание"
+                                />
                             </div>
-                            <div class="contacts__title">
-                                Организация мероприятий
+                            <div class="contacts__checkbox">
+                                <input style="-webkit-appearance: auto; width: 20px; height: 20px;" type="checkbox" name="" id="">
+                                <p>Я соглашаюсь на <a href="#">обработку персональных данных</a></p>
                             </div>
-                            <div class="contacts__desc">
-                                Описание о том, какие вопросы можно задавать
-                            </div>
-                            <div class="contacts__contact contacts_mail">
-                                <svg width="21" height="17" viewBox="0 0 21 17">
-                                    <image
-                                        width="21"
-                                        height="17"
-                                        xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAARCAYAAAAyhueAAAABZElEQVQ4jaWUvU4CQRSFv0UtlMKKQmOo0M5GLLQm9BbGwthY8QZ2hsT4EjYkFJhYGXsSfAREKo2FFpBQUEKMiubCWTLuj7h6mtl75txvM7Oz4zUaT1vABbAJDIAhybUILAH3QMmgz0D2D6A4vaQE/AQKwB7QignHqaW+gjjZlJZsagM3QB44+8U2DJXLq68tf2DQEeABKzLfgTKwC9RDqInqmi8rj/qNM0oF3ozCpjugCBwBfXl91UXNu/npylzoq8YqcAVkVNeAHeBcY01+RrlqoP8b1H/uAgdAEziW9wicakR+U7lukOVCfX1oXAUqwDWQk5dTXdE8Tn6q+RBystmu7LhsA5fAIbA2Ix8JjZKBTiL8SEUt/9+K+lCh5cyQF+gfP3j6vXrykl4ofr4njmd7mlZht1UHWE4Itfy6cxrSBjWQGbcJYb7sj3pw6o5B93WfbgBvumBCZ+8HzekuXRjDofQFpONNGsfTT40AAAAASUVORK5CYII="
-                                    />
-                                </svg>
-                                <p>eedu@istu.ru</p>
-                            </div>
-                            <div class="contacts__contact contacts_phone">
-                                <svg width="13" height="25" viewBox="0 0 13 25">
-                                    <image
-                                        width="13"
-                                        height="25"
-                                        xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAZCAYAAADqrKTxAAABFUlEQVQ4je3Uuy5EURTG8d/MnIk7QYHQqfReQK8VtUiUEiqFp1BJxFMoSaaTeAEVInHrKEgQ1yyWMGbcev9kZ2fv9X17rZOctUq12n4PVjCJElpQRqtXznGX93tYKLCGqRRcYCuFm+jDMgYyPo6NME14pzOFkWkIvehST7XIY6TdRVuKBjGHB2zjFo/5yHCRLy9h3c90R/lRxhM6fmGQuqKch3JDuDmVv4jr+Df9m5qbSg2Rbyin4fprSR030VdFtkY1Iy9/ce79uPzwYDRk+0tZtdr+aQ6Nk9yD6JsDjORQCe7zvhKZIkt0b6w3NjCP2RwsH7mKb9ppUvsxDnN95iEyzWA1p1KUEmVMYxRjOEtXlH6ExWeNuDJXtYhfrQAAAABJRU5ErkJggg=="
-                                    />
-                                </svg>
-                                <p>8 (3412) 77-60-55, доб. 5160</p>
-                            </div>
-                        </div>
-                        <div class="contacts__block">
-                            <div class="contacts__img">
-                                <img src="../../img/general.png" />
-                            </div>
-                            <div class="contacts__title">Общие вопросы</div>
-                            <div class="contacts__desc">
-                                Описание о том, какие вопросы можно задавать
-                            </div>
-                            <div class="contacts__contact contacts_mail">
-                                <svg width="21" height="17" viewBox="0 0 21 17">
-                                    <image
-                                        width="21"
-                                        height="17"
-                                        xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAARCAYAAAAyhueAAAABZElEQVQ4jaWUvU4CQRSFv0UtlMKKQmOo0M5GLLQm9BbGwthY8QZ2hsT4EjYkFJhYGXsSfAREKo2FFpBQUEKMiubCWTLuj7h6mtl75txvM7Oz4zUaT1vABbAJDIAhybUILAH3QMmgz0D2D6A4vaQE/AQKwB7QignHqaW+gjjZlJZsagM3QB44+8U2DJXLq68tf2DQEeABKzLfgTKwC9RDqInqmi8rj/qNM0oF3ozCpjugCBwBfXl91UXNu/npylzoq8YqcAVkVNeAHeBcY01+RrlqoP8b1H/uAgdAEziW9wicakR+U7lukOVCfX1oXAUqwDWQk5dTXdE8Tn6q+RBystmu7LhsA5fAIbA2Ix8JjZKBTiL8SEUt/9+K+lCh5cyQF+gfP3j6vXrykl4ofr4njmd7mlZht1UHWE4Itfy6cxrSBjWQGbcJYb7sj3pw6o5B93WfbgBvumBCZ+8HzekuXRjDofQFpONNGsfTT40AAAAASUVORK5CYII="
-                                    />
-                                </svg>
-                                <p>eedu@istu.ru</p>
-                            </div>
-                            <div class="contacts__contact contacts_phone">
-                                <svg width="13" height="25" viewBox="0 0 13 25">
-                                    <image
-                                        width="13"
-                                        height="25"
-                                        xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAZCAYAAADqrKTxAAABFUlEQVQ4je3Uuy5EURTG8d/MnIk7QYHQqfReQK8VtUiUEiqFp1BJxFMoSaaTeAEVInHrKEgQ1yyWMGbcev9kZ2fv9X17rZOctUq12n4PVjCJElpQRqtXznGX93tYKLCGqRRcYCuFm+jDMgYyPo6NME14pzOFkWkIvehST7XIY6TdRVuKBjGHB2zjFo/5yHCRLy9h3c90R/lRxhM6fmGQuqKch3JDuDmVv4jr+Df9m5qbSg2Rbyin4fprSR030VdFtkY1Iy9/ce79uPzwYDRk+0tZtdr+aQ6Nk9yD6JsDjORQCe7zvhKZIkt0b6w3NjCP2RwsH7mKb9ppUvsxDnN95iEyzWA1p1KUEmVMYxRjOEtXlH6ExWeNuDJXtYhfrQAAAABJRU5ErkJggg=="
-                                    />
-                                </svg>
-                                <p>8 (3412) 77-60-55, доб. 5160</p>
+                            <div class="dialog__btns">
+                                <button
+                                    type="button"
+                                    class="main__btn"
+                                    style="margin-top: 30px;"
+                                >
+                                    Отправить
+                                </button>
                             </div>
                         </div>
                     </div>
