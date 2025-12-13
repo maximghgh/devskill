@@ -521,7 +521,7 @@ onBeforeUnmount(() => {
         <input v-model="form.simulators" type="hidden" />
 
         <!-- 6) Уровень -->
-        <div class="dialog__component medium">
+        <div class="dialog__component ">
             <p class="dialog__title">Уровень курса</p>
             <select
                 v-model="form.difficulty"
@@ -531,7 +531,6 @@ onBeforeUnmount(() => {
                 <option value="basic">Базовый</option>
                 <option value="middle">Средний</option>
                 <option value="advanced">Продвинутый</option>
-                <option value="mixed">Смешанный</option>
             </select>
         </div>
 

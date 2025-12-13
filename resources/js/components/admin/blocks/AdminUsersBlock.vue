@@ -107,7 +107,7 @@
                             <img
                                 width="13"
                                 height="13"
-                                src="../../../../img/admin/search.svg"
+                                src="../../../img/admin/search.svg"
                                 alt=""
                             />
                         </span>
@@ -139,7 +139,7 @@
                         <th>Дата регистрации</th>
                         <th>Телефон</th>
                         <th>Роль</th>
-                        <th>Действия</th>
+                        <th>Действие</th>
                     </tr>
                 </thead>
 
@@ -213,7 +213,7 @@
                             </div>
                         </td>
 
-                        <td>
+                        <td class="hadle">
                             <div class="tooltip-container">
                                 <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openEditRoleModal(userItem)">
                                     <img

@@ -22,12 +22,7 @@
                                     @click.prevent="setActive(index)"
                                 >
                                     <span class="aside__icon" v-if="item.icon">
-                                        <img
-                                            :src="item.icon"
-                                            width="24"
-                                            height="24"
-                                            alt=""
-                                        />
+                                        <component :is="item.icon" />
                                     </span>
                                     <span class="aside__text">{{
                                         item.label
@@ -50,6 +45,12 @@
                         v-else-if="activeId === 'users'"
                         id="users"
                         v-model:users="users"
+                        />
+
+                        <AdminSupportBlock
+                        v-else-if="activeId === 'support'"
+                        id="support"
+                        v-model:users="support"
                         />
 
                         <AdminCoursesBlock
@@ -108,16 +109,18 @@ import AdminCoursesBlock from "./blocks/AdminCoursesBlock.vue";
 import AdminCategoriesBlock from "./blocks/AdminCategoriesBlock.vue";
 import AdminNewsBlock from "./blocks/AdminNewsBlock.vue";
 import AdminFaqBlock from "./blocks/AdminFaqBlock.vue";
+import AdminSupportBlock from "./blocks/AdminSupportBlock.vue";
 
 import CreateCourseDialog from "./CreateHackathon.vue";
 import EditCourseDialog from "./EditCourseDialog.vue";
 
-import iconDashboard from "./../../../img/admin/info.svg";
-import iconUsers from "./../../../img/admin/users.svg";
-import iconCourses from "./../../../img/admin/couse.svg";
-import iconCategory from "./../../../img/admin/couse.svg";
-import iconNews from "./../../../img/admin/newspaper.svg";
-import iconFaq from "./../../../img/admin/newspaper.svg";
+import iconDashboard from "./icon/IconDashboard.vue";
+import iconUsers from "./icon/IconUsers.vue";
+import iconCourses from "./icon/IconCourses.vue";
+import iconCategory from "./icon/IconCategory.vue";
+import iconNews from "./icon/IconNews.vue";
+import iconFaq from "./icon/IconFaq.vue";
+import iconSupport from "./icon/IconSupport.vue";
 
 const showCreateCourse = ref(false);
 const showEditCourse = ref(false);
@@ -141,6 +144,7 @@ const menuItems = [
         icon: iconDashboard,
     },
     { id: "users", label: "Пользователи", href: "#users", icon: iconUsers },
+    { id: "support", label: "Обращения", href: "#support", icon: iconSupport },
     { id: "courses", label: "Курсы", href: "#courses", icon: iconCourses },
     { id: "other", label: "Категории", href: "#other", icon: iconCategory },
     { id: "news", label: "Новости", href: "#news", icon: iconNews },

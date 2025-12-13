@@ -38,7 +38,7 @@
                 <p class="activity__text">Новое обращение от пользователя Вася</p>
                 <p class="activity__meta">
                   <span class="activity__meta-icon">
-                    <img width="15" height="15" src="../../../img/admin/time.svg" alt="">
+                    <img width="15" height="15" src="../../../../img/admin/time.svg" alt="">
                   </span>
                   <span class="activity__meta-time">3 часа назад</span>
                 </p>
@@ -50,7 +50,7 @@
                 <p class="activity__text">Новый курс создан</p>
                 <p class="activity__meta">
                   <span class="activity__meta-icon">
-                    <img width="15" height="15" src="../../../img/admin/time.svg" alt="">
+                    <img width="15" height="15" src="../../../../img/admin/time.svg" alt="">
                   </span>
                   <span class="activity__meta-time">5 часов назад</span>
                 </p>
@@ -61,7 +61,7 @@
 
         <section class="activity">
           <h1 class="blocks__title--m">Активность</h1>
-          <img src="../../../img/admin/active.png" alt="">
+          <img src="../../../../img/admin/active.png" alt="">
         </section>
 
         <section class="attention">

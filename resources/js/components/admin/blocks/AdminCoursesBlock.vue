@@ -16,6 +16,11 @@
                                 <option :value="25">25</option>
                                 <option :value="50">50</option>
                             </select>
+                            <img
+                                class="select__icon"
+                                src="../../../../img/admin/select.svg"
+                                alt=""
+                            />
                         </span>
                         курсов
                     </label>
@@ -109,7 +114,7 @@
                             <img
                                 width="13"
                                 height="13"
-                                src="../../../img/admin/search.png"
+                                src="../../../../img/admin/search.png"
                                 alt=""
                             />
                         </span>
@@ -183,8 +188,7 @@
                                 </div>
                             </td>
 
-                            <td>
-
+                            <td class="hadle">
                                 <div class="tooltip-container">
                                     <button aria-describedby="help-tooltip" class="btn__user--edit" @click.prevent="$emit('requestEditCourse', course)">
                                         <img

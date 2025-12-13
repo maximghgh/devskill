@@ -435,6 +435,30 @@
                         <!-- /content -->
                     </div>
                 </section>
+
+                <section class="questions">
+                    <div class="questions__inner">
+                        <h2>{{ faqTitle }}</h2>
+
+                        <div
+                        v-for="(item, index) in faqs"
+                        :key="index"
+                        class="question"
+                        >
+                        <div class="question__row" @click="toggleFaq(index)">
+                            <div class="question__plus">{{ item.question }}</div>
+                            <div class="question__quest">{{ item.isOpen ? "-" : "+" }}</div>
+                        </div>
+
+                        <transition name="slide-fade">
+                            <div v-if="item.isOpen" class="question__answer">
+                            {{ item.answer }}
+                            </div>
+                        </transition>
+                        </div>
+                    </div>
+                </section>
+
             </div>
         </div>
         <!-- ===== auth modal ===== -->
@@ -461,258 +485,366 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import axios from 'axios';
-const lastSubmittedOption = ref('');
-/* ------------------------------------------------------------------ */
-/* 1. Константы                                                       */
-/* ------------------------------------------------------------------ */
-const AUTH_KEY = 'user';
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import axios from "axios";
 
 /* ------------------------------------------------------------------ */
-/* 2. Сторы состояния                                                 */
+/* 0. FAQ (внутри этой страницы)                                      */
 /* ------------------------------------------------------------------ */
-const isSidebarOpen         = ref(false);
-const showAuthModal         = ref(false);
-const user                  = ref(null);
+const faqTitle = ref("Вопросы");
+const faqs = ref([]); // тут будут FAQ с isOpen
 
-const courses               = ref([]);
-const languages             = ref([]);
-const directions            = ref([]);
+function toggleFaq(index) {
+  faqs.value[index].isOpen = !faqs.value[index].isOpen;
+}
+
+async function loadFaqs(endpoint = "/api/faqs") {
+  try {
+    const { data } = await axios.get(endpoint);
+    const arr = Array.isArray(data) ? data : (data.data ?? data.faqs ?? []);
+    faqs.value = arr.map(x => ({ ...x, isOpen: false }));
+  } catch (e) {
+    console.error("Ошибка при загрузке FAQ:", e);
+  }
+}
+
 
 /* ------------------------------------------------------------------ */
-/* 3. Постраничный вывод                                              */
+/* 1. Константы                                                       */
 /* ------------------------------------------------------------------ */
-const pageSize     = 6;
-const currentPage  = ref(1);
+const lastSubmittedOption = ref("");
+const AUTH_KEY = "user";
+
+/* ------------------------------------------------------------------ */
+/* 2. Сторы состояния                                                 */
+/* ------------------------------------------------------------------ */
+const isSidebarOpen = ref(false);
+const showAuthModal = ref(false);
+const user = ref(null);
+
+const courses = ref([]);
+const languages = ref([]);
+const directions = ref([]);
+
+/* ------------------------------------------------------------------ */
+/* 3. Постраничный вывод                                              */
+/* ------------------------------------------------------------------ */
+const pageSize = 6;
+const currentPage = ref(1);
 
 const paginatedCourses = computed(() =>
-    courses.value.slice(
-        (currentPage.value - 1) * pageSize,
-        currentPage.value * pageSize
-    )
+  courses.value.slice(
+    (currentPage.value - 1) * pageSize,
+    currentPage.value * pageSize
+  )
 );
+
 const pages = computed(() =>
-    Array.from(
-        { length: Math.ceil(courses.value.length / pageSize) },
-        (_, i) => i + 1
-    )
+  Array.from(
+    { length: Math.ceil(courses.value.length / pageSize) },
+    (_, i) => i + 1
+  )
 );
+
 /* ------------------------------------------------------------------ */
-/* 4. Фильтры                                                         */
+/* 4. Фильтры                                                         */
 /* ------------------------------------------------------------------ */
 const levelOptions = [
-    { value: "basic", label: "Начинающий" },
-    { value: "middle", label: "Средний" },
-    { value: "advanced", label: "Продвинутый" },
-    { value: "mixed", label: "Смешанный" },
+  { value: "basic", label: "Начинающий" },
+  { value: "middle", label: "Средний" },
+  { value: "advanced", label: "Продвинутый" },
+  { value: "mixed", label: "Смешанный" },
 ];
 
 const selectedDifficulties = ref([]);
-const selectedDirection    = ref('all');
-const selectedDuration     = ref(null);
+const selectedDirection = ref("all");
+const selectedDuration = ref(null);
 
 const selectedLanguages = computed(() =>
-    languages.value.filter(l => l.checked).map(l => l.id)
+  languages.value.filter((l) => l.checked).map((l) => l.id)
 );
-const validateDuration = e => {
-    const v = Number(e.target.value);
-    selectedDuration.value = v && v >= 1 && v <= 24 ? v : '';
+
+const validateDuration = (e) => {
+  const v = Number(e.target.value);
+  selectedDuration.value = v && v >= 1 && v <= 24 ? v : "";
 };
+
 /* ------------------------------------------------------------------ */
-/* 5. Справочники (словарики)                                         */
+/* 5. Справочники (словарики)                                         */
 /* ------------------------------------------------------------------ */
 const difficultyTranslation = {
-    basic:    'Начинающий',
-    middle:   'Средний',
-    advanced: 'Продвинутый',
-    mixed:    'Смешанный',
+  basic: "Начинающий",
+  middle: "Средний",
+  advanced: "Продвинутый",
+  mixed: "Смешанный",
 };
+
 const difficultyColorClass = {
-    basic:    'course__card_bg-cyan',
-    middle:   'course__card_bg-fiolet',
-    advanced: 'course__card_bg-orange',
-    mixed:    'course__card_bg-green',
+  basic: "course__card_bg-cyan",
+  middle: "course__card_bg-fiolet",
+  advanced: "course__card_bg-orange",
+  mixed: "course__card_bg-green",
 };
+
 const difficultyBgClass = {
-    basic:    'block-info_bg-cyan',
-    middle:   'block-info_bg-fiolet',
-    advanced: 'block-info_bg-orange',
-    mixed:    'block-info_bg-green',
+  basic: "block-info_bg-cyan",
+  middle: "block-info_bg-fiolet",
+  advanced: "block-info_bg-orange",
+  mixed: "block-info_bg-green",
 };
-/* ------------------------------------------------------------------ */
-/* 6. Модалка покупки/консультации                                    */
-/* ------------------------------------------------------------------ */
-const isModalOpen             = ref(false);
-const selectedCourse          = ref(null);
-const isSubmitted             = ref(false);
-const successMessage          = ref('');
 
-const selectedOption          = ref('consultation');
-const selectedDiscountOption  = ref('card');
+/* ------------------------------------------------------------------ */
+/* 6. Модалка покупки/консультации                                    */
+/* ------------------------------------------------------------------ */
+const isModalOpen = ref(false);
+const selectedCourse = ref(null);
+const isSubmitted = ref(false);
+const successMessage = ref("");
 
-const formData = ref({ email: '', name: '', phone: '' });
-const cardInfo = ref({ cardNumber: '', expiry: '', cvc: '' });
+const selectedOption = ref("consultation");
+const selectedDiscountOption = ref("card");
+
+const formData = ref({ email: "", name: "", phone: "" });
+const cardInfo = ref({ cardNumber: "", expiry: "", cvc: "" });
 
 const openAuth = () => {
   showAuthModal.value = true;
 };
 
-const openModal = course => {
-    if (!user.value) {
-        showAuthModal.value = true;
-        return;
-    }
-    selectedCourse.value = course;
-    isSubmitted.value    = false;
-    successMessage.value = '';
-    isModalOpen.value    = true;
+const openModal = (course) => {
+  if (!user.value) {
+    showAuthModal.value = true;
+    return;
+  }
+  selectedCourse.value = course;
+  isSubmitted.value = false;
+  successMessage.value = "";
+  isModalOpen.value = true;
 };
+
 const closeModal = () => (isModalOpen.value = false);
+
 /* ------------------------------------------------------------------ */
-/* 7. API‑запросы                                                     */
+/* 7. API-запросы                                                     */
 /* ------------------------------------------------------------------ */
 async function loadDirections() {
-    try {
-        const r = await axios.get('/api/directions');
-        directions.value = Array.isArray(r.data) ? r.data : r.data.data ?? [];
-    } catch (e) {
-        console.error(e);
-    }
+  try {
+    const r = await axios.get("/api/directions");
+    directions.value = Array.isArray(r.data) ? r.data : r.data.data ?? [];
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 async function fetchCourses() {
-    try {
-        const params = {};
-        if (selectedLanguages.value.length)
-            params.languages = selectedLanguages.value.join(',');
-        if (selectedDifficulties.value.length)
-            params.difficulties = selectedDifficulties.value;
-        if (selectedDirection.value !== 'all')
-            params.direction = selectedDirection.value;
-        if (selectedDuration.value)
-            params.duration = selectedDuration.value;
+  try {
+    const params = {};
 
-        const r = await axios.get('/api/courses', { params });
-        courses.value = Array.isArray(r.data) ? r.data : r.data.data ?? [];
-    } catch (e) {
-        console.error(e);
-    }
+    if (selectedLanguages.value.length)
+      params.languages = selectedLanguages.value.join(",");
+
+    if (selectedDifficulties.value.length)
+      params.difficulties = selectedDifficulties.value;
+
+    if (selectedDirection.value !== "all")
+      params.direction = selectedDirection.value;
+
+    if (selectedDuration.value) params.duration = selectedDuration.value;
+
+    const r = await axios.get("/api/courses", { params });
+    courses.value = Array.isArray(r.data) ? r.data : r.data.data ?? [];
+  } catch (e) {
+    console.error(e);
+  }
 }
+
 /* ------------------------------------------------------------------ */
-/* 8. Реактивные вотчеры                                              */
+/* 8. Реактивные вотчеры                                              */
 /* ------------------------------------------------------------------ */
 watch(
-    [
-        selectedDifficulties,
-        selectedDirection,
-        selectedDuration,
-        selectedLanguages,
-    ],
-    fetchCourses,
-    { deep: true }
+  [selectedDifficulties, selectedDirection, selectedDuration, selectedLanguages],
+  () => {
+    currentPage.value = 1; // чтобы при фильтрах возвращало на 1 страницу
+    fetchCourses();
+  },
+  { deep: true }
 );
+
 /* ------------------------------------------------------------------ */
-/* 9. Отправка форм                                                   */
+/* 9. Отправка форм                                                   */
 /* ------------------------------------------------------------------ */
 async function submitForm() {
-    if (!selectedCourse.value) return;
+  if (!selectedCourse.value) return;
 
-    const payload = {
-        user_id: user.value.id,
-        ...formData.value,
-        type: selectedOption.value,
-    };
+  const payload = {
+    user_id: user.value.id,
+    ...formData.value,
+    type: selectedOption.value,
+  };
 
-    if (selectedOption.value === 'discount') {
-        payload.payment_method = selectedDiscountOption.value;
-        if (selectedDiscountOption.value === 'card') {
-            payload.payment_details = JSON.stringify(cardInfo.value);
-        }
-    } else {
-        payload.payment_method  = 'card';
-        payload.payment_details = null;
+  if (selectedOption.value === "discount") {
+    payload.payment_method = selectedDiscountOption.value;
+    if (selectedDiscountOption.value === "card") {
+      payload.payment_details = JSON.stringify(cardInfo.value);
     }
+  } else {
+    payload.payment_method = "card";
+    payload.payment_details = null;
+  }
 
-    const url =
-        selectedOption.value === 'consultation'
-            ? `/api/${selectedCourse.value.id}/consultation`
-            : `/api/${selectedCourse.value.id}/purchase`;
+  const url =
+    selectedOption.value === "consultation"
+      ? `/api/${selectedCourse.value.id}/consultation`
+      : `/api/${selectedCourse.value.id}/purchase`;
 
-    try {
-        await axios.post(url, payload);
-        lastSubmittedOption.value = selectedOption.value;
-        successMessage.value =
-            selectedOption.value === 'consultation'
-                ? 'Спасибо за заявку!'
-                : 'Поздравляем с покупкой!';
+  try {
+    await axios.post(url, payload);
 
-        isSubmitted.value = true;
+    lastSubmittedOption.value = selectedOption.value;
 
-        /* очистка */
-        formData.value           = { email: '', name: '', phone: '' };
-        selectedOption.value     = 'consultation';
-        selectedDiscountOption.value = 'card';
-        cardInfo.value           = { cardNumber: '', expiry: '', cvc: '' };
-    } catch (e) {
-        console.error(e);
-    }
+    successMessage.value =
+      selectedOption.value === "consultation"
+        ? "Спасибо за заявку!"
+        : "Поздравляем с покупкой!";
+
+    isSubmitted.value = true;
+
+    /* очистка */
+    formData.value = { email: "", name: "", phone: "" };
+    selectedOption.value = "consultation";
+    selectedDiscountOption.value = "card";
+    cardInfo.value = { cardNumber: "", expiry: "", cvc: "" };
+  } catch (e) {
+    console.error(e);
+  }
 }
+
 /* ------------------------------------------------------------------ */
-/* 10. Авторизация                                                    */
+/* 10. Авторизация                                                    */
 /* ------------------------------------------------------------------ */
 function handleLoginEvent(e) {
-    user.value = e.detail;
-    showAuthModal.value = false;
-    localStorage.setItem(AUTH_KEY, JSON.stringify(e.detail));
+  user.value = e.detail;
+  showAuthModal.value = false;
+  localStorage.setItem(AUTH_KEY, JSON.stringify(e.detail));
 }
+
 /* ------------------------------------------------------------------ */
-/* 11. Монтирование компонента                                        */
+/* 11. Монтирование компонента                                        */
 /* ------------------------------------------------------------------ */
 onMounted(async () => {
-    const storedUser = localStorage.getItem(AUTH_KEY);
-
-    if (storedUser) {
-        try {
-            user.value = JSON.parse(storedUser);
-        } catch (err) {
-            console.error(err);
-            showAuthModal.value = true;
-        }
-    }
-    window.addEventListener('user:login', handleLoginEvent);
-
-    await loadDirections();
-
+  const storedUser = localStorage.getItem(AUTH_KEY);
+  if (storedUser) {
     try {
-        const lr  = await axios.get('/api/languages');
-        const arr = Array.isArray(lr.data) ? lr.data : lr.data.data ?? [];
-        languages.value = arr.map(l => ({ ...l, checked: false }));
-    } catch (e) {
-        console.error(e);
+      user.value = JSON.parse(storedUser);
+    } catch (err) {
+      console.error(err);
+      showAuthModal.value = true;
     }
+  }
 
-    await fetchCourses();
+  window.addEventListener("user:login", handleLoginEvent);
+
+  await loadDirections();
+
+  try {
+    const lr = await axios.get("/api/languages");
+    const arr = Array.isArray(lr.data) ? lr.data : lr.data.data ?? [];
+    languages.value = arr.map((l) => ({ ...l, checked: false }));
+  } catch (e) {
+    console.error(e);
+  }
+
+  await fetchCourses();
+
+  // FAQ загрузка
+  await loadFaqs("/api/faqs");
 });
 
 onUnmounted(() => {
-    window.removeEventListener('user:login', handleLoginEvent);
+  window.removeEventListener("user:login", handleLoginEvent);
 });
+
 /* ------------------------------------------------------------------ */
-/* 12. UI‑утилиты                                                     */
+/* 12. UI-утилиты                                                     */
 /* ------------------------------------------------------------------ */
 const toggleSidebar = () => {
-    isSidebarOpen.value = !isSidebarOpen.value;
+  isSidebarOpen.value = !isSidebarOpen.value;
 };
+
 function scrollToCourse() {
-  const el = document.getElementById('course');
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  const el = document.getElementById("course");
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 </script>
 
+
 <style>
+
+/* Контейнер */
+.questions__inner {
+  padding: 0 10px;
+  margin: 20px auto;
+}
+
+/* Весь блок вопроса */
+.question {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Шапка */
+.question__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  min-height: 55px;
+  cursor: pointer;
+}
+
+.question__plus {
+  user-select: none;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.question__quest {
+  font-size: 25px;
+  font-weight: bold;
+  text-align: right;
+  margin-left: auto;
+}
+
+.question__answer {
+  font-size: 14px;
+  color: #555;
+  padding: 0 15px 15px 15px;
+  line-height: 1.4;
+  border-top: 1px solid #eee;
+}
+
+/* Анимация */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: max-height 0.4s linear, opacity 0.4s linear;
+  overflow: hidden;
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.slide-fade-enter-to,
+.slide-fade-leave-from {
+  max-height: 500px;
+  opacity: 1;
+}
+
 .payment-block{
     display: flex;
     align-items: center;

@@ -11,10 +11,10 @@
                 </a>
             </div>
             <nav class="header__nav">
-                <a href="/catalog">Каталог</a>
-                <a href="/news">Новости</a>
-                <a href="/contact">Контакты</a>
-                <a href="/about">О нас</a>
+                <a href="/catalog" :class="{ 'nav__link--active': isActive('/catalog') }">Каталог</a>
+                <a href="/news"    :class="{ 'nav__link--active': isActive('/news') }">Новости</a>
+                <a href="/contact" :class="{ 'nav__link--active': isActive('/contact') }">Контакты</a>
+                <a href="/about"   :class="{ 'nav__link--active': isActive('/about') }">О нас</a>
             </nav>
             <div class="header__lk">
                 <div class="personal-area personal-area_active">
@@ -79,37 +79,58 @@
 
 <script>
 export default {
-    name: "HeaderComponent",
-    data() {
-        return {
-            menuOpen: false,
-            user: null,
-        };
+  name: "HeaderComponent",
+  data() {
+    return {
+      menuOpen: false,
+      user: null,
+      currentPath: window.location.pathname,
+    };
+  },
+  methods: {
+    toggleMenu() {
+      this.menuOpen = !this.menuOpen;
     },
-    methods: {
-        toggleMenu() {
-            this.menuOpen = !this.menuOpen;
-        },
-        logout() {
-            localStorage.removeItem("user");
-            this.user = null;
-            window.location.href = "/";
-        },
+    logout() {
+      localStorage.removeItem("user");
+      this.user = null;
+      window.location.href = "/";
     },
-    mounted() {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            try {
-                this.user = JSON.parse(storedUser);
-            } catch (error) {
-                console.error("Ошибка парсинга данных пользователя", error);
-            }
-        }
+
+    // точное совпадение
+    isActive(path) {
+      return this.currentPath === path;
     },
+
+    // если нужно подсвечивать и вложенные страницы (например /news/123):
+    // isActive(path) {
+    //   return this.currentPath === path || this.currentPath.startsWith(path + "/");
+    // },
+  },
+  mounted() {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        this.user = JSON.parse(storedUser);
+      } catch (error) {
+        console.error("Ошибка парсинга данных пользователя", error);
+      }
+    }
+
+    // если где-то используешь history.pushState/назад-вперёд
+    window.addEventListener("popstate", () => {
+      this.currentPath = window.location.pathname;
+    });
+  },
 };
+
 </script>
 
 <style scoped>
+.nav__link--active {
+  color: rgba(0, 92, 148, 1);
+}
+
 .header__logo {
     height: 90px;
 }

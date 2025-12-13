@@ -1,8 +1,9 @@
 <template>
     <div class="user-block">
         <h1 class="page__title">Новости</h1>
+
+        <!-- ================== NEWS LIST ================== -->
         <div v-if="viewMode === 'news'">
-        <div>
             <div class="users-toolbar">
                 <div class="asdf">
                     <div class="users-toolbar__left">
@@ -10,13 +11,18 @@
                             Показать
                             <span class="users-show__select-wrap">
                                 <select
-                                    v-model.number="pageSizeCourses"
+                                    v-model.number="pageSizeNews"
                                     class="users-show__select"
                                 >
                                     <option :value="10">10</option>
                                     <option :value="25">25</option>
                                     <option :value="50">50</option>
                                 </select>
+                                <img
+                                    class="select__icon"
+                                    src="../../../../img/admin/select.svg"
+                                    alt=""
+                                />
                             </span>
                             новостей
                         </label>
@@ -32,24 +38,30 @@
                                     alt=""
                                 />
                             </span>
+
+                            <!-- ✅ ВАЖНО: теперь управляет searchNewsQuery -->
                             <input
-                                v-model="searchCourseQuery"
+                                v-model="searchNewsQuery"
                                 type="text"
                                 class="users-search__input"
                                 placeholder="Поиск..."
                             />
                             <button
-                                v-if="searchCourseQuery"
+                                v-if="searchNewsQuery"
                                 type="button"
                                 class="users-search__clear"
-                                @click="searchCourseQuery = ''"
+                                @click="searchNewsQuery = ''"
                             >
                                 ×
                             </button>
                         </div>
                     </div>
 
-                    <button type="button" class="users-btn-new" @click="openCreateNews">
+                    <button
+                        type="button"
+                        class="users-btn-new"
+                        @click="openCreateNews"
+                    >
                         <span class="users-btn-desc">+</span> Добавить новость
                     </button>
                 </div>
@@ -74,13 +86,14 @@
                         <td style="text-align: center">
                             #{{ index + 1 + (currentPageNews - 1) * pageSizeNews }}
                         </td>
+
                         <td class="avatar__user">
                             <img
                                 :src="
-                                            newsItem.image
-                                                ? `${newsItem.image}`
-                                                : 'https://devskills.foncode.ru/img/no_foto.jpg'
-                                        "
+                                    newsItem.image
+                                        ? `${newsItem.image}`
+                                        : 'https://devskills.foncode.ru/img/no_foto.jpg'
+                                "
                                 alt=""
                                 width="25"
                                 height="25"
@@ -88,10 +101,16 @@
                             />
                             {{ newsItem.title || "Неизвестно" }}
                         </td>
+
                         <td>{{ formatBirthday(newsItem.created_at) }}</td>
+
                         <td class="avatar__user">
                             <span>
-                                {{ commentCountsLoading[newsItem.id] ? "…" : (pureCommentCounts[newsItem.id] ?? 0) }}
+                                {{
+                                    commentCountsLoading[newsItem.id]
+                                        ? "…"
+                                        : (pureCommentCounts[newsItem.id] ?? 0)
+                                }}
                             </span>
                             <img
                                 title="Перейти к комментариям"
@@ -103,27 +122,51 @@
                                 @click="openComments(newsItem)"
                             />
                         </td>
-                        <td>
 
-                            <div class="tooltip-container">
-                                <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openEditNews(newsItem)">
-                                    <img width="24" height="24" src="../../../../img/admin/edit.svg" alt="" />
-                                </button>
-                                <div role="tooltip" id="help-tooltip" class="tooltip">
-                                    Редактировать новость
+                        <td>
+                            <div class="hadle">
+                                <div class="tooltip-container">
+                                    <button
+                                        aria-describedby="help-tooltip"
+                                        class="btn__user--edit"
+                                        @click="openEditNews(newsItem)"
+                                    >
+                                        <img
+                                            width="24"
+                                            height="24"
+                                            src="../../../../img/admin/edit.svg"
+                                            alt=""
+                                        />
+                                    </button>
+                                    <div
+                                        role="tooltip"
+                                        id="help-tooltip"
+                                        class="tooltip"
+                                    >
+                                        Редактировать новость
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="tooltip-container">
-                                <button aria-describedby="help-tooltip" class="btn__user--edit" @click="deleteNews(newsItem.id)">
-                                    <img
-                                        width="24"
-                                        height="24"
-                                        src="../../../../img/admin/trash.png"
-                                        alt=""
-                                    />
-                                </button>
-                                <div role="tooltip" id="help-tooltip" class="tooltip">
-                                    Удалить новость
+
+                                <div class="tooltip-container">
+                                    <button
+                                        aria-describedby="help-tooltip"
+                                        class="btn__user--edit"
+                                        @click="deleteNews(newsItem.id)"
+                                    >
+                                        <img
+                                            width="24"
+                                            height="24"
+                                            src="../../../../img/admin/trash.png"
+                                            alt=""
+                                        />
+                                    </button>
+                                    <div
+                                        role="tooltip"
+                                        id="help-tooltip"
+                                        class="tooltip"
+                                    >
+                                        Удалить новость
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -139,7 +182,11 @@
                 @saved="setNewsItems"
             />
 
-            <div class="pagination-users" v-if="totalPagesNews > 1">
+            <!-- ✅ Пагинация теперь работает от filteredNews -->
+            <div
+                class="pagination-users"
+                v-if="totalPagesNews > 1 && filteredNews.length"
+            >
                 <button
                     :disabled="currentPageNews === 1"
                     @click="currentPageNews--"
@@ -162,12 +209,20 @@
                 </button>
             </div>
         </div>
-        </div>
+
+        <!-- ================== COMMENTS LIST ================== -->
         <div v-else>
             <div class="breadcrumbs">
-                <a href="#" @click.prevent="backToNews" class="breadcrumbs__old">Новости</a>
+                <a
+                    href="#"
+                    @click.prevent="backToNews"
+                    class="breadcrumbs__old"
+                    >Новости</a
+                >
                 <img src="../../../../img/admin/line.svg" alt="" />
-                <span class="breadcrumbs__new">{{ currentCommentsNewsTitle }}</span>
+                <span class="breadcrumbs__new">{{
+                    currentCommentsNewsTitle
+                }}</span>
             </div>
 
             <div class="users-toolbar">
@@ -176,21 +231,29 @@
                         <label class="users-show">
                             Показать
                             <span class="users-show__select-wrap">
-                            <select v-model.number="pageSizeComments" class="users-show__select">
-                                <option :value="10">10</option>
-                                <option :value="25">25</option>
-                                <option :value="50">50</option>
-                            </select>
-                        </span>
+                                <select
+                                    v-model.number="pageSizeComments"
+                                    class="users-show__select"
+                                >
+                                    <option :value="10">10</option>
+                                    <option :value="25">25</option>
+                                    <option :value="50">50</option>
+                                </select>
+                            </span>
                             комментариев
                         </label>
                     </div>
 
                     <div class="users-toolbar__search">
                         <div class="users-search">
-                        <span class="users-search__icon">
-                            <img width="13" height="13" src="../../../../img/admin/search.png" alt="" />
-                        </span>
+                            <span class="users-search__icon">
+                                <img
+                                    width="13"
+                                    height="13"
+                                    src="../../../../img/admin/search.png"
+                                    alt=""
+                                />
+                            </span>
                             <input
                                 v-model="searchCommentsQuery"
                                 type="text"
@@ -208,54 +271,86 @@
                         </div>
                     </div>
 
-                    <button type="button" class="users-btn-new" @click="openAddCommentDialog">
-                        <span class="users-btn-desc">+</span> Добавить комментарий
+                    <button
+                        type="button"
+                        class="users-btn-new"
+                        @click="openAddCommentDialog"
+                    >
+                        <span class="users-btn-desc">+</span> Добавить
+                        комментарий
                     </button>
                 </div>
             </div>
 
-            <table v-if="!commentsLoading && paginatedComments.length" class="light-push-table">
+            <table
+                v-if="!commentsLoading && paginatedComments.length"
+                class="light-push-table"
+            >
                 <thead>
-                <tr>
-                    <th>Комментарий</th>
-                    <th>Дата и время</th>
-                    <th>Автор</th>
-                    <th>Действие</th>
-                </tr>
+                    <tr>
+                        <th>Комментарий</th>
+                        <th>Дата и время</th>
+                        <th>Автор</th>
+                        <th>Действие</th>
+                    </tr>
                 </thead>
 
                 <tbody>
-                <tr v-for="c in paginatedComments" :key="c.id">
-                    <td>{{ c.body }}</td>
-                    <td>{{ formatDateTime(c.created_at) }}</td>
+                    <tr v-for="c in paginatedComments" :key="c.id">
+                        <td>{{ c.body }}</td>
+                        <td>{{ formatDateTime(c.created_at) }}</td>
 
-                    <td class="avatar__user">
-                        {{ c.user_name || ("Пользователь #" + c.user_id) }}
-                        <img
-                            src="../../../../img/admin/eye.svg"
-                            alt=""
-                        />
-                    </td>
+                        <td class="avatar__user">
+                            {{ c.user_name || "Пользователь #" + c.user_id }}
+                            <img src="../../../../img/admin/eye.svg" alt="" />
+                        </td>
 
-                    <td>
-                        <div class="tooltip-container">
-                            <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openReplyCommentDialog(c)">
-                                <img width="24" height="24" src="../../../../img/admin/letter.svg" alt="" />
-                            </button>
-                            <div role="tooltip" id="help-tooltip" class="tooltip">
-                                Ответить пользователю
+                        <td>
+                            <div class="tooltip-container">
+                                <button
+                                    aria-describedby="help-tooltip"
+                                    class="btn__user--edit"
+                                    @click="openReplyCommentDialog(c)"
+                                >
+                                    <img
+                                        width="24"
+                                        height="24"
+                                        src="../../../../img/admin/letter.svg"
+                                        alt=""
+                                    />
+                                </button>
+                                <div
+                                    role="tooltip"
+                                    id="help-tooltip"
+                                    class="tooltip"
+                                >
+                                    Ответить пользователю
+                                </div>
                             </div>
-                        </div>
-                        <div class="tooltip-container">
-                            <button aria-describedby="help-tooltip" class="btn__user--edit" @click="deleteComment(c.id)">
-                                <img width="24" height="24" src="../../../../img/admin/trash.png" alt="" />
-                            </button>
-                            <div role="tooltip" id="help-tooltip" class="tooltip">
-                                Удалить комментарий
+
+                            <div class="tooltip-container">
+                                <button
+                                    aria-describedby="help-tooltip"
+                                    class="btn__user--edit"
+                                    @click="deleteComment(c.id)"
+                                >
+                                    <img
+                                        width="24"
+                                        height="24"
+                                        src="../../../../img/admin/trash.png"
+                                        alt=""
+                                    />
+                                </button>
+                                <div
+                                    role="tooltip"
+                                    id="help-tooltip"
+                                    class="tooltip"
+                                >
+                                    Удалить комментарий
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -263,7 +358,12 @@
             <div v-else>Комментариев нет</div>
 
             <div class="pagination-users" v-if="totalPagesComments > 1">
-                <button :disabled="currentPageComments === 1" @click="currentPageComments--">‹ Назад</button>
+                <button
+                    :disabled="currentPageComments === 1"
+                    @click="currentPageComments--"
+                >
+                    ‹ Назад
+                </button>
                 <button
                     v-for="p in totalPagesComments"
                     :key="p"
@@ -280,6 +380,7 @@
                 </button>
             </div>
         </div>
+
         <AddCommentDialog
             v-model="showAddCommentDialog"
             :news-id="commentsNewsId"
@@ -296,18 +397,11 @@
 </template>
 
 <script setup>
-import {
-    ref,
-    computed,
-    watch,
-    reactive,
-    nextTick,
-    onMounted,
-    onBeforeUnmount,
-} from "vue";
+import { ref, computed, watch, reactive } from "vue";
 import axios from "axios";
 import { globalNotification } from "../../../globalNotification";
 import { useDateFormatters } from "../utils/useDateFormatters";
+
 import NewsDialog from "../modal_admin/NewsDialog.vue";
 import AddCommentDialog from "../modal_admin/AddCommentDialog.vue";
 import ReplyCommentDialog from "../modal_admin/ReplyCommentDialog.vue";
@@ -319,7 +413,6 @@ function openCreateNews() {
     dialogNews.value = null;
     showNewsDialog.value = true;
 }
-
 function openEditNews(newsItem) {
     dialogNews.value = newsItem;
     showNewsDialog.value = true;
@@ -327,9 +420,73 @@ function openEditNews(newsItem) {
 
 const viewMode = ref("news");
 
+const { formatBirthday, formatDateTime } = useDateFormatters();
+
+const props = defineProps({
+    newsItems: { type: Array, default: () => [] },
+});
+const emit = defineEmits(["update:newsItems"]);
+
+function setNewsItems(next) {
+    emit("update:newsItems", next);
+}
+
+/* =========================================================
+   ✅ НОВОСТИ: фильтрация (поиск) + пагинация (Показать N)
+   ========================================================= */
+const searchNewsQuery = ref("");
+const pageSizeNews = ref(10);
+const currentPageNews = ref(1);
+
+const normalizedNewsQuery = computed(() =>
+    (searchNewsQuery.value || "").trim().toLowerCase()
+);
+
+const filteredNews = computed(() => {
+    const q = normalizedNewsQuery.value;
+    const arr = props.newsItems ?? [];
+    if (!q) return arr;
+
+    return arr.filter((n) => {
+        const title = (n.title || "").toLowerCase();
+        const content = (n.content || "").toLowerCase(); // если поле content существует
+        return title.includes(q) || content.includes(q);
+    });
+});
+
+const totalPagesNews = computed(() =>
+    Math.max(1, Math.ceil(filteredNews.value.length / pageSizeNews.value))
+);
+
+const paginatedNews = computed(() => {
+    const start = (currentPageNews.value - 1) * pageSizeNews.value;
+    return filteredNews.value.slice(start, start + pageSizeNews.value);
+});
+
+watch([pageSizeNews, searchNewsQuery], () => {
+    currentPageNews.value = 1;
+});
+
+watch(totalPagesNews, (tp) => {
+    if (currentPageNews.value > tp) currentPageNews.value = tp;
+});
+
+watch(
+    () => props.newsItems,
+    () => (currentPageNews.value = 1)
+);
+
+/* =========================================================
+   Комментарии (у тебя уже было)
+   ========================================================= */
 const pageSizeComments = ref(10);
 const currentPageComments = ref(1);
 const searchCommentsQuery = ref("");
+
+const commentsLoading = ref(false);
+const commentsNewsId = ref(null);
+const currentCommentsNewsTitle = ref("");
+const commentsRaw = ref([]);
 
 const pureComments = computed(() =>
     (commentsRaw.value || []).filter((c) => c.parent_id === null)
@@ -360,11 +517,9 @@ watch([pageSizeComments, searchCommentsQuery], () => {
 });
 
 const showAddCommentDialog = ref(false);
-
 function openAddCommentDialog() {
     showAddCommentDialog.value = true;
 }
-
 async function onAddCommentSaved() {
     await loadComments(commentsNewsId.value);
 }
@@ -378,34 +533,26 @@ function openReplyCommentDialog(c) {
     replyCommentText.value = c.body || "";
     showReplyCommentDialog.value = true;
 }
-
 async function onReplyCommentSaved() {
     await loadComments(commentsNewsId.value);
 }
 
-const props = defineProps({
-    newsItems: { type: Array, default: () => [] },
-});
-const emit = defineEmits(["update:newsItems"]);
-
-function setNewsItems(next) {
-    emit("update:newsItems", next);
-}
-
-const { formatBirthday, formatDateTime } = useDateFormatters();
-
-const pageSizeCourses = ref(10);
-
+/* =========================================================
+   Кол-во комментариев по новостям (у тебя было)
+   ========================================================= */
 const pureCommentCounts = reactive({});
+const commentCountsLoading = reactive({});
 
 function countPureComments(list) {
     return (list || []).filter((c) => c.parent_id === null).length;
 }
 
-const commentCountsLoading = reactive({}); // { [newsId]: true }
-
 async function ensureCount(newsId) {
-    if (pureCommentCounts[newsId] !== undefined || commentCountsLoading[newsId]) return;
+    if (
+        pureCommentCounts[newsId] !== undefined ||
+        commentCountsLoading[newsId]
+    )
+        return;
 
     commentCountsLoading[newsId] = true;
     try {
@@ -414,22 +561,25 @@ async function ensureCount(newsId) {
         pureCommentCounts[newsId] = countPureComments(list);
     } catch (e) {
         console.error(e);
-        pureCommentCounts[newsId] = 0; // чтобы не было "—"
+        pureCommentCounts[newsId] = 0;
     } finally {
         delete commentCountsLoading[newsId];
     }
 }
 
 async function preloadAllCounts(list, limit = 5) {
-    const ids = (list || []).map(n => n.id);
+    const ids = (list || []).map((n) => n.id);
     let i = 0;
 
-    const workers = Array.from({ length: Math.min(limit, ids.length) }, async () => {
-        while (i < ids.length) {
-            const id = ids[i++];
-            await ensureCount(id);
+    const workers = Array.from(
+        { length: Math.min(limit, ids.length) },
+        async () => {
+            while (i < ids.length) {
+                const id = ids[i++];
+                await ensureCount(id);
+            }
         }
-    });
+    );
 
     await Promise.all(workers);
 }
@@ -440,46 +590,15 @@ watch(
     { immediate: true }
 );
 
-/* ===== пагинация ===== */
-const currentPageNews = ref(1);
-const pageSizeNews = ref(5);
-
-const totalPagesNews = computed(() =>
-    Math.max(1, Math.ceil(props.newsItems.length / pageSizeNews.value))
-);
-
-const paginatedNews = computed(() => {
-    const start = (currentPageNews.value - 1) * pageSizeNews.value;
-    return props.newsItems.slice(start, start + pageSizeNews.value);
-});
-
-watch(
-    () => props.newsItems,
-    () => (currentPageNews.value = 1)
-);
-
-/* ===== editor create ===== */
-
-const newNews = ref({
-    title: "",
-    content: "",
-    newsImage: null,
-    editorData: {},
-});
-
-function onNewsImageChange(e) {
-    newNews.value.newsImage = e.target.files?.[0] || null;
-}
-
-
-/* ===== создание новости ===== */
-
-/* ===== удаление новости ===== */
+/* =========================================================
+   Удаление новости
+   ========================================================= */
 async function deleteNews(id) {
     if (!confirm("Вы действительно хотите удалить новость?")) return;
     try {
         await axios.delete(`/api/news/${id}`);
-        setNewsItems(props.newsItems.filter((n) => n.id !== id));
+        setNewsItems((props.newsItems ?? []).filter((n) => n.id !== id));
+
         globalNotification.categoryMessage = "Новость успешно удалена";
         globalNotification.type = "success";
     } catch (e) {
@@ -489,11 +608,9 @@ async function deleteNews(id) {
     }
 }
 
-const commentsLoading = ref(false);
-const commentsNewsId = ref(null);
-const currentCommentsNewsTitle = ref("");
-const commentsRaw = ref([]);
-
+/* =========================================================
+   Переход к комментариям / назад
+   ========================================================= */
 async function openComments(newsItem) {
     commentsNewsId.value = newsItem.id;
     currentCommentsNewsTitle.value = newsItem.title || "";
@@ -533,6 +650,9 @@ async function loadComments(newsId) {
     }
 }
 
+/* =========================================================
+   Удаление комментария
+   ========================================================= */
 const commentDeleting = reactive({});
 
 async function deleteComment(id) {
@@ -553,4 +673,3 @@ async function deleteComment(id) {
     }
 }
 </script>
-

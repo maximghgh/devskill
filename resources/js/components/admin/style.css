@@ -4,6 +4,7 @@
     line-height: 18px;
     letter-spacing: 0%;
     color: #41328F;
+    margin: 0;
 }
 
 .avatar__admin {
@@ -417,9 +418,9 @@ h2 {
     background-color: #0056b3;
 }
 
-/* .user-block {
-    width: 100%;
-} */
+.user-block {
+    width: 1000px;
+}
 /* ===== Блок пользователей ===== */
 
 /* заголовок + счетчик + кнопка */
@@ -829,6 +830,17 @@ h2 {
     background: var(--secondary-600, #41328f);
     color: #ffffff;
 }
+
+.aside__link--active .aside__icon svg path {
+    fill: #ffffff;
+}
+.hadle{
+    max-width: 121px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
 table.light-push-table {
     font-family: JanoSansProRegular;
     width: 1000px;
@@ -837,6 +849,14 @@ table.light-push-table {
     border-radius: 8px;
     margin: 0 0 30px;
 }
+
+.light-push-table th:last-child,
+.light-push-table td:last-child{
+  max-width: 121px;
+  width: 121px;          /* фиксируем, чтобы точно не растягивалась */
+  white-space: nowrap;   /* чтобы не переносило кнопки */
+}
+
 .light-push-table tbody tr:nth-child(odd) {
     background-color: #eeeeee;
 }

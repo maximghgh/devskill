@@ -32,7 +32,7 @@
                             <div class="course-content__main-block">
                                 <!-- Элемент для Editor.js -->
                                 <div class="editor" id="editorjs"></div>
-                                <section
+                                <!-- <section
                                     class="course-teachers"
                                     v-if="
                                         course &&
@@ -49,7 +49,6 @@
                                             v-for="teacher in course.teachersData"
                                             :key="teacher.id"
                                         >
-                                            <!-- Если у преподавателя есть фото, выводим его, иначе заглушку -->
                                             <img
                                                 class="teacher-photo"
                                                 :src="
@@ -63,14 +62,13 @@
                                                 <p class="teacher-name">
                                                     {{ teacher.name }}
                                                 </p>
-                                                <!-- Можно вывести и другие поля, например email -->
                                                 <p class="teacher-email">
                                                     {{ teacher.position }}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
-                                </section>
+                                </section> -->
                             </div>
 
                             <!-- Правая часть (сайдбар) -->
