@@ -726,7 +726,7 @@ h2 {
 /* таблетка роли в таблице */
 .users-role-pill {
     display: inline-block;
-    padding: 8px 12px;
+    padding: 9px 14px;
     border-radius: 22px;
     background: #dddddd;
     color: #727272;
@@ -2057,7 +2057,7 @@ table.light-push-table {
     transform: translate(-50%, 0);
 }
 
-/* 1-в-1 из вашего проекта */
+/* 1-в-1 из вашего проекта
 .tooltipSquare {
     position: absolute;
     top: 100%;
@@ -2124,7 +2124,7 @@ table.light-push-table {
     display: flex;
     gap: 5px;
     align-items: center;
-}
+} */
 
 .dialog__file-input {
     display: none;
@@ -2189,4 +2189,95 @@ table.light-push-table {
 .main__btn--white{
     background: none;
     color: #41328F;
+}
+
+/* tooltip */
+
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+  }
+
+
+  .tooltip {
+    position: absolute;
+    bottom: calc(100% + 15px);
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    color: #1f2937;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(229, 231, 235, 1);
+  }
+
+  /* Tooltip arrow */
+  .tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: #ffffff transparent transparent transparent;
+  }
+
+  .tooltip-container:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @keyframes glow {
+    0% {
+      text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+    50% {
+      text-shadow: 0 0 20px rgba(99, 102, 241, 0.7);
+    }
+    100% {
+      text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+  }
+
+  .tooltip strong {
+    animation: glow 2s infinite;
+    font-weight: 600;
+  }
+
+  .tooltip i {
+    margin-right: 6px;
+    color: #6366f1;
+  }
+
+  .users-search__input {
+    max-width: 430px;
+}
+.users-search__input:focus {
+    border: 1px solid #41328F;
+}
+
+.breadcrumbs{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 0px 0 40px;
+}
+.breadcrumbs__old {
+    font-size: 18px;
+    color: #9E9E9E;
+    text-decoration: none;
+    font-weight: 600;
+}
+.breadcrumbs__new {
+    font-size: 18px;
+    color: #41328F;
+    font-weight: 600;
 }

@@ -18,7 +18,7 @@
                             </select>
                             <img
                                 class="select__icon"
-                                src="../../../img/admin/select.svg"
+                                src="../../../../img/admin/select.svg"
                                 alt=""
                             />
                         </span>
@@ -107,7 +107,7 @@
                             <img
                                 width="13"
                                 height="13"
-                                src="../../../img/admin/search.svg"
+                                src="../../../../img/admin/search.svg"
                                 alt=""
                             />
                         </span>
@@ -206,6 +206,7 @@
                             <div
                                 v-else
                                 class="users-role-pill"
+                                :class="rolePillClass(userItem.role)"
                                 @click="startInlineRole(userItem)"
                             >
                                 {{ getRoleName(userItem.role) }}
@@ -213,28 +214,36 @@
                         </td>
 
                         <td>
-                            <button
-                                class="btn__user--edit"
-                                @click="openUserEditModal(userItem)"
-                            >
-                                <img
+                            <div class="tooltip-container">
+                                <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openEditRoleModal(userItem)">
+                                    <img
                                     width="24"
                                     height="24"
-                                    src="../../../img/admin/edit.svg"
+                                    src="../../../../img/admin/edit.svg"
                                     alt=""
                                 />
-                            </button>
-                            <button
-                                class="btn__user--delete"
-                                @click="deleteUser(userItem.id)"
-                            >
-                                <img
-                                    width="24"
-                                    height="24"
-                                    src="../../../img/admin/trash.png"
-                                    alt=""
-                                />
-                            </button>
+                                </button>
+                                <div role="tooltip" id="help-tooltip" class="tooltip">
+                                    Изменить роль
+                                </div>
+                            </div>
+                            <div class="tooltip-container">
+                                <button
+                                    aria-describedby="help-tooltip"
+                                    class="btn__user--delete"
+                                    @click="deleteUser(userItem.id)"
+                                >
+                                    <img
+                                        width="24"
+                                        height="24"
+                                        src="../../../../img/admin/trash.png"
+                                        alt=""
+                                    />
+                                </button>
+                                <div role="tooltip" id="help-tooltip" class="tooltip">
+                                    Удалить пользователя
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -268,103 +277,11 @@
             </button>
         </div>
 
-        <!-- модалка редактирования -->
-        <div v-if="showUserEditModal" class="modal-overlay">
-            <div class="modal-content modal-content--s">
-                <button class="close-button" @click="closeUserEditModal">
-                    ×
-                </button>
-                <h2>Редактировать пользователя</h2>
-
-                <form
-                    @submit.prevent="saveUserModal"
-                    class="form-column form-column--s"
-                >
-                    <div class="form-group">
-                        <label class="form-label">ФИО</label>
-                        <input
-                            v-model="editingUser.name"
-                            type="text"
-                            class="form-input"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input
-                            v-model="editingUser.email"
-                            type="email"
-                            class="form-input"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Телефон</label>
-                        <input
-                            v-model="editingUser.phone"
-                            placeholder="+7 (999) 999-99-99"
-                            v-mask="'+7 (###) ###-##-##'"
-                            type="text"
-                            class="form-input"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Дата рождения</label>
-                        <input
-                            v-model="editingUser.birthday"
-                            type="date"
-                            class="form-input"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Местоположение</label>
-                        <input
-                            v-model="editingUser.country"
-                            type="text"
-                            class="form-input"
-                            placeholder="Город, страна"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Роль</label>
-                        <select
-                            v-model.number="editingUser.role"
-                            class="form-input"
-                        >
-                            <option :value="3">Администратор</option>
-                            <option :value="2">Преподаватель</option>
-                            <option :value="1">Ученик</option>
-                            <option :value="4">Родитель</option>
-                        </select>
-                    </div>
-
-                    <div
-                        class="form-group"
-                        v-if="editingUser.role === 3 || editingUser.role === 2"
-                    >
-                        <label class="form-label">Должность</label>
-                        <input
-                            v-model="editingUser.position"
-                            type="text"
-                            class="form-input"
-                            placeholder="Введите должность"
-                        />
-                    </div>
-
-                    <div class="modal-actions">
-                        <button
-                            type="submit"
-                            class="btn form-button form-button--s"
-                        >
-                            Сохранить
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <EditRoleUser
+            v-model="showEditRoleModal"
+            :user="userToEditRole"
+            @saved="onRoleUpdated"
+        />
     </div>
 </template>
 
@@ -373,6 +290,32 @@ import { ref, computed, watch, reactive } from "vue";
 import axios from "axios";
 import { globalNotification } from "../../../globalNotification";
 import { useDateFormatters } from "../utils/useDateFormatters";
+import EditRoleUser from "./../modal_admin/EditRoleUser.vue";
+
+function rolePillClass(role) {
+  const r = Number(role);
+  return {
+    "users-role-pill--student": r === 1,
+    "users-role-pill--teacher": r === 2,
+    "users-role-pill--admin": r === 3,
+    "users-role-pill--parent": r === 4,
+  };
+}
+
+
+const showEditRoleModal = ref(false);
+const userToEditRole = ref(null);
+
+function openEditRoleModal(user) {
+  userToEditRole.value = user;
+  showEditRoleModal.value = true;
+}
+
+function onRoleUpdated(updated) {
+  const next = props.users.map((u) => (u.id === updated.id ? updated : u));
+  setUsers(next);
+}
+
 
 const props = defineProps({
     users: { type: Array, default: () => [] },
@@ -552,4 +495,39 @@ async function deleteUser(userId) {
         globalNotification.type = "error";
     }
 }
+
+watch([paginatedUsers, currentPageUsers], () => {
+  refresh();
+});
 </script>
+
+<style scoped>
+
+/* Ученик */
+.users-role-pill--student {
+  background: #BDE5B0;
+  border: 1px solid transparent;
+}
+
+/* Родитель */
+.users-role-pill--parent {
+  background: #E5B0B0;
+  border: 1px solid transparent;
+}
+
+/* Преподаватель */
+.users-role-pill--teacher {
+  background: #E5DFB0;
+  border: 1px solid transparent;
+}
+
+/* Администратор */
+.users-role-pill--admin {
+  background: #FFFFFF;
+  border: 1px solid #41328F;
+}
+</style>
+
+
+
+

@@ -184,31 +184,33 @@
                             </td>
 
                             <td>
-                                <button
-                                    class="btn__user--delete"
-                                    @click.prevent="deleteCourse(course.id)"
-                                >
-                                    <img
+
+                                <div class="tooltip-container">
+                                    <button aria-describedby="help-tooltip" class="btn__user--edit" @click.prevent="$emit('requestEditCourse', course)">
+                                        <img
+                                            width="24"
+                                            height="24"
+                                            src="../../../../img/admin/edit.svg"
+                                            alt=""
+                                        />
+                                    </button>
+                                    <div role="tooltip" id="help-tooltip" class="tooltip">
+                                        Редактировать курс
+                                    </div>
+                                </div>
+                                <div class="tooltip-container">
+                                    <button aria-describedby="help-tooltip" class="btn__user--edit" @click.prevent="deleteCourse(course.id)">
+                                        <img
                                         width="24"
                                         height="24"
                                         src="../../../../img/admin/trash.png"
                                         alt=""
                                     />
-                                </button>
-
-                                <button
-                                    class="btn__user--edit"
-                                    @click.prevent="
-                                        $emit('requestEditCourse', course)
-                                    "
-                                >
-                                    <img
-                                        width="24"
-                                        height="24"
-                                        src="../../../../img/admin/edit.svg"
-                                        alt=""
-                                    />
-                                </button>
+                                    </button>
+                                    <div role="tooltip" id="help-tooltip" class="tooltip">
+                                        Удалить курс
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

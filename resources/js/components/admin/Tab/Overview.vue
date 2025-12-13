@@ -266,36 +266,40 @@ onMounted(() => loadTopics());
         <td>{{ topic.chapters_count }}</td>
         <td class="col-btn">
           <div class="btn__edit">
-            <button
-                class="btn__user--delete"
-                @click="openEditTopic(topic)"
-            >
-                <img
-                    width="24"
-                    height="24"
-                    src="../../../../img/admin/edit.svg"
-                    alt=""
-                />
-            </button>
-            <button
-              class="btn__user--delete"
-              title="Открыть уроки темы"
-              @click="openTopicChapters(topic)"
-            >
-              <img
-                width="24"
-                height="24"
-                src="../../../../img/admin/edit_file.svg"
-                alt=""
-              />
-            </button>
-            <button
-              class="btn__user--delete"
-              @click="deleteTopic(topic.id)"
-              title="Удалить"
-            >
-              <img width="24" height="24" src="../../../../img/admin/trash.png" alt="delete" />
-            </button>
+            <div class="tooltip-container">
+                <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openEditTopic(topic)">
+                    <img
+                        width="24"
+                        height="24"
+                        src="../../../../img/admin/edit.svg"
+                        alt=""
+                    />
+                </button>
+                <div role="tooltip" id="help-tooltip" class="tooltip">
+                    Редактировать тему
+                </div>
+            </div>
+            <div class="tooltip-container">
+                <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openTopicChapters(topic)">
+                    <img
+                      width="24"
+                      height="24"
+                      src="../../../../img/admin/edit_file.svg"
+                      alt=""
+                    />
+                </button>
+                <div role="tooltip" id="help-tooltip" class="tooltip">
+                    Добавить уроки
+                </div>
+            </div>
+            <div class="tooltip-container">
+                <button aria-describedby="help-tooltip" class="btn__user--edit" @click="deleteTopic(topic.id)">
+                    <img width="24" height="24" src="../../../../img/admin/trash.png" alt="delete" />
+                </button>
+                <div role="tooltip" id="help-tooltip" class="tooltip">
+                    Удалить тему
+                </div>
+            </div>
           </div>
         </td>
       </tr>
@@ -379,25 +383,27 @@ onMounted(() => loadTopics());
           <!-- пока можешь оставить заглушки, потом подключим EditChapterDialog -->
             <td class="col-btn">
             <div class="btn__edit">
-              <button
-                  class="btn__user--delete"
-                  @click="openEditChapter(chapter)"
-                  title="Редактировать"
-              >
-                  <img
-                      width="24"
-                      height="24"
-                      src="../../../../img/admin/edit.svg"
-                      alt=""
-                  />
-              </button>
-              <button
-                class="btn__user--delete"
-                @click="deleteChapter(chapter.id)"
-                title="Удалить"
-              >
-                <img width="24" height="24" src="../../../../img/admin/trash.png" alt="delete" />
-              </button>
+              <div class="tooltip-container">
+                  <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openEditChapter(chapter)">
+                      <img
+                        width="24"
+                        height="24"
+                        src="../../../../img/admin/edit.svg"
+                        alt=""
+                    />
+                  </button>
+                  <div role="tooltip" id="help-tooltip" class="tooltip">
+                      Редактировать урок
+                  </div>
+              </div>
+              <div class="tooltip-container">
+                  <button aria-describedby="help-tooltip" class="btn__user--edit" @click="deleteChapter(chapter.id)">
+                      <img width="24" height="24" src="../../../../img/admin/trash.png" alt="delete" />
+                  </button>
+                  <div role="tooltip" id="help-tooltip" class="tooltip">
+                      Удалить урок
+                  </div>
+              </div>
             </div>
           </td>
         </tr>

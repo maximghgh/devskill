@@ -38,53 +38,48 @@
                     </div>
 
                     <div class="menu-block" style="margin-top: 20px">
-                        <!-- ДАШБОРД -->
                         <AdminDashboardBlock
-                            v-show="activeId === 'dashboard'"
-                            id="dashboard"
-                            :current-user="user"
-                            :users-count="users.length"
-                            :courses-count="courses.length"
+                        v-if="activeId === 'dashboard'"
+                        id="dashboard"
+                        :current-user="user"
+                        :users-count="users.length"
+                        :courses-count="courses.length"
                         />
 
-                        <!-- ПОЛЬЗОВАТЕЛИ -->
                         <AdminUsersBlock
-                            v-show="activeId === 'users'"
-                            id="users"
-                            v-model:users="users"
+                        v-else-if="activeId === 'users'"
+                        id="users"
+                        v-model:users="users"
                         />
 
-                        <!-- КУРСЫ -->
                         <AdminCoursesBlock
-                            v-show="activeId === 'courses'"
-                            id="courses"
-                            v-model:courses="courses"
-                            :users="users"
-                            @requestCreateCourse="openCreateCourseDialog"
-                            @requestEditCourse="openEditCourseDialog"
+                        v-else-if="activeId === 'courses'"
+                        id="courses"
+                        v-model:courses="courses"
+                        :users="users"
+                        @requestCreateCourse="openCreateCourseDialog"
+                        @requestEditCourse="openEditCourseDialog"
                         />
 
-                        <!-- КАТЕГОРИИ -->
                         <AdminCategoriesBlock
-                            v-show="activeId === 'other'"
-                            id="other"
-                            v-model:languages="languages"
-                            v-model:directions="directions"
+                        v-else-if="activeId === 'other'"
+                        id="other"
+                        v-model:languages="languages"
+                        v-model:directions="directions"
                         />
 
-                        <!-- НОВОСТИ -->
                         <AdminNewsBlock
-                            v-show="activeId === 'news'"
-                            id="news"
-                            v-model:newsItems="newsItems"
+                        v-else-if="activeId === 'news'"
+                        id="news"
+                        v-model:newsItems="newsItems"
                         />
 
-                        <!-- FAQ -->
                         <AdminFaqBlock
-                            v-show="activeId === 'faq'"
-                            id="faq"
-                            v-model:faqs="faqs"
+                        v-else-if="activeId === 'faq'"
+                        id="faq"
+                        v-model:faqs="faqs"
                         />
+
                     </div>
                 </div>
             </aside>
@@ -101,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed} from "vue";
 import axios from "axios";
 import "./style.css";
 
@@ -160,10 +155,9 @@ function saveActiveIndex() {
     localStorage.setItem("activeIndex", String(activeIndex.value));
 }
 function setActive(index) {
-    activeIndex.value = index;
-    saveActiveIndex();
-    const target = document.getElementById(menuItems[index].id);
-    if (target) target.scrollIntoView({ behavior: "smooth" });
+  activeIndex.value = index;
+  saveActiveIndex();
+  // всё. без scrollIntoView
 }
 
 /* ====== данные ====== */
@@ -228,14 +222,14 @@ async function loadDirections() {
     }
 }
 async function loadNews() {
-    try {
-        const { data } = await axios.get("/api/news");
-        newsItems.value = data;
-    } catch (e) {
-        console.error(e);
-        globalNotification.categoryMessage = "Ошибка при загрузке новостей";
-        globalNotification.type = "error";
-    }
+  try {
+    const { data } = await axios.get("/api/news");
+    newsItems.value = Array.isArray(data) ? data : (data?.news ?? []);
+  } catch (e) {
+    console.error(e);
+    globalNotification.categoryMessage = "Ошибка при загрузке новостей";
+    globalNotification.type = "error";
+  }
 }
 async function loadFaqs() {
     try {

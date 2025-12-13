@@ -1,290 +1,298 @@
 <template>
-    <h1 class="page__title">Новости</h1>
-    <div v-if="viewMode === 'news'">
     <div class="user-block">
-        <div class="users-toolbar">
-            <div class="asdf">
-                <div class="users-toolbar__left">
-                    <label class="users-show">
-                        Показать
-                        <span class="users-show__select-wrap">
-                            <select
-                                v-model.number="pageSizeCourses"
-                                class="users-show__select"
+        <h1 class="page__title">Новости</h1>
+        <div v-if="viewMode === 'news'">
+        <div>
+            <div class="users-toolbar">
+                <div class="asdf">
+                    <div class="users-toolbar__left">
+                        <label class="users-show">
+                            Показать
+                            <span class="users-show__select-wrap">
+                                <select
+                                    v-model.number="pageSizeCourses"
+                                    class="users-show__select"
+                                >
+                                    <option :value="10">10</option>
+                                    <option :value="25">25</option>
+                                    <option :value="50">50</option>
+                                </select>
+                            </span>
+                            новостей
+                        </label>
+                    </div>
+
+                    <div class="users-toolbar__search">
+                        <div class="users-search">
+                            <span class="users-search__icon">
+                                <img
+                                    width="13"
+                                    height="13"
+                                    src="../../../../img/admin/search.png"
+                                    alt=""
+                                />
+                            </span>
+                            <input
+                                v-model="searchCourseQuery"
+                                type="text"
+                                class="users-search__input"
+                                placeholder="Поиск..."
+                            />
+                            <button
+                                v-if="searchCourseQuery"
+                                type="button"
+                                class="users-search__clear"
+                                @click="searchCourseQuery = ''"
                             >
+                                ×
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="users-btn-new" @click="openCreateNews">
+                        <span class="users-btn-desc">+</span> Добавить новость
+                    </button>
+                </div>
+            </div>
+
+            <table v-if="paginatedNews.length" class="light-push-table">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">ID</th>
+                        <th>Заголовок</th>
+                        <th>Дата</th>
+                        <th>Комментарии</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr
+                        v-for="(newsItem, index) in paginatedNews"
+                        :key="newsItem.id"
+                    >
+                        <td style="text-align: center">
+                            #{{ index + 1 + (currentPageNews - 1) * pageSizeNews }}
+                        </td>
+                        <td class="avatar__user">
+                            <img
+                                :src="
+                                            newsItem.image
+                                                ? `${newsItem.image}`
+                                                : 'https://devskills.foncode.ru/img/no_foto.jpg'
+                                        "
+                                alt=""
+                                width="25"
+                                height="25"
+                                class="avatar__admin"
+                            />
+                            {{ newsItem.title || "Неизвестно" }}
+                        </td>
+                        <td>{{ formatBirthday(newsItem.created_at) }}</td>
+                        <td class="avatar__user">
+                            <span>
+                                {{ commentCountsLoading[newsItem.id] ? "…" : (pureCommentCounts[newsItem.id] ?? 0) }}
+                            </span>
+                            <img
+                                title="Перейти к комментариям"
+                                width="24"
+                                height="24"
+                                src="../../../../img/admin/eye.svg"
+                                alt=""
+                                style="cursor: pointer"
+                                @click="openComments(newsItem)"
+                            />
+                        </td>
+                        <td>
+
+                            <div class="tooltip-container">
+                                <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openEditNews(newsItem)">
+                                    <img width="24" height="24" src="../../../../img/admin/edit.svg" alt="" />
+                                </button>
+                                <div role="tooltip" id="help-tooltip" class="tooltip">
+                                    Редактировать новость
+                                </div>
+                            </div>
+                            <div class="tooltip-container">
+                                <button aria-describedby="help-tooltip" class="btn__user--edit" @click="deleteNews(newsItem.id)">
+                                    <img
+                                        width="24"
+                                        height="24"
+                                        src="../../../../img/admin/trash.png"
+                                        alt=""
+                                    />
+                                </button>
+                                <div role="tooltip" id="help-tooltip" class="tooltip">
+                                    Удалить новость
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div v-else>Нет новостей</div>
+
+            <NewsDialog
+                v-model="showNewsDialog"
+                :news="dialogNews"
+                @saved="setNewsItems"
+            />
+
+            <div class="pagination-users" v-if="totalPagesNews > 1">
+                <button
+                    :disabled="currentPageNews === 1"
+                    @click="currentPageNews--"
+                >
+                    ‹ Назад
+                </button>
+                <button
+                    v-for="p in totalPagesNews"
+                    :key="p"
+                    :class="{ active: currentPageNews === p }"
+                    @click="currentPageNews = p"
+                >
+                    {{ p }}
+                </button>
+                <button
+                    :disabled="currentPageNews === totalPagesNews"
+                    @click="currentPageNews++"
+                >
+                    Вперёд ›
+                </button>
+            </div>
+        </div>
+        </div>
+        <div v-else>
+            <div class="breadcrumbs">
+                <a href="#" @click.prevent="backToNews" class="breadcrumbs__old">Новости</a>
+                <img src="../../../../img/admin/line.svg" alt="" />
+                <span class="breadcrumbs__new">{{ currentCommentsNewsTitle }}</span>
+            </div>
+
+            <div class="users-toolbar">
+                <div class="asdf">
+                    <div class="users-toolbar__left">
+                        <label class="users-show">
+                            Показать
+                            <span class="users-show__select-wrap">
+                            <select v-model.number="pageSizeComments" class="users-show__select">
                                 <option :value="10">10</option>
                                 <option :value="25">25</option>
                                 <option :value="50">50</option>
                             </select>
                         </span>
-                        новостей
-                    </label>
-                </div>
-
-                <div class="users-toolbar__search">
-                    <div class="users-search">
-                        <span class="users-search__icon">
-                            <img
-                                width="13"
-                                height="13"
-                                src="../../../../img/admin/search.png"
-                                alt=""
-                            />
-                        </span>
-                        <input
-                            v-model="searchCourseQuery"
-                            type="text"
-                            class="users-search__input"
-                            placeholder="Поиск..."
-                        />
-                        <button
-                            v-if="searchCourseQuery"
-                            type="button"
-                            class="users-search__clear"
-                            @click="searchCourseQuery = ''"
-                        >
-                            ×
-                        </button>
+                            комментариев
+                        </label>
                     </div>
+
+                    <div class="users-toolbar__search">
+                        <div class="users-search">
+                        <span class="users-search__icon">
+                            <img width="13" height="13" src="../../../../img/admin/search.png" alt="" />
+                        </span>
+                            <input
+                                v-model="searchCommentsQuery"
+                                type="text"
+                                class="users-search__input"
+                                placeholder="Поиск..."
+                            />
+                            <button
+                                v-if="searchCommentsQuery"
+                                type="button"
+                                class="users-search__clear"
+                                @click="searchCommentsQuery = ''"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="users-btn-new" @click="openAddCommentDialog">
+                        <span class="users-btn-desc">+</span> Добавить комментарий
+                    </button>
                 </div>
-
-                <button type="button" class="users-btn-new" @click="openCreateNews">
-                    <span class="users-btn-desc">+</span> Добавить новость
-                </button>
             </div>
-        </div>
 
-        <table v-if="paginatedNews.length" class="light-push-table">
-            <thead>
+            <table v-if="!commentsLoading && paginatedComments.length" class="light-push-table">
+                <thead>
                 <tr>
-                    <th style="text-align: center">ID</th>
-                    <th>Заголовок</th>
-                    <th>Дата</th>
-                    <th>Комментарии</th>
+                    <th>Комментарий</th>
+                    <th>Дата и время</th>
+                    <th>Автор</th>
                     <th>Действие</th>
                 </tr>
-            </thead>
+                </thead>
 
-            <tbody>
-                <tr
-                    v-for="(newsItem, index) in paginatedNews"
-                    :key="newsItem.id"
-                >
-                    <td style="text-align: center">
-                        #{{ index + 1 + (currentPageNews - 1) * pageSizeNews }}
-                    </td>
+                <tbody>
+                <tr v-for="c in paginatedComments" :key="c.id">
+                    <td>{{ c.body }}</td>
+                    <td>{{ formatDateTime(c.created_at) }}</td>
+
                     <td class="avatar__user">
+                        {{ c.user_name || ("Пользователь #" + c.user_id) }}
                         <img
-                            :src="
-                                        newsItem.image
-                                            ? `${newsItem.image}`
-                                            : 'https://devskills.foncode.ru/img/no_foto.jpg'
-                                    "
-                            alt=""
-                            width="25"
-                            height="25"
-                            class="avatar__admin"
-                        />
-                        {{ newsItem.title || "Неизвестно" }}
-                    </td>
-                    <td>{{ formatBirthday(newsItem.created_at) }}</td>
-                    <td class="avatar__user">
-                        <span>
-                            {{ commentCountsLoading[newsItem.id] ? "…" : (pureCommentCounts[newsItem.id] ?? 0) }}
-                        </span>
-                        <img
-                            title="Перейти к комментариям"
-                            width="24"
-                            height="24"
                             src="../../../../img/admin/eye.svg"
                             alt=""
-                            style="cursor: pointer"
-                            @click="openComments(newsItem)"
                         />
                     </td>
+
                     <td>
-                        <button title="Редактировать новость" class="btn__user--edit" @click="openEditNews(newsItem)">
-                            <img width="24" height="24" src="../../../../img/admin/edit.svg" alt="" />
-                        </button>
-                        <button
-                            title="Удалить новость"
-                            class="btn__user--delete"
-                            @click="deleteNews(newsItem.id)"
-                        >
-                            <img
-                                width="24"
-                                height="24"
-                                src="../../../../img/admin/trash.png"
-                                alt=""
-                            />
-                        </button>
+                        <div class="tooltip-container">
+                            <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openReplyCommentDialog(c)">
+                                <img width="24" height="24" src="../../../../img/admin/letter.svg" alt="" />
+                            </button>
+                            <div role="tooltip" id="help-tooltip" class="tooltip">
+                                Ответить пользователю
+                            </div>
+                        </div>
+                        <div class="tooltip-container">
+                            <button aria-describedby="help-tooltip" class="btn__user--edit" @click="deleteComment(c.id)">
+                                <img width="24" height="24" src="../../../../img/admin/trash.png" alt="" />
+                            </button>
+                            <div role="tooltip" id="help-tooltip" class="tooltip">
+                                Удалить комментарий
+                            </div>
+                        </div>
                     </td>
                 </tr>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
 
-        <div v-else>Нет новостей</div>
+            <div v-else-if="commentsLoading">Загрузка…</div>
+            <div v-else>Комментариев нет</div>
 
-        <NewsDialog
-            v-model="showNewsDialog"
-            :news="dialogNews"
-            @saved="setNewsItems"
-        />
-
-        <div class="pagination-users" v-if="totalPagesNews > 1">
-            <button
-                :disabled="currentPageNews === 1"
-                @click="currentPageNews--"
-            >
-                ‹ Назад
-            </button>
-            <button
-                v-for="p in totalPagesNews"
-                :key="p"
-                :class="{ active: currentPageNews === p }"
-                @click="currentPageNews = p"
-            >
-                {{ p }}
-            </button>
-            <button
-                :disabled="currentPageNews === totalPagesNews"
-                @click="currentPageNews++"
-            >
-                Вперёд ›
-            </button>
-        </div>
-    </div>
-    </div>
-    <div v-else>
-        <div class="breadcrumbs">
-            <a href="#" @click.prevent="backToNews" class="breadcrumbs__old">Новости</a>
-            <img src="../../../../img/admin/line.svg" alt="" />
-            <span class="breadcrumbs__new">{{ currentCommentsNewsTitle }}</span>
-        </div>
-
-        <div class="users-toolbar">
-            <div class="asdf">
-                <div class="users-toolbar__left">
-                    <label class="users-show">
-                        Показать
-                        <span class="users-show__select-wrap">
-                        <select v-model.number="pageSizeComments" class="users-show__select">
-                            <option :value="10">10</option>
-                            <option :value="25">25</option>
-                            <option :value="50">50</option>
-                        </select>
-                    </span>
-                        комментариев
-                    </label>
-                </div>
-
-                <div class="users-toolbar__search">
-                    <div class="users-search">
-                    <span class="users-search__icon">
-                        <img width="13" height="13" src="../../../../img/admin/search.png" alt="" />
-                    </span>
-                        <input
-                            v-model="searchCommentsQuery"
-                            type="text"
-                            class="users-search__input"
-                            placeholder="Поиск..."
-                        />
-                        <button
-                            v-if="searchCommentsQuery"
-                            type="button"
-                            class="users-search__clear"
-                            @click="searchCommentsQuery = ''"
-                        >
-                            ×
-                        </button>
-                    </div>
-                </div>
-
-                <button type="button" class="users-btn-new" @click="openAddCommentDialog">
-                    <span class="users-btn-desc">+</span> Добавить комментарий
+            <div class="pagination-users" v-if="totalPagesComments > 1">
+                <button :disabled="currentPageComments === 1" @click="currentPageComments--">‹ Назад</button>
+                <button
+                    v-for="p in totalPagesComments"
+                    :key="p"
+                    :class="{ active: currentPageComments === p }"
+                    @click="currentPageComments = p"
+                >
+                    {{ p }}
+                </button>
+                <button
+                    :disabled="currentPageComments === totalPagesComments"
+                    @click="currentPageComments++"
+                >
+                    Вперёд ›
                 </button>
             </div>
         </div>
-
-        <table v-if="!commentsLoading && paginatedComments.length" class="light-push-table">
-            <thead>
-            <tr>
-                <th>Комментарий</th>
-                <th>Дата и время</th>
-                <th>Автор</th>
-                <th>Действие</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <tr v-for="c in paginatedComments" :key="c.id">
-                <td>{{ c.body }}</td>
-                <td>{{ formatDateTime(c.created_at) }}</td>
-
-                <td class="avatar__user">
-                    {{ c.user_name || ("Пользователь #" + c.user_id) }}
-                    <img
-                        src="../../../../img/admin/eye.svg"
-                        alt=""
-                    />
-                </td>
-
-                <td>
-                    <button
-                        title="Ответить"
-                        class="btn__user--edit"
-                        type="button"
-                        @click="openReplyCommentDialog(c)"
-                    >
-                        <img width="24" height="24" src="../../../../img/admin/letter.svg" alt="" />
-                    </button>
-
-                    <button
-                        title="Удалить комментарий"
-                        class="btn__user--delete"
-                        type="button"
-                        @click="deleteComment(c.id)"
-                    >
-                        <img width="24" height="24" src="../../../../img/admin/trash.png" alt="" />
-                    </button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <div v-else-if="commentsLoading">Загрузка…</div>
-        <div v-else>Комментариев нет</div>
-
-        <div class="pagination-users" v-if="totalPagesComments > 1">
-            <button :disabled="currentPageComments === 1" @click="currentPageComments--">‹ Назад</button>
-            <button
-                v-for="p in totalPagesComments"
-                :key="p"
-                :class="{ active: currentPageComments === p }"
-                @click="currentPageComments = p"
-            >
-                {{ p }}
-            </button>
-            <button
-                :disabled="currentPageComments === totalPagesComments"
-                @click="currentPageComments++"
-            >
-                Вперёд ›
-            </button>
-        </div>
+        <AddCommentDialog
+            v-model="showAddCommentDialog"
+            :news-id="commentsNewsId"
+            @saved="onAddCommentSaved"
+        />
+        <ReplyCommentDialog
+            v-model="showReplyCommentDialog"
+            :news-id="commentsNewsId"
+            :parent-id="replyParentId"
+            :comment-text="replyCommentText"
+            @saved="onReplyCommentSaved"
+        />
     </div>
-    <AddCommentDialog
-        v-model="showAddCommentDialog"
-        :news-id="commentsNewsId"
-        @saved="onAddCommentSaved"
-    />
-    <ReplyCommentDialog
-        v-model="showReplyCommentDialog"
-        :news-id="commentsNewsId"
-        :parent-id="replyParentId"
-        :comment-text="replyCommentText"
-        @saved="onReplyCommentSaved"
-    />
 </template>
 
 <script setup>
@@ -298,10 +306,6 @@ import {
     onBeforeUnmount,
 } from "vue";
 import axios from "axios";
-import EditorJS from "@editorjs/editorjs";
-import Header from "@editorjs/header";
-import List from "@editorjs/list";
-import ImageTool from "@editorjs/image";
 import { globalNotification } from "../../../globalNotification";
 import { useDateFormatters } from "../utils/useDateFormatters";
 import NewsDialog from "../modal_admin/NewsDialog.vue";
@@ -455,7 +459,6 @@ watch(
 );
 
 /* ===== editor create ===== */
-let editorNews = null;
 
 const newNews = ref({
     title: "",
@@ -468,71 +471,8 @@ function onNewsImageChange(e) {
     newNews.value.newsImage = e.target.files?.[0] || null;
 }
 
-onMounted(() => {
-    if (editorNews) return;
-    editorNews = new EditorJS({
-        holder: "editorjs-news",
-        placeholder: "Введите текст новости...",
-        tools: {
-            header: { class: Header, inlineToolbar: ["link"] },
-            list: { class: List, inlineToolbar: true },
-            image: {
-                class: ImageTool,
-                config: {
-                    endpoints: {
-                        byFile: "/api/uploadFile",
-                        byUrl: "/api/fetchUrl",
-                    },
-                },
-            },
-        },
-    });
-});
-
-onBeforeUnmount(() => {
-    if (editorNews) {
-        editorNews.destroy();
-        editorNews = null;
-    }
-});
 
 /* ===== создание новости ===== */
-async function submitNews() {
-    try {
-        const editorData = await editorNews.save();
-        newNews.value.editorData = editorData;
-
-        const fd = new FormData();
-        fd.append("title", newNews.value.title);
-        fd.append("content", newNews.value.content);
-        fd.append("editor_data", JSON.stringify(newNews.value.editorData));
-        if (newNews.value.newsImage)
-            fd.append("image", newNews.value.newsImage);
-
-        const { data } = await axios.post("/api/news", fd, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        globalNotification.categoryMessage = "Новость успешно создана";
-        globalNotification.type = "success";
-
-        // обновим список (на случай любого формата ответа)
-        const res = await axios.get("/api/news");
-        setNewsItems(res.data);
-
-        newNews.value = {
-            title: "",
-            content: "",
-            newsImage: null,
-            editorData: {},
-        };
-        editorNews.clear();
-    } catch (e) {
-        console.error(e);
-        globalNotification.categoryMessage = "Ошибка при создании новости";
-        globalNotification.type = "error";
-    }
-}
 
 /* ===== удаление новости ===== */
 async function deleteNews(id) {
@@ -614,29 +554,3 @@ async function deleteComment(id) {
 }
 </script>
 
-<style scoped>
-.users-search__input {
-    max-width: 430px;
-}
-.users-search__input:focus {
-    border: 1px solid #41328F;
-}
-
-.breadcrumbs{
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin: 0px 0 40px;
-}
-.breadcrumbs__old {
-    font-size: 18px;
-    color: #9E9E9E;
-    text-decoration: none;
-    font-weight: 600;
-}
-.breadcrumbs__new {
-    font-size: 18px;
-    color: #41328F;
-    font-weight: 600;
-}
-</style>

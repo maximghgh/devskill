@@ -71,8 +71,8 @@ class UserController extends Controller
     {
         // Валидируем входные данные
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|max:255',
+            'name'     => 'nullable|string|max:255',
+            'email'    => 'nullable|email|max:255',
             'phone'    => 'nullable|string|max:50',
             'birthday' => 'nullable|date',
             'country'  => 'nullable|string|max:100',
