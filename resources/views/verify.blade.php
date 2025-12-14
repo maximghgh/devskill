@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ФГБОУ ВО ИжГТУ им. М.Т. Калашникова</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" href="{{ Vite::asset('resources/img/logo.svg') }}" type="image/svg+xml"/>
+    <link rel="icon" href="{{ Vite::asset('resources/img/logo.png') }}" type="image/svg+xml"/>
 </head>
 <body>
     <div id="app">
@@ -15,4 +15,4 @@
         <footer-component></footer-component>
     </div>
 </body>
-</html>
+</html
