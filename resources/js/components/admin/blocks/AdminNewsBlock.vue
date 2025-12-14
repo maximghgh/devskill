@@ -89,10 +89,9 @@
 
                         <td class="avatar__user">
                             <img
-                                :src="
-                                    newsItem.image
-                                        ? `${newsItem.image}`
-                                        : 'https://devskills.foncode.ru/img/no_foto.jpg'
+                                :src="newsItem.image
+                                    ? `/storage/${newsItem.image}`
+                                    : 'https://devskills.foncode.ru/img/no_foto.jpg'
                                 "
                                 alt=""
                                 width="25"

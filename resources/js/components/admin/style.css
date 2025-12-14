@@ -102,11 +102,11 @@
 }
 
 .pagination-users button {
-    min-width: 40px;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
+    min-width: 32px;
+    padding: 6px 10px;
+    border: 1px solid #fff;
     border-radius: 6px;
-    background-color: #f9f9f9;
+    background-color: #fff;
     color: #333;
     font-size: 16px;
     cursor: pointer;
@@ -115,7 +115,8 @@
 
 .pagination-users button:hover:not(:disabled) {
     background-color: #fff;
-    border-color: #888;
+    color: #41328F;
+    border-color: #fff;
     transform: translateY(-1px);
 }
 
@@ -125,8 +126,8 @@
 }
 
 .pagination-users button.active {
-    background-color: #698dc9;
-    border-color: #698dc9;
+    background-color: #41328F;
+    border-color: #41328F;
     color: #fff;
     font-weight: bold;
 }

@@ -7,6 +7,7 @@ use App\Models\Chapter;
 use App\Models\Topic;
 use Illuminate\Http\Request;
 use App\Models\FinalTest;
+use Illuminate\Support\Facades\Storage;
 
 class ChapterController extends Controller
 {
@@ -91,23 +92,43 @@ class ChapterController extends Controller
      */
     public function update(Request $request, $topicId, $chapterId)
     {
-        $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'type'  => 'required|string|in:video,text,task,terms,presentation',
+            'content' => 'nullable',
+            'video_url' => 'nullable|string',
+            'correct_answer' => 'nullable|string',
+            'points' => 'nullable|integer|min:0',
+            'file' => 'nullable|file|max:20480',
         ]);
 
         $chapter = Chapter::where('topic_id', $topicId)->findOrFail($chapterId);
-        $chapter->title          = $request->title;
-        $chapter->type           = $request->type;
-        $chapter->content        = $request->content; // JSON-контент, если используется Editor.js
-        $chapter->video_url      = $request->video_url ?? null;
-        $chapter->correct_answer = $request->correct_answer ?? null;
-        $chapter->points         = $request->input('points', $chapter->points ?? 0);
+
+        $chapter->title          = $data['title'];
+        $chapter->type           = $data['type'];
+        $chapter->content        = $data['content'] ?? null;
+        $chapter->video_url      = $data['video_url'] ?? null;
+        $chapter->correct_answer = $data['correct_answer'] ?? null;
+        $chapter->points         = $data['points'] ?? ($chapter->points ?? 0);
+
+        // ✅ обработка нового файла
+        if ($request->hasFile('file')) {
+
+            // (опционально) удалить старый файл
+            if ($chapter->presentation_path) {
+                $old = str_replace('storage/', 'public/', $chapter->presentation_path);
+                Storage::delete($old);
+            }
+
+            $file = $request->file('file');
+            $name = time().'_'.$file->getClientOriginalName(); // лучше уникально
+            $path = $file->storeAs('public/chapters_files', $name);
+            $chapter->presentation_path = str_replace('public/', 'storage/', $path);
+        }
+
         $chapter->save();
 
-        return response()->json([
-            'chapter' => $chapter,
-        ]);
+        return response()->json(['chapter' => $chapter]);
     }
 
     /**

@@ -62,14 +62,21 @@
                                 @drop.prevent="onDropImage"
                             >
                                 <p class="dialog__dropzone_title">
-                                    {{ imageFileName ? imageFileName : "Перетащите или выберите файл" }}
+                                    {{
+                                        imageFileName
+                                        ? imageFileName
+                                        : currentImageName
+                                            ? `Заменить файл: ${currentImageName}`
+                                            : "Перетащите или выберите файл"
+                                    }}
                                 </p>
-                                <p v-if="!imageFileName" class="dialog__dropzone_title">
-                                    (JPG или PNG, 5 МБ максимальный размер файла)
-                                </p>
+
+                                <p v-if="!imageFileName" class="dialog__dropzone_title dialog__dropzone_hint">
+                                (JPG или PNG, 5 МБ максимальный размер файла)
+</p>
                             </div>
 
-                            <div v-if="isEdit && currentImageUrl" class="image_db" style="margin-top: 10px;">
+                            <!-- <div v-if="isEdit && currentImageUrl" class="image_db" style="margin-top: 10px;">
                                 <img
                                     v-if="currentImageIsImage"
                                     :src="currentImageUrl"
@@ -80,7 +87,7 @@
                                 <a :href="currentImageUrl" target="_blank" rel="noopener">
                                     {{ currentImageName }}
                                 </a>
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="dialog__component">

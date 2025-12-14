@@ -215,15 +215,23 @@
 
                         <td class="hadle">
                             <div class="tooltip-container">
-                                <button aria-describedby="help-tooltip" class="btn__user--edit" @click="openEditRoleModal(userItem)">
+                                <button
+                                    aria-describedby="help-tooltip"
+                                    class="btn__user--edit"
+                                    @click="openEditRoleModal(userItem)"
+                                >
                                     <img
-                                    width="24"
-                                    height="24"
-                                    src="../../../../img/admin/edit.svg"
-                                    alt=""
-                                />
+                                        width="24"
+                                        height="24"
+                                        src="../../../../img/admin/edit.svg"
+                                        alt=""
+                                    />
                                 </button>
-                                <div role="tooltip" id="help-tooltip" class="tooltip">
+                                <div
+                                    role="tooltip"
+                                    id="help-tooltip"
+                                    class="tooltip"
+                                >
                                     Изменить роль
                                 </div>
                             </div>
@@ -240,7 +248,11 @@
                                         alt=""
                                     />
                                 </button>
-                                <div role="tooltip" id="help-tooltip" class="tooltip">
+                                <div
+                                    role="tooltip"
+                                    id="help-tooltip"
+                                    class="tooltip"
+                                >
                                     Удалить пользователя
                                 </div>
                             </div>
@@ -293,29 +305,27 @@ import { useDateFormatters } from "../utils/useDateFormatters";
 import EditRoleUser from "./../modal_admin/EditRoleUser.vue";
 
 function rolePillClass(role) {
-  const r = Number(role);
-  return {
-    "users-role-pill--student": r === 1,
-    "users-role-pill--teacher": r === 2,
-    "users-role-pill--admin": r === 3,
-    "users-role-pill--parent": r === 4,
-  };
+    const r = Number(role);
+    return {
+        "users-role-pill--student": r === 1,
+        "users-role-pill--teacher": r === 2,
+        "users-role-pill--admin": r === 3,
+        "users-role-pill--parent": r === 4,
+    };
 }
-
 
 const showEditRoleModal = ref(false);
 const userToEditRole = ref(null);
 
 function openEditRoleModal(user) {
-  userToEditRole.value = user;
-  showEditRoleModal.value = true;
+    userToEditRole.value = user;
+    showEditRoleModal.value = true;
 }
 
 function onRoleUpdated(updated) {
-  const next = props.users.map((u) => (u.id === updated.id ? updated : u));
-  setUsers(next);
+    const next = props.users.map((u) => (u.id === updated.id ? updated : u));
+    setUsers(next);
 }
-
 
 const props = defineProps({
     users: { type: Array, default: () => [] },
@@ -496,38 +506,33 @@ async function deleteUser(userId) {
     }
 }
 
-watch([paginatedUsers, currentPageUsers], () => {
-  refresh();
+watch(currentPageUsers, () => {
+    refresh();
 });
 </script>
 
 <style scoped>
-
 /* Ученик */
 .users-role-pill--student {
-  background: #BDE5B0;
-  border: 1px solid transparent;
+    background: #bde5b0;
+    border: 1px solid transparent;
 }
 
 /* Родитель */
 .users-role-pill--parent {
-  background: #E5B0B0;
-  border: 1px solid transparent;
+    background: #e5b0b0;
+    border: 1px solid transparent;
 }
 
 /* Преподаватель */
 .users-role-pill--teacher {
-  background: #E5DFB0;
-  border: 1px solid transparent;
+    background: #e5dfb0;
+    border: 1px solid transparent;
 }
 
 /* Администратор */
 .users-role-pill--admin {
-  background: #FFFFFF;
-  border: 1px solid #41328F;
+    background: #ffffff;
+    border: 1px solid #41328f;
 }
 </style>
-
-
-
-
