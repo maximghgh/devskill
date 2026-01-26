@@ -479,7 +479,7 @@ onBeforeUnmount(() => {
             <input
                 v-model="form.price"
                 type="number"
-                class="dialog__input"
+                class="dialog__input" 
                 placeholder="Введите цену"
                 :disabled="isDisabled"
             />

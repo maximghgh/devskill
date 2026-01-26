@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modelValue" class="dialog" style="z-index: 1">
+  <div v-if="modelValue" class="dialog" @click.self="close" style="z-index: 1">
     <div class="dialog__container_custom dialog__container_custom--s" @click.stop>
       <div class="dialog__inner" :class="{ 'is-saving': loading }">
         <div class="dialog__header">
@@ -40,7 +40,38 @@
                     class="dialog__file-input"
                     @change="handleFileChange"
                     :disabled="loading"
+                    multiple
                 />
+
+                <div v-if="selectedFiles.length" class="dialog__file-list">
+                  <p class="dialog__file-list-title">Выбранные файлы</p>
+                  <div class="dialog__file-list-items">
+                    <div
+                      v-for="(file, idx) in selectedFiles"
+                      :key="fileKey(file, idx)"
+                      class="dialog__file-item"
+                    >
+                      <span class="dialog__file-name">{{ file.name }}</span>
+                      <button
+                        type="button"
+                        class="dialog__file-remove"
+                        :disabled="loading"
+                        aria-label="Удалить файл"
+                        @click="removeSelectedFile(idx)"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="dialog__file-add"
+                    :disabled="loading"
+                    @click="triggerFileSelect"
+                  >
+                    Добавить ещё
+                  </button>
+                </div>
 
                 <!-- красивое поле -->
                 <div
@@ -53,9 +84,13 @@
                     @drop.prevent="onDropFile"
                 >
                     <p class="dialog__dropzone_title">
-                        {{ fileName ? fileName : "Перетащите или выберите файл" }}
+                        {{
+                          selectedFileLabel
+                            ? selectedFileLabel
+                            : "Перетащите или выберите файлы"
+                        }}
                     </p>
-                    <p v-if="!fileName" class="dialog__dropzone_title">
+                    <p v-if="!selectedFileLabel" class="dialog__dropzone_title">
                         (JPG, PNG PDF..., 5 MB максимальный размер файла)
                     </p>
                 </div>
@@ -92,7 +127,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from "vue";
+import { ref, watch, nextTick, computed } from "vue";
 import axios from "axios";
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
@@ -112,45 +147,82 @@ const error = ref("");
 
 const fileInputRef = ref(null);
 
-const fileName = ref("");
 const isDraggingFile = ref(false);
+const selectedFiles = computed(() => form.value.files || []);
+const selectedFileNames = computed(() =>
+  selectedFiles.value.map((file) => file.name)
+);
+const selectedFileLabel = computed(() => {
+  const count = selectedFileNames.value.length;
+  if (!count) return "";
+  if (count === 1) return selectedFileNames.value[0];
+  return `Выбрано файлов: ${count}`;
+});
 
 function triggerFileSelect() {
   if (loading.value) return;
   fileInputRef.value?.click();
 }
 
+function fileKey(file) {
+  return `${file.name}-${file.size}-${file.lastModified}`;
+}
+
+function mergeFiles(existing, incoming) {
+  const map = new Map();
+  existing.forEach((file) => map.set(fileKey(file), file));
+  incoming.forEach((file) => map.set(fileKey(file), file));
+  return Array.from(map.values());
+}
+
+function syncFileInput(files) {
+  if (!fileInputRef.value) return;
+  if (!files.length) {
+    fileInputRef.value.value = "";
+    return;
+  }
+  const dt = new DataTransfer();
+  files.forEach((file) => dt.items.add(file));
+  fileInputRef.value.files = dt.files;
+}
+
+function setFiles(files) {
+  form.value.files = files;
+  syncFileInput(files);
+}
+
+function removeSelectedFile(index) {
+  const next = form.value.files.filter((_, i) => i !== index);
+  setFiles(next);
+}
+
 function handleFileChange(e) {
-  const f = e.target.files?.[0] || null;
-  form.value.file = f;
-  fileName.value = f ? f.name : "";
+  const incoming = Array.from(e.target.files || []);
+  if (!incoming.length) return;
+  const merged = mergeFiles(form.value.files, incoming);
+  setFiles(merged);
 }
 
 function onDropFile(e) {
   if (loading.value) return;
   isDraggingFile.value = false;
 
-  const file = e.dataTransfer?.files?.[0];
-  if (!file) return;
-
-  const dt = new DataTransfer();
-  dt.items.add(file);
-  fileInputRef.value.files = dt.files;
-
-  // чтобы сработала та же логика, что при обычном выборе
-  handleFileChange({ target: fileInputRef.value });
+  const incoming = Array.from(e.dataTransfer?.files || []);
+  if (!incoming.length) return;
+  const merged = mergeFiles(form.value.files, incoming);
+  setFiles(merged);
 }
 
 
 const form = ref({
   title: "",
-  file: null,
+  files: [],
 });
 
 let editor = null;
 
 function reset() {
-  form.value = { title: "", file: null };
+  form.value = { title: "", files: [] };
   error.value = "";
   if (fileInputRef.value) fileInputRef.value.value = "";
 }
@@ -192,7 +264,10 @@ function close() {
 }
 
 function onFile(e) {
-  form.value.file = e.target.files?.[0] || null;
+  const incoming = Array.from(e.target.files || []);
+  if (!incoming.length) return;
+  const merged = mergeFiles(form.value.files, incoming);
+  setFiles(merged);
 }
 
 /**
@@ -213,7 +288,7 @@ async function submit() {
     fd.append("content", JSON.stringify(contentPayload));
     fd.append("points", "0"); // ← чтобы не ловить undefined points на бэке
 
-    if (form.value.file) fd.append("file", form.value.file);
+    form.value.files.forEach((file) => fd.append("files[]", file));
 
     const { data } = await axios.post(`/admin/topic/${props.topicId}/chapters`, fd);
 
@@ -266,5 +341,67 @@ watch(
   border-radius: 4px;
   min-height: 150px;
   background-color: #fff;
+}
+
+.dialog__file-list {
+  margin: 10px 0 12px;
+}
+
+.dialog__file-list-title {
+  font-size: 13px;
+  color: #6d6d6d;
+  margin-bottom: 6px;
+}
+
+.dialog__file-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dialog__file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.dialog__file-name {
+  font-size: 13px;
+  color: #333;
+  word-break: break-word;
+}
+
+.dialog__file-remove {
+  border: none;
+  background: transparent;
+  color: #8d8d8d;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dialog__file-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dialog__file-add {
+  margin-top: 8px;
+  border: none;
+  background: none;
+  color: #6c57d9;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+  text-align: left;
+}
+
+.dialog__file-add:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 </style>

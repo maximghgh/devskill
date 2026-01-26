@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modelValue" class="dialog" style="z-index: 1">
+  <div v-if="modelValue" class="dialog" @click.self="close" style="z-index: 1">
     <div class="dialog__container_custom dialog__container_custom--s" @click.stop>
       <div class="dialog__inner" :class="{ 'is-saving': loading }">
         <!-- Заголовок -->

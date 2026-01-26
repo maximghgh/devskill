@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modelValue" class="dialog" style="z-index: 1">
+  <div v-if="modelValue" class="dialog" @click.self="close" style="z-index: 1">
     <div class="dialog__container_custom dialog__container_custom--s" @click.stop>
       <div class="dialog__inner" :class="{ 'is-saving': loading }">
 
@@ -65,8 +65,67 @@
                     accept=".pdf,.ppt,.pptx,video/*,image/*"
                     class="dialog__file-input"
                     :disabled="loading"
+                    multiple
                     @change="handleFileChange"
                 />
+
+                <div v-if="selectedFiles.length" class="dialog__file-list">
+                  <p class="dialog__file-list-title">Выбранные файлы</p>
+                  <div class="dialog__file-list-items">
+                    <div
+                      v-for="(file, idx) in selectedFiles"
+                      :key="fileKey(file, idx)"
+                      class="dialog__file-item"
+                    >
+                      <span class="dialog__file-name">{{ file.name }}</span>
+                      <button
+                        type="button"
+                        class="dialog__file-remove"
+                        :disabled="loading"
+                        aria-label="Удалить файл"
+                        @click="removeSelectedFile(idx)"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="dialog__file-add"
+                    :disabled="loading"
+                    @click="triggerFileSelect"
+                  >
+                    Добавить ещё
+                  </button>
+                  <p class="dialog__file-note">
+                    Новые файлы добавятся к текущим после сохранения.
+                  </p>
+                </div>
+
+                <div v-if="existingFiles.length" class="dialog__file-list">
+                  <p class="dialog__file-list-title">Текущие файлы</p>
+                  <div class="dialog__file-list-items">
+                    <div
+                      v-for="(path, idx) in existingFiles"
+                      :key="path"
+                      class="dialog__file-item is-current"
+                    >
+                      <span class="dialog__file-name">{{ fileNameFromPath(path) }}</span>
+                      <button
+                        type="button"
+                        class="dialog__file-remove"
+                        :disabled="loading"
+                        aria-label="Удалить файл"
+                        @click="removeExistingFile(idx)"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  <p class="dialog__file-note">
+                    Удалённые файлы исчезнут после сохранения.
+                  </p>
+                </div>
 
                 <!-- dropzone -->
                 <div
@@ -80,14 +139,14 @@
                 >
                     <p class="dialog__dropzone_title">
                     {{
-                        selectedFileName
-                        ? selectedFileName
-                        : currentFileName
-                            ? `Заменить файл: ${currentFileName}`
-                            : "Перетащите или выберите файл"
+                        selectedFileLabel
+                        ? selectedFileLabel
+                        : currentFilesLabel
+                            ? currentFilesLabel
+                            : "Перетащите или выберите файлы"
                     }}
                     </p>
-                    <p v-if="!selectedFileName" class="dialog__dropzone_title dialog__dropzone_hint">
+                    <p v-if="!selectedFileLabel" class="dialog__dropzone_title dialog__dropzone_hint">
                     (PDF/PPT/PPTX/Видео/Картинки)
                     </p>
                 </div>
@@ -141,42 +200,61 @@ const error = ref("");
 /** form */
 const form = ref({
   title: "",
-  file: null, // новый файл (если выбрали)
+  files: [], // новые файлы (если выбрали)
 });
+
+const existingFiles = ref([]);
 
 /** file dropzone state */
 const fileInputRef = ref(null);
-const selectedFileName = ref("");
 const isDraggingFile = ref(false);
 
 /** текущий файл из chapter */
-const currentFilePath = computed(() => {
-  // чаще всего у тебя поле такое:
-  // presentation_path
-  // но оставим запасные варианты
-  return (
+const initialFilePaths = computed(() => {
+  const raw =
+    props.chapter?.presentation_paths ||
     props.chapter?.presentation_path ||
     props.chapter?.file_path ||
     props.chapter?.file ||
-    null
-  );
+    null;
+
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.filter(Boolean);
+  if (typeof raw === "string") {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      } catch {
+        // fall through to single path
+      }
+    }
+    return [raw];
+  }
+  return [];
 });
 
-const currentFileName = computed(() => {
-  if (!currentFilePath.value) return "";
-  const p = String(currentFilePath.value);
-  return p.split("/").pop();
+const existingFileNames = computed(() =>
+  existingFiles.value.map((p) => String(p).split("/").pop())
+);
+
+const currentFilesLabel = computed(() => {
+  const count = existingFileNames.value.length;
+  if (!count) return "";
+  if (count === 1) return `Текущий файл: ${existingFileNames.value[0]}`;
+  return `Текущих файлов: ${count}`;
 });
 
-const fileUrl = computed(() => {
-  if (!currentFilePath.value) return "#";
-  const p = String(currentFilePath.value);
-
-  // если уже полный URL
-  if (p.startsWith("http://") || p.startsWith("https://")) return p;
-
-  // иначе относительный путь
-  return `/${p}`;
+const selectedFiles = computed(() => form.value.files || []);
+const selectedFileNames = computed(() =>
+  selectedFiles.value.map((file) => file.name)
+);
+const selectedFileLabel = computed(() => {
+  const count = selectedFileNames.value.length;
+  if (!count) return "";
+  if (count === 1) return selectedFileNames.value[0];
+  return `Выбрано файлов: ${count}`;
 });
 
 /** EditorJS */
@@ -227,10 +305,10 @@ function initEditor(initialData) {
 
 /** reset/close */
 function reset() {
-  form.value = { title: "", file: null };
+  form.value = { title: "", files: [] };
   error.value = "";
+  existingFiles.value = [];
 
-  selectedFileName.value = "";
   isDraggingFile.value = false;
 
   if (fileInputRef.value) fileInputRef.value.value = "";
@@ -248,26 +326,65 @@ function triggerFileSelect() {
   fileInputRef.value?.click();
 }
 
+function fileNameFromPath(path) {
+  return String(path).split("/").pop();
+}
+
+function setExistingFiles(paths) {
+  existingFiles.value = Array.from(new Set(paths.filter(Boolean)));
+}
+
+function removeExistingFile(index) {
+  existingFiles.value = existingFiles.value.filter((_, i) => i !== index);
+}
+
+function fileKey(file) {
+  return `${file.name}-${file.size}-${file.lastModified}`;
+}
+
+function mergeFiles(existing, incoming) {
+  const map = new Map();
+  existing.forEach((file) => map.set(fileKey(file), file));
+  incoming.forEach((file) => map.set(fileKey(file), file));
+  return Array.from(map.values());
+}
+
+function syncFileInput(files) {
+  if (!fileInputRef.value) return;
+  if (!files.length) {
+    fileInputRef.value.value = "";
+    return;
+  }
+  const dt = new DataTransfer();
+  files.forEach((file) => dt.items.add(file));
+  fileInputRef.value.files = dt.files;
+}
+
+function setFiles(files) {
+  form.value.files = files;
+  syncFileInput(files);
+}
+
 function handleFileChange(e) {
-  const f = e?.target?.files?.[0] || null;
-  form.value.file = f;
-  selectedFileName.value = f ? f.name : "";
+  const incoming = Array.from(e?.target?.files || []);
+  if (!incoming.length) return;
+  const merged = mergeFiles(form.value.files, incoming);
+  setFiles(merged);
+}
+
+function removeSelectedFile(index) {
+  const next = form.value.files.filter((_, i) => i !== index);
+  setFiles(next);
 }
 
 function onDropFile(e) {
   if (loading.value) return;
   isDraggingFile.value = false;
 
-  const file = e.dataTransfer?.files?.[0];
-  if (!file) return;
-
-  const dt = new DataTransfer();
-  dt.items.add(file);
-
-  if (fileInputRef.value) {
-    fileInputRef.value.files = dt.files;
-    handleFileChange({ target: fileInputRef.value });
-  }
+  const incoming = Array.from(e.dataTransfer?.files || []);
+  if (!incoming.length) return;
+  const merged = mergeFiles(form.value.files, incoming);
+  setFiles(merged);
 }
 
 /** submit */
@@ -288,7 +405,8 @@ async function submit() {
     fd.append("content", JSON.stringify(contentPayload));
     fd.append("points", "0");
 
-    if (form.value.file) fd.append("file", form.value.file);
+    fd.append("retain_files", JSON.stringify(existingFiles.value));
+    form.value.files.forEach((file) => fd.append("files[]", file));
 
     // method spoofing для multipart
     fd.append("_method", "PUT");
@@ -328,9 +446,9 @@ watch(
 
     // заполнение формы
     form.value.title = props.chapter?.title ?? "";
-    form.value.file = null;
+    form.value.files = [];
+    setExistingFiles(initialFilePaths.value);
 
-    selectedFileName.value = "";
     isDraggingFile.value = false;
 
     if (fileInputRef.value) fileInputRef.value.value = "";
@@ -351,5 +469,76 @@ watch(
   border-radius: 4px;
   min-height: 150px;
   background-color: #fff;
+}
+.dialog__file-list {
+  margin: 10px 0 12px;
+}
+
+.dialog__file-list-title {
+  font-size: 13px;
+  color: #6d6d6d;
+  margin-bottom: 6px;
+}
+
+.dialog__file-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dialog__file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.dialog__file-item.is-current {
+  background: #f7f7f7;
+}
+
+.dialog__file-name {
+  font-size: 13px;
+  color: #333;
+  word-break: break-word;
+}
+
+.dialog__file-remove {
+  border: none;
+  background: transparent;
+  color: #8d8d8d;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dialog__file-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dialog__file-add {
+  margin-top: 8px;
+  border: none;
+  background: none;
+  color: #6c57d9;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+  text-align: left;
+}
+
+.dialog__file-add:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dialog__file-note {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #8d8d8d;
 }
 </style>

@@ -3,6 +3,7 @@ import {computed, defineAsyncComponent, onMounted, reactive, ref, watch} from 'v
 // import ConfirmDialog from './Tab/ConfirmDialog.vue'
 
 import OverviewTab      from './Tab/Overview.vue'
+import PinMaxTab from './Tab/PinMax.vue'
 // import ResourcesTab     from './Tab/Resources.vue'
 // import RulesTab         from './Tab/Rules.vue'
 // import ContactsTab      from './Tab/Contacts.vue'
@@ -32,13 +33,14 @@ function onSaving(flag) { saving.value = !!flag }
 const tabs = [
     defineAsyncComponent(() => import('./Tab/MainInfo.vue')),
     OverviewTab,
+    PinMaxTab,
 ]
 
 const active = ref(0)
 const pendingTab     = ref(null)
 const showLeaveDlg   = ref(false)
 const hasUnsaved     = ref(false)
-const tabsRu = ref(['Основная информация','Темы']);
+const tabsRu = ref(['Основная информация','Темы', 'Закрепить MAX']);
 const tCert = (t) => capitalizeFirstLetter(t?.certificates || 'Сертификаты')
 
 function onDirty (flag) { hasUnsaved.value = flag }
@@ -168,6 +170,7 @@ onMounted(() => {
         v-if="modelValue"
         class="dialog"
         style="z-index: 1"
+        @click.self="close"
     >
         <div class="dialog__container_custom" @click.stop>
             <div class="dialog__inner" :class="{ 'is-saving': saving }">

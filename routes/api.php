@@ -23,6 +23,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\FinalTestResultController;
 use App\Http\Controllers\TaskSubmissionController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\CourseQrController;
 //проверка задания и отправка задания
 Route::get('chapter/{chapter}/my-submission', [TaskSubmissionController::class, 'mySubmission']);
 Route::post('/submitTask', [TaskSubmissionController::class, 'store']);               // студент отправляет
@@ -136,6 +137,8 @@ Route::post('/courses/{id}', [CourseController::class, 'update']);
 Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/courses', [CourseController::class, 'category']);
 
+Route::get('/courses/{course}/qr', [CourseQrController::class, 'show']);
+
 // Удаление курса 
 Route::delete('/courses/{id}', [CourseController::class, 'destroy']);
 
@@ -237,6 +240,10 @@ Route::prefix('admin/course/{course}')->group(function () {
     Route::get('/topics', [TopicController::class, 'index'])->name('admin.topics.index');
     // Создать новую тему для курса
     Route::post('/topics', [TopicController::class, 'store'])->name('admin.topics.store');
+
+    Route::get('/qr', [CourseQrController::class, 'show']);
+    Route::post('/qr', [CourseQrController::class, 'store']);
+    Route::delete('/qr', [CourseQrController::class, 'destroy']);
 });
 
 Route::prefix('admin/topics')->group(function () {

@@ -1,11 +1,39 @@
+<script setup>
+defineProps({
+  modelValue: { type: Boolean, default: false },
+  qrPreviewUrl: { type: String, default: "" },
+  attachedPreviewUrl: { type: String, default: "" },
+  qrLoading: { type: Boolean, default: false },
+  qrError: { type: String, default: "" },
+  linkValue: { type: String, default: "" },
+});
+
+const emit = defineEmits([
+  "update:modelValue",
+  "file-change",
+  "submit",
+  "update:linkValue",
+]);
+
+function close() {
+  emit("update:modelValue", false);
+}
+
+function onFileChange(event) {
+  emit("file-change", event);
+}
+
+function onSubmit() {
+  emit("submit");
+}
+</script>
+
 <template>
   <div v-if="modelValue" class="dialog" @click.self="close" style="z-index: 1">
     <div class="dialog__container_custom dialog__container_custom--s" @click.stop>
-      <div class="dialog__inner" :class="{ 'is-saving': loading }">
-        <!-- header -->
+      <div class="dialog__inner" :class="{ 'is-saving': qrLoading }">
         <div class="dialog__header">
-          <p>Добавить вопрос</p>
-
+          <p>Закрепить MAX</p>
           <div class="dialog__close" @click="close">
             <svg
               width="13"
@@ -22,39 +50,51 @@
           </div>
         </div>
 
-        <!-- content -->
         <div class="dialog__content">
           <div class="form__admin">
+            <div class="qr-preview">
+              <img
+                v-if="qrPreviewUrl || attachedPreviewUrl"
+                :src="qrPreviewUrl || attachedPreviewUrl"
+                alt="QR code preview"
+              />
+              <span v-else>QR-код не прикреплен</span>
+            </div>
+
             <div class="dialog__component">
-              <p class="dialog__title">Вопрос</p>
+              <p class="dialog__title">Прикрепить QR-код</p>
               <input
-                v-model="form.question"
-                type="text"
+                type="file"
                 class="dialog__input"
-                placeholder="Введите вопрос"
-                :disabled="loading"
-                required
+                accept="image/*"
+                :disabled="qrLoading"
+                @change="onFileChange"
               />
             </div>
 
             <div class="dialog__component">
-              <p class="dialog__title">Ответ</p>
-              <textarea
-                v-model="form.answer"
-                class="dialog__textarea dialog__textarea--s"
-                placeholder="Введите ответ"
-                :disabled="loading"
-              ></textarea>
+              <p class="dialog__title">Ссылка</p>
+              <input
+                :value="linkValue"
+                type="url"
+                class="dialog__input"
+                placeholder="https://example.com"
+                :disabled="qrLoading"
+                required
+                @input="emit('update:linkValue', $event.target.value)"
+              />
             </div>
 
-            <p v-if="error" class="dialog__error">{{ error }}</p>
+            <p v-if="qrError" class="dialog__error">
+              {{ qrError }}
+            </p>
 
             <div class="dialog__btns">
               <button
                 type="button"
                 class="main__btn main__btn--white"
                 @click="close"
-                :disabled="loading"
+                :disabled="qrLoading"
               >
                 Отмена
               </button>
@@ -62,10 +102,10 @@
               <button
                 type="button"
                 class="main__btn"
-                @click="submit"
-                :disabled="loading || !form.question.trim() || !form.answer.trim()"
+                @click="onSubmit"
+                :disabled="qrLoading"
               >
-                {{ loading ? "Сохранение..." : "Создать" }}
+                {{ qrLoading ? "Сохранение..." : "Закрепить" }}
               </button>
             </div>
           </div>
@@ -75,72 +115,33 @@
   </div>
 </template>
 
-<script setup>
-import { reactive, ref, watch } from "vue";
-import axios from "axios";
-import { globalNotification } from "../../../globalNotification";
-
-const props = defineProps({
-  modelValue: { type: Boolean, default: false },
-});
-
-const emit = defineEmits(["update:modelValue", "created"]);
-
-const form = reactive({
-  question: "",
-  answer: "",
-});
-
-const loading = ref(false);
-const error = ref("");
-
-watch(
-  () => props.modelValue,
-  (v) => {
-    if (v) {
-      form.question = "";
-      form.answer = "";
-      error.value = "";
-      loading.value = false;
-    }
-  }
-);
-
-function close() {
-  emit("update:modelValue", false);
-}
-
-async function submit() {
-  error.value = "";
-  loading.value = true;
-
-  try {
-    const { data } = await axios.post("/api/faqs", {
-      question: form.question,
-      answer: form.answer,
-    });
-
-    globalNotification.categoryMessage = "FAQ успешно создан";
-    globalNotification.type = "success";
-
-    emit("created", data?.faq ?? data);
-    close();
-  } catch (e) {
-    console.error(e);
-    error.value = "Заполните все поля";
-    globalNotification.categoryMessage = "Заполните все поля, для добавление FAQ";
-    globalNotification.type = "error";
-  } finally {
-    loading.value = false;
-  }
-}
-</script>
-
 <style scoped>
 .dialog__error {
   color: #d40000;
   font-size: 13px;
   margin-top: -8px;
   margin-bottom: 8px;
+}
+
+.qr-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  margin-bottom: 16px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 12px;
+  background: #fafafa;
+  text-align: center;
+}
+
+.qr-preview img {
+  max-width: 220px;
+  max-height: 220px;
+}
+
+.qr-preview span {
+  color: #8d8d8d;
+  font-size: 13px;
 }
 </style>

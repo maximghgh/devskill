@@ -6,6 +6,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Purchase;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\UpdateUserAvatarRequest;
+use App\Http\Resources\UserResource;
+use App\Http\Resources\CourseResource;
 
 
 class UserController extends Controller
@@ -18,13 +22,13 @@ class UserController extends Controller
                      ->get();
 
         // Возвращаем JSON
-        return response()->json($users);
+        return response()->json(UserResource::collection($users));
     }
     public function show($id)
     {
         // Ищем пользователя по ID или возвращаем 404, если не найден
         $user = User::findOrFail($id);
-        return response()->json($user);
+        return response()->json(new UserResource($user));
     }
     public function getByIds(Request $request)
     {
@@ -32,7 +36,7 @@ class UserController extends Controller
         $ids = $request->input('ids', []);
         // Получаем пользователей с этими ID
         $users = User::whereIn('id', $ids)->get();
-        return response()->json($users);
+        return response()->json(UserResource::collection($users));
     }
 
     public function getPurchasedCourses($id)
@@ -63,22 +67,14 @@ class UserController extends Controller
 
         // 5. Возвращаем JSON-ответ
         return response()->json([
-            'courses' => $courses
+            'courses' => CourseResource::collection($courses),
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
         // Валидируем входные данные
-        $validated = $request->validate([
-            'name'     => 'nullable|string|max:255',
-            'email'    => 'nullable|email|max:255',
-            'phone'    => 'nullable|string|max:50',
-            'birthday' => 'nullable|date',
-            'country'  => 'nullable|string|max:100',
-            'role'     => 'required|in:1,2,3',
-            'position' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         // Ищем пользователя по ID
         $user = User::findOrFail($id);
@@ -92,7 +88,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'user'    => $user,
+            'user'    => new UserResource($user),
         ]);
     }
     public function destroy($id)
@@ -108,15 +104,10 @@ class UserController extends Controller
             'message' => 'Пользователь успешно удалён'
         ]);
     }
-    public function updateAvatar(Request $request, $id)
+    public function updateAvatar(UpdateUserAvatarRequest $request, $id)
     {
         // Находим пользователя по ID
         $user = User::findOrFail($id);
-
-        // Валидируем файл
-        $request->validate([
-            'file' => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048',
-        ]);
 
         // Если файл передан
         if ($request->hasFile('file')) {
@@ -131,7 +122,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'user'    => $user,
+            'user'    => new UserResource($user),
         ]);
     }
 

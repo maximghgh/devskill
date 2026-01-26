@@ -54,4 +54,10 @@ class Course extends Model
     {
         return $this->hasOne(FinalTest::class, 'chapter_id');
     }
+
+    public function qrCodes()
+    {
+        return $this->belongsToMany(\App\Models\QrCode::class, 'course_qr_codes')
+            ->withTimestamps();
+    }
 }

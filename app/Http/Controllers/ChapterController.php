@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\UserChapterProgress;
 use App\Models\Chapter;
 use App\Models\Topic;
+use App\Http\Requests\StoreChapterRequest;
+use App\Http\Requests\UpdateChapterRequest;
+use App\Http\Resources\ChapterResource;
 use Illuminate\Http\Request;
 use App\Models\FinalTest;
 use Illuminate\Support\Facades\Storage;
@@ -21,7 +24,7 @@ class ChapterController extends Controller
         // return view('admin.chapters.index', compact('topic', 'chapters'));
         return response()->json([
             'topic' => $topic,
-            'chapters' => $chapters
+            'chapters' => ChapterResource::collection($chapters),
         ]);
     }
 
@@ -40,25 +43,25 @@ class ChapterController extends Controller
      * @param int $topicId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request, $topicId)
+    public function store(StoreChapterRequest $request, $topicId)
     {
-        $data = $request->validate([
-            'title'          => 'required|string|max:255',
-            'type'           => 'required|in:video,text,task,terms,presentation',
-            'content'        => 'nullable',
-            'correct_answer' => 'nullable|string',
-            'file'           => 'nullable|file|max:20480',
-            'video_url'      => 'nullable|string',
-            'points'         => 'nullable|integer|min:0',
-        ]);
+        $data = $request->validated();
 
         // Обработка файла (если есть)...
-        $presentationPath = null;
-        if ($request->hasFile('file')) {
+        $presentationPaths = [];
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $name = time().'_'.$file->getClientOriginalName();
+                $path = $file->storeAs('public/chapters_files', $name);
+                $presentationPaths[] = str_replace('public/', 'storage/', $path);
+            }
+        } elseif ($request->hasFile('file')) {
             $file = $request->file('file');
-            $path = $file->storeAs('public/chapters_files', $file->getClientOriginalName());
-            $presentationPath = str_replace('public/', 'storage/', $path);
+            $name = time().'_'.$file->getClientOriginalName();
+            $path = $file->storeAs('public/chapters_files', $name);
+            $presentationPaths[] = str_replace('public/', 'storage/', $path);
         }
+        $presentationPath = $presentationPaths[0] ?? null;
 
         // — для всех остальных типов: ТОЛЬКО в таблицу chapters
         $chapter = Chapter::create([
@@ -69,12 +72,13 @@ class ChapterController extends Controller
             'correct_answer'   => $data['correct_answer'] ?? null,
             'video_url'        => $data['video_url']      ?? null,
             'presentation_path'=> $presentationPath,
+            'presentation_paths'=> $presentationPaths ?: null,
             'points'           => $data['points'] ?? 0,
         ]);
 
         return response()->json([
             'success' => true,
-            'chapter' => $chapter,
+            'chapter' => new ChapterResource($chapter),
         ], 201);
     }
 
@@ -90,17 +94,9 @@ class ChapterController extends Controller
     /**
      * Обновить данные главы.
      */
-    public function update(Request $request, $topicId, $chapterId)
+    public function update(UpdateChapterRequest $request, $topicId, $chapterId)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'type'  => 'required|string|in:video,text,task,terms,presentation',
-            'content' => 'nullable',
-            'video_url' => 'nullable|string',
-            'correct_answer' => 'nullable|string',
-            'points' => 'nullable|integer|min:0',
-            'file' => 'nullable|file|max:20480',
-        ]);
+        $data = $request->validated();
 
         $chapter = Chapter::where('topic_id', $topicId)->findOrFail($chapterId);
 
@@ -111,24 +107,58 @@ class ChapterController extends Controller
         $chapter->correct_answer = $data['correct_answer'] ?? null;
         $chapter->points         = $data['points'] ?? ($chapter->points ?? 0);
 
-        // ✅ обработка нового файла
-        if ($request->hasFile('file')) {
+        $existing = $chapter->presentation_paths ?? [];
+        if (!is_array($existing) || !count($existing)) {
+            $existing = $chapter->presentation_path ? [$chapter->presentation_path] : [];
+        }
 
-            // (опционально) удалить старый файл
-            if ($chapter->presentation_path) {
-                $old = str_replace('storage/', 'public/', $chapter->presentation_path);
-                Storage::delete($old);
+        $retain = $request->input('retain_files', null);
+        if (is_string($retain)) {
+            $decoded = json_decode($retain, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $retain = $decoded;
             }
+        }
+        if (is_array($retain)) {
+            $existingSet = array_flip($existing);
+            $retain = array_values(array_filter($retain, function ($path) use ($existingSet) {
+                return isset($existingSet[$path]);
+            }));
+        } else {
+            $retain = null;
+        }
 
+        $incoming = [];
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $name = time().'_'.$file->getClientOriginalName();
+                $path = $file->storeAs('public/chapters_files', $name);
+                $incoming[] = str_replace('public/', 'storage/', $path);
+            }
+        } elseif ($request->hasFile('file')) {
             $file = $request->file('file');
-            $name = time().'_'.$file->getClientOriginalName(); // лучше уникально
+            $name = time().'_'.$file->getClientOriginalName();
             $path = $file->storeAs('public/chapters_files', $name);
-            $chapter->presentation_path = str_replace('public/', 'storage/', $path);
+            $incoming[] = str_replace('public/', 'storage/', $path);
+        }
+
+        $retained = $retain !== null ? $retain : $existing;
+        $finalFiles = array_values(array_unique(array_merge($retained, $incoming)));
+
+        $removed = array_diff($existing, $retained);
+        foreach ($removed as $oldPath) {
+            $old = str_replace('storage/', 'public/', $oldPath);
+            Storage::delete($old);
+        }
+
+        if ($retain !== null || count($incoming)) {
+            $chapter->presentation_paths = count($finalFiles) ? $finalFiles : null;
+            $chapter->presentation_path = $finalFiles[0] ?? null;
         }
 
         $chapter->save();
 
-        return response()->json(['chapter' => $chapter]);
+        return response()->json(['chapter' => new ChapterResource($chapter)]);
     }
 
     /**
@@ -231,20 +261,9 @@ class ChapterController extends Controller
         ])->whereNotNull('completed_at')->exists();
     }
 
-    return response()->json([
-        'id'                => $chapter->id,
-        'topic_id'          => $chapter->topic_id,
-        'title'             => $chapter->title,
-        'content'           => $chapter->content,
-        'type'              => $chapter->type,
-        'video_url'         => $chapter->video_url,
-        'presentation_path' => $chapter->presentation_path,
-        'correct_answer'    => $chapter->correct_answer,
-        // вот он:
-        'is_completed'      => $isCompleted,
-        'created_at'        => $chapter->created_at,
-        'updated_at'        => $chapter->updated_at,
-    ]);
+        $chapter->setAttribute('is_completed', $isCompleted);
+
+        return response()->json(new ChapterResource($chapter));
     }
     public function taskCount($topicId)
     {

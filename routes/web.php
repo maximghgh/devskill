@@ -9,6 +9,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\FinalTestController;
+use App\Http\Controllers\CourseQrController;
 use App\Models\Course;
 use App\Http\Controllers\ForgotPasswordController;
 
@@ -227,6 +228,10 @@ Route::group([
         Route::get('/course/{course}/topics', [TopicController::class, 'index'])->name('topics.index');
         Route::post('/course/{course}/topics', [TopicController::class, 'store'])->name('topics.store');
         Route::get('/course/{course}/topics/json', [TopicController::class, 'getTopicsJson']);
+
+        Route::get('/course/{course}/qr', [CourseQrController::class, 'show']);
+        Route::post('/course/{course}/qr', [CourseQrController::class, 'store']);
+        Route::delete('/course/{course}/qr', [CourseQrController::class, 'destroy']);
 
 
         Route::get('/course/{course}/topics/create', [TopicController::class, 'create'])->name('topics.create');

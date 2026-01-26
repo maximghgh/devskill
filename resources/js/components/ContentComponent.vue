@@ -55,6 +55,27 @@
                         <a href="#">devskillreport@mail.ru</a>.
                     </p>
                 </div>
+
+                <div v-if="maxQr.image" class="card max-qr-card">
+                    <p class="max-qr-card__title">
+                        Напишите на почту, если у вас появились проблемы или
+                        воспользуйтесь
+                    </p>
+                    <div class="max-qr-card__qr">
+                        <img :src="maxQr.image" alt="QR код MAX" />
+                    </div>
+                    <p class="max-qr-card__note">
+                        Мы быстро с вами свяжемся и поможем
+                    </p>
+                    <a
+                        class="max-qr-card__link"
+                        :href="maxQr.link"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Ссылка на Max
+                    </a>
+                </div>
             </aside>
 
             <!-- Правый контент -->
@@ -136,7 +157,7 @@
                     </li>
                 </ul>
                 <!-- Блок итогового теста -->
-                <div v-if="course.id" class="final-test-block">
+                <!-- <div v-if="course.id" class="final-test-block">
                     <h3>Финальная работа курса «{{ course.card_title }}»</h3>
                     <p>Вы сможете пройти тест после завершения всех глав.</p>
 
@@ -161,7 +182,7 @@
                         </div>
                         <span>Вы успешно справились с итоговым тестом!</span>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
         <div
@@ -260,6 +281,7 @@ const course = ref(window.initialCourseData || {});
 const topics = ref(course.value.topics || []);
 const selectedTopic = ref(null);
 const selectedChapter = ref(null);
+const maxQr = ref({ image: "", link: "" });
 
 let editorInstance = null;
 const showSolution = ref(false);
@@ -317,6 +339,32 @@ function toggleSolution() {
 
 function goBack() {
     window.location.href = "/cabinet";
+}
+
+function normalizeQrSrc(raw) {
+    if (!raw) return "";
+    if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+    if (raw.startsWith("data:") || raw.startsWith("blob:")) return raw;
+    if (raw.startsWith("/")) return raw;
+    return "/" + raw;
+}
+
+async function loadMaxQr() {
+    if (!courseId.value) return;
+    try {
+        const { data } = await axios.get(`/api/courses/${courseId.value}/qr`);
+        if (data?.qr) {
+            maxQr.value = {
+                image: normalizeQrSrc(data.qr.qr_image),
+                link: data.qr.link || "",
+            };
+        } else {
+            maxQr.value = { image: "", link: "" };
+        }
+    } catch (e) {
+        console.error("Ошибка при загрузке QR-кода:", e);
+        maxQr.value = { image: "", link: "" };
+    }
 }
 function selectTopic(topic) {
     selectedTopic.value = topic;
@@ -719,10 +767,12 @@ const difficultyTranslation = {
 onMounted(async () => {
     if (course.value.id) {
         courseId.value = course.value.id;
+        await loadMaxQr();
     } else {
         const parts = window.location.pathname.split("/");
         const courseIdFromUrl = parts[parts.length - 1];
         courseId.value = courseIdFromUrl;
+        await loadMaxQr();
 
         axios
             .get(`/api/course/${courseIdFromUrl}/topics`, {
@@ -1186,6 +1236,50 @@ h2 {
 .telegram-card a {
     color: #5b4bff;
     text-decoration: none;
+}
+
+/* MAX QR card */
+.max-qr-card {
+    text-align: center;
+    background: #f1f1fb;
+    color: #6f738c;
+    border-radius: 16px;
+}
+
+.max-qr-card__title {
+    font-size: 13px;
+    line-height: 1.35;
+    margin: 0 0 16px;
+}
+
+.max-qr-card__qr {
+    width: 210px;
+    height: 210px;
+    margin: 0 auto 16px;
+    padding: 10px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #39d5cf 0%, #6a3df7 100%);
+    box-shadow: 0 12px 28px rgba(63, 54, 156, 0.2);
+}
+
+.max-qr-card__qr img {
+    width: 100%;
+    height: 100%;
+    border-radius: 14px;
+    background: #ffffff;
+    object-fit: cover;
+}
+
+.max-qr-card__note {
+    font-size: 12px;
+    margin: 0 0 6px;
+}
+
+.max-qr-card__link {
+    display: inline-block;
+    color: #5b4bff;
+    text-decoration: none;
+    font-weight: 600;
 }
 
 /* ========== Content ========== */

@@ -5,34 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Course; 
 use App\Models\Topic; 
 use App\Models\UserChapterProgress; 
+use App\Http\Requests\StoreCourseRequest;
+use App\Http\Requests\UpdateCourseRequest;
+use App\Http\Resources\CourseResource;
+use App\Http\Resources\TopicResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\Purchase;
 use App\Models\Language;
 
 class CourseController extends Controller
 {
-    public function store(Request $request)
+    public function store(StoreCourseRequest $request)
     {
-        $data = $request->validate([
-            'cardTitle'           => 'nullable|string|max:255',
-            'courseName'          => 'required|string|max:255',
-            'price'               => 'required|numeric',
-            'duration'            => 'nullable|string|max:255',
-            'description'         => 'nullable|string',
-            'hours'               => 'required|integer',
-            'simulators'          => 'nullable|integer|min:0',
-            'difficulty'          => 'required|string',
-            'editorData'          => 'required', // данные Editor.js
-            'teachers'            => 'nullable|json', // ожидаем JSON-строку с массивом ID преподавателей
-            'language'            => 'required|string', // язык программирования
-            'direction'           => 'nullable|string',
-            'upgradequalification' => 'required|in:0,1',
-            'cardImage'           => 'nullable|file|image|max:5120', // до 5 МБ
-            'descriptionImage'    => 'nullable|file|image|max:5120',
-            'pdf'                  => 'nullable|file|mimes:pdf|max:20480',
-            'start_date'           => 'nullable|date',
-            'end_date'             => 'nullable|date|after_or_equal:start_date',
-        ]);
+        $data = $request->validated();
 
         // $data['upgrade_qualification'] = $data['upgradeQualification'] === '1' ? true : false;
         // Преобразуем данные Editor.js из строки в массив, если нужно
@@ -101,11 +87,11 @@ class CourseController extends Controller
         
         return response()->json([
             'message' => 'Курс успешно создан',
-            'course'  => $course,
+            'course'  => new CourseResource($course),
             'redirect_url' => route('admin.course.show', ['id' => $course->id]),
         ], 201);
     }
-    public function update(Request $request, $id)
+    public function update(UpdateCourseRequest $request, $id)
     {
         // Если нужно отладить — посмотрите, какие поля реально приходят:
         // dd($request->all());
@@ -113,28 +99,7 @@ class CourseController extends Controller
         $course = Course::findOrFail($id);
 
         // Валидация
-        $validated = $request->validate([
-            'cardTitle'           => 'nullable|string|max:255',
-            'courseName'          => 'required|string|max:255',
-            'price'               => 'required|numeric',
-            'duration'            => 'nullable|string',
-            'description'         => 'nullable|string',
-            'hours'               => 'nullable|integer',
-            'simulators'          => 'nullable|integer',
-            'difficulty'          => 'required|string',
-            'teachers'            => 'nullable|json',
-            // Если раньше использовалось поле language, его можно заменить или оставить для обратной совместимости
-            // 'language'          => 'required|string',
-            'language'   => 'nullable|json', // ожидаем JSON-строку
-            'selectedDirection'   => 'nullable|integer',
-            'upgradequalification'=> 'required|in:0,1',
-            'cardImage'           => 'nullable|file|image|max:5120',
-            'descriptionImage'    => 'nullable|image|max:2048',
-            'editorData'          => 'required', // Если нужно editorData
-            'pdf' => 'nullable|file|mimes:pdf|max:20480',
-            'start_date'           => 'nullable|date',
-            'end_date'             => 'nullable|date|after_or_equal:start_date',
-        ]);
+        $validated = $request->validated();
 
 
         if (!empty($validated['language'])) {
@@ -157,6 +122,8 @@ class CourseController extends Controller
         $course->simulators   = $validated['simulators'] ?? $course->simulators;
         $course->difficulty   = $validated['difficulty'];
         $course->language     = $validated['language'];
+        $course->start_date   = $validated['start_date'] ?? null;
+        $course->end_date     = $validated['end_date'] ?? null;
 
         // Если используется новое поле для языков (selectedLanguages), декодируем его и сохраняем в поле language
         // if (isset($validated['selectedLanguages'])) {
@@ -224,7 +191,7 @@ class CourseController extends Controller
 
         return response()->json([
             'success' => true,
-            'course'  => $course,
+            'course'  => new CourseResource($course),
         ]);
     }
 
@@ -254,7 +221,7 @@ class CourseController extends Controller
         if (is_string($course->teachers)) {
             $course->teachers = json_decode($course->teachers, true);
         }
-        return response()->json($course);
+        return response()->json(new CourseResource($course));
     }
     
     public function showPage($id)
@@ -270,7 +237,7 @@ class CourseController extends Controller
     public function index()
     {
         
-        return response()->json(Course::all(), 200);
+        return response()->json(CourseResource::collection(Course::all()), 200);
     }
     public function category(Request $request)
     {
@@ -334,7 +301,7 @@ class CourseController extends Controller
         // Получаем отфильтрованные курсы
         $courses = $query->get();
 
-        return response()->json($courses, 200);
+        return response()->json(CourseResource::collection($courses), 200);
     }
 
     public function showCourseContent($courseId)
@@ -357,8 +324,8 @@ class CourseController extends Controller
 
         // Можно вернуть объект курса и отдельно список тем (с вложенными главами)
         return response()->json([
-            'course' => $course,
-            'topics' => $course->topics // В каждой теме уже есть chapters
+            'course' => new CourseResource($course),
+            'topics' => TopicResource::collection($course->topics),
         ]);
     }
     public function getTopicsWithProgress(Request $request, $courseId)
@@ -400,8 +367,8 @@ class CourseController extends Controller
              
 
         return response()->json([
-            'topics' => $topics,
-            'course' => Course::find($courseId),
+            'topics' => TopicResource::collection($topics),
+            'course' => new CourseResource(Course::find($courseId)),
         ]);
     }
     public function taskCount($courseId)
@@ -433,7 +400,7 @@ class CourseController extends Controller
             $courses = Course::whereJsonContains('teachers', $teacherId)->get();
 
             // Возвращаем найденные курсы
-            return response()->json($courses);
+            return response()->json(CourseResource::collection($courses));
         } catch (\Exception $e) {
             // Логируем ошибку
             \Log::error('Ошибка при получении курсов для преподавателя: ' . $e->getMessage());
@@ -459,7 +426,7 @@ class CourseController extends Controller
         });
 
         // Возвращаем студентов в формате JSON
-        return response()->json($students);
+        return response()->json(UserResource::collection($students));
     }
 
 

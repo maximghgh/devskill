@@ -86,10 +86,6 @@
                                             темы
                                         </p>
                                         <p>
-                                            <b>{{ course.simulators_count }}</b>
-                                            тренажера
-                                        </p>
-                                        <p>
                                             <b>{{ course.hours }}</b> часа
                                             занятий
                                         </p>

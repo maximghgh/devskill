@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modelValue" class="dialog" style="z-index: 10">
+  <div v-if="modelValue" class="dialog" style="z-index: 10" @click.self="closeDialog">
     <div class="dialog__container_custom dialog__container_custom--xl" @click.stop>
       <div class="dialog__inner">
         <!-- Заголовок -->
@@ -24,6 +24,13 @@
           >
             Темы
           </p>
+          <p
+            class="dialog__tabs_item"
+            :class="{ active: currentTab === 'qr' }"
+            @click="currentTab = 'qr'"
+          >
+            Закрепить QR code
+          </p>
         </div>
 
         <!-- Контент вкладок -->
@@ -37,11 +44,18 @@
 
           <!-- Темы -->
           <Overview
-            v-else
+            v-else-if="currentTab === 'topics'"
             :draft="{ courseId: course.id }"
             :isEdit="true"
             :admin="true"
             @cancel="closeDialog"
+          />
+
+          <PinMax
+            v-else
+            :draft="{ courseId: course.id }"
+            :isEdit="true"
+            :admin="true"
           />
         </div>
       </div>
@@ -53,6 +67,7 @@
 import { ref, watch } from "vue";
 import EditMainInfo from "./Tab/EditMainInfo.vue";
 import Overview     from './Tab/Overview.vue'
+import PinMax       from './Tab/PinMax.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -69,6 +84,12 @@ function closeDialog() {
 }
 
 function handleSaved(updatedCourse) {
+  // если отмена из формы — просто закрываем
+  if (!updatedCourse) {
+    closeDialog();
+    return;
+  }
+
   // родителю отдаём обновлённый курс
   emit("updated", updatedCourse);
   // остаёмся в этой же модалке, но можно по желанию переключиться на вкладку "Темы":

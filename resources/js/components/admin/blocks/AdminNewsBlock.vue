@@ -304,7 +304,7 @@
                             <img src="../../../../img/admin/eye.svg" alt="" />
                         </td>
 
-                        <td>
+                        <td class="hadle">
                             <div class="tooltip-container">
                                 <button
                                     aria-describedby="help-tooltip"

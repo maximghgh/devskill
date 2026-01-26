@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Topic;
 use App\Models\Course;
+use App\Http\Requests\StoreTopicRequest;
+use App\Http\Requests\UpdateTopicRequest;
+use App\Http\Resources\TopicResource;
 use Illuminate\Http\Request;
 
 class TopicController extends Controller
@@ -21,7 +24,7 @@ class TopicController extends Controller
         $topics = $course->topics()->withCount('chapters')->orderBy('order')->get();
         
         return response()->json([
-            'topics' => $topics
+            'topics' => TopicResource::collection($topics),
         ]);
         
     }
@@ -49,16 +52,12 @@ class TopicController extends Controller
      * @param int $courseId
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store(StoreTopicRequest $request)
     {
         // Берём из маршрута параметр "course" (зависит от того, как назвали в Route)
         $courseId = $request->route('course'); 
 
-        $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'order'       => 'nullable|integer',
-        ]);
+        $validated = $request->validated();
 
         $validated['course_id'] = $courseId;
 
@@ -66,7 +65,7 @@ class TopicController extends Controller
 
         return response()->json([
             'success' => true,
-            'topic'   => $topic,
+            'topic'   => new TopicResource($topic),
             'message' => 'Тема успешно создана'
         ], 201);
     }
@@ -92,21 +91,17 @@ class TopicController extends Controller
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $topicId)
+    public function update(UpdateTopicRequest $request, $topicId)
     {
         $topic = Topic::findOrFail($topicId);
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'order' => 'nullable|integer',
-        ]);
+        $validated = $request->validated();
 
         $topic->update($validated);
 
         return response()->json([
             'success' => true,
-            'topic'   => $topic
+            'topic'   => new TopicResource($topic),
         ]);
     }
 
@@ -129,7 +124,7 @@ class TopicController extends Controller
     public function showes(Topic $topic)
     {
         return response()->json([
-            'topic' => $topic
+            'topic' => new TopicResource($topic),
         ]);
     }
 

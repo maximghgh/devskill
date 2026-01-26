@@ -21,6 +21,7 @@ class Chapter extends Model
         'order',
         'correct_answer',
         'presentation_path',   // ← добавили
+        'presentation_paths',
         'points',
     ];
 
@@ -28,6 +29,7 @@ class Chapter extends Model
     protected $casts = [
         'points' => 'integer',
         'content' => 'json', // или 'json'
+        'presentation_paths' => 'array',
     ];
     
     /**
