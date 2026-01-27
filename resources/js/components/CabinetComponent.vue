@@ -158,8 +158,8 @@ const difficultyColorClass = {
 };
 const difficultyTranslation = {
     basic: "Начинающий",
-    middle: "Средний",
-    advanced: "Продвинутый",
+    middle: "Фундаментальный",
+    advanced: "Олимпиадный",
     mixed: "Смешанный",
 };
 

@@ -127,10 +127,13 @@ function onDropDesc(e) {
 const users = ref([]);
 const directions = ref([]);
 const languages = ref([]);
+const currentUser = ref(null);
 
 const teachers = computed(() =>
   users.value.filter((u) => String(u.role) === "2" || u.role === 2)
 );
+const isTeacher = computed(() => Number(currentUser.value?.role) === 2);
+const teacherSelectDisabled = computed(() => isDisabled.value || isTeacher.value);
 
 async function loadUsers() {
   const { data } = await axios.get("/api/users");
@@ -292,6 +295,29 @@ function resetForm() {
   }
 }
 
+function applyTeacherFromStorage() {
+  const storedUser = localStorage.getItem("user");
+  if (!storedUser) return;
+
+  try {
+    currentUser.value = JSON.parse(storedUser);
+  } catch (e) {
+    console.error("Ошибка при чтении пользователя из localStorage:", e);
+    return;
+  }
+
+  if (props.isEdit) return;
+  if (!isTeacher.value || !currentUser.value?.id) return;
+  if (teacherSelectModel.value) return;
+
+  isHydrating.value = true;
+  teacherSelectModel.value = currentUser.value.id;
+  form.value.selectedTeachers = [currentUser.value.id];
+  isDirty.value = false;
+  emit("dirty", false);
+  isHydrating.value = false;
+}
+
 /** Cancel */
 function cancel() {
   resetForm();
@@ -427,6 +453,7 @@ defineExpose({ save });
 
 onMounted(async () => {
   await Promise.all([loadUsers(), loadDirections(), loadLanguages()]);
+  applyTeacherFromStorage();
 
   if (props.isEdit && props.draft) {
     fillFormFromDraft(props.draft);
@@ -548,11 +575,11 @@ onBeforeUnmount(() => {
                 class="dialog__input dialog__select"
                 :disabled="isDisabled"
             >
-                <option value="basic">Базовый</option>
-                <option value="middle">Средний</option>
-                <option value="advanced">Продвинутый</option>
-            </select>
-        </div>
+        <option value="basic">Базовый</option>
+        <option value="middle">Фундаментальный</option>
+        <option value="advanced">Олимпиадный</option>
+      </select>
+    </div>
 
         <!-- 7) Преподаватели -->
         <!-- <div class="dialog__component">
@@ -573,7 +600,7 @@ onBeforeUnmount(() => {
             <select
                 v-model="teacherSelectModel"
                 class="dialog__input dialog__select"
-                :disabled="isDisabled"
+                :disabled="teacherSelectDisabled"
             >
                 <option :value="null">Выберите преподавателя</option>
                 <option v-for="t in teachers" :key="t.id" :value="t.id">

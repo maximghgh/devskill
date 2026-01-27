@@ -24,6 +24,7 @@ use App\Http\Controllers\FinalTestResultController;
 use App\Http\Controllers\TaskSubmissionController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CourseQrController;
+use App\Http\Controllers\GroupController;
 //проверка задания и отправка задания
 Route::get('chapter/{chapter}/my-submission', [TaskSubmissionController::class, 'mySubmission']);
 Route::post('/submitTask', [TaskSubmissionController::class, 'store']);               // студент отправляет
@@ -244,6 +245,12 @@ Route::prefix('admin/course/{course}')->group(function () {
     Route::get('/qr', [CourseQrController::class, 'show']);
     Route::post('/qr', [CourseQrController::class, 'store']);
     Route::delete('/qr', [CourseQrController::class, 'destroy']);
+
+    Route::get('/groups', [GroupController::class, 'index']);
+    Route::post('/groups', [GroupController::class, 'store']);
+    Route::get('/groups/{group}', [GroupController::class, 'show']);
+    Route::patch('/groups/{group}', [GroupController::class, 'update']);
+    Route::delete('/groups/{group}', [GroupController::class, 'destroy']);
 });
 
 Route::prefix('admin/topics')->group(function () {

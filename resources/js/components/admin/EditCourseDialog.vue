@@ -31,31 +31,49 @@
           >
             Закрепить QR code
           </p>
+          <p
+            class="dialog__tabs_item"
+            :class="{ active: currentTab === 'groups' }"
+            @click="currentTab = 'groups'"
+          >
+            Группы
+          </p>
         </div>
 
         <!-- Контент вкладок -->
         <div class="dialog__content">
           <!-- Основная информация -->
           <EditMainInfo
-            v-if="currentTab === 'main'"
+            v-if="currentTab === 'main' && course"
             :course="course"
             @saved="handleSaved"
           />
+          <div v-else-if="currentTab === 'main'" class="dialog__hint">
+            Курс не выбран.
+          </div>
 
           <!-- Темы -->
           <Overview
             v-else-if="currentTab === 'topics'"
-            :draft="{ courseId: course.id }"
+            :draft="{ courseId }"
             :isEdit="true"
             :admin="true"
             @cancel="closeDialog"
           />
 
           <PinMax
-            v-else
-            :draft="{ courseId: course.id }"
+            v-else-if="currentTab === 'qr'"
+            :draft="{ courseId }"
             :isEdit="true"
             :admin="true"
+          />
+
+          <GroupTab
+            v-else-if="currentTab === 'groups'"
+            :draft="{ courseId }"
+            :isEdit="true"
+            :admin="true"
+            :key="courseId || 'groups'"
           />
         </div>
       </div>
@@ -64,10 +82,11 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import EditMainInfo from "./Tab/EditMainInfo.vue";
 import Overview     from './Tab/Overview.vue'
 import PinMax       from './Tab/PinMax.vue'
+import GroupTab     from './Tab/Group.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -77,6 +96,7 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "updated", "cancel"]);
 
 const currentTab = ref("main");
+const courseId = computed(() => props.course?.id ?? null);
 
 function closeDialog() {
   emit("update:modelValue", false);

@@ -59,7 +59,7 @@
         <select v-model="form.difficulty" class="form-input">
           <option value="basic">ДПО</option>
           <option value="middle">ДПО детское</option>
-          <option value="advanced">Продвинутый</option>
+          <option value="advanced">Олимпиадный</option>
           <option value="mixed">Смешанный</option>
         </select>
       </div>
@@ -67,7 +67,12 @@
       <!-- Преподаватели -->
       <div class="form-group">
         <label class="form-label">Выберите преподавателей</label>
-        <select v-model="form.selectedTeachers" multiple class="form-input">
+        <select
+          v-model="form.selectedTeachers"
+          multiple
+          class="form-input"
+          :disabled="teacherSelectDisabled"
+        >
           <option v-for="t in teachers" :key="t.id" :value="t.id">{{ t.name }}</option>
         </select>
       </div>
@@ -178,14 +183,27 @@ const form = ref({
 const users = ref([])
 const directions = ref([])
 const languages = ref([])
+const currentUser = ref(null)
 
 const teachers = computed(() => users.value.filter(u => String(u.role) === '2' || u.role === 2))
+const teacherSelectDisabled = computed(() => Number(currentUser.value?.role) === 2)
 
 /** EditorJS */
 const editor = ref(null)
 const editorHolder = ref(null)
 
 onMounted(async () => {
+  const storedUser = localStorage.getItem('user')
+  if (storedUser) {
+    try {
+      currentUser.value = JSON.parse(storedUser)
+      if (teacherSelectDisabled.value && currentUser.value?.id) {
+        form.value.selectedTeachers = [currentUser.value.id]
+      }
+    } catch (e) {
+      console.error('Ошибка при чтении пользователя из localStorage:', e)
+    }
+  }
   await Promise.all([loadUsers(), loadDirections(), loadLanguages()])
   initEditor()
 })

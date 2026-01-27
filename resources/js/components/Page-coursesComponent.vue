@@ -108,7 +108,7 @@
                                     </div>
                                     <div class="course-content__evolution-block course__card_bg-fiolet">
                                         <div class="course-content__evolution-top">
-                                            <div class="course-content__evolution-title">Средний</div>
+                                            <div class="course-content__evolution-title">Фундаментальный</div>
                                             <div class="course-content__evolution-desc">  Углубьтесь в язык программирования, создавайте более сложные и мощные программы.</div>
                                             <div class="course-content__evolution-text">Содержание программы:<br>
                                             Структуры данных и библиотеки: Освоите различные способы хранения данных и стандартные инструменты программирования для более умного кода.<br>
@@ -120,7 +120,7 @@
                                     </div>
                                     <div class="course-content__evolution-block course__card_bg-orange">
                                         <div class="course-content__evolution-top">
-                                            <div class="course-content__evolution-title">Продвинутый</div>
+                                            <div class="course-content__evolution-title">Олимпиадный</div>
                                             <div class="course-content__evolution-desc">  Станьте настоящим героем программирования. Готовы к соревнованиям?</div>
                                             <div class="course-content__evolution-text">Содержание программы:<br>
                                             Сложные алгоритмы и оптимизация: Разберитесь с продвинутыми алгоритмами и их использованием для решения сложных задач.<br>

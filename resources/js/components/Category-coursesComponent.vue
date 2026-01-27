@@ -12,7 +12,7 @@
                                 </div>
                                 <div class="category__one-info">
                                     <p>• Базовый</p>
-                                    <p>• Фундаментальный</p>
+                                    <p>• Базовый фундаментальный</p>
                                     <p>• Олимпиадный</p>
                                 </div>
                                 <a href="#" class="button button_white button_cat-link">Перейти в категорию</a>

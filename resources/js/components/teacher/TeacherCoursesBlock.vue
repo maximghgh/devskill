@@ -1,6 +1,6 @@
 <template>
-    <div class="user-block">
-        <h1 class="page__title">Курсы</h1>
+    <div class="teacher__block">
+        <h1 class="page__title">Мои курсы</h1>
 
         <div class="users-toolbar">
             <div class="asdf">
@@ -18,94 +18,12 @@
                             </select>
                             <img
                                 class="select__icon"
-                                src="../../../../img/admin/select.svg"
+                                :src="selectIcon"
                                 alt=""
                             />
                         </span>
                         курсов
                     </label>
-
-                    <div class="users-roles">
-                        <button
-                            type="button"
-                            class="users-roles__btn"
-                            @click="
-                                courseDifficultyDropdownOpen =
-                                    !courseDifficultyDropdownOpen
-                            "
-                        >
-                            Уровень
-                            <span
-                                class="users-roles__chevron"
-                                :class="{
-                                    'users-roles__chevron--open':
-                                        courseDifficultyDropdownOpen,
-                                }"
-                            ></span>
-                        </button>
-
-                        <div
-                            v-if="courseDifficultyDropdownOpen"
-                            class="users-roles__dropdown"
-                            @click.stop
-                        >
-                            <p class="users-roles__title">Фильтр по уровню</p>
-
-                            <label class="users-roles__option">
-                                <input
-                                    type="radio"
-                                    value="all"
-                                    v-model="selectedDifficulty"
-                                />
-                                <span class="users-roles__span">Все</span>
-                            </label>
-                            <label class="users-roles__option">
-                                <input
-                                    type="radio"
-                                    value="basic"
-                                    v-model="selectedDifficulty"
-                                />
-                                <span class="users-roles__span">Базовый</span>
-                            </label>
-                            <label class="users-roles__option">
-                                <input
-                                    type="radio"
-                                    value="middle"
-                                    v-model="selectedDifficulty"
-                                />
-                                <span class="users-roles__span">Фундаментальный</span>
-                            </label>
-                            <label class="users-roles__option">
-                                <input
-                                    type="radio"
-                                    value="advanced"
-                                    v-model="selectedDifficulty"
-                                />
-                                <span class="users-roles__span"
-                                    >Олимпиадный</span
-                                >
-                            </label>
-
-                            <div class="users-roles__actions">
-                                <button
-                                    type="button"
-                                    class="btn users-roles__apply"
-                                    @click="
-                                        courseDifficultyDropdownOpen = false
-                                    "
-                                >
-                                    Фильтр
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn users-roles__reset"
-                                    @click="resetCourseDifficultyFilter"
-                                >
-                                    Сброс
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="users-toolbar__search">
@@ -114,7 +32,7 @@
                             <img
                                 width="13"
                                 height="13"
-                                src="../../../../img/admin/search.png"
+                                :src="searchIcon"
                                 alt=""
                             />
                         </span>
@@ -136,7 +54,6 @@
                 </div>
 
                 <button
-                    v-if="showCreate"
                     type="button"
                     class="users-btn-new"
                     @click="$emit('requestCreateCourse')"
@@ -146,18 +63,17 @@
             </div>
         </div>
 
-        <div class="admin__block">
+        <div class="teacher__block">
             <div v-if="paginatedCourses.length">
                 <table class="light-push-table">
                     <thead>
                         <tr>
                             <th>Курс</th>
-                            <th v-if="showAuthor">Автор</th>
                             <th>Активен</th>
                             <th>Дата создания</th>
                             <th>Участники</th>
                             <th>Уровень</th>
-                            <th v-if="showActions">Действия</th>
+                            <th>Действия</th>
                         </tr>
                     </thead>
 
@@ -167,7 +83,7 @@
                                 <img
                                     :src="
                                         course.card_image
-                                            ? `${course.card_image}`
+                                            ? normalizeImageUrl(course.card_image)
                                             : 'https://devskills.foncode.ru/img/no_foto.jpg'
                                     "
                                     alt=""
@@ -178,7 +94,6 @@
                                 {{ course.course_name || "Неизвестно" }}
                             </td>
 
-                            <td v-if="showAuthor">{{ course.teacher || "Неизвестно" }}</td>
                             <td>Да</td>
                             <td>{{ formatBirthday(course.created_at) }}</td>
                             <td>0</td>
@@ -189,13 +104,17 @@
                                 </div>
                             </td>
 
-                            <td v-if="showActions" class="hadle">
+                            <td class="hadle">
                                 <div class="tooltip-container">
-                                    <button aria-describedby="help-tooltip" class="btn__user--edit" @click.prevent="$emit('requestEditCourse', course)">
+                                    <button
+                                        aria-describedby="help-tooltip"
+                                        class="btn__user--edit"
+                                        @click.prevent="$emit('requestEditCourse', course)"
+                                    >
                                         <img
                                             width="24"
                                             height="24"
-                                            src="../../../../img/admin/edit.svg"
+                                            :src="editIcon"
                                             alt=""
                                         />
                                     </button>
@@ -204,13 +123,17 @@
                                     </div>
                                 </div>
                                 <div class="tooltip-container">
-                                    <button aria-describedby="help-tooltip" class="btn__user--edit" @click.prevent="deleteCourse(course.id)">
+                                    <button
+                                        aria-describedby="help-tooltip"
+                                        class="btn__user--edit"
+                                        @click.prevent="deleteCourse(course.id)"
+                                    >
                                         <img
-                                        width="24"
-                                        height="24"
-                                        src="../../../../img/admin/trash.png"
-                                        alt=""
-                                    />
+                                            width="24"
+                                            height="24"
+                                            :src="trashIcon"
+                                            alt=""
+                                        />
                                     </button>
                                     <div role="tooltip" id="help-tooltip" class="tooltip">
                                         Удалить курс
@@ -259,16 +182,19 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import axios from "axios";
-import { globalNotification } from "../../../globalNotification";
-import { useDateFormatters } from "../utils/useDateFormatters";
-import { useDifficultyLabel } from "../utils/useDifficultyLabel";
+import { globalNotification } from "../../globalNotification";
+import { useDateFormatters } from "../admin/utils/useDateFormatters";
+import { useDifficultyLabel } from "../admin/utils/useDifficultyLabel";
+
+const selectIcon = new URL("../../../img/admin/select.svg", import.meta.url)
+    .href;
+const searchIcon = new URL("../../../img/admin/search.png", import.meta.url)
+    .href;
+const editIcon = new URL("../../../img/admin/edit.svg", import.meta.url).href;
+const trashIcon = new URL("../../../img/admin/trash.png", import.meta.url).href;
 
 const props = defineProps({
     courses: { type: Array, default: () => [] },
-    users: { type: Array, default: () => [] },
-    showCreate: { type: Boolean, default: true },
-    showActions: { type: Boolean, default: true },
-    showAuthor: { type: Boolean, default: true },
 });
 const emit = defineEmits([
     "update:courses",
@@ -280,41 +206,26 @@ const { formatBirthday } = useDateFormatters();
 const { difficultyLabel } = useDifficultyLabel();
 
 function difficultyClass(diff) {
-  const d = String(diff || "").toLowerCase();
+    const d = String(diff || "").toLowerCase();
 
-  if (d === "basic") return "users-role-pill--basic";
-  if (d === "middle") return "users-role-pill--middle";
-  if (d === "advanced") return "users-role-pill--advanced";
+    if (d === "basic") return "users-role-pill--basic";
+    if (d === "middle") return "users-role-pill--middle";
+    if (d === "advanced") return "users-role-pill--advanced";
 
-  return "users-role-pill--default";
+    return "users-role-pill--default";
 }
 
 function setCourses(next) {
     emit("update:courses", next);
 }
 
-const selectedDifficulty = ref("all");
 const searchCourseQuery = ref("");
-const courseDifficultyDropdownOpen = ref(false);
-
-function resetCourseDifficultyFilter() {
-    selectedDifficulty.value = "all";
-    courseDifficultyDropdownOpen.value = false;
-}
 
 const filteredCourses = computed(() => {
-    let base = props.courses;
-
-    if (selectedDifficulty.value !== "all") {
-        base = base.filter(
-            (c) => String(c.difficulty || "") === selectedDifficulty.value
-        );
-    }
-
     const q = (searchCourseQuery.value || "").trim().toLowerCase();
-    if (!q) return base;
+    if (!q) return props.courses;
 
-    return base.filter((c) => {
+    return props.courses.filter((c) => {
         const name = (c.course_name || "").toLowerCase();
         const title = (c.card_title || "").toLowerCase();
         const desc = (c.description || "").toLowerCase();
@@ -336,7 +247,7 @@ const paginatedCourses = computed(() => {
     return filteredCourses.value.slice(start, start + size);
 });
 
-watch([selectedDifficulty, searchCourseQuery, pageSizeCourses], () => {
+watch([searchCourseQuery, pageSizeCourses], () => {
     currentPageCourses.value = 1;
 });
 watch(
@@ -358,22 +269,30 @@ async function deleteCourse(courseId) {
         globalNotification.type = "error";
     }
 }
+
+function normalizeImageUrl(value) {
+    if (!value) return "";
+    if (value.startsWith("http://") || value.startsWith("https://")) {
+        return value;
+    }
+    if (value.startsWith("/")) {
+        return value;
+    }
+    return `/${value}`;
+}
 </script>
 
 <style scoped>
-.users-role-pill--basic{
-  background: #BDE5B0;
+.users-role-pill--basic {
+    background: #bde5b0;
 }
-
-.users-role-pill--middle{
-  background: #E5DFB0;
+.users-role-pill--middle {
+    background: #e5dfb0;
 }
-
-.users-role-pill--advanced{
-  background: #E5B0B0;
+.users-role-pill--advanced {
+    background: #e5b0b0;
 }
-
-.users-role-pill--default{
-  background: #e9e9e9;
+.users-role-pill--default {
+    background: #e9e9e9;
 }
 </style>

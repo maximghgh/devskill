@@ -50,6 +50,11 @@ class Course extends Model
         return $this->hasMany(\App\Models\Purchase::class, 'course_id');
     }
 
+    public function groups()
+    {
+        return $this->hasMany(\App\Models\Group::class, 'course_id');
+    }
+
     public function finalTest()
     {
         return $this->hasOne(FinalTest::class, 'chapter_id');

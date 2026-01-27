@@ -1014,3 +1014,15 @@ h3 {
 .course-accordion__body .journal {
     margin-top: 0;
 }
+
+/* страница мои курсы */
+
+.teacher__block{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.teacher__block .light-push-table{
+    width: 1200px;
+}

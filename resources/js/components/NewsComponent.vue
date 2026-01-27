@@ -2,36 +2,42 @@
     <div>
         <div class="maincontainer">
             <div class="container">
-                <section class="content content_news">
-                    <div class="content__inner">
-                        <h1>Новости</h1>
-                    </div>
-                    <div
-                        v-for="newsItem in latestNews"
-                        :key="newsItem.id"
-                        class="content__inner"
-                    >
-                        <h2>{{ newsItem.title }}</h2>
-                        <div class="content__data">
-                            {{ dayjs(newsItem.created_at).fromNow() }}
+                <section class="news">
+                    <div class="news__inner">
+                        <div class="news__header">
+                            <h1>Новости</h1>
                         </div>
-                        <img
-                            :src="
-                                newsItem.image
-                                    ? `/storage/${newsItem.image}`
-                                    : 'img/image.jpg'
-                            "
-                            class="content__img content__img_big"
-                            width="885"
-                            height="515"
-                        />
-                        <p v-html="newsItem.content"></p>
-                        <div class="content__button">
-                            <a
-                                :href="`/news-single?id=${newsItem.id}`"
-                                class="button button__content"
-                                >Читать подробнее</a
+                        <div class="news__grid">
+                            <article
+                                v-for="newsItem in news"
+                                :key="newsItem.id"
+                                class="news-card"
                             >
+                                <a
+                                    :href="`/news-single?id=${newsItem.id}`"
+                                    class="news-card__link"
+                                >
+                                    <div class="news-card__media">
+                                        <img
+                                            :src="
+                                                newsItem.image
+                                                    ? `/storage/${newsItem.image}`
+                                                    : 'img/image.jpg'
+                                            "
+                                            class="news-card__img"
+                                            alt=""
+                                            loading="lazy"
+                                        />
+
+                                    </div>
+                                    <div class="news-card__meta">
+                                        {{ formatDate(newsItem.created_at) }}
+                                    </div>
+                                    <h2 class="news-card__title">
+                                        {{ newsItem.title }}
+                                    </h2>
+                                </a>
+                            </article>
                         </div>
                     </div>
                 </section>
@@ -111,13 +117,11 @@
 
 <script setup>
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ru";
 
-dayjs.extend(relativeTime);
 dayjs.locale("ru");
 
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 
 // Массив для хранения всех новостей
@@ -134,10 +138,9 @@ async function loadNews() {
     }
 }
 
-// computed-свойство, которое возвращает только 3 последних новости
-const latestNews = computed(() => {
-    return news.value.slice(0, 3);
-});
+function formatDate(dateStr) {
+    return dayjs(dateStr).format("dddd, D MMMM YYYY");
+}
 
 // Загружаем новости при монтировании компонента
 onMounted(() => {
@@ -146,30 +149,93 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.content p {
+.news {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+.news__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.news__header h1 {
+    margin: 0 0 30px;
+}
+.news__grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px;
+}
+.news-card {
+    display: flex;
+    flex-direction: column;
+}
+.news-card__link {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: inherit;
+    text-decoration: none;
+}
+.news-card__media {
+    position: relative;
+    border: 1px solid #d9d9df;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+}
+.news-card__img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
     display: block;
 }
-.content__img_big {
-    border-radius: 60px;
+.news-card__tag {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    background: #f39c12;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 6px 10px;
+    border-radius: 3px;
+    text-transform: uppercase;
 }
-@media (max-width: 991px) {
-    .content__img_big {
-        width: 100%;
-        height: 250px;
-    }
-    .content__button{
-        margin: 0 0 70px;
+.news-card__meta {
+    color: #6f6f76;
+    font-size: 12px;
+}
+.news-card__title {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0;
+    text-align: left;
+}
+
+@media (max-width: 1200px) {
+    .news__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
-@media (max-width: 370px) {
-    .content__img_big {
-        border-radius: 15px;
+@media (max-width: 900px) {
+    .news__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .content p {
-        text-align: justify;
-        text-indent: 23px;
-        font-size: 0.7em;
-        line-height: 1.2em;
+    .news-card__img {
+        height: 200px;
+    }
+}
+@media (max-width: 600px) {
+    .news__grid {
+        grid-template-columns: 1fr;
+    }
+    .news-card__img {
+        height: 220px;
     }
 }
 </style>

@@ -4,6 +4,7 @@ import {computed, defineAsyncComponent, onMounted, reactive, ref, watch} from 'v
 
 import OverviewTab      from './Tab/Overview.vue'
 import PinMaxTab from './Tab/PinMax.vue'
+import GroupTab from './Tab/Group.vue'
 // import ResourcesTab     from './Tab/Resources.vue'
 // import RulesTab         from './Tab/Rules.vue'
 // import ContactsTab      from './Tab/Contacts.vue'
@@ -34,18 +35,21 @@ const tabs = [
     defineAsyncComponent(() => import('./Tab/MainInfo.vue')),
     OverviewTab,
     PinMaxTab,
+    GroupTab,
 ]
 
 const active = ref(0)
 const pendingTab     = ref(null)
 const showLeaveDlg   = ref(false)
 const hasUnsaved     = ref(false)
-const tabsRu = ref(['Основная информация','Темы', 'Закрепить MAX']);
+const tabsRu = ref(['Основная информация','Темы', 'Закрепить MAX', 'Группы']);
 const tCert = (t) => capitalizeFirstLetter(t?.certificates || 'Сертификаты')
 
 function onDirty (flag) { hasUnsaved.value = flag }
 
 function isTabLocked(i) {
+    if (isEdit.value) return false
+    if (!created.value && i !== 0) return true
     return false
 }
 

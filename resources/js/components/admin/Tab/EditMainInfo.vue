@@ -18,6 +18,157 @@ const props = defineProps({
 const emit = defineEmits(["saved"]);
 
 // =======================
+// EditorJS data helpers (parse + normalize list v1 -> v2)
+// =======================
+function parseEditorData(raw) {
+  if (!raw) return { blocks: [] };
+  if (typeof raw === "object") return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { blocks: [] };
+  }
+}
+
+function normalizeListItems(items, style) {
+  const listStyle = style === "checklist" ? "checklist" : "list";
+  const baseMeta = listStyle === "checklist" ? { checked: false } : {};
+
+  return (items || []).map((item) => {
+    if (item == null) return { content: "", meta: { ...baseMeta }, items: [] };
+
+    if (typeof item === "string" || typeof item === "number") {
+      return { content: String(item), meta: { ...baseMeta }, items: [] };
+    }
+
+    if (typeof item === "object") {
+      const content =
+        item.content ??
+        item.text ??
+        (typeof item.value === "string" ? item.value : "");
+
+      const rawNested = item.items;
+      let nested = [];
+      if (Array.isArray(rawNested)) {
+        nested = normalizeListItems(rawNested, style);
+      } else if (rawNested && typeof rawNested === "object") {
+        nested = normalizeListItems(Object.values(rawNested), style);
+      }
+
+      let meta = {};
+      if (listStyle === "checklist") {
+        const checked =
+          typeof item.checked === "boolean"
+            ? item.checked
+            : typeof item.meta?.checked === "boolean"
+              ? item.meta.checked
+              : false;
+        meta = { checked };
+      } else if (item.meta && typeof item.meta === "object" && !Array.isArray(item.meta)) {
+        meta = item.meta;
+      } else {
+        meta = { ...baseMeta };
+      }
+
+      return { content: String(content ?? ""), meta, items: nested };
+    }
+
+    return { content: String(item), meta: { ...baseMeta }, items: [] };
+  });
+}
+
+function normalizeEditorData(raw) {
+  const parsed = parseEditorData(raw);
+  const data = Array.isArray(parsed) ? { blocks: parsed } : parsed;
+  const blocks = Array.isArray(data.blocks) ? data.blocks : [];
+
+  const normalizedBlocks = blocks.map((block) => {
+    if (!block || typeof block !== "object") return block;
+    const rawType = typeof block.type === "string" ? block.type : "";
+    const type = rawType.toLowerCase();
+    if (type !== "list") return block;
+
+    let rawData = {};
+    if (block.data && typeof block.data === "object" && !Array.isArray(block.data)) {
+      rawData = block.data;
+    } else if (typeof block.data === "string") {
+      const trimmed = block.data.trim();
+      if (trimmed) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            rawData = parsed;
+          } else {
+            rawData = { items: parsed };
+          }
+        } catch {
+          rawData = { items: [block.data] };
+        }
+      }
+    }
+
+    let style = rawData.style;
+    if (style === "ol" || style === "ordered") style = "ordered";
+    else if (style === "ul" || style === "unordered" || style === "bullet") style = "unordered";
+    else if (style === "checklist" || style === "check") style = "checklist";
+    else if (style !== "ordered" && style !== "unordered" && style !== "checklist") {
+      style = "unordered";
+    }
+
+    let itemsRaw = rawData.items;
+    if (typeof itemsRaw === "string") {
+      const trimmed = itemsRaw.trim();
+      if (!trimmed) {
+        itemsRaw = [];
+      } else {
+        try {
+          itemsRaw = JSON.parse(trimmed);
+        } catch {
+          itemsRaw = [itemsRaw];
+        }
+      }
+    } else if (itemsRaw && typeof itemsRaw === "object" && !Array.isArray(itemsRaw)) {
+      itemsRaw = Object.values(itemsRaw);
+    }
+    if (!Array.isArray(itemsRaw)) itemsRaw = itemsRaw != null ? [itemsRaw] : [];
+
+    const meta =
+      rawData.meta && typeof rawData.meta === "object" && !Array.isArray(rawData.meta)
+        ? rawData.meta
+        : {};
+    if (style === "ordered") {
+      if (meta.start == null) meta.start = 1;
+      if (meta.counterType == null) meta.counterType = "numeric";
+    }
+
+    const normalizedItems = normalizeListItems(itemsRaw, style);
+    const safeItems =
+      normalizedItems.length > 0
+        ? normalizedItems
+        : [
+            {
+              content: "",
+              meta: style === "checklist" ? { checked: false } : {},
+              items: [],
+            },
+          ];
+
+    return {
+      ...block,
+      type: "list",
+      data: {
+        ...rawData,
+        style,
+        meta,
+        items: safeItems,
+      },
+    };
+  });
+
+  return { ...data, blocks: normalizedBlocks };
+}
+
+// =======================
 // списки для селектов
 // =======================
 const users = ref([]);
@@ -76,9 +227,12 @@ function initEditor() {
     editor.value = null;
   }
 
+  const normalized = normalizeEditorData(form.value.editorData);
+  form.value.editorData = normalized;
+
   editor.value = new EditorJS({
     holder: editorHolder.value,
-    data: form.value.editorData || { blocks: [] },
+    data: normalized,
     placeholder: "Редактируйте контент курса...",
     tools: {
       header: { class: Header, inlineToolbar: ["link"] },
@@ -256,7 +410,7 @@ function fillFormFromCourse(course) {
     cardImage: null,
     descriptionImage: null,
     pdfFile: null,
-    editorData: course.editor_data || { blocks: [] },
+    editorData: normalizeEditorData(course.editor_data),
     startDate: toDateInput(course.start_date),
     endDate: toDateInput(course.end_date),
   };
@@ -442,8 +596,8 @@ onBeforeUnmount(() => {
         class="dialog__input dialog__select"
       >
         <option value="basic">Базовый</option>
-        <option value="middle">Средний</option>
-        <option value="advanced">Продвинутый</option>
+        <option value="middle">Фундаментальный</option>
+        <option value="advanced">Олимпиадный</option>
       </select>
     </div>
 

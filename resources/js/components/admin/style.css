@@ -851,6 +851,33 @@ table.light-push-table {
     margin: 0 0 30px;
 }
 
+.group-table {
+    margin: 20px 0 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed;
+}
+
+.group-table .col-check {
+    width: 44px;
+    text-align: center;
+}
+
+.group-table .col-name {
+    width: calc(100% - 44px);
+}
+
+.group-table .col-check input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    appearance: auto;
+    -webkit-appearance: checkbox;
+    -moz-appearance: checkbox;
+    accent-color: #41328f;
+    display: inline-block;
+}
+
 .light-push-table th:last-child,
 .light-push-table td:last-child {
     max-width: 121px;
@@ -927,9 +954,6 @@ table.light-push-table {
     font-size: 14px;
     line-height: 100%;
     letter-spacing: 0%;
-}
-
-.light-push-table td {
 }
 
 .light-push-table tbody tr:last-child td {
@@ -1429,6 +1453,19 @@ table.light-push-table {
     justify-content: flex-end;
     align-items: center;
     gap: 12px;
+}
+
+.btn-delete {
+    background: none;
+    border: none;
+    color: #d40000;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-delete:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 @media screen and (max-width: 575.98px) {

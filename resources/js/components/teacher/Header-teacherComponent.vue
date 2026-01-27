@@ -16,6 +16,7 @@
                 <a href="/teacher">Панель преподователя</a>
                 <a href="/teacher/journal">Журнал</a>
                 <a href="/teacher/course">Курсы</a>
+                <a href="/teacher/mycourses">Мои курсы</a>
             </nav>
             <div class="header__lk">
                 <div class="personal-area personal-area_active">
@@ -138,6 +139,7 @@ watch(
 </script>
 
 <style scoped>
+
 .avatar__user{
     border-radius: 50%;
 }

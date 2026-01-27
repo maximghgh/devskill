@@ -428,8 +428,8 @@ const successText = ref("");
 /* словари для уровней и цветов */
 const diffLabel = {
     basic: "Начинающий",
-    middle: "Средний",
-    advanced: "Продвинутый",
+    middle: "Фундаментальный",
+    advanced: "Олимпиадный",
     mixed: "Смешанный",
 };
 const diffBg = {

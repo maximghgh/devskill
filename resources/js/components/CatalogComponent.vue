@@ -61,7 +61,7 @@
                                             value="middle"
                                             v-model="selectedDifficulties"
                                         />
-                                        <label for="lvl_2"><span>Средний</span></label>
+                                        <label for="lvl_2"><span>Фундаментальный</span></label>
                                     </div>
                                     <div class="course__sidebar-oncheck">
                                         <input
@@ -71,7 +71,7 @@
                                             value="advanced"
                                             v-model="selectedDifficulties"
                                         />
-                                        <label for="lvl_3"><span>Продвинутый</span></label>
+                                        <label for="lvl_3"><span>Олимпиадный</span></label>
                                     </div>
                                     <div class="course__sidebar-oncheck">
                                         <input
@@ -531,8 +531,8 @@ const selectedLanguages    = computed(() =>
 /* --- Словари сложности для карточек и модалки --- */
 const difficultyTranslation = {
   basic: "Начинающий",
-  middle: "Средний",
-  advanced: "Продвинутый",
+  middle: "Фундаментальный",
+  advanced: "Олимпиадный",
   mixed: "Смешанный",
 };
 const difficultyColorClass = {

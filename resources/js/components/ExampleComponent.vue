@@ -551,9 +551,8 @@ const pages = computed(() =>
 /* ------------------------------------------------------------------ */
 const levelOptions = [
   { value: "basic", label: "Начинающий" },
-  { value: "middle", label: "Средний" },
-  { value: "advanced", label: "Продвинутый" },
-  { value: "mixed", label: "Смешанный" },
+  { value: "middle", label: "Фундаментальный" },
+  { value: "advanced", label: "Олимпиадный" },
 ];
 
 const selectedDifficulties = ref([]);
@@ -574,9 +573,8 @@ const validateDuration = (e) => {
 /* ------------------------------------------------------------------ */
 const difficultyTranslation = {
   basic: "Начинающий",
-  middle: "Средний",
-  advanced: "Продвинутый",
-  mixed: "Смешанный",
+  middle: "Фундаментальный",
+  advanced: "Олимпиадный",
 };
 
 const difficultyColorClass = {
