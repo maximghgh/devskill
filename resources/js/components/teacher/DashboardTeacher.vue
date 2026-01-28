@@ -5,11 +5,11 @@
             <div class="info__cards">
                 <div class="info__card">
                     <p class="info__text">Активных курсов</p>
-                    <span class="info__desc">2</span>
+                    <span class="info__desc">{{ activeCoursesCount }}</span>
                 </div>
                 <div class="info__card">
                     <p class="info__text">Всего студентов</p>
-                    <span class="info__desc">54</span>
+                    <span class="info__desc">{{ totalStudentsCount }}</span>
                 </div>
             </div>
             <div class="info__events">
@@ -28,40 +28,52 @@
         <div class="main">
             <div class="div">
                 <h3>Текущие курсы</h3>
-                <div class="course__block">
-                    <div class="course_card">
-                        <div class="course__text">
-                            <h4 class="course__title">Дизайн</h4>
-                            <div class="course__info">
-                                <span class="course__desc">12 модулей</span>
-                                <span class="course__desc">19 студентов</span>
+                <div class="course__block course__block--current">
+                    <div v-if="currentCourses.length" class="course__block">
+                        <div
+                            v-for="course in currentCoursesPage"
+                            :key="course.id"
+                            class="course_card course_card--s"
+                        >
+                            <div class="course__text">
+                                <h4 class="course__title">
+                                    {{ course.course_name || "Без названия" }}
+                                </h4>
+                                <div class="course__info">
+                                    <span class="course__desc"
+                                        >{{ course.topics_count ?? 0 }} модулей</span
+                                    >
+                                    <span class="course__desc"
+                                        >{{ studentsByCourse[course.id] ?? 0 }} студентов</span
+                                    >
+                                </div>
+                                <span class="course__desc">
+                                    {{
+                                        course.end_date
+                                            ? `Дата завершения: ${formatDate(course.end_date)}`
+                                            : "Дата завершения не указана"
+                                    }}
+                                </span>
                             </div>
-                            <span class="course__desc"
-                                >Дата завершения: 22.02.2026</span
+                            <a
+                                :href="`/teacher/course/${course.id}`"
+                                class="course__link"
+                                >Открыть курс</a
                             >
-                        </div>
-                        <a href="/teacher" class="course__link">Открыть курс</a>
 
-                        <span class="course__status">Активен</span>
-                    </div>
-                    <div class="course_card">
-                        <div class="course__text">
-                            <h4 class="course__title">Дизайн</h4>
-                            <div class="course__info">
-                                <span class="course__desc">12 модулей</span>
-                                <span class="course__desc">19 студентов</span>
-                            </div>
-                            <span class="course__desc"
-                                >Дата завершения: 22.02.2026</span
-                            >
+                            <span class="course__status">Активен</span>
                         </div>
-                        <a href="/teacher" class="course__link">Открыть курс</a>
-
-                        <span class="course__status">Активен</span>
                     </div>
-                    <div class="pagination">
-                        <button class="pag--active"></button>
-                        <button class="pag"></button>
+                    <div v-if="currentTotalPages > 1" class="pagination">
+                        <button
+                            v-for="p in currentTotalPages"
+                            :key="`current-${p}`"
+                            :class="currentPage === p ? 'pag--active' : 'pag'"
+                            @click="currentPage = p"
+                        ></button>
+                    </div>
+                    <div v-if="!currentCourses.length" class="course__empty">
+                        Текущих курсов нет.
                     </div>
                 </div>
             </div>
@@ -106,22 +118,53 @@
         <div class="course__later">
             <div class="div">
                 <h3>Будущие курсы</h3>
-                <div class="course__block">
-                    <div class="course_card course_card--s">
-                        <div class="course__text">
-                            <h4 class="course__title">Дизайн</h4>
-                            <div class="course__info">
-                                <span class="course__desc">12 модулей</span>
-                                <span class="course__desc">19 студентов</span>
+                <div class="course__block course__block--s">
+                    <div v-if="futureCourses.length">
+                        <div
+                            v-for="course in futureCoursesPage"
+                            :key="course.id"
+                            class="course_card course_card--s"
+                        >
+                            <div class="course__text">
+                                <h4 class="course__title">
+                                    {{ course.course_name || "Без названия" }}
+                                </h4>
+                                <div class="course__info">
+                                    <span class="course__desc"
+                                        >{{ course.topics_count ?? 0 }} модулей</span
+                                    >
+                                    <span class="course__desc"
+                                        >{{ studentsByCourse[course.id] ?? 0 }} студентов</span
+                                    >
+                                </div>
+                                <span class="course__desc">
+                                    {{
+                                        course.start_date
+                                            ? `Дата старта: ${formatDate(course.start_date)}`
+                                            : "Дата старта не указана"
+                                    }}
+                                </span>
                             </div>
-                            <span class="course__desc"
-                                >Дата завершения: 22.02.2026</span
+                            <a
+                                :href="`/teacher/course/${course.id}`"
+                                class="course__link"
+                                >Открыть курс</a
+                            >
+
+                            <span class="course__status course__status--red"
+                                >Закрыт</span
                             >
                         </div>
-                        <a href="/teacher" class="course__link">Открыть курс</a>
-
-                        <span class="course__status course__status--red">Закрыт</span>
+                        <div v-if="futureTotalPages > 1" class="pagination">
+                            <button
+                                v-for="p in futureTotalPages"
+                                :key="`future-${p}`"
+                                :class="futurePage === p ? 'pag--active' : 'pag'"
+                                @click="futurePage = p"
+                            ></button>
+                        </div>
                     </div>
+                    <div v-else class="course__empty">Будущих курсов нет.</div>
                 </div>
             </div>
         </div>
@@ -129,84 +172,137 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import axios from "axios";
 import "./style.css";
 
-const rows = ref([]);
-const searchQuery = ref("");
-const showHints = ref(false);
-const showModal = ref(false);
-const modalData = ref({ user: "", questions: [], answers: {} });
+const courses = ref([]);
+const studentsByCourse = ref({});
+const totalStudentsCount = ref(0);
+const pageSize = 2;
+const currentPage = ref(1);
+const futurePage = ref(1);
 
-onMounted(async () => {
-    const { data } = await axios.get("/api/final-test-results");
-    rows.value = data;
-});
-
-// Для подсказок: достаём уникальные имена
-const allNames = computed(() =>
-    Array.from(
-        new Set(
-            rows.value
-                .map((r) => r.user?.name)
-                .filter((n) => typeof n === "string")
-        )
-    )
-);
-
-// Вычисляем подсказки: начинаются с searchQuery, максимум 5 штук
-const hints = computed(() => {
-    const q = searchQuery.value.trim().toLowerCase();
-    if (!q) return [];
-    return allNames.value
-        .filter((name) => name.toLowerCase().startsWith(q))
-        .slice(0, 5);
-});
-
-// После выбора подсказки подставляем её и скрываем hint-лист
-function selectHint(name) {
-    searchQuery.value = name;
-    showHints.value = false;
-}
-
-// Скрываем подсказки с небольшой задержкой,
-// чтобы клик по пункту успел обработаться
-function onBlur() {
-    setTimeout(() => {
-        showHints.value = false;
-    }, 100);
-}
-
-// Фильтрация таблицы
-const filteredRows = computed(() => {
-    const q = searchQuery.value.trim().toLowerCase();
-    if (!q) return rows.value;
-    return rows.value.filter((r) => {
-        const name = (r.user?.name || "").toLowerCase();
-        const idStr = String(r.user_id);
-        return name.includes(q) || idStr.includes(q);
-    });
-});
-
-// Открыть модалку с деталями
-async function openModal(resultId) {
+function getTeacherId() {
+    const stored = localStorage.getItem("user");
+    if (!stored) return null;
     try {
-        const { data } = await axios.get(`/api/final-test-results/${resultId}`);
-        const quizBlock = data.questions.blocks.find((b) => b.type === "quiz");
-        const qs = quizBlock?.data?.questions || [];
-        modalData.value = {
-            user: data.user,
-            questions: qs,
-            answers: data.answers,
-        };
-        showModal.value = true;
+        const parsed = JSON.parse(stored);
+        return parsed?.id ?? null;
     } catch (e) {
-        console.error("Не удалось загрузить подробности:", e);
+        return null;
     }
 }
 
-function closeModal() {
-    showModal.value = false;
+function parseTeacherIds(teachers) {
+    if (Array.isArray(teachers)) return teachers;
+    if (teachers == null) return [];
+    if (typeof teachers === "number") return [teachers];
+    if (typeof teachers === "string") {
+        try {
+            const parsed = JSON.parse(teachers);
+            if (Array.isArray(parsed)) return parsed;
+            if (parsed == null) return [];
+            return [parsed];
+        } catch {
+            return [];
+        }
+    }
+    return [];
 }
+
+function getCourseStatus(course) {
+    const now = new Date();
+    const start = course.start_date ? new Date(course.start_date) : null;
+    const end = course.end_date ? new Date(course.end_date) : null;
+
+    if (end && now > end) return "past";
+    if (start && now < start) return "future";
+    return "current";
+}
+
+const currentCourses = computed(() =>
+    courses.value.filter((c) => getCourseStatus(c) === "current")
+);
+const futureCourses = computed(() =>
+    courses.value.filter((c) => getCourseStatus(c) === "future")
+);
+
+const activeCoursesCount = computed(() => currentCourses.value.length);
+
+const currentTotalPages = computed(() =>
+    Math.max(1, Math.ceil(currentCourses.value.length / pageSize))
+);
+const futureTotalPages = computed(() =>
+    Math.max(1, Math.ceil(futureCourses.value.length / pageSize))
+);
+
+const currentCoursesPage = computed(() => {
+    const start = (currentPage.value - 1) * pageSize;
+    return currentCourses.value.slice(start, start + pageSize);
+});
+const futureCoursesPage = computed(() => {
+    const start = (futurePage.value - 1) * pageSize;
+    return futureCourses.value.slice(start, start + pageSize);
+});
+
+function formatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleDateString("ru-RU");
+}
+
+async function loadCourses() {
+    try {
+        const teacherId = getTeacherId();
+        const { data } = await axios.get("/api/courses");
+        const list = Array.isArray(data) ? data : data?.data || [];
+
+        if (!teacherId) {
+            courses.value = [];
+            return;
+        }
+
+        const teacherIdStr = String(teacherId);
+        courses.value = list.filter((course) => {
+            const ids = parseTeacherIds(course.teachers).map((id) =>
+                String(id)
+            );
+            return ids.includes(teacherIdStr);
+        });
+    } catch (e) {
+        console.error("Ошибка при загрузке курсов:", e);
+        courses.value = [];
+    }
+}
+
+async function loadStudentsCounts() {
+    const next = {};
+    let total = 0;
+    await Promise.all(
+        courses.value.map(async (course) => {
+            try {
+                const { data } = await axios.get(`/api/students/${course.id}`);
+                const list = Array.isArray(data) ? data : [];
+                next[course.id] = list.length;
+                total += list.length;
+            } catch (e) {
+                next[course.id] = 0;
+            }
+        })
+    );
+    studentsByCourse.value = next;
+    totalStudentsCount.value = total;
+}
+
+watch(courses, () => {
+    if (currentPage.value > currentTotalPages.value) currentPage.value = 1;
+    if (futurePage.value > futureTotalPages.value) futurePage.value = 1;
+});
+
+onMounted(async () => {
+    await loadCourses();
+    await loadStudentsCounts();
+});
 </script>

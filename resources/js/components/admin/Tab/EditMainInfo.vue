@@ -32,13 +32,12 @@ function parseEditorData(raw) {
 
 function normalizeListItems(items, style) {
   const listStyle = style === "checklist" ? "checklist" : "list";
-  const baseMeta = listStyle === "checklist" ? { checked: false } : {};
 
   return (items || []).map((item) => {
-    if (item == null) return { content: "", meta: { ...baseMeta }, items: [] };
+    if (item == null) return { content: "", items: [] };
 
     if (typeof item === "string" || typeof item === "number") {
-      return { content: String(item), meta: { ...baseMeta }, items: [] };
+      return { content: String(item), items: [] };
     }
 
     if (typeof item === "object") {
@@ -53,9 +52,10 @@ function normalizeListItems(items, style) {
         nested = normalizeListItems(rawNested, style);
       } else if (rawNested && typeof rawNested === "object") {
         nested = normalizeListItems(Object.values(rawNested), style);
+      } else {
+        nested = [];
       }
 
-      let meta = {};
       if (listStyle === "checklist") {
         const checked =
           typeof item.checked === "boolean"
@@ -63,17 +63,13 @@ function normalizeListItems(items, style) {
             : typeof item.meta?.checked === "boolean"
               ? item.meta.checked
               : false;
-        meta = { checked };
-      } else if (item.meta && typeof item.meta === "object" && !Array.isArray(item.meta)) {
-        meta = item.meta;
-      } else {
-        meta = { ...baseMeta };
+        return { content: String(content ?? ""), meta: { checked }, items: nested };
       }
 
-      return { content: String(content ?? ""), meta, items: nested };
+      return { content: String(content ?? ""), items: nested };
     }
 
-    return { content: String(item), meta: { ...baseMeta }, items: [] };
+    return { content: String(item), items: [] };
   });
 }
 
@@ -86,11 +82,13 @@ function normalizeEditorData(raw) {
     if (!block || typeof block !== "object") return block;
     const rawType = typeof block.type === "string" ? block.type : "";
     const type = rawType.toLowerCase();
-    if (type !== "list") return block;
+    if (type !== "list" && type !== "checklist") return block;
 
     let rawData = {};
     if (block.data && typeof block.data === "object" && !Array.isArray(block.data)) {
       rawData = block.data;
+    } else if (Array.isArray(block.data)) {
+      rawData = { items: block.data };
     } else if (typeof block.data === "string") {
       const trimmed = block.data.trim();
       if (trimmed) {
@@ -112,7 +110,7 @@ function normalizeEditorData(raw) {
     else if (style === "ul" || style === "unordered" || style === "bullet") style = "unordered";
     else if (style === "checklist" || style === "check") style = "checklist";
     else if (style !== "ordered" && style !== "unordered" && style !== "checklist") {
-      style = "unordered";
+      style = type === "checklist" ? "checklist" : "unordered";
     }
 
     let itemsRaw = rawData.items;
@@ -132,9 +130,11 @@ function normalizeEditorData(raw) {
     }
     if (!Array.isArray(itemsRaw)) itemsRaw = itemsRaw != null ? [itemsRaw] : [];
 
+    const safeRawData = { ...rawData };
+    if (Array.isArray(safeRawData.meta)) delete safeRawData.meta;
     const meta =
-      rawData.meta && typeof rawData.meta === "object" && !Array.isArray(rawData.meta)
-        ? rawData.meta
+      safeRawData.meta && typeof safeRawData.meta === "object" && !Array.isArray(safeRawData.meta)
+        ? safeRawData.meta
         : {};
     if (style === "ordered") {
       if (meta.start == null) meta.start = 1;
@@ -142,22 +142,28 @@ function normalizeEditorData(raw) {
     }
 
     const normalizedItems = normalizeListItems(itemsRaw, style);
-    const safeItems =
-      normalizedItems.length > 0
-        ? normalizedItems
-        : [
-            {
-              content: "",
-              meta: style === "checklist" ? { checked: false } : {},
-              items: [],
-            },
-          ];
+    const hasNested = normalizedItems.some(
+      (item) => Array.isArray(item.items) && item.items.length > 0
+    );
+    let safeItems = normalizedItems;
+    if (!safeItems.length) {
+      safeItems = [
+        style === "checklist"
+          ? { content: "", meta: { checked: false }, items: [] }
+          : { content: "", items: [] },
+      ];
+    }
+    if (style !== "checklist" && !hasNested) {
+      safeItems = safeItems.map((item) =>
+        typeof item === "string" ? item : String(item.content ?? "")
+      );
+    }
 
     return {
       ...block,
       type: "list",
       data: {
-        ...rawData,
+        ...safeRawData,
         style,
         meta,
         items: safeItems,

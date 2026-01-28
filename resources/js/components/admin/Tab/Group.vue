@@ -46,6 +46,20 @@ const filteredStudents = computed(() => {
     });
 });
 
+const studentPageSize = ref(5);
+const studentPage = ref(1);
+
+const totalStudentPages = computed(() => {
+    const size = studentPageSize.value || 1;
+    return Math.max(1, Math.ceil(filteredStudents.value.length / size));
+});
+
+const paginatedStudents = computed(() => {
+    const size = studentPageSize.value || 5;
+    const start = (studentPage.value - 1) * size;
+    return filteredStudents.value.slice(start, start + size);
+});
+
 function isSelected(id) {
     return selectedStudentIds.value.includes(id);
 }
@@ -62,6 +76,7 @@ function resetForm() {
     groupName.value = "";
     searchQuery.value = "";
     selectedStudentIds.value = [];
+    studentPage.value = 1;
 }
 
 async function loadStudents() {
@@ -133,6 +148,7 @@ async function openEditGroup(group) {
     editingGroupId.value = group.id;
     modalOpen.value = true;
     modalLoading.value = true;
+    studentPage.value = 1;
 
     try {
         const { data } = await axios.get(
@@ -249,6 +265,16 @@ watch(courseId, (id) => {
     loadStudents();
 });
 
+watch(searchQuery, () => {
+    studentPage.value = 1;
+});
+
+watch(filteredStudents, () => {
+    if (studentPage.value > totalStudentPages.value) {
+        studentPage.value = 1;
+    }
+});
+
 onMounted(() => {
     if (courseId.value) {
         loadGroups();
@@ -332,7 +358,7 @@ onMounted(() => {
                                     <input
                                         v-model="searchQuery"
                                         type="text"
-                                        class="users-search__input"
+                                        class="users-search__input search__input--xl"
                                         placeholder="Поиск ученика..."
                                         :disabled="modalLoading"
                                     />
@@ -365,7 +391,7 @@ onMounted(() => {
                                         </tr>
                                         <tr
                                             v-else
-                                            v-for="student in filteredStudents"
+                                            v-for="student in paginatedStudents"
                                             :key="student.id"
                                         >
                                             <td class="col-check">
@@ -380,6 +406,35 @@ onMounted(() => {
                                         </tr>
                                     </tbody>
                                 </table>
+
+                                <div
+                                    class="pagination-users"
+                                    v-if="totalStudentPages > 1"
+                                    style="margin-top: 12px"
+                                >
+                                    <button
+                                        :disabled="studentPage === 1"
+                                        @click="studentPage--"
+                                    >
+                                        ‹ Назад
+                                    </button>
+
+                                    <button
+                                        v-for="p in totalStudentPages"
+                                        :key="p"
+                                        :class="{ active: studentPage === p }"
+                                        @click="studentPage = p"
+                                    >
+                                        {{ p }}
+                                    </button>
+
+                                    <button
+                                        :disabled="studentPage === totalStudentPages"
+                                        @click="studentPage++"
+                                    >
+                                        Вперёд ›
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="dialog__btns">

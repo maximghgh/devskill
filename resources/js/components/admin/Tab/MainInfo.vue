@@ -24,6 +24,163 @@ const props = defineProps({
 
 const emit = defineEmits(["saved", "cancel", "dirty", "saving"]);
 
+// =======================
+// EditorJS data helpers (normalize list blocks)
+// =======================
+function parseEditorData(raw) {
+  if (!raw) return { blocks: [] };
+  if (typeof raw === "object") return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { blocks: [] };
+  }
+}
+
+function normalizeListItems(items, style) {
+  const listStyle = style === "checklist" ? "checklist" : "list";
+
+  return (items || []).map((item) => {
+    if (item == null) return { content: "", items: [] };
+
+    if (typeof item === "string" || typeof item === "number") {
+      return { content: String(item), items: [] };
+    }
+
+    if (typeof item === "object") {
+      const content =
+        item.content ??
+        item.text ??
+        (typeof item.value === "string" ? item.value : "");
+
+      const rawNested = item.items;
+      let nested = [];
+      if (Array.isArray(rawNested)) {
+        nested = normalizeListItems(rawNested, style);
+      } else if (rawNested && typeof rawNested === "object") {
+        nested = normalizeListItems(Object.values(rawNested), style);
+      } else {
+        nested = [];
+      }
+
+      if (listStyle === "checklist") {
+        const checked =
+          typeof item.checked === "boolean"
+            ? item.checked
+            : typeof item.meta?.checked === "boolean"
+              ? item.meta.checked
+              : false;
+        return { content: String(content ?? ""), meta: { checked }, items: nested };
+      }
+
+      return { content: String(content ?? ""), items: nested };
+    }
+
+    return { content: String(item), items: [] };
+  });
+}
+
+function normalizeEditorData(raw) {
+  const parsed = parseEditorData(raw);
+  const data = Array.isArray(parsed) ? { blocks: parsed } : parsed;
+  const blocks = Array.isArray(data.blocks) ? data.blocks : [];
+
+  const normalizedBlocks = blocks.map((block) => {
+    if (!block || typeof block !== "object") return block;
+    const rawType = typeof block.type === "string" ? block.type : "";
+    const type = rawType.toLowerCase();
+    if (type !== "list" && type !== "checklist") return block;
+
+    let rawData = {};
+    if (block.data && typeof block.data === "object" && !Array.isArray(block.data)) {
+      rawData = block.data;
+    } else if (Array.isArray(block.data)) {
+      rawData = { items: block.data };
+    } else if (typeof block.data === "string") {
+      const trimmed = block.data.trim();
+      if (trimmed) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            rawData = parsed;
+          } else {
+            rawData = { items: parsed };
+          }
+        } catch {
+          rawData = { items: [block.data] };
+        }
+      }
+    }
+
+    let style = rawData.style;
+    if (style === "ol" || style === "ordered") style = "ordered";
+    else if (style === "ul" || style === "unordered" || style === "bullet") style = "unordered";
+    else if (style === "checklist" || style === "check") style = "checklist";
+    else if (style !== "ordered" && style !== "unordered" && style !== "checklist") {
+      style = type === "checklist" ? "checklist" : "unordered";
+    }
+
+    let itemsRaw = rawData.items;
+    if (typeof itemsRaw === "string") {
+      const trimmed = itemsRaw.trim();
+      if (!trimmed) {
+        itemsRaw = [];
+      } else {
+        try {
+          itemsRaw = JSON.parse(trimmed);
+        } catch {
+          itemsRaw = [itemsRaw];
+        }
+      }
+    } else if (itemsRaw && typeof itemsRaw === "object" && !Array.isArray(itemsRaw)) {
+      itemsRaw = Object.values(itemsRaw);
+    }
+    if (!Array.isArray(itemsRaw)) itemsRaw = itemsRaw != null ? [itemsRaw] : [];
+
+    const safeRawData = { ...rawData };
+    if (Array.isArray(safeRawData.meta)) delete safeRawData.meta;
+    const meta =
+      safeRawData.meta && typeof safeRawData.meta === "object" && !Array.isArray(safeRawData.meta)
+        ? safeRawData.meta
+        : {};
+    if (style === "ordered") {
+      if (meta.start == null) meta.start = 1;
+      if (meta.counterType == null) meta.counterType = "numeric";
+    }
+
+    const normalizedItems = normalizeListItems(itemsRaw, style);
+    const hasNested = normalizedItems.some(
+      (item) => Array.isArray(item.items) && item.items.length > 0
+    );
+    let safeItems = normalizedItems;
+    if (!safeItems.length) {
+      safeItems = [
+        style === "checklist"
+          ? { content: "", meta: { checked: false }, items: [] }
+          : { content: "", items: [] },
+      ];
+    }
+    if (style !== "checklist" && !hasNested) {
+      safeItems = safeItems.map((item) =>
+        typeof item === "string" ? item : String(item.content ?? "")
+      );
+    }
+
+    return {
+      ...block,
+      type: "list",
+      data: {
+        ...safeRawData,
+        style,
+        meta,
+        items: safeItems,
+      },
+    };
+  });
+
+  return { ...data, blocks: normalizedBlocks };
+}
+
 /** Локальная форма */
 const form = ref({
   cardTitle: "",
@@ -164,10 +321,13 @@ function initEditor() {
 
   destroyEditor();
 
+  const normalized = normalizeEditorData(form.value.editorData);
+  form.value.editorData = normalized;
+
   editor.value = new EditorJS({
     holder: editorHolder.value,
     placeholder: "Добавьте контент для нового курса...",
-    data: form.value.editorData,
+    data: normalized,
     tools: {
       header: { class: Header, inlineToolbar: ["link"] },
       list: { class: List, inlineToolbar: true },
@@ -334,7 +494,7 @@ async function save() {
     // 1) сохраняем данные из EditorJS
     if (editor.value) {
       const data = await editor.value.save();
-      form.value.editorData = data;
+      form.value.editorData = normalizeEditorData(data);
     }
 
     const ct = (form.value.cardTitle || form.value.courseName || "").trim();
@@ -353,7 +513,7 @@ async function save() {
     if (form.value.simulators != null) fd.append("simulators", form.value.simulators);
 
     fd.append("difficulty", form.value.difficulty);
-    fd.append("editorData", JSON.stringify(form.value.editorData));
+    fd.append("editorData", JSON.stringify(normalizeEditorData(form.value.editorData)));
 
     fd.append("teachers", JSON.stringify(form.value.selectedTeachers));
 

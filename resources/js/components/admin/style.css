@@ -714,6 +714,11 @@ h2 {
     font-size: 14px;
 }
 
+.search__input--xl{
+    width: 100%;
+    max-width: 647px !important;
+}
+
 .users-search__clear {
     position: absolute;
     right: 8px;
@@ -859,7 +864,8 @@ table.light-push-table {
 }
 
 .group-table .col-check {
-    width: 44px;
+    width: 15px;
+    padding: 0;
     text-align: center;
 }
 

@@ -1297,7 +1297,11 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: 0 auto;
 }
 .course-content__top-img {
-    max-width: 100%;
+    display: block;
+    width: 600px;
+    height: 350px;
+    background-position: center;
+    object-fit: contain;
 }
 .course-content__main {
     display: flex;
