@@ -86,7 +86,7 @@
                                     @click="submit"
                                     :disabled="loading"
                                 >
-                                    {{ loading ? "Отправляем..." : "Отправить" }}
+                                    {{ loading ? "Сохраняем..." : "Сохранить" }}
                                 </button>
                             </div>
                         </div>

@@ -37,7 +37,7 @@
               </button>
 
               <button type="button" class="main__btn" @click="submit" :disabled="loading || !form.id">
-                {{ loading ? "Сохранение..." : "Отправить" }}
+                {{ loading ? "Сохранение..." : "Сохранить" }}
               </button>
             </div>
           </div>
