@@ -118,6 +118,48 @@ app.use(VueTheMask);
 app.mount("#app");
 // createApp(Register).mount('#app');
 
+// Keep course cards the same height based on the tallest card in each list.
+function equalizeCourseCards() {
+  const containers = document.querySelectorAll(".course__cards");
+  containers.forEach((container) => {
+    const cards = Array.from(container.querySelectorAll(".course__card"));
+    if (cards.length === 0) return;
+
+    cards.forEach((card) => {
+      card.style.height = "auto";
+    });
+
+    const maxHeight = cards.reduce(
+      (max, card) => Math.max(max, card.getBoundingClientRect().height),
+      0
+    );
+    if (maxHeight === 0) return;
+
+    const targetHeight = `${Math.ceil(maxHeight)}px`;
+    cards.forEach((card) => {
+      card.style.height = targetHeight;
+    });
+  });
+}
+
+let equalizeRafId = null;
+function requestEqualizeCourseCards() {
+  if (equalizeRafId) return;
+  equalizeRafId = window.requestAnimationFrame(() => {
+    equalizeRafId = null;
+    equalizeCourseCards();
+  });
+}
+
+window.addEventListener("load", requestEqualizeCourseCards);
+window.addEventListener("resize", requestEqualizeCourseCards);
+
+const appRoot = document.getElementById("app");
+if (appRoot && "MutationObserver" in window) {
+  const observer = new MutationObserver(requestEqualizeCourseCards);
+  observer.observe(appRoot, { childList: true, subtree: true });
+}
+
 window.globalNotification = {
     message: "",
 };

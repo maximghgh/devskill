@@ -216,11 +216,7 @@
                                 </div>
                                 <!-- ===== Modal purchase / consult ===== -->
                                 <transition name="modal">
-                                    <div
-                                        v-if="isModalOpen"
-                                        class="modal-overlay"
-                                        @click.self="closeModal"
-                                    >
+                                    <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
                                         <div class="modal-content__block">
                                             <button
                                                 class="modal-close"
@@ -1192,6 +1188,7 @@ function scrollToCourse() {
     min-height: 300px;
     height: 100%;
     color: #ffffff;
+    overflow: hidden;
 }
 
 .block-info_bg-cyan {
@@ -1211,6 +1208,11 @@ function scrollToCourse() {
     font-size: 30px;
     margin: 0;
 }
+.block__difficul {
+    max-height: 48vh;
+    overflow-y: auto;
+    padding-right: 6px;
+}
 .block__top img {
     width: 65px;
     height: 65px;
@@ -1225,6 +1227,7 @@ function scrollToCourse() {
     padding: 50px 30px;
 }
 .modal-content {
+    margin: 0;
     overflow: hidden;
     display: grid;
     grid-template-columns: 500px 1fr;

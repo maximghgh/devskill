@@ -892,7 +892,8 @@ input[type="number"]::-webkit-outer-spin-button {
 .course__card {
     width: 100%;
     max-width: 47%;
-    height: 300px;
+    height: auto;
+    min-height: 300px;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -903,6 +904,7 @@ input[type="number"]::-webkit-outer-spin-button {
     justify-content: space-between;
     flex-direction: column;
     transition: var(--transition-3);
+    position: relative;
 }
 .course__card_bg1 {
     background-image: url("../img/bg_1.png");
@@ -954,9 +956,12 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .course__card-title {
     font-family: JanoSansProBold;
-    font-size: 32px;
+    font-size: clamp(24px, 2.2vw, 32px);
     margin: 0 0 5px;
     max-width: 80%;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 /* .course__card-desc {
     width: 67%;

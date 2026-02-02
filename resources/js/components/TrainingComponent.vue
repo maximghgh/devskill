@@ -625,7 +625,8 @@ function scrollToCourse() {
     width: 100%;
     min-height: 300px;
     position: relative;
-    border-radius: 8px;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(12, 24, 53, 0.25);
 }
 
 /* Основной контент модалки покупки */
@@ -636,17 +637,17 @@ function scrollToCourse() {
     z-index: 10001 !important;
 }
 .modal-content {
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden;
     display: grid;
-    grid-template-columns: 500px 1fr;
+    grid-template-columns: minmax(0, 46%) minmax(0, 54%);
     padding: 0;
     background: #fff;
     max-width: 1000px;
     width: 100%;
     min-height: 300px;
     position: relative;
-    border-radius: 8px;
+    border-radius: 18px;
+    max-height: 85vh;
 }
 .editor {
     z-index: 1;
@@ -655,7 +656,7 @@ function scrollToCourse() {
 /* Кнопка закрытия */
 .modal-close {
     font-size: 20px;
-    background: none;
+    background: #fff;
     border: none;
     border-radius: 50%;
     width: 30px;
@@ -665,6 +666,10 @@ function scrollToCourse() {
     right: 10px;
     cursor: pointer;
     z-index: 10;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+.modal-close:hover {
+    background: #f2f4f8;
 }
 
 /* Экран «успеха» */
@@ -692,14 +697,17 @@ function scrollToCourse() {
     flex-direction: column;
     justify-content: space-between;
     background-color: #727dcc;
-    padding: 20px 30px;
+    padding: 28px 32px;
     width: 100%;
     min-height: 300px;
     height: 100%;
     color: #fff;
+    gap: 16px;
+    overflow-y: auto;
+    max-height: 85vh;
 }
 .block-info h2 {
-    font-size: 30px;
+    font-size: 28px;
     margin: 0;
 }
 .block-info_bg-cyan {
@@ -764,7 +772,7 @@ function scrollToCourse() {
     margin: 0 0 10px;
 }
 .form-block {
-    padding: 50px 30px;
+    padding: 50px 36px;
 }
 .payment-block {
     display: flex;
@@ -1015,6 +1023,10 @@ function scrollToCourse() {
         grid-template-columns: 1fr;
         overflow-y: auto; /* или scroll */
         max-height: 80vh;
+    }
+    .block-info {
+        max-height: none;
+        overflow-y: visible;
     }
     .modal-close {
         background-color: #ffffff;
