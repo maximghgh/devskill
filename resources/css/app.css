@@ -956,7 +956,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .course__card-title {
     font-family: JanoSansProBold;
-    font-size: clamp(24px, 2.2vw, 32px);
+    font-size: 24px;
     margin: 0 0 5px;
     max-width: 80%;
     line-height: 1.1;

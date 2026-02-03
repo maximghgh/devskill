@@ -45,6 +45,7 @@
                         v-else-if="activeId === 'users'"
                         id="users"
                         v-model:users="users"
+                        :search-request="usersSearchRequest"
                         />
 
                         <AdminSupportBlock
@@ -73,6 +74,7 @@
                         v-else-if="activeId === 'news'"
                         id="news"
                         v-model:newsItems="newsItems"
+                        @requestUserSearch="handleUserSearch"
                         />
 
                         <AdminFaqBlock
@@ -164,6 +166,18 @@ function setActive(index) {
   // всё. без scrollIntoView
 }
 
+function handleUserSearch(name) {
+    const term = (name || "").toString().trim();
+    if (!term) return;
+
+    const usersIndex = menuItems.findIndex((item) => item.id === "users");
+    if (usersIndex !== -1) {
+        activeIndex.value = usersIndex;
+        saveActiveIndex();
+    }
+    usersSearchRequest.value = { term, nonce: Date.now() };
+}
+
 /* ====== данные ====== */
 const user = ref(null);
 
@@ -173,6 +187,7 @@ const languages = ref([]);
 const directions = ref([]);
 const newsItems = ref([]);
 const faqs = ref([]);
+const usersSearchRequest = ref({ term: "", nonce: 0 });
 
 function upsertCourse(course) {
   const idx = courses.value.findIndex(c => c.id === course.id);

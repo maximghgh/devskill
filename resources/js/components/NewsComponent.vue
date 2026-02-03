@@ -9,7 +9,7 @@
                         </div>
                         <div class="news__grid">
                             <article
-                                v-for="newsItem in news"
+                                v-for="newsItem in paginatedNews"
                                 :key="newsItem.id"
                                 class="news-card"
                             >
@@ -38,6 +38,34 @@
                                     </h2>
                                 </a>
                             </article>
+                        </div>
+                        <div
+                            v-if="totalPages > 1"
+                            class="pagination-pages news__pagination"
+                        >
+                            <button
+                                type="button"
+                                :disabled="currentPage === 1"
+                                @click="prevPage"
+                            >
+                                Назад
+                            </button>
+                            <button
+                                v-for="page in pages"
+                                :key="page"
+                                type="button"
+                                @click="goToPage(page)"
+                                :class="{ active: currentPage === page }"
+                            >
+                                {{ page }}
+                            </button>
+                            <button
+                                type="button"
+                                :disabled="currentPage === totalPages"
+                                @click="nextPage"
+                            >
+                                Вперёд
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -121,11 +149,23 @@ import "dayjs/locale/ru";
 
 dayjs.locale("ru");
 
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import axios from "axios";
 
 // Массив для хранения всех новостей
 const news = ref([]);
+const pageSize = 8;
+const currentPage = ref(1);
+const paginatedNews = computed(() => {
+    const start = (currentPage.value - 1) * pageSize;
+    return news.value.slice(start, start + pageSize);
+});
+const totalPages = computed(() =>
+    Math.ceil(news.value.length / pageSize)
+);
+const pages = computed(() =>
+    Array.from({ length: totalPages.value }, (_, i) => i + 1)
+);
 
 // Функция загрузки новостей с сервера
 async function loadNews() {
@@ -141,6 +181,24 @@ async function loadNews() {
 function formatDate(dateStr) {
     return dayjs(dateStr).format("dddd, D MMMM YYYY");
 }
+
+function goToPage(page) {
+    if (page < 1 || page > totalPages.value) return;
+    currentPage.value = page;
+}
+function nextPage() {
+    if (currentPage.value < totalPages.value) currentPage.value += 1;
+}
+function prevPage() {
+    if (currentPage.value > 1) currentPage.value -= 1;
+}
+
+watch(
+    () => news.value.length,
+    () => {
+        currentPage.value = 1;
+    }
+);
 
 // Загружаем новости при монтировании компонента
 onMounted(() => {
@@ -215,6 +273,35 @@ onMounted(() => {
     line-height: 1.25;
     margin: 0;
     text-align: left;
+}
+.news__pagination {
+    margin-top: 32px;
+}
+.pagination-pages {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.pagination-pages button {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+.pagination-pages button:hover:not(:disabled) {
+    background-color: #e6e6e6;
+}
+.pagination-pages button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.pagination-pages button.active {
+    background-color: #698dc9;
+    color: #fff;
 }
 
 @media (max-width: 1200px) {

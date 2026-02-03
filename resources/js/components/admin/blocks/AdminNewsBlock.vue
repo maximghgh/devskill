@@ -300,52 +300,66 @@
                         <td>{{ formatDateTime(c.created_at) }}</td>
 
                         <td class="avatar__user">
-                            {{ c.user_name || "Пользователь #" + c.user_id }}
-                            <img src="../../../../img/admin/eye.svg" alt="" />
+                            <span>
+                                {{ c.user_name || "Пользователь #" + c.user_id }}
+                            </span>
+                            <button
+                                type="button"
+                                class="btn__user--edit"
+                                title="Перейти к пользователю"
+                                @click="openUserSearch(c)"
+                            >
+                                <img
+                                    src="../../../../img/admin/eye.svg"
+                                    alt="Перейти к пользователю"
+                                />
+                            </button>
                         </td>
 
-                        <td class="hadle">
-                            <div class="tooltip-container">
-                                <button
-                                    aria-describedby="help-tooltip"
-                                    class="btn__user--edit"
-                                    @click="openReplyCommentDialog(c)"
-                                >
-                                    <img
-                                        width="24"
-                                        height="24"
-                                        src="../../../../img/admin/letter.svg"
-                                        alt=""
-                                    />
-                                </button>
-                                <div
-                                    role="tooltip"
-                                    id="help-tooltip"
-                                    class="tooltip"
-                                >
-                                    Ответить пользователю
+                        <td>
+                            <div class="hadle">
+                                <div class="tooltip-container">
+                                    <button
+                                        aria-describedby="help-tooltip"
+                                        class="btn__user--edit"
+                                        @click="openReplyCommentDialog(c)"
+                                    >
+                                        <img
+                                            width="24"
+                                            height="24"
+                                            src="../../../../img/admin/letter.svg"
+                                            alt=""
+                                        />
+                                    </button>
+                                    <div
+                                        role="tooltip"
+                                        id="help-tooltip"
+                                        class="tooltip"
+                                    >
+                                        Ответить пользователю
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="tooltip-container">
-                                <button
-                                    aria-describedby="help-tooltip"
-                                    class="btn__user--edit"
-                                    @click="deleteComment(c.id)"
-                                >
-                                    <img
-                                        width="24"
-                                        height="24"
-                                        src="../../../../img/admin/trash.png"
-                                        alt=""
-                                    />
-                                </button>
-                                <div
-                                    role="tooltip"
-                                    id="help-tooltip"
-                                    class="tooltip"
-                                >
-                                    Удалить комментарий
+                                <div class="tooltip-container">
+                                    <button
+                                        aria-describedby="help-tooltip"
+                                        class="btn__user--edit"
+                                        @click="deleteComment(c.id)"
+                                    >
+                                        <img
+                                            width="24"
+                                            height="24"
+                                            src="../../../../img/admin/trash.png"
+                                            alt=""
+                                        />
+                                    </button>
+                                    <div
+                                        role="tooltip"
+                                        id="help-tooltip"
+                                        class="tooltip"
+                                    >
+                                        Удалить комментарий
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -424,10 +438,18 @@ const { formatBirthday, formatDateTime } = useDateFormatters();
 const props = defineProps({
     newsItems: { type: Array, default: () => [] },
 });
-const emit = defineEmits(["update:newsItems"]);
+const emit = defineEmits(["update:newsItems", "requestUserSearch"]);
 
 function setNewsItems(next) {
     emit("update:newsItems", next);
+}
+
+function openUserSearch(comment) {
+    const name = (comment?.user_name || "").trim();
+    const fallback = comment?.user_id ? String(comment.user_id) : "";
+    const term = name || fallback;
+    if (!term) return;
+    emit("requestUserSearch", term);
 }
 
 /* =========================================================

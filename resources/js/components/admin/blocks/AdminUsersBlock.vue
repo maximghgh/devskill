@@ -329,6 +329,7 @@ function onRoleUpdated(updated) {
 
 const props = defineProps({
     users: { type: Array, default: () => [] },
+    searchRequest: { type: Object, default: () => ({ term: "", nonce: 0 }) },
 });
 const emit = defineEmits(["update:users"]);
 
@@ -379,6 +380,7 @@ const filteredUsers = computed(() => {
         const phone = u.phone || "";
         const phoneLc = phone.toLowerCase();
         const phoneDg = phone.replace(/\D/g, "");
+        const idStr = String(u.id || "");
         const country = (u.country || "").toLowerCase();
         const bRaw = u.birthday || "";
         const bFmt = (formatBirthday(u.birthday) || "").toLowerCase();
@@ -389,6 +391,7 @@ const filteredUsers = computed(() => {
             country.includes(q) ||
             phoneLc.includes(q) ||
             (qDigits && phoneDg.includes(qDigits)) ||
+            idStr.includes(qDigits || q) ||
             bRaw.includes(q) ||
             bFmt.includes(q)
         );
@@ -412,6 +415,15 @@ const paginatedUsers = computed(() => {
 watch([selectedRole, searchQuery, pageSizeUsers], () => {
     currentPageUsers.value = 1;
 });
+
+watch(
+    () => props.searchRequest?.nonce,
+    () => {
+        const term = (props.searchRequest?.term || "").toString();
+        searchQuery.value = term;
+    },
+    { immediate: true }
+);
 
 /* ===== inline роль ===== */
 const inlineRoleEdit = reactive({ id: null, role: null });

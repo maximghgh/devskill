@@ -78,33 +78,35 @@
                                                         ]
                                                     }}
                                                 </p>
-                                                <div class="course__card-task">
-                                                    <p>Пройдено тем</p>
-                                                    <p>
-                                                        {{
-                                                            getCourseProgress(
-                                                                course
-                                                            ).completedTopics
-                                                        }}/{{
-                                                            getCourseProgress(
-                                                                course
-                                                            ).totalTopics
-                                                        }}
-                                                    </p>
-                                                </div>
-                                                <div class="course__card-task">
-                                                    <p>Решено заданий</p>
-                                                    <p>
-                                                        {{
-                                                            getCourseProgress(
-                                                                course
-                                                            ).completedTasks
-                                                        }}/{{
-                                                            getCourseProgress(
-                                                                course
-                                                            ).totalTasks
-                                                        }}
-                                                    </p>
+                                                <div class="card__info-ch">
+                                                    <div class="course__card-task">
+                                                        <p>Пройдено тем</p>
+                                                        <p>
+                                                            {{
+                                                                getCourseProgress(
+                                                                    course
+                                                                ).completedTopics
+                                                            }}/{{
+                                                                getCourseProgress(
+                                                                    course
+                                                                ).totalTopics
+                                                            }}
+                                                        </p>
+                                                    </div>
+                                                    <div class="course__card-task">
+                                                        <p>Решено заданий</p>
+                                                        <p>
+                                                            {{
+                                                                getCourseProgress(
+                                                                    course
+                                                                ).completedTasks
+                                                            }}/{{
+                                                                getCourseProgress(
+                                                                    course
+                                                                ).totalTasks
+                                                            }}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                                 <div class="menu__button">
                                                     <a
@@ -232,6 +234,10 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.card__info-ch{
+    display: flex;
+    justify-content: space-between;
+}
 .course__cardss {
     width: 100%;
     height: 100%;
