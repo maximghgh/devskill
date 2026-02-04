@@ -331,7 +331,7 @@ const props = defineProps({
     users: { type: Array, default: () => [] },
     searchRequest: { type: Object, default: () => ({ term: "", nonce: 0 }) },
 });
-const emit = defineEmits(["update:users"]);
+const emit = defineEmits(["update:users", "clearSearchRequest"]);
 
 const { formatBirthday } = useDateFormatters();
 
@@ -423,6 +423,15 @@ watch(
         searchQuery.value = term;
     },
     { immediate: true }
+);
+
+watch(
+    () => searchQuery.value,
+    (val) => {
+        if (!val && (props.searchRequest?.term || "")) {
+            emit("clearSearchRequest");
+        }
+    }
 );
 
 /* ===== inline роль ===== */

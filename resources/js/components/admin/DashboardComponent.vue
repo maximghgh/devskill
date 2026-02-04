@@ -46,6 +46,7 @@
                         id="users"
                         v-model:users="users"
                         :search-request="usersSearchRequest"
+                        @clearSearchRequest="clearUserSearchRequest"
                         />
 
                         <AdminSupportBlock
@@ -99,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed} from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import axios from "axios";
 import "./style.css";
 
@@ -157,6 +158,8 @@ const activeId = computed(
     () => menuItems[activeIndex.value]?.id || "dashboard"
 );
 
+const usersSearchRequest = ref({ term: "", nonce: 0 });
+
 function saveActiveIndex() {
     localStorage.setItem("activeIndex", String(activeIndex.value));
 }
@@ -178,6 +181,16 @@ function handleUserSearch(name) {
     usersSearchRequest.value = { term, nonce: Date.now() };
 }
 
+function clearUserSearchRequest() {
+    usersSearchRequest.value = { term: "", nonce: Date.now() };
+}
+
+watch(activeId, (nextId) => {
+    if (nextId !== "users" && usersSearchRequest.value.term) {
+        clearUserSearchRequest();
+    }
+});
+
 /* ====== данные ====== */
 const user = ref(null);
 
@@ -187,7 +200,6 @@ const languages = ref([]);
 const directions = ref([]);
 const newsItems = ref([]);
 const faqs = ref([]);
-const usersSearchRequest = ref({ term: "", nonce: 0 });
 
 function upsertCourse(course) {
   const idx = courses.value.findIndex(c => c.id === course.id);
