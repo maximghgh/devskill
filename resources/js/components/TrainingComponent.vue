@@ -65,7 +65,7 @@
                                     </div>
                                     <div class="course__card-buttons">
                                         <a
-                                            :href="`/cpp/${course.id}`"
+                                            :href="course.slug ? `/courses/${course.slug}` : `/cpp/${course.id}`"
                                             class="button button_transparent"
                                             >Подробнее</a
                                         >

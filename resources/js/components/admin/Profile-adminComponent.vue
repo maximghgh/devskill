@@ -2,34 +2,11 @@
     <div>
         <div class="maincontainer">
             <div class="container">
-                <section class="course">
-                    <div class="course__inner">
-                        <div class="course__content">
-                            <div class="course__menu course__menu-persona">
-                                <div class="course__menu-nickname">
-                                    <img 
-                                        :src="user.photo ? `/storage/${user.photo}` : 'https://devskills.foncode.ru/img/no_foto.jpg'" 
-                                        alt="Фото пользователя" class="course__menu-foto"
-                                    />
-                                    <div class="course__menu-name-admin">
-                                        {{ user.name }}
-                                        <span class="course__menu-desc">(Администратор)</span>
-                                    </div>
-                                </div>
-                                <div class="course__menu-block">
-                                    <a href="/admin" class="course__menu-one">Вернуться на главную</a>
-                                    <div class="course__menu-one course__menu-one_active">
-                                        Личные данные
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                <section class="course"></section>
                 <section class="infoblock block-tab block-tab_active">
                     <div class="infoblock__wrapper">
                         <div class="infoblock__inner">
-                            <div class="infoblock-title">Личные данные</div>
+                            <div class="infoblock-title">Личный кабинет</div>
                             <div class="infoblock__info">
                                 <div lang="infoblock__info-name">
                                     <div class="infoblock__info-name-image">
@@ -38,7 +15,7 @@
                                             alt="Фото пользователя" 
                                         />
                                     </div>
-                                    <form action="" class="infoblock__info-form">
+                                    <form class="infoblock__info-form" @submit.prevent="saveProfile">
                                         <label class="infoblock__info-file">
                                             <input
                                                 type="file"
@@ -56,14 +33,12 @@
                                         </label>
                                         <input
                                             type="submit"
-                                            value="Добавить"
+                                            value="Сохранить"
                                             class="infoblock__button"
-                                            @click="uploadPhoto"
                                         />
                                     </form>
                                 </div>
                                 <form
-                                    @submit.prevent="updateProfile"
                                     class="infoblock__data"
                                 >
                                     <div class="infoblock__data-top">
@@ -106,7 +81,6 @@
                                                 type="text"
                                                 v-model="form.status"
                                                 placeholder="Ученик"
-                                                disabled
                                             />
                                         </div>
                                         <div class="custom-input">
@@ -135,7 +109,6 @@
                                             >
                                         </div>
                                     </div>
-                                    <input type="submit" value="Сохранить" />
                                 </form>
                                 <div v-if="showModal" class="modal-overlay">
                                     <div class="modal-content">
@@ -265,6 +238,17 @@ const loadUserData = async () => {
     form.country = userData.country || "";
   } catch (error) {
     console.error("Ошибка загрузки данных:", error);
+  }
+};
+
+const saveProfile = async () => {
+  try {
+    if (selectedFile.value) {
+      await uploadPhoto();
+    }
+    await updateProfile();
+  } catch (error) {
+    console.error("Ошибка при сохранении профиля:", error);
   }
 };
 

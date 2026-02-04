@@ -24,7 +24,7 @@
                                     :key="c.id"
                                     :value="c.id"
                                 >
-                                    {{ c.title }}
+                                    {{ c.course_name || c.card_title || "Без названия" }}
                                 </option>
                             </select>
                         </div>
@@ -35,7 +35,7 @@
                             <select
                                 class="dialog__input dialog__select"
                                 v-model="selectedGroupId"
-                                :disabled="!groupsForCourse.length"
+                                :disabled="groupsLoading || !groupsForCourse.length"
                             >
                                 <option disabled value="">Выберите группу</option>
                                 <option
@@ -43,9 +43,18 @@
                                     :key="g.id"
                                     :value="g.id"
                                 >
-                                    {{ g.title }}
+                                    {{ g.name_group || g.title || `Группа #${g.id}` }}
                                 </option>
                             </select>
+                            <p v-if="groupsLoading" class="course-filter__note">
+                                Загрузка групп...
+                            </p>
+                            <p
+                                v-else-if="!groupsForCourse.length"
+                                class="course-filter__note"
+                            >
+                                Группы еще не сформированы
+                            </p>
                         </div>
 
                         <!-- 3) Урок (появляется после выбора группы) -->
@@ -54,7 +63,7 @@
                             <select
                                 class="dialog__input dialog__select"
                                 v-model="selectedLessonId"
-                                :disabled="!lessonsForGroup.length"
+                                :disabled="lessonsLoading || !lessonsForGroup.length"
                             >
                                 <option disabled value="">Выберите урок</option>
                                 <option
@@ -65,6 +74,15 @@
                                     {{ l.title }}
                                 </option>
                             </select>
+                            <p v-if="lessonsLoading" class="course-filter__note">
+                                Загрузка уроков...
+                            </p>
+                            <p
+                                v-else-if="!lessonsForGroup.length"
+                                class="course-filter__note"
+                            >
+                                Уроки не найдены
+                            </p>
                         </div>
                     </div>
 
@@ -75,300 +93,39 @@
                             <!-- ТАБЛИЦА ЖУРНАЛА -->
                             <div class="journal__table-wrapper">
                                 <table class="journal__table">
-                                <thead class="journal__head">
-                                    <tr class="journal__head-row">
-                                    <!-- первый столбец -->
-                                    <th class="journal__head-cell journal__head-cell--sticky">
-                                        <img width="20" height="20" src="../../../img/teacher/table_icon.svg" alt="">
-                                        <span class="journal__head-title">Оценки</span>
-                                    </th>
+                                    <thead class="journal__head">
+                                        <tr class="journal__head-row">
+                                            <th class="journal__head-cell journal__head-cell--sticky">
+                                                <img width="20" height="20" src="../../../img/teacher/table_icon.svg" alt="">
+                                                <span class="journal__head-title">ФИО</span>
+                                            </th>
+                                            <th class="journal__head-cell journal__head-cell--score">
+                                                <span class="journal__head-title">Баллы</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
 
-                                    <!-- ДАТЫ (пример, можно генерировать циклом с бэка) -->
-                                    <th class="journal__head-cell" data-date="2024-03-01">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Пт</span>
-                                        <span class="journal__day-date">1.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-04">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Пн</span>
-                                        <span class="journal__day-date">4.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-05">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Вт</span>
-                                        <span class="journal__day-date">5.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-06">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Ср</span>
-                                        <span class="journal__day-date">6.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-07">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Чт</span>
-                                        <span class="journal__day-date">7.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-11">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Пн</span>
-                                        <span class="journal__day-date">11.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-12">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Вт</span>
-                                        <span class="journal__day-date">12.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-13">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Ср</span>
-                                        <span class="journal__day-date">13.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-14">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Чт</span>
-                                        <span class="journal__day-date">14.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-15">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Пт</span>
-                                        <span class="journal__day-date">15.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-18">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Пн</span>
-                                        <span class="journal__day-date">18.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-19">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Вт</span>
-                                        <span class="journal__day-date">19.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-20">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Ср</span>
-                                        <span class="journal__day-date">20.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-21">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Чт</span>
-                                        <span class="journal__day-date">21.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-22">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Пт</span>
-                                        <span class="journal__day-date">22.03</span>
-                                        </span>
-                                    </th>
-
-                                    <!-- ТЕКУЩИЙ ДЕНЬ -->
-                                    <th class="journal__head-cell journal__head-cell--today" data-date="2024-03-25">
-                                        <span class="journal__day journal__day--today">
-                                            <span class="journal__day-week">Пн</span>
-                                            <span class="journal__day-date">25.03</span>
-                                        </span>
-                                    </th>
-
-                                    <!-- БУДУЩИЕ ДНИ -->
-                                    <th class="journal__head-cell" data-date="2024-03-26">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Вт</span>
-                                        <span class="journal__day-date">26.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-27">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Ср</span>
-                                        <span class="journal__day-date">27.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-28">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Чт</span>
-                                        <span class="journal__day-date">28.03</span>
-                                        </span>
-                                    </th>
-                                    <th class="journal__head-cell" data-date="2024-03-29">
-                                        <span class="journal__day">
-                                        <span class="journal__day-week">Пт</span>
-                                        <span class="journal__day-date">29.03</span>
-                                        </span>
-                                    </th>
-                                    </tr>
-                                </thead>
-
-                                <tbody class="journal__body">
-                                    <!-- СТРОКА СТУДЕНТА 1 -->
-                                    <tr class="journal__row" data-student-id="1">
-                                    <td class="journal__cell journal__cell--name">
-                                        <span class="journal__student-index">1</span>
-                                        <span class="journal__student-name">Татьяна Зайцева</span>
-                                    </td>
-
-                                    <!-- обычные ячейки с оценкой -->
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-01">5</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-04">5</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-05">5+</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-06">Н/Я</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-07">3</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-11"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-12"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-13">4</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-14"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-15">3</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-18"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-19"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-20">5</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-21"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-22">5</td>
-
-                                    <!-- сегодня -->
-                                    <td class="journal__cell journal__cell--today" data-date="2024-03-25">
-                                        <span class="journal__slot journal__slot--filled">5</span>
-                                    </td>
-
-                                    <!-- будущие даты -->
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-26">
-                                        <span class="journal__slot"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-27">
-                                        <span class="journal__slot"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-28">
-                                        <span class="journal__slot"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-29">
-                                        <span class="journal__slot"></span>
-                                    </td>
-                                    </tr>
-
-                                    <!-- СТУДЕНТ 2 -->
-                                    <tr class="journal__row" data-student-id="2">
-                                    <td class="journal__cell journal__cell--name">
-                                        <span class="journal__student-index">2</span>
-                                        <span class="journal__student-name">Дмитрий Петров</span>
-                                    </td>
-
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-01">Н/Я</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-04">5+</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-05">3</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-06">3</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-07"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-11">3</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-12"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-13">3</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-14"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-15"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-18">3</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-19"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-20">5</td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-21"></td>
-                                    <td class="journal__cell journal__cell--value" data-date="2024-03-22">5+</td>
-
-                                    <td class="journal__cell journal__cell--today" data-date="2024-03-25">
-                                        <span class="journal__slot journal__slot--filled">5</span>
-                                    </td>
-
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-26">
-                                        <span class="journal__slot"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-27">
-                                        <span class="journal__slot "></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-28">
-                                        <span class="journal__slot "></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-29">
-                                        <span class="journal__slot"></span>
-                                    </td>
-                                    </tr>
-
-                                    <!-- СТУДЕНТ 3 (пример с «С» и пустыми квадратами, как внизу скрина) -->
-                                    <tr class="journal__row" data-student-id="3">
-                                    <td class="journal__cell journal__cell--name">
-                                        <span class="journal__student-index">9</span>
-                                        <span class="journal__student-name">Вася Попов</span>
-                                    </td>
-
-                                    <!-- серия пустых квадратиков -->
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-01">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-04">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-05">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-06">
-                                        <span class="journal__slot journal__slot--comment">С</span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-07">
-                                        <span class="journal__slot journal__slot--comment">С</span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-11">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-12">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-13">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-14">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-15">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-18">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-19">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-20">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-21">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--slot" data-date="2024-03-22">
-                                        <span class="journal__slot journal__slot--empty"></span>
-                                    </td>
-
-                                    <td class="journal__cell journal__cell--today" data-date="2024-03-25">
-                                        <span class="journal__slot journal__slot--filled">5</span>
-                                    </td>
-
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-26">
-                                        <span class="journal__slot "></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-27">
-                                        <span class="journal__slot "></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-28">
-                                        <span class="journal__slot "></span>
-                                    </td>
-                                    <td class="journal__cell journal__cell--future" data-date="2024-03-29">
-                                        <span class="journal__slot "></span>
-                                    </td>
-                                    </tr>
-                                </tbody>
+                                    <tbody class="journal__body">
+                                        <tr v-if="studentsLoading" class="journal__row">
+                                            <td class="journal__cell" colspan="2">Загрузка...</td>
+                                        </tr>
+                                        <tr v-else-if="!studentsForGroup.length" class="journal__row">
+                                            <td class="journal__cell" colspan="2">В группе нет участников</td>
+                                        </tr>
+                                        <template v-else>
+                                            <tr
+                                                v-for="(student, index) in studentsForGroup"
+                                                :key="student.id"
+                                                class="journal__row"
+                                            >
+                                                <td class="journal__cell journal__cell--name">
+                                                    <span class="journal__student-index">{{ index + 1 }}</span>
+                                                    <span class="journal__student-name">{{ student.name || "Без имени" }}</span>
+                                                </td>
+                                                <td class="journal__cell journal__cell--value">—</td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
                                 </table>
                             </div>
                         </section>
@@ -381,6 +138,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
     data() {
         return {
@@ -388,51 +147,157 @@ export default {
             selectedGroupId: "",
             selectedLessonId: "",
 
-            courses: [
-                { id: "web", title: "Веб-разработка" },
-                { id: "py", title: "Python" },
-            ],
-            groupsByCourse: {
-                web: [
-                    { id: "web-1", title: "Группа 1" },
-                    { id: "web-2", title: "Группа 2" },
-                ],
-                py: [
-                    { id: "py-1", title: "Группа A" },
-                ],
-            },
-            lessonsByGroup: {
-                "web-1": [
-                    { id: "l-101", title: "Урок 1" },
-                    { id: "l-102", title: "Урок 2" },
-                ],
-                "web-2": [
-                    { id: "l-201", title: "Урок 1" },
-                ],
-                "py-1": [
-                    { id: "l-301", title: "Введение" },
-                ],
-            },
+            courses: [],
+            groupsForCourse: [],
+            lessonsForGroup: [],
+            studentsForGroup: [],
+            groupsLoading: false,
+            lessonsLoading: false,
+            studentsLoading: false,
         };
     },
 
-    computed: {
-        groupsForCourse() {
-            return this.groupsByCourse[this.selectedCourseId] || [];
+    watch: {
+        async selectedCourseId(newId) {
+            this.selectedGroupId = "";
+            this.selectedLessonId = "";
+            this.groupsForCourse = [];
+            this.lessonsForGroup = [];
+            this.studentsForGroup = [];
+            this.studentsLoading = false;
+
+            if (!newId) return;
+
+            await Promise.all([this.loadGroups(newId), this.loadLessons(newId)]);
         },
-        lessonsForGroup() {
-            return this.lessonsByGroup[this.selectedGroupId] || [];
+        async selectedGroupId(newId) {
+            this.selectedLessonId = "";
+            this.studentsForGroup = [];
+            this.studentsLoading = false;
+            if (!newId || !this.selectedCourseId) return;
+            await this.loadGroupStudents(this.selectedCourseId, newId);
         },
     },
 
-    watch: {
-        selectedCourseId() {
-            this.selectedGroupId = "";
-            this.selectedLessonId = "";
+    methods: {
+        getTeacherId() {
+            const stored = localStorage.getItem("user");
+            if (!stored) return null;
+            try {
+                const parsed = JSON.parse(stored);
+                return parsed?.id ?? null;
+            } catch (e) {
+                return null;
+            }
         },
-        selectedGroupId() {
-            this.selectedLessonId = "";
+        parseTeacherIds(teachers) {
+            if (Array.isArray(teachers)) return teachers;
+            if (teachers == null) return [];
+            if (typeof teachers === "number") return [teachers];
+            if (typeof teachers === "string") {
+                try {
+                    const parsed = JSON.parse(teachers);
+                    if (Array.isArray(parsed)) return parsed;
+                    if (parsed == null) return [];
+                    return [parsed];
+                } catch {
+                    return [];
+                }
+            }
+            return [];
         },
+        async loadCourses() {
+            try {
+                const teacherId = this.getTeacherId();
+                const { data } = await axios.get("/api/courses");
+                const list = Array.isArray(data) ? data : data?.data || [];
+
+                if (!teacherId) {
+                    this.courses = [];
+                    return;
+                }
+
+                const teacherIdStr = String(teacherId);
+                this.courses = list.filter((course) => {
+                    const ids = this.parseTeacherIds(course.teachers).map((id) =>
+                        String(id)
+                    );
+                    return ids.includes(teacherIdStr);
+                });
+            } catch (e) {
+                console.error("Ошибка при загрузке курсов:", e);
+                this.courses = [];
+            }
+        },
+        async loadGroups(courseId) {
+            this.groupsLoading = true;
+            try {
+                const { data } = await axios.get(
+                    `/api/admin/course/${courseId}/groups`
+                );
+                this.groupsForCourse = Array.isArray(data)
+                    ? data
+                    : data?.groups || [];
+            } catch (e) {
+                console.error("Ошибка при загрузке групп:", e);
+                this.groupsForCourse = [];
+            } finally {
+                this.groupsLoading = false;
+            }
+        },
+        async loadGroupStudents(courseId, groupId) {
+            this.studentsLoading = true;
+            try {
+                const { data } = await axios.get(
+                    `/api/admin/course/${courseId}/groups/${groupId}`
+                );
+                this.studentsForGroup = Array.isArray(data?.students)
+                    ? data.students
+                    : data?.group?.students || [];
+            } catch (e) {
+                console.error("Ошибка при загрузке участников группы:", e);
+                this.studentsForGroup = [];
+            } finally {
+                this.studentsLoading = false;
+            }
+        },
+        async loadLessons(courseId) {
+            this.lessonsLoading = true;
+            try {
+                const teacherId = this.getTeacherId();
+                if (!teacherId) {
+                    this.lessonsForGroup = [];
+                    return;
+                }
+                const { data } = await axios.get(
+                    `/api/course/${courseId}/topics`,
+                    { params: { user_id: teacherId } }
+                );
+                const topics = Array.isArray(data?.topics) ? data.topics : [];
+                const lessons = [];
+                topics.forEach((topic) => {
+                    const chapters = Array.isArray(topic?.chapters)
+                        ? topic.chapters
+                        : [];
+                    chapters.forEach((chapter) => {
+                        lessons.push({
+                            id: chapter.id,
+                            title: chapter.title || "Урок",
+                        });
+                    });
+                });
+                this.lessonsForGroup = lessons;
+            } catch (e) {
+                console.error("Ошибка при загрузке уроков:", e);
+                this.lessonsForGroup = [];
+            } finally {
+                this.lessonsLoading = false;
+            }
+        },
+    },
+
+    mounted() {
+        this.loadCourses();
     },
 };
 </script>

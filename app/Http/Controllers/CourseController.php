@@ -13,9 +13,52 @@ use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\Purchase;
 use App\Models\Language;
+use Illuminate\Support\Str;
 
 class CourseController extends Controller
 {
+    private function transliterateRu(string $value): string
+    {
+        $map = [
+            'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
+            'е' => 'e', 'ё' => 'e', 'ж' => 'zh', 'з' => 'z', 'и' => 'i',
+            'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm', 'н' => 'n',
+            'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't',
+            'у' => 'u', 'ф' => 'f', 'х' => 'h', 'ц' => 'c', 'ч' => 'ch',
+            'ш' => 'sh', 'щ' => 'shch', 'ы' => 'y', 'э' => 'e', 'ю' => 'yu',
+            'я' => 'ya', 'ъ' => '', 'ь' => '',
+        ];
+
+        $value = mb_strtolower($value, 'UTF-8');
+
+        return strtr($value, $map);
+    }
+
+    private function makeSlug(string $name, ?int $excludeId = null): string
+    {
+        $base = Str::slug($name, '-', 'ru');
+        if ($base === '') {
+            $base = Str::slug($this->transliterateRu($name), '-');
+        }
+        if ($base === '') {
+            $base = 'course';
+        }
+
+        $slug = $base;
+        $i = 2;
+
+        while (
+            Course::where('slug', $slug)
+                ->when($excludeId, fn ($q) => $q->where('id', '<>', $excludeId))
+                ->exists()
+        ) {
+            $slug = $base . '-' . $i;
+            $i++;
+        }
+
+        return $slug;
+    }
+
     public function store(StoreCourseRequest $request)
     {
         $data = $request->validated();
@@ -64,6 +107,9 @@ class CourseController extends Controller
         $dataToSave = [
             'card_title'         => $data['cardTitle'] ?? null,
             'course_name'        => $data['courseName'],
+            'slug'               => $this->makeSlug(
+                $data['courseName'] ?? ($data['cardTitle'] ?? 'course')
+            ),
             'price'              => $data['price'],
             'duration'           => $data['duration'],
             'description'        => $data['description'] ?? null,
@@ -124,6 +170,12 @@ class CourseController extends Controller
         $course->language     = $validated['language'];
         $course->start_date   = $validated['start_date'] ?? null;
         $course->end_date     = $validated['end_date'] ?? null;
+        if (empty($course->slug)) {
+            $course->slug = $this->makeSlug(
+                $validated['courseName'] ?? $course->course_name,
+                $course->id
+            );
+        }
 
         // Если используется новое поле для языков (selectedLanguages), декодируем его и сохраняем в поле language
         // if (isset($validated['selectedLanguages'])) {
@@ -222,6 +274,28 @@ class CourseController extends Controller
             $course->teachers = json_decode($course->teachers, true);
         }
         return response()->json(new CourseResource($course));
+    }
+
+    public function showBySlug(string $slug)
+    {
+        $course = Course::where('slug', $slug)->firstOrFail();
+
+        $title = $course->course_name ?: $course->card_title;
+        $description = $course->description ? strip_tags($course->description) : '';
+        $description = $description ?: ('Курс ' . $title . '.');
+        $description = Str::limit($description, 160, '');
+
+        $canonical = url('/courses/' . $course->slug);
+        $ogImage = $course->description_image ?: $course->card_image;
+        $ogImage = $ogImage ? asset($ogImage) : null;
+
+        return view('course', [
+            'course' => $course,
+            'title' => $title,
+            'description' => $description,
+            'canonical' => $canonical,
+            'ogImage' => $ogImage,
+        ]);
     }
     
     public function showPage($id)

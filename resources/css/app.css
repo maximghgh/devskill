@@ -804,9 +804,9 @@ input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-/* .course__content {
+.course__content {
     width: 100%;
-} */
+} 
 .course__menu {
     margin-top: 20px;
     margin-bottom: 40px;

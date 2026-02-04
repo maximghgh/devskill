@@ -495,10 +495,14 @@ onMounted(loadCourse);
 
 async function loadCourse() {
     try {
-        /* id курса в URL вида /cpp/17 */
+        /* id курса: из data-course-id или из URL вида /cpp/17 */
+        const appEl = document.getElementById("app");
+        const courseIdFromDom = appEl?.dataset?.courseId;
         const segments = window.location.pathname.split("/");
         const courseId =
-            segments[2] || new URLSearchParams(location.search).get("id");
+            courseIdFromDom ||
+            segments[2] ||
+            new URLSearchParams(location.search).get("id");
         if (!courseId) return console.error("ID курса не найден");
 
         /* получаем сам курс + преподавателей */

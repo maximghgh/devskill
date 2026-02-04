@@ -19,6 +19,7 @@
                     </div>
                 </section>
 
+
                 <!-- ================= Сотрудничество ================= -->
                 <section class="cooperation">
                     <h2>
@@ -190,9 +191,9 @@
                                                 <span>{{ course.price }} P</span>
                                             </div>
                                             <div class="menu__button">
-                                                <a
-                                                    :href="`/cpp/${course.id}`"
-                                                    class="button button_transparent"
+                                            <a
+                                                :href="course.slug ? `/courses/${course.slug}` : `/cpp/${course.id}`"
+                                                class="button button_transparent"
                                                 >Подробнее</a>
                                                 <a
                                                     href="#"
@@ -1205,7 +1206,7 @@ function scrollToCourse() {
 }
 
 .block-info h2 {
-    font-size: 30px;
+    font-size: 24px;
     margin: 0;
 }
 .block__difficul {

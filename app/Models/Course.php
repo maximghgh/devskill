@@ -13,6 +13,7 @@ class Course extends Model
     protected $fillable = [
         'card_title',
         'course_name',
+        'slug',
         'price',
         'duration',
         'description',

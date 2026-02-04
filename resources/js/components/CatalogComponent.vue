@@ -178,7 +178,7 @@
                                         <!-- Ссылка «Подробнее» может вести на страницу с подробной информацией, например /courses/ID -->
                                         <div class="menu__button">
                                             <a
-                                                :href="`/cpp/${course.id}`"
+                                                :href="course.slug ? `/courses/${course.slug}` : `/cpp/${course.id}`"
                                                 class="button button_transparent"
                                                 >Подробнее</a
                                             >

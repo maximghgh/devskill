@@ -129,6 +129,18 @@ function equalizeCourseCards() {
       card.style.height = "auto";
     });
 
+    const images = Array.from(container.querySelectorAll("img"));
+    images.forEach((img) => {
+      if (!img.complete || img.naturalHeight === 0) {
+        img.addEventListener("load", requestEqualizeCourseCards, {
+          once: true,
+        });
+        img.addEventListener("error", requestEqualizeCourseCards, {
+          once: true,
+        });
+      }
+    });
+
     const maxHeight = cards.reduce(
       (max, card) => Math.max(max, card.getBoundingClientRect().height),
       0
@@ -153,6 +165,10 @@ function requestEqualizeCourseCards() {
 
 window.addEventListener("load", requestEqualizeCourseCards);
 window.addEventListener("resize", requestEqualizeCourseCards);
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(requestEqualizeCourseCards).catch(() => {});
+}
 
 const appRoot = document.getElementById("app");
 if (appRoot && "MutationObserver" in window) {

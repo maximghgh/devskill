@@ -32,7 +32,7 @@
                 <section class="infoblock block-tab block-tab_active">
                     <div class="infoblock__wrapper">
                         <div class="infoblock__inner">
-                            <div class="infoblock-title">Личные данные</div>
+                            <div class="infoblock-title">Личный кабинет</div>
                             <div class="infoblock__info">
                                 <div lang="infoblock__info-name">
                                     <div class="infoblock__info-name-image">
@@ -41,17 +41,16 @@
                                             alt="Фото пользователя" 
                                         />
                                     </div>
-                                    <form @submit.prevent="uploadPhoto" class="infoblock__info-form">
+                                    <form @submit.prevent="saveProfile" class="infoblock__info-form">
                                         <label class="infoblock__info-file">
                                             <input type="file" name="file" accept=".jpg, .png, .wbep, .jpeg" @change="onFileSelected" />
                                             <span class="infoblock__info-filebtn">Загрузить фото</span>
                                             <span class="infoblock__info-filetext"></span>
                                         </label>
-                                        <input type="submit" value="Добавить" class="infoblock__button" />
+                                        <input type="submit" value="Сохранить" class="infoblock__button" />
                                     </form>
                                 </div>
                                 <form
-                                    @submit.prevent="updateProfile"
                                     class="infoblock__data"
                                 >
                                     <div class="infoblock__data-top">
@@ -94,7 +93,6 @@
                                                 type="text"
                                                 v-model="form.status"
                                                 placeholder="Ученик"
-                                                disabled
                                             />
                                         </div>
                                         <div class="custom-input">
@@ -123,7 +121,6 @@
                                             >
                                         </div>
                                     </div>
-                                    <input type="submit" value="Сохранить" />
                                 </form>
                                 <div v-if="showModal" class="modal-overlay">
                                     <div class="modal-content">
@@ -230,6 +227,17 @@ const loadUserData = async () => {
     form.country = userData.country || "";
   } catch (error) {
     console.error("Ошибка загрузки данных:", error);
+  }
+};
+
+const saveProfile = async () => {
+  try {
+    if (selectedFile.value) {
+      await uploadPhoto();
+    }
+    await updateProfile();
+  } catch (error) {
+    console.error("Ошибка при сохранении профиля:", error);
   }
 };
 

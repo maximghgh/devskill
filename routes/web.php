@@ -41,6 +41,9 @@ Route::get('/catalog', function () {
     return view('catalog');
 })->name('catalog');
 
+Route::get('/courses/{slug}', [CourseController::class, 'showBySlug'])
+    ->name('courses.show');
+
 Route::get('/content', function () {
     return view('content');
 })->name('content');
@@ -154,6 +157,57 @@ Route::get('/training', function () {
 Route::get('/news', function () {
     return view('news');
 })->name('news');
+
+Route::get('/sitemap.xml', function () {
+    $pages = [
+        [
+            'loc' => url('/'),
+            'changefreq' => 'daily',
+            'priority' => '1.0',
+        ],
+        [
+            'loc' => url('/catalog'),
+            'changefreq' => 'weekly',
+            'priority' => '0.9',
+        ],
+        [
+            'loc' => url('/page-courses'),
+            'changefreq' => 'weekly',
+            'priority' => '0.8',
+        ],
+        [
+            'loc' => url('/category-courses'),
+            'changefreq' => 'weekly',
+            'priority' => '0.7',
+        ],
+        [
+            'loc' => url('/about'),
+            'changefreq' => 'monthly',
+            'priority' => '0.6',
+        ],
+        [
+            'loc' => url('/contact'),
+            'changefreq' => 'monthly',
+            'priority' => '0.6',
+        ],
+        [
+            'loc' => url('/news'),
+            'changefreq' => 'weekly',
+            'priority' => '0.5',
+        ],
+    ];
+
+    $courses = \App\Models\Course::whereNotNull('slug')->get();
+
+    return response()
+        ->view('sitemap', compact('pages', 'courses'))
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
+Route::get('/robots.txt', function () {
+    $content = "User-agent: *\nAllow: /\nSitemap: " . url('/sitemap.xml') . "\n";
+    return response($content, 200)->header('Content-Type', 'text/plain');
+});
 
 Route::get('/register', function () {
     return view('register');
