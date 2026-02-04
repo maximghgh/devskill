@@ -104,7 +104,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>   
+                        </div>
                         <div class="course__content">
                           <div class="block__filter">
                             <h2>Все программы обучения</h2>
@@ -185,7 +185,7 @@
                                             <a href="#"
                                                 class="button button_white button_white-card"
                                                 @click.prevent="openModal(course)"
-                                            >Купить</a>
+                                            >Записаться</a>
                                         </div>
                                     </div>
                                 </div>
@@ -402,7 +402,7 @@
                                 </div>
                             </transition>
                                 <!-- Список номеров страниц -->
-                                
+
                         </div>
                     </div>
                     <div class="pagination-pages">

@@ -96,7 +96,7 @@ h3 {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    
+
 }
 
 .course__block--current {
@@ -945,6 +945,13 @@ h3 {
 /* элементы списка курсов */
 .course-accordion__item + .course-accordion__item {
     margin-top: 8px;
+}
+
+.course-accordion__filter {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
 }
 
 /* шапка курса */

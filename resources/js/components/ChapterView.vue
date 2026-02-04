@@ -1,7 +1,22 @@
 <template>
     <div class="maincontainer">
         <div class="backs">
-            <button @click="goBack" class="btn-back">Вернуться к модулю</button>
+            <nav class="breadcrumbs" aria-label="breadcrumb">
+                <a class="crumb" href="/cabinet">Личный кабинет</a>
+                <span class="crumb-sep">/</span>
+
+                <a
+                    v-if="currentCourseId"
+                    class="crumb"
+                    :href="`/content/${currentCourseId}`"
+                >
+                    {{ courseTitle || "Курс" }}
+                </a>
+                <span v-else class="crumb muted">{{ courseTitle || "Курс" }}</span>
+
+                <span class="crumb-sep">/</span>
+                <span class="crumb current">{{ chapter.title || "Глава" }}</span>
+            </nav>
         </div>
         <div v-if="loading" class="loading">Загрузка…</div>
 
@@ -11,11 +26,33 @@
                 <div class="card course-card">
                     <div class="course-card__header">
                         <div>
-                            <div class="course-card__label">Лекция</div>
-                            <div class="course-card__sub">{{ typeLabel }}:</div>
+                            <div class="course-card__label">Курс</div>
                             <h2 class="course-card__title">
-                                {{ chapter.title }}
+                                {{ courseTitle }}
                             </h2>
+
+                            <nav class="course-tree" v-if="currentTopic && currentChapter">
+                                <ul class="tree-topics">
+                                    <li class="tree-topic-item">
+                                        <div class="tree-topic">
+                                            <span class="tree-topic-title">{{ currentTopic.title }}</span>
+                                        </div>
+
+                                        <ul class="tree-chapters">
+                                            <li class="tree-chapter-item">
+                                                <!-- без ссылок, просто просмотр -->
+                                                <div class="tree-chapter is-active">
+                                                    <span class="tree-chapter-title">{{ currentChapter.title }}</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </nav>
+
+                            <div v-else class="course-tree__empty">
+                                Структура курса загружается…
+                            </div>
                         </div>
                         <!-- <img
                             :src="'/img/logo_placeholder.png'"
@@ -38,6 +75,25 @@
                         Мы быстро с вами свяжемся и поможем
                         <a href="#">devskillreport@mail.ru</a>.
                     </p>
+                </div>
+
+                <div v-if="maxQr.image" class="card max-qr-card">
+                    <p class="max-qr-card__title">
+                        Напишите на почту, если у вас появились проблемы или воспользуйтесь
+                    </p>
+                    <div class="max-qr-card__qr">
+                        <img :src="maxQr.image" alt="QR код MAX" />
+                    </div>
+                    <p class="max-qr-card__note">Мы быстро с вами свяжемся и поможем</p>
+
+                    <a
+                        class="max-qr-card__link"
+                        :href="maxQr.link"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Ссылка на Max
+                    </a>
                 </div>
             </aside>
             <div class="info__card-course">
@@ -259,7 +315,7 @@
                     <p class="hint">{{ submissionMessage }}</p>
                 </div>
             </div>
-            
+
         </div>
     </div>
 </template>
@@ -311,6 +367,133 @@ const typeLabel = computed(() => {
     default:             return chapter.value?.type || "";
   }
 });
+
+const currentCourseId = ref(null);
+
+function getCourseIdFromQuery() {
+    const sp = new URLSearchParams(window.location.search);
+    return sp.get("course_id") || sp.get("course");
+}
+
+function getCourseIdFromReferrer() {
+    const ref = document.referrer || "";
+
+    // /cpp/123 или /course/123
+    let m = ref.match(/\/(?:cpp|course)\/(\d+)/);
+    if (m?.[1]) return m[1];
+
+    // ?course=123 или ?course_id=123
+    m = ref.match(/[?&](?:course|course_id)=(\d+)/);
+    if (m?.[1]) return m[1];
+
+    return null;
+}
+
+/* ===== ДЕРЕВО КУРСА (слева) ===== */
+const courseTitle = ref("Курс");
+const courseTopics = ref([]);
+
+const currentTopic = computed(() => {
+    const cid = String(chapterId.value);
+    return (courseTopics.value || []).find(t =>
+        (t.chapters || []).some(ch => String(ch.id) === cid)
+    ) || null;
+});
+
+const currentChapter = computed(() => {
+    const t = currentTopic.value;
+    if (!t) return null;
+    const cid = String(chapterId.value);
+    return (t.chapters || []).find(ch => String(ch.id) === cid) || null;
+});
+
+function isCurrentChapter(id) {
+    return String(id) === String(chapterId.value);
+}
+
+function goToChapterFromTree(id) {
+    const cid =
+        currentCourseId.value ||
+        getCourseIdFromQuery() ||
+        localStorage.getItem("last_course_id");
+
+    window.location.href = cid
+        ? `/chapter/${id}?course_id=${cid}`
+        : `/chapter/${id}`;
+}
+
+async function fetchCourseTree(courseId) {
+    if (!courseId) return;
+
+    try {
+        const { data } = await axios.get(`/course/${courseId}/topics`, {
+            params: { user_id: storedUser.id },
+        });
+
+        console.log("course tree response =", data);
+
+        // НАЗВАНИЕ КУРСА (берём из ответа, или fallback из chapter)
+        courseTitle.value =
+            data?.course?.card_title ||
+            data?.course?.title ||
+            chapter.value?.course?.card_title ||
+            "Курс";
+
+        // ТЕМЫ: поддерживаем разные форматы ответа
+        const rawTopics = Array.isArray(data)
+            ? data
+            : (data?.topics || data?.data?.topics || []);
+
+        const ts = rawTopics.slice().sort(
+            (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        );
+
+        ts.forEach((t) => {
+            (t.chapters || []).sort(
+                (a, b) => new Date(a.created_at) - new Date(b.created_at)
+            );
+        });
+
+        courseTopics.value = ts;
+    } catch (e) {
+        console.warn("Не удалось загрузить дерево курса:", e);
+        courseTopics.value = [];
+    }
+}
+
+
+const maxQr = ref({ image: "", link: "" });
+
+function normalizeQrSrc(raw) {
+    if (!raw) return "";
+    if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+    if (raw.startsWith("data:") || raw.startsWith("blob:")) return raw;
+    if (raw.startsWith("/")) return raw;
+    return "/" + raw;
+}
+
+async function loadMaxQr(courseId) {
+    if (!courseId) {
+        maxQr.value = { image: "", link: "" };
+        return;
+    }
+    try {
+        // axios.defaults.baseURL = "/api" => тут путь БЕЗ /api
+        const { data } = await axios.get(`/courses/${courseId}/qr`);
+        if (data?.qr) {
+            maxQr.value = {
+                image: normalizeQrSrc(data.qr.qr_image),
+                link: data.qr.link || "",
+            };
+        } else {
+            maxQr.value = { image: "", link: "" };
+        }
+    } catch (e) {
+        console.warn("Ошибка при загрузке QR-кода:", e);
+        maxQr.value = { image: "", link: "" };
+    }
+}
+
 
 /* ---------- Тест ---------- */
 const quizData    = ref(null);
@@ -437,6 +620,27 @@ async function fetchChapter() {
       params: { user_id: storedUser.id },
     });
     chapter.value = data;
+
+      const fromQuery = getCourseIdFromQuery();
+      const fromLS = localStorage.getItem("last_course_id");
+
+      const courseId =
+          chapter.value?.course_id ??
+          chapter.value?.course?.id ??
+          fromQuery ??
+          fromLS ??
+          getCourseIdFromReferrer();
+
+      currentCourseId.value = courseId;
+
+      if (courseId) {
+          localStorage.setItem("last_course_id", String(courseId));
+          await fetchCourseTree(courseId);
+          await loadMaxQr(courseId); // <-- ДОБАВЬ
+      } else {
+          console.warn("Не смогли определить courseId для дерева");
+          maxQr.value = { image: "", link: "" };
+      }
 
     if (chapter.value.type === quizType && chapter.value.content) {
   const raw = typeof chapter.value.content === "string"
@@ -606,7 +810,66 @@ onMounted(fetchChapter);
   margin-top: 12px;
 }
 
-/* Сетка формы */
+    .course-tree {
+        margin-top: 12px;
+    }
+
+    .tree-topics,
+    .tree-chapters {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .tree-topic-item {
+        padding: 8px 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .tree-topic {
+        padding: 4px 0;
+    }
+
+    .tree-topic-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #111;
+    }
+
+    .tree-chapters {
+        margin-top: 6px;
+        margin-left: 6px;
+        padding-left: 10px;
+        border-left: 1px solid rgba(0, 0, 0, 0.12);
+        display: grid;
+        gap: 6px;
+    }
+
+    .tree-chapter {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        text-decoration: none;
+        color: #111;
+        padding: 2px 0;
+    }
+
+    .tree-chapter.is-active {
+        color: #617aff;
+        font-weight: 700;
+    }
+
+    .tree-chapter.is-completed {
+        opacity: 0.85;
+    }
+
+    .tree-badge {
+        font-weight: 800;
+        color: #28a745;
+    }
+
+
+    /* Сетка формы */
 .test__course {
   display: grid;
   gap: 18px;
@@ -965,9 +1228,8 @@ onMounted(fetchChapter);
 /* элементы блоков */
 .backs {
     display: flex;
-    height: 20px;
     width: 100%;
-    max-width: 1250px;
+    max-width: 1240px;
     margin: 0 auto;
 }
 .maincontainer {
@@ -1269,4 +1531,82 @@ onMounted(fetchChapter);
     text-align: center;
     padding: 40px 0;
 }
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+.crumb {
+    color: #5b4bff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.crumb:hover {
+    text-decoration: underline;
+}
+
+.crumb-sep {
+    color: #9aa0a6;
+}
+
+.crumb.current {
+    color: #111;
+    font-weight: 600;
+    cursor: default;
+    text-decoration: none;
+}
+
+.crumb.muted {
+    color: #9aa0a6;
+    cursor: default;
+    text-decoration: none;
+}
+/* MAX QR card */
+.max-qr-card {
+    text-align: center;
+    background: #f1f1fb;
+    color: #6f738c;
+    border-radius: 16px;
+}
+
+.max-qr-card__title {
+    font-size: 13px;
+    line-height: 1.35;
+    margin: 0 0 16px;
+}
+
+.max-qr-card__qr {
+    width: 210px;
+    height: 210px;
+    margin: 0 auto 16px;
+    padding: 10px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #39d5cf 0%, #6a3df7 100%);
+    box-shadow: 0 12px 28px rgba(63, 54, 156, 0.2);
+}
+
+.max-qr-card__qr img {
+    width: 100%;
+    height: 100%;
+    border-radius: 14px;
+    background: #ffffff;
+    object-fit: cover;
+}
+
+.max-qr-card__note {
+    font-size: 12px;
+    margin: 0 0 6px;
+}
+
+.max-qr-card__link {
+    display: inline-block;
+    color: #5b4bff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
 </style>

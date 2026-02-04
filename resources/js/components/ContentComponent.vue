@@ -1,9 +1,11 @@
 <template>
     <div class="maincontainer">
         <div class="backs">
-            <button @click="goBack" class="btn-back">
-                Вернуться в личный кабинет
-            </button>
+            <nav class="breadcrumbs" aria-label="breadcrumb">
+                <a class="crumb" href="/cabinet">Личный кабинет</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb current">{{ course?.card_title || "Курс" }}</span>
+            </nav>
         </div>
         <div class="container flex">
             <!-- Левый сайдбар -->
@@ -122,7 +124,7 @@
                                                 'is-completed': ch.is_completed,
                                             }"
                                         >
-                                            <div 
+                                            <div
                                                 v-show="ch.is_completed"
                                                 class="good"
                                             >
@@ -715,11 +717,12 @@ function toggleTopicSafe(topic) {
 }
 /** Переход к главе */
 function openChapter(topic, chapter) {
-    //   if (!isChapterUnlocked(topic, chapter)) {
-    //     alert("Сначала завершите предыдущие главы в этом разделе.");
-    //     return;
-    //   }
-    window.location.href = `/chapter/${chapter.id}`;
+    const cid = courseId.value || course.value?.id || coursId; // что есть — то и берём
+    if (cid) localStorage.setItem("last_course_id", String(cid));
+
+    window.location.href = cid
+        ? `/chapter/${chapter.id}?course_id=${cid}`
+        : `/chapter/${chapter.id}`;
 }
 
 /* ======================================================
@@ -968,9 +971,8 @@ async function dislikeComment(comment) {
 }
 .backs {
     display: flex;
-    height: 20px;
     width: 100%;
-    max-width: 1250px;
+    max-width: 1240px;
     margin: 0 auto;
 }
 .collapse-enter-active,
@@ -1548,5 +1550,31 @@ h2 {
         justify-content: center;
         flex-direction: column;
     }
+}
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.crumb {
+    color: #5b4bff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.crumb:hover {
+    text-decoration: underline;
+}
+
+.crumb-sep {
+    color: #9aa0a6;
+}
+
+.crumb.current {
+    color: #111;
+    font-weight: 600;
+    cursor: default;
 }
 </style>
