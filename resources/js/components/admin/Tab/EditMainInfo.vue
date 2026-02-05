@@ -779,6 +779,9 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+:deep .ce-toolbar__actions{
+  left: -200px !important;
+}
 .editor-container {
   max-width: unset;
   width: 100%;

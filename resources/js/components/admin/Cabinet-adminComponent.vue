@@ -37,7 +37,7 @@
                     <div class="footer__block">API</div>
                     <div class="footer__block">
                         <div class="footer__logo">
-                            <img src="https://devskills.foncode.ru/img/logo.png">
+                            <img src="../../img/logo.png" class="header__logo">
                         </div>
                     </div>
                 </div>

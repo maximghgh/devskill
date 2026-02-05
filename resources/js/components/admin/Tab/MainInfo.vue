@@ -914,7 +914,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
     :deep .ce-toolbar__actions{
-        right: 127% !important;
+        left: -200px !important;
     }
 /* EditorJS внутри визуальной системы dialog */
 .editor-container {

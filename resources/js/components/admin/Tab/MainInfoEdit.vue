@@ -339,7 +339,7 @@ const sortOptions3 = computed(() => [
                 </svg>
                 <div class="tooltipSquare"></div>
                 <div class="tooltip">
-                    <p>Это название мероприятия, отображаемое на карточке и странице хакатона</p>
+                    <p>Это название мероприятия, отображаемое на карточке и странице</p>
                 </div>
             </div>
         </div>
