@@ -152,7 +152,7 @@
                                 :src="
                                     userItem.photo
                                         ? `/storage/${userItem.photo}`
-                                        : 'https://devskills.foncode.ru/img/no_foto.jpg'
+                                        : '/img/no_foto.jpg'
                                 "
                                 alt="Фото пользователя"
                                 width="32"

@@ -168,7 +168,7 @@
                                     :src="
                                         course.card_image
                                             ? `${course.card_image}`
-                                            : 'https://devskills.foncode.ru/img/no_foto.jpg'
+                                            : '/img/no_foto.jpg'
                                     "
                                     alt=""
                                     width="25"
@@ -178,7 +178,7 @@
                                 {{ course.course_name || "Неизвестно" }}
                             </td>
 
-                            <td v-if="showAuthor">{{ course.teacher || "Неизвестно" }}</td>
+                            <td v-if="showAuthor">{{ teacherLabel(course) }}</td>
                             <td>Да</td>
                             <td>{{ formatBirthday(course.created_at) }}</td>
                             <td>0</td>
@@ -278,6 +278,54 @@ const emit = defineEmits([
 
 const { formatBirthday } = useDateFormatters();
 const { difficultyLabel } = useDifficultyLabel();
+
+const usersById = computed(() => {
+    const map = new Map();
+    props.users.forEach((user) => {
+        if (!user || user.id == null) return;
+        const name =
+            user.name ||
+            user.full_name ||
+            user.email ||
+            `ID ${user.id}`;
+        map.set(String(user.id), name);
+    });
+    return map;
+});
+
+function normalizeTeacherIds(teachers) {
+    if (Array.isArray(teachers)) {
+        return teachers
+            .map((t) => (typeof t === "object" && t ? t.id : t))
+            .filter((t) => t !== null && t !== undefined);
+    }
+    if (teachers == null) return [];
+    if (typeof teachers === "number") return [teachers];
+    if (typeof teachers === "string") {
+        try {
+            const parsed = JSON.parse(teachers);
+            if (Array.isArray(parsed)) {
+                return parsed
+                    .map((t) => (typeof t === "object" && t ? t.id : t))
+                    .filter((t) => t !== null && t !== undefined);
+            }
+            if (parsed == null) return [];
+            return [parsed];
+        } catch {
+            return [];
+        }
+    }
+    return [];
+}
+
+function teacherLabel(course) {
+    const ids = normalizeTeacherIds(course?.teachers);
+    const names = ids
+        .map((id) => usersById.value.get(String(id)))
+        .filter(Boolean);
+    if (names.length) return names.join(", ");
+    return course?.teacher || "Неизвестно";
+}
 
 function difficultyClass(diff) {
   const d = String(diff || "").toLowerCase();

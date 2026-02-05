@@ -71,9 +71,15 @@
                                     }}
                                 </p>
 
-                                <p v-if="!imageFileName" class="dialog__dropzone_title dialog__dropzone_hint">
-                                (JPG или PNG, 5 МБ максимальный размер файла)
-</p>
+                                <p
+                                    v-if="!imageFileName && !imageFileError"
+                                    class="dialog__dropzone_title dialog__dropzone_hint"
+                                >
+                                    (JPG или PNG, 5 МБ максимальный размер файла)
+                                </p>
+                                <p v-if="imageFileError" class="dialog__dropzone_error">
+                                    {{ imageFileError }}
+                                </p>
                             </div>
 
                             <!-- <div v-if="isEdit && currentImageUrl" class="image_db" style="margin-top: 10px;">
@@ -133,6 +139,7 @@ const isEdit = computed(() => !!props.news?.id);
 
 const loading = ref(false);
 const error = ref("");
+const imageFileError = ref("");
 
 const form = ref({
     id: null,
@@ -146,6 +153,7 @@ function resetForm() {
     form.value = { id: null, title: "", content: "", newsImage: null, editorData: {} };
     error.value = "";
     imageFileName.value = "";
+    imageFileError.value = "";
     isDraggingImage.value = false;
 }
 
@@ -178,14 +186,47 @@ const imageInputRef = ref(null);
 const imageFileName = ref("");
 const isDraggingImage = ref(false);
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png"];
+
+function validateImageFile(file) {
+    if (!file) return "";
+    const name = String(file.name || "").toLowerCase();
+    const hasAllowedExt =
+        name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png");
+    const hasAllowedType = ALLOWED_IMAGE_TYPES.includes(file.type);
+    if (!hasAllowedType && !hasAllowedExt) {
+        return "Разрешены только JPG или PNG";
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+        return "Максимальный размер файла — 5 МБ";
+    }
+    return "";
+}
+
 function triggerImageSelect() {
     if (loading.value) return;
     imageInputRef.value?.click();
 }
 
 function onImageFileSelected(file) {
-    form.value.newsImage = file || null;
-    imageFileName.value = file ? file.name : "";
+    if (!file) {
+        form.value.newsImage = null;
+        imageFileName.value = "";
+        imageFileError.value = "";
+        return;
+    }
+    const errorMsg = validateImageFile(file);
+    if (errorMsg) {
+        imageFileError.value = errorMsg;
+        form.value.newsImage = null;
+        imageFileName.value = "";
+        if (imageInputRef.value) imageInputRef.value.value = "";
+        return;
+    }
+    imageFileError.value = "";
+    form.value.newsImage = file;
+    imageFileName.value = file.name;
 }
 
 function handleImageChange(e) {
@@ -281,12 +322,30 @@ async function submit() {
     loading.value = true;
 
     try {
+        const title = (form.value.title || "").trim();
+        const content = (form.value.content || "").trim();
+        if (!title) {
+            error.value = "Введите название новости";
+            loading.value = false;
+            return;
+        }
+        if (!content) {
+            error.value = "Введите описание новости";
+            loading.value = false;
+            return;
+        }
+        if (imageFileError.value) {
+            error.value = imageFileError.value;
+            loading.value = false;
+            return;
+        }
+
         const editorData = editor ? await editor.save() : {};
         form.value.editorData = editorData;
 
         const fd = new FormData();
-        fd.append("title", form.value.title);
-        fd.append("content", form.value.content);
+        fd.append("title", title);
+        fd.append("content", content);
         fd.append("editor_data", JSON.stringify(form.value.editorData));
 
         if (form.value.newsImage) fd.append("image", form.value.newsImage);
@@ -307,7 +366,15 @@ async function submit() {
         close();
     } catch (e) {
         console.error(e);
-        error.value = isEdit.value ? "Ошибка обновления новости" : "Ошибка при создании новости";
+        const serverErrors = e?.response?.data?.errors;
+        const serverMessage = e?.response?.data?.message;
+        if (serverErrors && typeof serverErrors === "object") {
+            error.value = Object.values(serverErrors).flat().join(" ");
+        } else if (serverMessage) {
+            error.value = serverMessage;
+        } else {
+            error.value = isEdit.value ? "Ошибка обновления новости" : "Ошибка при создании новости";
+        }
         globalNotification.categoryMessage = error.value;
         globalNotification.type = "error";
     } finally {

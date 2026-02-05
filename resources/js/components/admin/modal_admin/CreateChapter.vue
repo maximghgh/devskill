@@ -90,8 +90,14 @@
                             : "Перетащите или выберите файлы"
                         }}
                     </p>
-                    <p v-if="!selectedFileLabel" class="dialog__dropzone_title">
-                        (JPG, PNG PDF..., 5 MB максимальный размер файла)
+                    <p
+                      v-if="!selectedFileLabel && !fileError"
+                      class="dialog__dropzone_title dialog__dropzone_hint"
+                    >
+                        (JPG/PNG, PDF/PPT/PPTX, Видео — до 20 МБ)
+                    </p>
+                    <p v-if="fileError" class="dialog__dropzone_error">
+                      {{ fileError }}
                     </p>
                 </div>
             </div>
@@ -144,6 +150,7 @@ const emit = defineEmits(["update:modelValue", "saved"]);
 
 const loading = ref(false);
 const error = ref("");
+const fileError = ref("");
 
 const fileInputRef = ref(null);
 
@@ -199,7 +206,8 @@ function removeSelectedFile(index) {
 function handleFileChange(e) {
   const incoming = Array.from(e.target.files || []);
   if (!incoming.length) return;
-  const merged = mergeFiles(form.value.files, incoming);
+  const validated = validateIncomingFiles(incoming);
+  const merged = mergeFiles(form.value.files, validated);
   setFiles(merged);
 }
 
@@ -209,7 +217,8 @@ function onDropFile(e) {
 
   const incoming = Array.from(e.dataTransfer?.files || []);
   if (!incoming.length) return;
-  const merged = mergeFiles(form.value.files, incoming);
+  const validated = validateIncomingFiles(incoming);
+  const merged = mergeFiles(form.value.files, validated);
   setFiles(merged);
 }
 
@@ -219,11 +228,53 @@ const form = ref({
   files: [],
 });
 
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const ALLOWED_MIMES = new Set([
+  "application/pdf",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+]);
+
+function isAllowedFile(file) {
+  if (!file) return false;
+  const type = file.type || "";
+  const name = String(file.name || "").toLowerCase();
+  if (type.startsWith("image/") || type.startsWith("video/")) return true;
+  if (ALLOWED_MIMES.has(type)) return true;
+  return (
+    name.endsWith(".pdf") ||
+    name.endsWith(".ppt") ||
+    name.endsWith(".pptx")
+  );
+}
+
+function validateIncomingFiles(incoming) {
+  const ok = [];
+  const errors = [];
+
+  incoming.forEach((file) => {
+    if (file.size > MAX_FILE_SIZE) {
+      errors.push(`Файл "${file.name}" больше 20 МБ`);
+      return;
+    }
+    if (!isAllowedFile(file)) {
+      errors.push(`Файл "${file.name}" имеет неподдерживаемый тип`);
+      return;
+    }
+    ok.push(file);
+  });
+
+  fileError.value = errors.join(". ");
+  if (!errors.length) fileError.value = "";
+  return ok;
+}
+
 let editor = null;
 
 function reset() {
   form.value = { title: "", files: [] };
   error.value = "";
+  fileError.value = "";
   if (fileInputRef.value) fileInputRef.value.value = "";
 }
 
@@ -280,10 +331,21 @@ async function submit() {
   loading.value = true;
 
   try {
+    const title = (form.value.title || "").trim();
+    if (!title) {
+      error.value = "Введите название урока";
+      loading.value = false;
+      return;
+    }
+    if (fileError.value) {
+      error.value = fileError.value;
+      loading.value = false;
+      return;
+    }
     const contentPayload = editor ? await editor.save() : { blocks: [] };
 
     const fd = new FormData();
-    fd.append("title", form.value.title);
+    fd.append("title", title);
     fd.append("type", "text"); // ← скрыто, потому что бэк требует
     fd.append("content", JSON.stringify(contentPayload));
     fd.append("points", "0"); // ← чтобы не ловить undefined points на бэке
@@ -329,6 +391,18 @@ watch(
   color: #d40000;
   font-size: 13px;
   margin-top: 8px;
+}
+
+.dialog__dropzone_hint {
+  font-size: 13px;
+  color: #9e9e9e;
+}
+
+.dialog__dropzone_error {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #d40000;
+  text-align: center;
 }
 
 .dialog__close {

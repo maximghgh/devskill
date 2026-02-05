@@ -30,7 +30,10 @@
                     <label class="users-show">
                         Показать
                         <span class="users-show__select-wrap">
-                            <select class="users-show__select">
+                            <select
+                                v-model.number="pageSizeUsers"
+                                class="users-show__select"
+                            >
                                 <option :value="10">10</option>
                                 <option :value="25">25</option>
                                 <option :value="50">50</option>
@@ -41,7 +44,7 @@
                                 alt=""
                             />
                         </span>
-                        пользователей
+                        обращений
                     </label>
                 </div>
 
@@ -56,11 +59,17 @@
                             />
                         </span>
                         <input
+                            v-model="searchQuery"
                             type="text"
                             class="users-search__input"
                             placeholder="Поиск..."
                         />
-                        <button type="button" class="users-search__clear">
+                        <button
+                            v-if="searchQuery"
+                            type="button"
+                            class="users-search__clear"
+                            @click="searchQuery = ''"
+                        >
                             ×
                         </button>
                     </div>
@@ -68,7 +77,7 @@
             </div>
         </div>
 
-        <div>
+        <div v-if="paginatedUsers.length">
             <table class="light-push-table">
                 <thead>
                     <tr>
@@ -80,65 +89,18 @@
                 </thead>
 
                 <tbody>
-                    <tr>
-                        <td>ФИО</td>
-
-                        <td>Ошибка</td>
-
-                        <td>дд.мм.гггг 00:00</td>
-
-                        <td class="size--xl">дд.мм.гггг 00:00</td>
-                    </tr>
-                    <tr>
-                        <td>ФИО</td>
-
-                        <td>Ошибка</td>
-
-                        <td>дд.мм.гггг 00:00</td>
-
-                        <td class="size--xl">дд.мм.гггг 00:00</td>
-                    </tr>
-                    <tr>
-                        <td>ФИО</td>
-
-                        <td>Ошибка</td>
-
-                        <td>дд.мм.гггг 00:00</td>
-
-                        <td class="size--xl">дд.мм.гггг 00:00</td>
-                    </tr>
-                    <tr>
-                        <td>ФИО</td>
-
-                        <td>Ошибка</td>
-
-                        <td>дд.мм.гггг 00:00</td>
-
-                        <td class="size--xl">дд.мм.гггг 00:00</td>
-                    </tr>
-                    <tr>
-                        <td>ФИО</td>
-
-                        <td>Ошибка</td>
-
-                        <td>дд.мм.гггг 00:00</td>
-
-                        <td class="size--xl">дд.мм.гггг 00:00</td>
-                    </tr>
-                    <tr>
-                        <td>ФИО</td>
-
-                        <td>Ошибка</td>
-
-                        <td>дд.мм.гггг 00:00</td>
-
-                        <td class="size--xl">дд.мм.гггг 00:00</td>
+                    <tr v-for="item in paginatedUsers" :key="item.id">
+                        <td>{{ supportName(item) }}</td>
+                        <td>{{ supportType(item) }}</td>
+                        <td>{{ formatDateTime(item.created_at) }}</td>
+                        <td class="size--xl">{{ supportAnsweredAt(item) }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
+        <div v-else>Нет обращений</div>
 
-        <!-- <div class="pagination-users" v-if="totalPagesUsers > 1">
+        <div class="pagination-users" v-if="totalPagesUsers > 1">
             <button
                 :disabled="currentPageUsers === 1"
                 @click="currentPageUsers--"
@@ -161,7 +123,7 @@
             >
                 Вперёд ›
             </button>
-        </div> -->
+        </div>
     </div>
 </template>
 
@@ -200,7 +162,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["update:users"]);
 
-const { formatBirthday } = useDateFormatters();
+const { formatDateTime } = useDateFormatters();
 
 function setUsers(next) {
     emit("update:users", next);
@@ -248,19 +210,19 @@ const filteredUsers = computed(() => {
         const phoneLc = phone.toLowerCase();
         const phoneDg = phone.replace(/\D/g, "");
         const country = (u.country || "").toLowerCase();
-        const bRaw = u.birthday || "";
-        const bFmt = (formatBirthday(u.birthday) || "").toLowerCase();
+    const createdRaw = u.created_at || "";
+    const createdFmt = (formatDateTime(u.created_at) || "").toLowerCase();
 
-        return (
-            name.includes(q) ||
-            email.includes(q) ||
-            country.includes(q) ||
-            phoneLc.includes(q) ||
-            (qDigits && phoneDg.includes(qDigits)) ||
-            bRaw.includes(q) ||
-            bFmt.includes(q)
-        );
-    });
+    return (
+        name.includes(q) ||
+        email.includes(q) ||
+        country.includes(q) ||
+        phoneLc.includes(q) ||
+        (qDigits && phoneDg.includes(qDigits)) ||
+        createdRaw.includes(q) ||
+        createdFmt.includes(q)
+    );
+});
 });
 
 const currentPageUsers = ref(1);
@@ -280,6 +242,30 @@ const paginatedUsers = computed(() => {
 watch([selectedRole, searchQuery, pageSizeUsers], () => {
     currentPageUsers.value = 1;
 });
+
+watch(totalPagesUsers, (tp) => {
+    if (currentPageUsers.value > tp) currentPageUsers.value = tp;
+});
+
+function supportName(item) {
+    return item?.name || item?.user_name || item?.fio || item?.email || "—";
+}
+
+function supportType(item) {
+    return (
+        item?.type ||
+        item?.course_title ||
+        item?.subject ||
+        item?.reason ||
+        "—"
+    );
+}
+
+function supportAnsweredAt(item) {
+    const val = item?.answered_at || item?.updated_at;
+    if (!val) return "—";
+    return formatDateTime(val);
+}
 
 /* ===== inline роль ===== */
 const inlineRoleEdit = reactive({ id: null, role: null });
@@ -374,9 +360,6 @@ async function deleteUser(userId) {
     }
 }
 
-watch([paginatedUsers, currentPageUsers], () => {
-    refresh();
-});
 </script>
 
 <style scoped>

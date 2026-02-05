@@ -215,11 +215,31 @@ const descInputRef = ref(null);
 
 const cardFileName = ref("");
 const descFileName = ref("");
+const cardFileError = ref("");
+const descFileError = ref("");
 
 const isDraggingCard = ref(false);
 const isDraggingDesc = ref(false);
 
 const isDisabled = computed(() => props.readonly || props.admin);
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png"];
+
+function validateImageFile(file) {
+  if (!file) return "";
+  const name = String(file.name || "").toLowerCase();
+  const hasAllowedExt =
+    name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png");
+  const hasAllowedType = ALLOWED_IMAGE_TYPES.includes(file.type);
+  if (!hasAllowedType && !hasAllowedExt) {
+    return "Разрешены только JPG или PNG";
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    return "Максимальный размер файла — 5 МБ";
+  }
+  return "";
+}
 
 /** Trigger/Drop helpers */
 function triggerCardSelect() {
@@ -243,13 +263,43 @@ function onPdf(e) {
 
 function handleCardChange(e) {
   const f = e.target.files?.[0] || null;
-  onCardImage(e);
-  cardFileName.value = f ? f.name : "";
+  if (!f) {
+    form.value.cardImage = null;
+    cardFileName.value = "";
+    cardFileError.value = "";
+    return;
+  }
+  const error = validateImageFile(f);
+  if (error) {
+    cardFileError.value = error;
+    form.value.cardImage = null;
+    cardFileName.value = "";
+    if (cardInputRef.value) cardInputRef.value.value = "";
+    return;
+  }
+  cardFileError.value = "";
+  form.value.cardImage = f;
+  cardFileName.value = f.name;
 }
 function handleDescChange(e) {
   const f = e.target.files?.[0] || null;
-  onDescriptionImage(e);
-  descFileName.value = f ? f.name : "";
+  if (!f) {
+    form.value.descriptionImage = null;
+    descFileName.value = "";
+    descFileError.value = "";
+    return;
+  }
+  const error = validateImageFile(f);
+  if (error) {
+    descFileError.value = error;
+    form.value.descriptionImage = null;
+    descFileName.value = "";
+    if (descInputRef.value) descInputRef.value.value = "";
+    return;
+  }
+  descFileError.value = "";
+  form.value.descriptionImage = f;
+  descFileName.value = f.name;
 }
 
 function onDropCard(e) {
@@ -262,8 +312,7 @@ function onDropCard(e) {
   dt.items.add(file);
   cardInputRef.value.files = dt.files;
 
-  onCardImage({ target: cardInputRef.value });
-  cardFileName.value = file.name;
+  handleCardChange({ target: cardInputRef.value });
 }
 
 function onDropDesc(e) {
@@ -276,8 +325,7 @@ function onDropDesc(e) {
   dt.items.add(file);
   descInputRef.value.files = dt.files;
 
-  onDescriptionImage({ target: descInputRef.value });
-  descFileName.value = file.name;
+  handleDescChange({ target: descInputRef.value });
 }
 
 /** Источники для селектов */
@@ -444,6 +492,8 @@ function resetForm() {
   teacherSelectModel.value = null;
   cardFileName.value = "";
   descFileName.value = "";
+  cardFileError.value = "";
+  descFileError.value = "";
 
   isDirty.value = false;
   emit("dirty", false);
@@ -835,8 +885,17 @@ onBeforeUnmount(() => {
                                 : "Перетащите или выберите файл"
                         }}
                     </p>
-                    <p v-if="!cardFileName" class="dialog__dropzone_title">
+                    <p
+                        v-if="!cardFileName && !cardFileError"
+                        class="dialog__dropzone_title dialog__dropzone_hint"
+                    >
                         (JPG или PNG, 5 МБ максимальный размер файла)
+                    </p>
+                    <p
+                        v-if="cardFileError"
+                        class="dialog__dropzone_error"
+                    >
+                        {{ cardFileError }}
                     </p>
                 </div>
             </div>
@@ -874,8 +933,17 @@ onBeforeUnmount(() => {
                                 : "Перетащите или выберите файл"
                         }}
                     </p>
-                    <p v-if="!descFileName" class="dialog__dropzone_title">
+                    <p
+                        v-if="!descFileName && !descFileError"
+                        class="dialog__dropzone_title dialog__dropzone_hint"
+                    >
                         (JPG или PNG, 5 МБ максимальный размер файла)
+                    </p>
+                    <p
+                        v-if="descFileError"
+                        class="dialog__dropzone_error"
+                    >
+                        {{ descFileError }}
                     </p>
                 </div>
             </div>

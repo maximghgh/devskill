@@ -91,7 +91,7 @@
                             <img
                                 :src="newsItem.image
                                     ? `/storage/${newsItem.image}`
-                                    : 'https://devskills.foncode.ru/img/no_foto.jpg'
+                                    : '/img/no_foto.jpg'
                                 "
                                 alt=""
                                 width="25"

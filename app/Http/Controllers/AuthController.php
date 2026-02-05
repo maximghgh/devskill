@@ -33,15 +33,20 @@ class AuthController extends Controller
                 'inn.digits_between' => 'ИНН должен содержать 10 или 12 цифр.',
             ]);
 
-            // Создаём временную запись с данными пользователя
-            $pendingUser = PendingUser::create([
-                'name'       => $request->name,
-                'email'      => $request->email,
-                'password'   => Hash::make($request->password),
-                'inn'        => $request->inn,
-                'token'      => sha1($request->email . now()),
-                'expires_at' => Carbon::now()->addMinutes(60),
-            ]);
+            $token = sha1($request->email . now());
+            $expiresAt = Carbon::now()->addMinutes(60);
+
+            // Создаём или обновляем временную запись (если email уже есть в pending_users)
+            $pendingUser = PendingUser::updateOrCreate(
+                ['email' => $request->email],
+                [
+                    'name'       => $request->name,
+                    'password'   => Hash::make($request->password),
+                    'inn'        => $request->inn,
+                    'token'      => $token,
+                    'expires_at' => $expiresAt,
+                ]
+            );
 
             // Генерируем временную подписанную ссылку подтверждения
             $verificationUrl = URL::temporarySignedRoute(

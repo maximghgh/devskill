@@ -11,7 +11,7 @@
                                         :src="
                                             user.photo
                                                 ? `/storage/${user.photo}`
-                                                : 'https://devskills.foncode.ru/img/no_foto.jpg'
+                                                : '/img/no_foto.jpg'
                                         "
                                         alt="Фото пользователя"
                                         class="course__menu-foto"

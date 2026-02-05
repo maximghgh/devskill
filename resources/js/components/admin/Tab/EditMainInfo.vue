@@ -268,9 +268,29 @@ const descInputRef = ref(null);
 
 const cardFileName = ref("");
 const descFileName = ref("");
+const cardFileError = ref("");
+const descFileError = ref("");
 
 const isDraggingCard = ref(false);
 const isDraggingDesc = ref(false);
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png"];
+
+function validateImageFile(file) {
+  if (!file) return "";
+  const name = String(file.name || "").toLowerCase();
+  const hasAllowedExt =
+    name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png");
+  const hasAllowedType = ALLOWED_IMAGE_TYPES.includes(file.type);
+  if (!hasAllowedType && !hasAllowedExt) {
+    return "Разрешены только JPG или PNG";
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    return "Максимальный размер файла — 5 МБ";
+  }
+  return "";
+}
 
 // текущие файлы из курса (если бэк отдаёт пути)
 const currentCardPath = computed(() => {
@@ -323,13 +343,43 @@ function triggerDescSelect() {
 
 function handleCardChange(e) {
   const f = e.target.files?.[0] || null;
+  if (!f) {
+    form.value.cardImage = null;
+    cardFileName.value = "";
+    cardFileError.value = "";
+    return;
+  }
+  const error = validateImageFile(f);
+  if (error) {
+    cardFileError.value = error;
+    form.value.cardImage = null;
+    cardFileName.value = "";
+    if (cardInputRef.value) cardInputRef.value.value = "";
+    return;
+  }
+  cardFileError.value = "";
   form.value.cardImage = f;
-  cardFileName.value = f ? f.name : "";
+  cardFileName.value = f.name;
 }
 function handleDescChange(e) {
   const f = e.target.files?.[0] || null;
+  if (!f) {
+    form.value.descriptionImage = null;
+    descFileName.value = "";
+    descFileError.value = "";
+    return;
+  }
+  const error = validateImageFile(f);
+  if (error) {
+    descFileError.value = error;
+    form.value.descriptionImage = null;
+    descFileName.value = "";
+    if (descInputRef.value) descInputRef.value.value = "";
+    return;
+  }
+  descFileError.value = "";
   form.value.descriptionImage = f;
-  descFileName.value = f ? f.name : "";
+  descFileName.value = f.name;
 }
 
 function onDropCard(e) {
@@ -424,6 +474,8 @@ function fillFormFromCourse(course) {
   // сброс выбранных новых файлов в dropzone
   cardFileName.value = "";
   descFileName.value = "";
+  cardFileError.value = "";
+  descFileError.value = "";
   isDraggingCard.value = false;
   isDraggingDesc.value = false;
 
@@ -695,8 +747,14 @@ onBeforeUnmount(() => {
               : "Перетащите или выберите файл"
         }}
       </p>
-      <p v-if="!cardFileName" class="dialog__dropzone_title dialog__dropzone_hint">
-        (JPG или PNG)
+      <p
+        v-if="!cardFileName && !cardFileError"
+        class="dialog__dropzone_title dialog__dropzone_hint"
+      >
+        (JPG или PNG, 5 МБ максимальный размер файла)
+      </p>
+      <p v-if="cardFileError" class="dialog__dropzone_error">
+        {{ cardFileError }}
       </p>
     </div>
   </div>
@@ -743,8 +801,14 @@ onBeforeUnmount(() => {
                 : "Перетащите или выберите файл"
           }}
         </p>
-        <p v-if="!descFileName" class="dialog__dropzone_title dialog__dropzone_hint">
-          (JPG или PNG)
+        <p
+          v-if="!descFileName && !descFileError"
+          class="dialog__dropzone_title dialog__dropzone_hint"
+        >
+          (JPG или PNG, 5 МБ максимальный размер файла)
+        </p>
+        <p v-if="descFileError" class="dialog__dropzone_error">
+          {{ descFileError }}
         </p>
       </div>
     </div>

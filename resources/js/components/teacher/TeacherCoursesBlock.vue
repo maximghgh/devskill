@@ -84,7 +84,7 @@
                                     :src="
                                         course.card_image
                                             ? normalizeImageUrl(course.card_image)
-                                            : 'https://devskills.foncode.ru/img/no_foto.jpg'
+                                            : '/img/no_foto.jpg'
                                     "
                                     alt=""
                                     width="25"

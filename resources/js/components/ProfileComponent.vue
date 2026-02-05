@@ -8,7 +8,7 @@
                             <div class="course__menu course__menu-persona">
                                 <div class="course__menu-nickname">
                                     <img 
-                                        :src="user.photo ? `/storage/${user.photo}` : 'https://devskills.foncode.ru/img/no_foto.jpg'" 
+                                        :src="user.photo ? `/storage/${user.photo}` : '/img/no_foto.jpg'" 
                                         alt="Фото пользователя" class="course__menu-foto"
                                     />
                                     <div class="course__menu-name">
@@ -37,7 +37,7 @@
                                 <div lang="infoblock__info-name">
                                     <div class="infoblock__info-name-image">
                                         <img 
-                                            :src="user.photo ? `/storage/${user.photo}` : 'https://devskills.foncode.ru/img/no_foto.jpg'" 
+                                            :src="user.photo ? `/storage/${user.photo}` : '/img/no_foto.jpg'" 
                                             alt="Фото пользователя" 
                                         />
                                     </div>

@@ -115,11 +115,15 @@
       <div class="form-group">
         <label class="form-label">Логотип курса</label>
         <input type="file" accept="image/*" class="form-input" @change="onCardImage" />
+        <small class="form-hint">JPG или PNG, до 5 МБ</small>
+        <small v-if="cardImageError" class="form-error">{{ cardImageError }}</small>
       </div>
 
       <div class="form-group">
         <label class="form-label">Изображение для описания курса</label>
         <input type="file" accept="image/*" class="form-input" @change="onDescriptionImage" />
+        <small class="form-hint">JPG или PNG, до 5 МБ</small>
+        <small v-if="descImageError" class="form-error">{{ descImageError }}</small>
       </div>
 
       <div class="form-group">
@@ -178,6 +182,11 @@ const form = ref({
   startDate: '', // 'YYYY-MM-DD'
   endDate:   ''
 })
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png"]
+const cardImageError = ref("")
+const descImageError = ref("")
 
 /** Источники для селектов */
 const users = ref([])
@@ -255,8 +264,50 @@ async function loadLanguages() {
 }
 
 /** Хендлеры файлов */
-function onCardImage(e) { form.value.cardImage = e.target.files?.[0] || null }
-function onDescriptionImage(e) { form.value.descriptionImage = e.target.files?.[0] || null }
+function validateImageFile(file) {
+  if (!file) return ""
+  const name = String(file.name || "").toLowerCase()
+  const hasAllowedExt = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png")
+  const hasAllowedType = ALLOWED_IMAGE_TYPES.includes(file.type)
+  if (!hasAllowedType && !hasAllowedExt) return "Разрешены только JPG или PNG"
+  if (file.size > MAX_IMAGE_SIZE) return "Максимальный размер файла — 5 МБ"
+  return ""
+}
+
+function onCardImage(e) {
+  const file = e.target.files?.[0] || null
+  if (!file) {
+    form.value.cardImage = null
+    cardImageError.value = ""
+    return
+  }
+  const error = validateImageFile(file)
+  if (error) {
+    cardImageError.value = error
+    form.value.cardImage = null
+    e.target.value = ""
+    return
+  }
+  cardImageError.value = ""
+  form.value.cardImage = file
+}
+function onDescriptionImage(e) {
+  const file = e.target.files?.[0] || null
+  if (!file) {
+    form.value.descriptionImage = null
+    descImageError.value = ""
+    return
+  }
+  const error = validateImageFile(file)
+  if (error) {
+    descImageError.value = error
+    form.value.descriptionImage = null
+    e.target.value = ""
+    return
+  }
+  descImageError.value = ""
+  form.value.descriptionImage = file
+}
 function onPdf(e) { form.value.pdfFile = e.target.files?.[0] || null }
 
 /** Сабмит создания */
@@ -350,6 +401,8 @@ function resetForm() {
   }
   // очистим EditorJS визуально
   if (editor.value) editor.value.clear()
+  cardImageError.value = ""
+  descImageError.value = ""
 }
 </script>
 
@@ -377,6 +430,8 @@ function resetForm() {
 .form-label { font-weight: bold; margin-bottom: 8px; color: #333; }
 .form-input, .form-textarea { outline: none; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
 .form-textarea { resize: none; min-height: 80px; }
+.form-hint { font-size: 12px; color: #7c7c7c; margin-top: 6px; }
+.form-error { font-size: 12px; color: #e80024; margin-top: 6px; }
 .editor-container { padding: 10px; border: 1px solid #ccc; border-radius: 4px; min-height: 150px; background: #fff; }
 .form-button { width: 700px; background: #007bff; color: #fff; padding: 10px 15px; border: 0; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color .3s; margin: 0 auto; }
 .form-button:hover { background: #0056b3; }
