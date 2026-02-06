@@ -493,6 +493,17 @@ let editorInstance = null;
 
 onMounted(loadCourse);
 
+function hideEmptyEditorCaptions() {
+    const root = document.getElementById("editorjs");
+    if (!root) return;
+    const captions = root.querySelectorAll(".image-tool__caption");
+    captions.forEach((caption) => {
+        if (!caption.textContent || caption.textContent.trim() === "") {
+            caption.style.display = "none";
+        }
+    });
+}
+
 async function loadCourse() {
     try {
         /* id курса: из data-course-id или из URL вида /cpp/17 */
@@ -529,6 +540,9 @@ async function loadCourse() {
                 typeof data.editor_data === "string"
                     ? JSON.parse(data.editor_data)
                     : data.editor_data ?? {},
+            onReady: () => {
+                hideEmptyEditorCaptions();
+            },
             tools: {
                 header: { class: Header, inlineToolbar: ["link"] },
                 list: { class: List, inlineToolbar: true },
@@ -569,6 +583,13 @@ function downloadPdf(path) {
   width: 100%;
   height: auto;
   display: block;
+}
+:deep(.image-tool__caption) {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    outline: none;
+    padding: 8px 0 0;
 }
 .block__logo {
     display: flex;
