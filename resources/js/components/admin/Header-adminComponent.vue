@@ -23,7 +23,7 @@
                                     :src="
                                         user.photo
                                             ? `/storage/${user.photo}`
-                                            : 'https://devskills.foncode.ru/img/nofotolk.png'
+                                            : '../../../img/nofotolk.png'
                                     "
                                     alt="Фото пользователя"
                                     width="40"

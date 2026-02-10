@@ -23,12 +23,11 @@
                     <div class="personal-area__inner">
                         <div v-if="user" class="header__lk">
                             <a href="/cabinet" class="header__lk-img">
-                                <!-- <img src="https://devskills.foncode.ru/img/nofotolk.png" width="40" height="40" alt="User avatar" /> -->
                                 <img
                                     :src="
                                         user.photo
                                             ? `/storage/${user.photo}`
-                                            : 'https://devskills.foncode.ru/img/nofotolk.png'
+                                            : '../../../img/nofotolk.png'
                                     "
                                     alt="Фото пользователя"
                                     width="40"

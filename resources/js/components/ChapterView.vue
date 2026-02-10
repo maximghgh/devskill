@@ -288,7 +288,7 @@
                                         >Преподватель:</label
                                     >
                                     <img
-                                        :src="'https://devskills.foncode.ru/img/nofotolk.png'"
+                                        :src="'../../../img/nofotolk.png'"
                                         alt="Фото преподвателя"
                                         class="form__img"
                                     />
