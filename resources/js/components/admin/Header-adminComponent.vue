@@ -2,11 +2,18 @@
     <header class="header header_main">
         <div class="header__inner header__inner--admin">
             <div class="header__logos">
-                <a href="/admin">
+                <a href="/admin" class="logos">
                     <img
                         src="../../../img/logo.png"
                         class="header__logo"
                         alt="Логотип"
+                        height="90"
+                        width="90"
+                    />
+                    <img
+                        src="../../../img/logo_istu.svg"
+                        class="header__logo"
+                        alt="Логотип ИжГТУ"
                         height="90"
                         width="90"
                     />

@@ -2071,6 +2071,12 @@ footer {
     font-weight: 900;
     font-style: italic;
 }
+
+.logos{
+    display: flex;
+    gap: 8px;
+}
+
 .b-popup-content input[type="submit"]:hover {
     background: #fff;
     color: rgba(57, 48, 133, 1);
