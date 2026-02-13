@@ -4,9 +4,9 @@
             Курс: {{ course?.course_name || "Без названия" }}
         </h2>
         <div class="info__course">
-            <div class="info__card info__card--center">
+            <div class="info__card info__card--course">
                 <p class="info__text">Всего студентов:</p>
-                <span class="info__desc">{{ studentsCount }}</span>
+                <span class="info__desc info__desc--s">{{ studentsCount }}</span>
             </div>
             <div class="info__card info__card--course">
                 <p class="info__text">Текущий блок:</p>

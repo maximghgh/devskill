@@ -63,7 +63,7 @@
             </div>
         </div>
 
-        <div class="teacher__block">
+        <div class="teacher__block teacher__block--sb">
             <div v-if="paginatedCourses.length">
                 <table class="light-push-table">
                     <thead>

@@ -2,22 +2,26 @@
     <header class="header header_main">
         <div class="header__inner">
             <div class="header__logos">
-                <a href="/teacher" class="logos">
-                    <img
-                        src="../../../img/logo.png"
-                        class="header__logo"
-                        alt="Логотип"
-                        height="90"
-                        width="90"
-                    />
-                    <img
-                        src="../../../img/logo_istu.svg"
-                        class="header__logo"
-                        alt="Логотип ИжГТУ"
-                        height="90"
-                        width="90"
-                    />
-                </a>
+                <div class="logos">
+                    <a href="/teacher">
+                        <img
+                            src="../../../img/logo.png"
+                            class="header__logo"
+                            alt="Логотип"
+                            height="90"
+                            width="90"
+                        />
+                    </a>
+                    <a href="https://istu.ru" target="_blank" class="logos">
+                        <img
+                            src="../../../img/logo_istu.svg"
+                            class="header__logo"
+                            alt="Логотип ИжГТУ"
+                            height="90"
+                            width="90"
+                        />
+                    </a>
+                </div>
             </div>
             <nav class="header__nav">
                 <a href="/teacher">Панель преподователя</a>

@@ -4,23 +4,27 @@
 
         <div class="status-tabs" role="tablist" aria-label="Фильтр задач">
             <button
-                class="status-tabs__tab status-tabs__tab--active"
+                class="status-tabs__tab"
+                :class="{ 'status-tabs__tab--active': activeStatus === 'открыта' }"
                 type="button"
                 role="tab"
-                aria-selected="true"
+                :aria-selected="activeStatus === 'открыта'"
+                @click="setActiveStatus('открыта')"
             >
                 <span class="status-tabs__label">Открытые</span>
-                <span class="status-tabs__badge">124</span>
+                <span class="status-tabs__badge">{{ openCount }}</span>
             </button>
             <div class="line"></div>
             <button
                 class="status-tabs__tab"
+                :class="{ 'status-tabs__tab--active': activeStatus === 'выполнена' }"
                 type="button"
                 role="tab"
-                aria-selected="false"
+                :aria-selected="activeStatus === 'выполнена'"
+                @click="setActiveStatus('выполнена')"
             >
                 <span class="status-tabs__label">Выполненные</span>
-                <span class="status-tabs__badge">124</span>
+                <span class="status-tabs__badge">{{ completedCount }}</span>
             </button>
         </div>
 
@@ -31,7 +35,7 @@
                         Показать
                         <span class="users-show__select-wrap">
                             <select
-                                v-model.number="pageSizeUsers"
+                                v-model.number="pageSize"
                                 class="users-show__select"
                             >
                                 <option :value="10">10</option>
@@ -77,22 +81,34 @@
             </div>
         </div>
 
-        <div v-if="paginatedUsers.length">
+        <div v-if="paginatedRequests.length">
             <table class="light-push-table">
                 <thead>
                     <tr>
                         <th class="th--xl">ФИО</th>
-                        <th class="th--xl">Тип обращения</th>
+                        <th class="th--xl">Сообщение</th>
                         <th class="th--xl">Дата обращения</th>
+                        <th class="th--xl">Статус</th>
                         <th class="th--xl size--xl">Дата ответа</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    <tr v-for="item in paginatedUsers" :key="item.id">
-                        <td>{{ supportName(item) }}</td>
-                        <td>{{ supportType(item) }}</td>
+                    <tr v-for="item in paginatedRequests" :key="item.id">
+                        <td>{{ item.user_name || "—" }}</td>
+                        <td>{{ messagePreview(item.message) }}</td>
                         <td>{{ formatDateTime(item.created_at) }}</td>
+                        <td>
+                            <select
+                                class="users-show__select support-status-select"
+                                :value="item.status"
+                                :disabled="updatingId === item.id"
+                                @change="handleStatusChange(item, $event)"
+                            >
+                                <option value="открыта">открыта</option>
+                                <option value="выполнена">выполнена</option>
+                            </select>
+                        </td>
                         <td class="size--xl">{{ supportAnsweredAt(item) }}</td>
                     </tr>
                 </tbody>
@@ -100,26 +116,26 @@
         </div>
         <div v-else>Нет обращений</div>
 
-        <div class="pagination-users" v-if="totalPagesUsers > 1">
+        <div class="pagination-users" v-if="totalPages > 1">
             <button
-                :disabled="currentPageUsers === 1"
-                @click="currentPageUsers--"
+                :disabled="currentPage === 1"
+                @click="currentPage--"
             >
                 ‹ Назад
             </button>
 
             <button
-                v-for="p in totalPagesUsers"
+                v-for="p in totalPages"
                 :key="p"
-                :class="{ active: currentPageUsers === p }"
-                @click="currentPageUsers = p"
+                :class="{ active: currentPage === p }"
+                @click="currentPage = p"
             >
                 {{ p }}
             </button>
 
             <button
-                :disabled="currentPageUsers === totalPagesUsers"
-                @click="currentPageUsers++"
+                :disabled="currentPage === totalPages"
+                @click="currentPage++"
             >
                 Вперёд ›
             </button>
@@ -128,238 +144,133 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, reactive } from "vue";
+import { ref, computed, watch } from "vue";
 import axios from "axios";
 import { globalNotification } from "../../../globalNotification";
 import { useDateFormatters } from "../utils/useDateFormatters";
-import EditRoleUser from "./../modal_admin/EditRoleUser.vue";
-
-function rolePillClass(role) {
-    const r = Number(role);
-    return {
-        "users-role-pill--student": r === 1,
-        "users-role-pill--teacher": r === 2,
-        "users-role-pill--admin": r === 3,
-        "users-role-pill--parent": r === 4,
-    };
-}
-
-const showEditRoleModal = ref(false);
-const userToEditRole = ref(null);
-
-function openEditRoleModal(user) {
-    userToEditRole.value = user;
-    showEditRoleModal.value = true;
-}
-
-function onRoleUpdated(updated) {
-    const next = props.users.map((u) => (u.id === updated.id ? updated : u));
-    setUsers(next);
-}
 
 const props = defineProps({
-    users: { type: Array, default: () => [] },
+    requests: { type: Array, default: () => [] },
 });
-const emit = defineEmits(["update:users"]);
+const emit = defineEmits(["update:requests"]);
 
 const { formatDateTime } = useDateFormatters();
 
-function setUsers(next) {
-    emit("update:users", next);
+function setRequests(next) {
+    emit("update:requests", next);
 }
 
-const selectedRole = ref("all");
+const activeStatus = ref("открыта");
 const searchQuery = ref("");
-const roleDropdownOpen = ref(false);
 
-function resetRoleFilter() {
-    selectedRole.value = "all";
-    roleDropdownOpen.value = false;
+const openCount = computed(
+    () => props.requests.filter((r) => r.status === "открыта").length
+);
+const completedCount = computed(
+    () => props.requests.filter((r) => r.status === "выполнена").length
+);
+
+function setActiveStatus(status) {
+    activeStatus.value = status;
 }
 
-function getRoleName(role) {
-    switch (role) {
-        case 4:
-            return "Родитель";
-        case 3:
-            return "Админ";
-        case 2:
-            return "Преподаватель";
-        case 1:
-            return "Ученик";
-        default:
-            return "Неизвестно";
-    }
+function messagePreview(message) {
+    const text = (message || "").toString();
+    return text.length > 140 ? `${text.slice(0, 140)}...` : text;
 }
 
-const filteredUsers = computed(() => {
-    const base =
-        selectedRole.value === "all"
-            ? props.users
-            : props.users.filter((u) => String(u.role) === selectedRole.value);
+const filteredRequests = computed(() => {
+    const base = props.requests.filter(
+        (r) => r.status === activeStatus.value
+    );
 
     const q = (searchQuery.value || "").trim().toLowerCase();
     if (!q) return base;
 
     const qDigits = q.replace(/\D/g, "");
 
-    return base.filter((u) => {
-        const name = (u.name || "").toLowerCase();
-        const email = (u.email || "").toLowerCase();
-        const phone = u.phone || "";
-        const phoneLc = phone.toLowerCase();
-        const phoneDg = phone.replace(/\D/g, "");
-        const country = (u.country || "").toLowerCase();
-    const createdRaw = u.created_at || "";
-    const createdFmt = (formatDateTime(u.created_at) || "").toLowerCase();
+    return base.filter((r) => {
+        const name = (r.user_name || "").toLowerCase();
+        const msg = (r.message || "").toLowerCase();
+        const createdRaw = r.created_at || "";
+        const createdFmt = (formatDateTime(r.created_at) || "").toLowerCase();
 
-    return (
-        name.includes(q) ||
-        email.includes(q) ||
-        country.includes(q) ||
-        phoneLc.includes(q) ||
-        (qDigits && phoneDg.includes(qDigits)) ||
-        createdRaw.includes(q) ||
-        createdFmt.includes(q)
-    );
-});
+        return (
+            name.includes(q) ||
+            msg.includes(q) ||
+            createdRaw.includes(q) ||
+            createdFmt.includes(q) ||
+            (qDigits && createdRaw.replace(/\D/g, "").includes(qDigits))
+        );
+    });
 });
 
-const currentPageUsers = ref(1);
-const pageSizeUsers = ref(10);
+const currentPage = ref(1);
+const pageSize = ref(10);
 
-const totalPagesUsers = computed(() => {
-    const size = pageSizeUsers.value || 1;
-    return Math.max(1, Math.ceil(filteredUsers.value.length / size));
+const totalPages = computed(() => {
+    const size = pageSize.value || 1;
+    return Math.max(1, Math.ceil(filteredRequests.value.length / size));
 });
 
-const paginatedUsers = computed(() => {
-    const size = pageSizeUsers.value || 10;
-    const start = (currentPageUsers.value - 1) * size;
-    return filteredUsers.value.slice(start, start + size);
+const paginatedRequests = computed(() => {
+    const size = pageSize.value || 10;
+    const start = (currentPage.value - 1) * size;
+    return filteredRequests.value.slice(start, start + size);
 });
 
-watch([selectedRole, searchQuery, pageSizeUsers], () => {
-    currentPageUsers.value = 1;
+watch([activeStatus, searchQuery, pageSize], () => {
+    currentPage.value = 1;
 });
 
-watch(totalPagesUsers, (tp) => {
-    if (currentPageUsers.value > tp) currentPageUsers.value = tp;
+watch(totalPages, (tp) => {
+    if (currentPage.value > tp) currentPage.value = tp;
 });
-
-function supportName(item) {
-    return item?.name || item?.user_name || item?.fio || item?.email || "—";
-}
-
-function supportType(item) {
-    return (
-        item?.type ||
-        item?.course_title ||
-        item?.subject ||
-        item?.reason ||
-        "—"
-    );
-}
 
 function supportAnsweredAt(item) {
-    const val = item?.answered_at || item?.updated_at;
+    const val = item?.completed_at;
     if (!val) return "—";
     return formatDateTime(val);
 }
 
-/* ===== inline роль ===== */
-const inlineRoleEdit = reactive({ id: null, role: null });
+const updatingId = ref(null);
 
-function startInlineRole(user) {
-    inlineRoleEdit.id = user.id;
-    inlineRoleEdit.role = Number(user.role);
-}
+async function handleStatusChange(item, event) {
+    const nextStatus = event.target.value;
+    const prevStatus = item.status;
+    if (nextStatus === prevStatus) return;
 
-function cancelInlineRole() {
-    inlineRoleEdit.id = null;
-    inlineRoleEdit.role = null;
-}
+    const updatedLocal = props.requests.map((r) =>
+        r.id === item.id
+            ? {
+                  ...r,
+                  status: nextStatus,
+                  completed_at:
+                      nextStatus === "выполнена" ? new Date().toISOString() : null,
+              }
+            : r
+    );
+    setRequests(updatedLocal);
 
-async function saveInlineRole() {
-    if (!inlineRoleEdit.id) return;
     try {
-        const id = inlineRoleEdit.id;
-        const resp = await axios.patch(`/api/users/${id}`, {
-            role: inlineRoleEdit.role,
+        updatingId.value = item.id;
+        await axios.patch(`/api/support-requests/${item.id}/status`, {
+            status: nextStatus,
         });
-        const updated = resp.data.user || resp.data;
-
-        const next = props.users.map((u) => (u.id === id ? updated : u));
-        setUsers(next);
-
-        globalNotification.categoryMessage = "Роль обновлена";
+        globalNotification.categoryMessage = "Статус обновлён";
         globalNotification.type = "success";
     } catch (e) {
         console.error(e);
-        globalNotification.categoryMessage = "Ошибка обновления роли";
+        const reverted = props.requests.map((r) =>
+            r.id === item.id ? { ...r, status: prevStatus } : r
+        );
+        setRequests(reverted);
+        globalNotification.categoryMessage = "Ошибка обновления статуса";
         globalNotification.type = "error";
     } finally {
-        cancelInlineRole();
+        updatingId.value = null;
     }
 }
-
-/* ===== модалка пользователя ===== */
-const showUserEditModal = ref(false);
-const editingUser = ref(null);
-
-function openUserEditModal(user) {
-    editingUser.value = { ...user };
-    showUserEditModal.value = true;
-}
-
-function closeUserEditModal() {
-    showUserEditModal.value = false;
-    editingUser.value = null;
-}
-
-async function saveUserModal() {
-    try {
-        const { id, name, email, phone, birthday, country, role, position } =
-            editingUser.value;
-        const resp = await axios.patch(`/api/users/${id}`, {
-            name,
-            email,
-            phone,
-            birthday,
-            country,
-            role,
-            position,
-        });
-        const updated = resp.data.user || resp.data;
-
-        const next = props.users.map((u) => (u.id === id ? updated : u));
-        setUsers(next);
-
-        globalNotification.categoryMessage = "Пользователь обновлён";
-        globalNotification.type = "success";
-    } catch (e) {
-        console.error(e);
-        globalNotification.categoryMessage = "Ошибка обновления пользователя";
-        globalNotification.type = "error";
-    } finally {
-        closeUserEditModal();
-    }
-}
-
-async function deleteUser(userId) {
-    if (!confirm("Вы действительно хотите удалить пользователя?")) return;
-    try {
-        await axios.delete(`/api/users/${userId}`);
-        setUsers(props.users.filter((u) => u.id !== userId));
-        globalNotification.categoryMessage = "Пользователь успешно удалён";
-        globalNotification.type = "success";
-    } catch (e) {
-        console.error(e);
-        globalNotification.categoryMessage = "Ошибка при удалении пользователя";
-        globalNotification.type = "error";
-    }
-}
-
 </script>
 
 <style scoped>
@@ -373,27 +284,20 @@ async function deleteUser(userId) {
     width: unset !important;
 }
 
-/* Ученик */
-.users-role-pill--student {
-    background: #bde5b0;
-    border: 1px solid transparent;
+/* Контрастный текст на зебре */
+:deep(.light-push-table tbody tr:nth-child(odd)) {
+    background-color: #F1F0FA;
 }
 
-/* Родитель */
-.users-role-pill--parent {
-    background: #e5b0b0;
-    border: 1px solid transparent;
+/* Статус на фиолетовом фоне */
+:deep(.light-push-table tbody tr:nth-child(odd) .support-status-select) {
+    background: #f8f8f8;
+    color: #41328f;
+    border: 1px solid #e0dbf7;
 }
-
-/* Преподаватель */
-.users-role-pill--teacher {
-    background: #e5dfb0;
-    border: 1px solid transparent;
-}
-
-/* Администратор */
-.users-role-pill--admin {
-    background: #ffffff;
-    border: 1px solid #41328f;
+:deep(.light-push-table tbody tr:nth-child(even) .support-status-select) {
+    background: #f1f0fa;
+    color: #41328f;
+    border: 1px solid #e0dbf7;
 }
 </style>

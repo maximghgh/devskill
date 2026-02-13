@@ -25,6 +25,7 @@ use App\Http\Controllers\TaskSubmissionController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CourseQrController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\SupportRequestController;
 //проверка задания и отправка задания
 Route::get('chapter/{chapter}/my-submission', [TaskSubmissionController::class, 'mySubmission']);
 Route::post('/submitTask', [TaskSubmissionController::class, 'store']);               // студент отправляет
@@ -235,6 +236,11 @@ Route::middleware('auth:sanctum')->get('/user/purchased-courses', [UserControlle
     
 Route::post('/{course}/purchase', [PurchaseController::class, 'store'])->name('purchases.store');
 Route::post('/{course}/consultation', [ConsultationController::class, 'store'])->name('consultations.store');
+
+// обращения (support)
+Route::get('/support-requests', [SupportRequestController::class, 'index']);
+Route::post('/support-requests', [SupportRequestController::class, 'store']);
+Route::patch('/support-requests/{supportRequest}/status', [SupportRequestController::class, 'updateStatus']);
 
 Route::prefix('admin/course/{course}')->group(function () {
     // Получить список тем курса

@@ -52,7 +52,7 @@
                         <AdminSupportBlock
                         v-else-if="activeId === 'support'"
                         id="support"
-                        v-model:users="support"
+                        v-model:requests="supportRequests"
                         />
 
                         <AdminCoursesBlock
@@ -200,6 +200,7 @@ const languages = ref([]);
 const directions = ref([]);
 const newsItems = ref([]);
 const faqs = ref([]);
+const supportRequests = ref([]);
 
 function upsertCourse(course) {
   const idx = courses.value.findIndex(c => c.id === course.id);
@@ -270,6 +271,16 @@ async function loadFaqs() {
         console.error(e);
     }
 }
+async function loadSupportRequests() {
+    try {
+        const { data } = await axios.get("/api/support-requests");
+        supportRequests.value = Array.isArray(data) ? data : data.data || [];
+    } catch (e) {
+        console.error(e);
+        globalNotification.categoryMessage = "Ошибка при загрузке обращений";
+        globalNotification.type = "error";
+    }
+}
 
 onMounted(async () => {
     const savedIndex = localStorage.getItem("activeIndex");
@@ -307,6 +318,7 @@ onMounted(async () => {
         loadDirections(),
         loadNews(),
         loadFaqs(),
+        loadSupportRequests(),
     ]);
 });
 </script>

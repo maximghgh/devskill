@@ -230,7 +230,7 @@ h3 {
 
 .info__course {
     display: flex;
-    gap: 28px;
+    justify-content: space-between;
     margin: 0 0 72px;
 }
 .info__card--course {
@@ -1047,6 +1047,7 @@ h3 {
 /* страница мои курсы */
 
 .teacher__block{
+    width: 1200px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

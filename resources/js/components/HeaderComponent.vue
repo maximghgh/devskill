@@ -2,20 +2,26 @@
     <header class="header header_main" :class="{ active: menuOpen }">
         <div class="header__inner">
             <div class="header__logo">
-                <a href="/" class="logos">
-                    <img
-                        src="../../img/logo.png"
-                        class="header__logo"
-                        alt="Логотип"
-                    />
-                    <img
-                        src="../../img/logo_istu.svg"
-                        class="header__logo"
-                        alt="Логотип ИжГТУ"
-                        height="90"
-                        width="90"
-                    />
-                </a>
+                <div class="logos">
+                    <a href="/">
+                        <img
+                            src="../../img/logo.png"
+                            class="header__logo"
+                            alt="Логотип"
+                            height="90"
+                            width="90"
+                        />
+                    </a>
+                    <a href="https://istu.ru" target="_blank" class="logos">
+                        <img
+                            src="../../img/logo_istu.svg"
+                            class="header__logo"
+                            alt="Логотип ИжГТУ"
+                            height="90"
+                            width="90"
+                        />
+                    </a>
+                </div>
             </div>
             <nav class="header__nav">
                 <a href="/catalog" :class="{ 'nav__link--active': isActive('/catalog') }">Каталог</a>
