@@ -574,6 +574,12 @@ function downloadPdf(path) {
 </script>
 
 <style scoped>
+.block__top {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+}
 .space-y-4{
     width: 100%;
     max-width: 500px;
@@ -594,8 +600,7 @@ function downloadPdf(path) {
 .block__logo {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 0 0 30px;
+    gap: 36px;
 }
 .modal-overlay {
     position: fixed;
@@ -635,6 +640,7 @@ function downloadPdf(path) {
     z-index: 10001 !important;
 }
 .modal-content {
+    margin: 0;
     overflow-x: hidden;
     overflow-y: auto;
     display: grid;
@@ -697,7 +703,8 @@ function downloadPdf(path) {
     color: #fff;
 }
 .block-info h2 {
-    font-size: 30px;
+    font-size: 24px;
+    text-align: left;
     margin: 0;
 }
 .block-info_bg-cyan {

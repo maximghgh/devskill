@@ -439,15 +439,6 @@ onMounted(() => {
 
                             <div class="dialog__btns">
                                 <button
-                                    v-if="modalMode === 'edit'"
-                                    type="button"
-                                    class="btn-delete"
-                                    @click="deleteGroup(editingGroupId, true)"
-                                    :disabled="createLoading || modalLoading"
-                                >
-                                    Удалить группу
-                                </button>
-                                <button
                                     type="button"
                                     class="main__btn main__btn--white"
                                     @click="closeModal"

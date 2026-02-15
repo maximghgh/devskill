@@ -33,38 +33,79 @@
                 <div class="personal-area personal-area_active">
                     <div class="personal-area__inner">
                         <div v-if="user" class="header__lk">
-                            <a href="/cabinet" class="header__lk-img">
-                                <img
-                                    :src="
-                                        user.photo
-                                            ? `/storage/${user.photo}`
-                                            : '../../../img/nofotolk.png'
-                                    "
-                                    alt="Фото пользователя"
-                                    width="40"
-                                    height="40"
-                                    class="avatar__user"
-                                />
-                            </a>
-                            <a
-                                href="#"
-                                @click="logout"
-                                class="personal-area__button personal-area__button--none"
-                                >Выйти</a
-                            >
-                            <div class="header__lk-name">
-                                <a
-                                    href="/cabinet"
-                                    class="personal-area__username"
-                                    >{{ user.name }}</a
+                            <div v-if="isPrivileged" class="header-user-menu" @click.stop="toggleUserMenu">
+                                <button
+                                    type="button"
+                                    class="header-user-menu__btn"
+                                    :aria-expanded="userMenuOpen ? 'true' : 'false'"
                                 >
+                                    <img
+                                        :src="
+                                            user.photo
+                                                ? `/storage/${user.photo}`
+                                                : '../../../img/nofotolk.png'
+                                        "
+                                        alt="Фото пользователя"
+                                        width="40"
+                                        height="40"
+                                        class="avatar__user"
+                                    />
+                                    <span class="header-user-menu__name">{{ user.name }}</span>
+                                    <span
+                                        class="header-user-menu__caret"
+                                        :class="{ 'is-open': userMenuOpen }"
+                                    ></span>
+                                </button>
+                                <div
+                                    v-show="userMenuOpen"
+                                    class="header-user-menu__dropdown"
+                                    @click.stop
+                                >
+                                    <a
+                                        v-for="(item, idx) in userMenuItems"
+                                        :key="idx"
+                                        :href="item.href || '#'"
+                                        class="header-user-menu__item"
+                                        @click.prevent="handleMenuItem(item)"
+                                    >
+                                        {{ item.label }}
+                                    </a>
+                                </div>
+                            </div>
+                            <template v-else>
+                                <a href="/cabinet" class="header__lk-img">
+                                    <img
+                                        :src="
+                                            user.photo
+                                                ? `/storage/${user.photo}`
+                                                : '../../../img/nofotolk.png'
+                                        "
+                                        alt="Фото пользователя"
+                                        width="40"
+                                        height="40"
+                                        class="avatar__user"
+                                    />
+                                </a>
                                 <a
                                     href="#"
                                     @click="logout"
-                                    class="personal-area__button"
+                                    class="personal-area__button personal-area__button--none"
                                     >Выйти</a
                                 >
-                            </div>
+                                <div class="header__lk-name">
+                                    <a
+                                        href="/cabinet"
+                                        class="personal-area__username"
+                                        >{{ user.name }}</a
+                                    >
+                                    <a
+                                        href="#"
+                                        @click="logout"
+                                        class="personal-area__button"
+                                        >Выйти</a
+                                    >
+                                </div>
+                            </template>
                         </div>
                         <div v-else>
                             <a href="/login" class="personal-area__username"
@@ -95,6 +136,7 @@ export default {
   data() {
     return {
       menuOpen: false,
+      userMenuOpen: false,
       user: null,
       currentPath: window.location.pathname,
     };
@@ -108,6 +150,21 @@ export default {
       this.user = null;
       window.location.href = "/";
     },
+    toggleUserMenu() {
+      this.userMenuOpen = !this.userMenuOpen;
+    },
+    closeUserMenu() {
+      this.userMenuOpen = false;
+    },
+    handleMenuItem(item) {
+      if (item.action === "logout") {
+        this.logout();
+        return;
+      }
+      if (item.href) {
+        window.location.href = item.href;
+      }
+    },
 
     // точное совпадение
     isActive(path) {
@@ -118,6 +175,34 @@ export default {
     // isActive(path) {
     //   return this.currentPath === path || this.currentPath.startsWith(path + "/");
     // },
+  },
+  computed: {
+    isPrivileged() {
+      const role = Number(this.user?.role);
+      return role === 2 || role === 3;
+    },
+    userMenuItems() {
+      if (!this.user) return [];
+      const role = Number(this.user.role);
+      if (role === 3) {
+        return [
+          { label: "Профиль", href: "/admin/profile" },
+          { label: "Панель администратора", href: "/admin" },
+          { label: "Выйти", action: "logout" },
+        ];
+      }
+      if (role === 2) {
+        return [
+          { label: "Панель преподавателя", href: "/teacher" },
+          { label: "Журнал", href: "/teacher/journal" },
+          { label: "Курс", href: "/teacher/course" },
+          { label: "Мои курсы", href: "/teacher/mycourses" },
+          { label: "Профиль", href: "/teacher/profile" },
+          { label: "Выйти", action: "logout" },
+        ];
+      }
+      return [];
+    },
   },
   mounted() {
     const storedUser = localStorage.getItem("user");
@@ -133,6 +218,10 @@ export default {
     window.addEventListener("popstate", () => {
       this.currentPath = window.location.pathname;
     });
+    document.addEventListener("click", this.closeUserMenu);
+  },
+  beforeUnmount() {
+    document.removeEventListener("click", this.closeUserMenu);
   },
 };
 

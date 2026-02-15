@@ -65,6 +65,7 @@
                                         </div>
                                         <div class="custom-input">
                                             <input
+                                                class="input__center"
                                                 type="date"
                                                 v-model="form.birthday"
                                                 placeholder="Дата рождения"

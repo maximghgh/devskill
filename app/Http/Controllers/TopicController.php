@@ -128,4 +128,19 @@ class TopicController extends Controller
         ]);
     }
 
+    public function updateStatus(Request $request, Topic $topic)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:активный,закрыт',
+        ]);
+
+        $topic->status = $validated['status'];
+        $topic->save();
+
+        return response()->json([
+            'success' => true,
+            'topic' => new TopicResource($topic),
+        ]);
+    }
+
 }

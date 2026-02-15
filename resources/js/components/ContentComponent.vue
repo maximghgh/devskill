@@ -8,7 +8,7 @@
             </nav>
         </div>
         <div class="container flex">
-            <!-- Левый сайдбар -->
+            <!-- Левый сайдбар --> 
             <aside class="sidebar">
                 <!-- Карточка курса -->
                 <div class="card course-card">
@@ -111,10 +111,17 @@
                                     v-for="ch in topic.chapters"
                                     :key="ch.id"
                                     class="chapter-card"
+                                    :class="{
+                                        'is-locked': !isTopicActive(topic),
+                                    }"
                                 >
                                     <!-- управляемый клик, без прямого href -->
                                     <a
                                         class="chapter-link"
+                                        :class="{
+                                            'chapter-link--locked':
+                                                !isTopicActive(topic),
+                                        }"
                                         href="#"
                                         @click.prevent="openChapter(topic, ch)"
                                     >
@@ -349,6 +356,18 @@ function normalizeQrSrc(raw) {
     if (raw.startsWith("data:") || raw.startsWith("blob:")) return raw;
     if (raw.startsWith("/")) return raw;
     return "/" + raw;
+}
+
+function normalizeTopicsState(list) {
+    (list || []).forEach((topic) => {
+        if (typeof topic.status === "undefined") topic.status = "закрыт";
+        (topic.chapters || []).forEach((chapter) => {
+            if (typeof chapter.is_completed === "undefined")
+                chapter.is_completed = false;
+            if (typeof chapter.status === "undefined")
+                chapter.status = "закрыт";
+        });
+    });
 }
 
 async function loadMaxQr() {
@@ -672,6 +691,13 @@ async function markChapterCompleted(chapter) {
 /* ======================================================
    4. Разблокировки: разделы и главы
 ===================================================== */
+function normalizeTopicStatus(topic) {
+    const status = topic?.status || "закрыт";
+    return status === "активный" ? "активный" : "закрыт";
+}
+function isTopicActive(topic) {
+    return normalizeTopicStatus(topic) === "активный";
+}
 /** Индекс раздела */
 function topicIndex(topic) {
     return topics.value.findIndex((t) => t.id === topic.id);
@@ -686,12 +712,7 @@ function isTopicFullyCompleted(topic) {
  *   - иначе все предыдущие разделы должны быть полностью завершены
  */
 function isTopicUnlocked(topic) {
-    const idx = topicIndex(topic);
-    if (idx <= 0) return true;
-    for (let i = 0; i < idx; i++) {
-        if (!isTopicFullyCompleted(topics.value[i])) return false;
-    }
-    return true;
+    return isTopicActive(topic);
 }
 /** Можно открыть главу?
  *   - раздел разблокирован
@@ -719,6 +740,11 @@ function toggleTopicSafe(topic) {
 function openChapter(topic, chapter) {
     const cid = courseId.value || course.value?.id || coursId; // что есть — то и берём
     if (cid) localStorage.setItem("last_course_id", String(cid));
+
+    if (!isTopicActive(topic)) {
+        alert("Этот раздел пока закрыт.");
+        return;
+    }
 
     window.location.href = cid
         ? `/chapter/${chapter.id}?course_id=${cid}`
@@ -771,6 +797,7 @@ onMounted(async () => {
     if (course.value.id) {
         courseId.value = course.value.id;
         await loadMaxQr();
+        normalizeTopicsState(topics.value);
     } else {
         const parts = window.location.pathname.split("/");
         const courseIdFromUrl = parts[parts.length - 1];
@@ -792,11 +819,11 @@ onMounted(async () => {
                     );
                 });
                 topics.value.forEach((topic) => {
-                    topic.chapters.forEach((chapter) => {
-                        if (typeof chapter.is_completed === "undefined")
-                            chapter.is_completed = false;
-                    });
+                    // ensure required defaults
+                    if (typeof topic.chapters === "undefined")
+                        topic.chapters = [];
                 });
+                normalizeTopicsState(topics.value);
                 course.value = response.data.course || {};
             })
             .catch((error) =>

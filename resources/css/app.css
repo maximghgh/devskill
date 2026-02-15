@@ -526,6 +526,68 @@ nav a:hover {
     text-decoration: none;
 }
 
+.header-user-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.header-user-menu__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+.header-user-menu__name {
+    font-weight: 400;
+    font-size: 18px;
+    color: #005c94;
+}
+
+.header-user-menu__caret {
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #005c94;
+    border-bottom: 2px solid #005c94;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+    margin-left: 2px;
+}
+
+.header-user-menu__caret.is-open {
+    transform: rotate(-135deg);
+}
+
+.header-user-menu__dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #e6e6f2;
+    border-radius: 12px;
+    min-width: 220px;
+    padding: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+}
+
+.header-user-menu__item {
+    display: block;
+    padding: 8px 12px;
+    color: #222222;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.header-user-menu__item:hover {
+    background: #f1f0fa;
+}
+
 .personal-area__inner {
     display: flex;
     flex-direction: column;

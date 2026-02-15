@@ -24,41 +24,51 @@
                 </div>
             </div>
             <nav class="header__nav">
-                <a href="/teacher">Панель преподователя</a>
-                <a href="/teacher/journal">Журнал</a>
-                <a href="/teacher/course">Курсы</a>
-                <a href="/teacher/mycourses">Мои курсы</a>
+                <a href="/catalog">Каталог</a>
+                <a href="/news">Новости</a>
+                <a href="/contact">Контакты</a>
+                <a href="/about">О нас</a>
             </nav>
             <div class="header__lk">
                 <div class="personal-area personal-area_active">
                     <div class="personal-area__inner">
                         <!-- Если пользователь авторизован -->
                         <div v-if="user" class="header__lk">
-                            <a href="/profile" class="header__lk-img">
-                                <img
-                                    :src="
-                                        user.photo
-                                            ? `/storage/${user.photo}`
-                                            : '../../../img/nofotolk.png'
-                                    "
-                                    alt="Фото пользователя"
-                                    width="60"
-                                    height="60"
-                                    class="avatar__user"
-                                />
-                            </a>
-                            <div class="header__lk-name">
-                                <a
-                                    href="/teacher/profile"
-                                    class="personal-area__username"
-                                    >{{ user.name }}</a
+                            <div class="header-user-menu" @click.stop="toggleUserMenu">
+                                <button
+                                    type="button"
+                                    class="header-user-menu__btn"
+                                    :aria-expanded="userMenuOpen ? 'true' : 'false'"
                                 >
-                                <a
-                                    href="#"
-                                    @click.prevent="logout"
-                                    class="personal-area__button"
-                                    >Выйти</a
+                                    <img
+                                        :src="
+                                            user.photo
+                                                ? `/storage/${user.photo}`
+                                                : '../../../img/nofotolk.png'
+                                        "
+                                        alt="Фото пользователя"
+                                        width="60"
+                                        height="60"
+                                        class="avatar__user"
+                                    />
+                                    <span class="header-user-menu__name">{{ user.name }}</span>
+                                    <span
+                                        class="header-user-menu__caret"
+                                        :class="{ 'is-open': userMenuOpen }"
+                                    ></span>
+                                </button>
+                                <div
+                                    v-show="userMenuOpen"
+                                    class="header-user-menu__dropdown"
+                                    @click.stop
                                 >
+                                    <a href="/teacher" class="header-user-menu__item">Панель преподавателя</a>
+                                    <a href="/teacher/journal" class="header-user-menu__item">Журнал</a>
+                                    <a href="/teacher/course" class="header-user-menu__item">Курсы</a>
+                                    <a href="/teacher/mycourses" class="header-user-menu__item">Мои курсы</a>
+                                    <a href="/teacher/profile" class="header-user-menu__item">Профиль</a>
+                                    <a href="#" class="header-user-menu__item" @click.prevent="logout">Выйти</a>
+                                </div>
                             </div>
                         </div>
                         <!-- Если пользователь не авторизован -->
@@ -103,10 +113,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { globalNotification } from "../../globalNotification";
 
 const user = ref(null);
+const userMenuOpen = ref(false);
 
 function loadUser() {
     const storedUser = localStorage.getItem("user");
@@ -117,6 +128,14 @@ function loadUser() {
             console.error("Ошибка при загрузке пользователя:", error);
         }
     }
+}
+
+function toggleUserMenu() {
+    userMenuOpen.value = !userMenuOpen.value;
+}
+
+function closeUserMenu() {
+    userMenuOpen.value = false;
 }
 
 function logout() {
@@ -131,7 +150,14 @@ watch(user, (newValue) => {
     }
 });
 
-onMounted(loadUser);
+onMounted(() => {
+    loadUser();
+    document.addEventListener("click", closeUserMenu);
+});
+
+onBeforeUnmount(() => {
+    document.removeEventListener("click", closeUserMenu);
+});
 
 function closeNotification() {
     globalNotification.categoryMessage = "";

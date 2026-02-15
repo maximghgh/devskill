@@ -74,6 +74,7 @@ class ChapterController extends Controller
             'presentation_path'=> $presentationPath,
             'presentation_paths'=> $presentationPaths ?: null,
             'points'           => $data['points'] ?? 0,
+            'status'           => $data['status'] ?? 'закрыт',
         ]);
 
         return response()->json([
@@ -201,6 +202,21 @@ class ChapterController extends Controller
         'chapter_id' => $chapter->id
     ]);
 }
+
+    public function updateStatus(Request $request, Chapter $chapter)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:активный,закрыт',
+        ]);
+
+        $chapter->status = $validated['status'];
+        $chapter->save();
+
+        return response()->json([
+            'success' => true,
+            'chapter' => new ChapterResource($chapter),
+        ]);
+    }
     public function getStats()
     {
         // 1. Общее количество глав

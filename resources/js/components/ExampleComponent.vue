@@ -199,7 +199,7 @@
                                                     href="#"
                                                     class="button button_white button_white-card"
                                                     @click.prevent="openModal(course)"
-                                                >Купить</a>
+                                                >Записаться</a>
                                             </div>
                                         </div>
                                     </div>
@@ -234,8 +234,8 @@
                                                         <div class="block__logo">
                                                             <img
                                                                 :src="selectedCourse.card_image || '/img/logo_placeholder.png'"
-                                                                width="50"
-                                                                height="50"
+                                                                width="65"
+                                                                height="65"
                                                             />
                                                             <h2>{{ selectedCourse.card_title }}</h2>
                                                         </div>

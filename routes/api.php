@@ -26,6 +26,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CourseQrController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\SupportRequestController;
+use App\Http\Controllers\LessonScoreController;
 //проверка задания и отправка задания
 Route::get('chapter/{chapter}/my-submission', [TaskSubmissionController::class, 'mySubmission']);
 Route::post('/submitTask', [TaskSubmissionController::class, 'store']);               // студент отправляет
@@ -242,6 +243,10 @@ Route::get('/support-requests', [SupportRequestController::class, 'index']);
 Route::post('/support-requests', [SupportRequestController::class, 'store']);
 Route::patch('/support-requests/{supportRequest}/status', [SupportRequestController::class, 'updateStatus']);
 
+// оценки в журнале
+Route::get('/lesson-scores', [LessonScoreController::class, 'index']);
+Route::post('/lesson-scores', [LessonScoreController::class, 'upsert']);
+
 Route::prefix('admin/course/{course}')->group(function () {
     // Получить список тем курса
     Route::get('/topics', [TopicController::class, 'index'])->name('admin.topics.index');
@@ -266,9 +271,13 @@ Route::prefix('admin/topics')->group(function () {
     Route::delete('/{topic}', [TopicController::class, 'destroy']);
 });
 
+Route::patch('/topics/{topic}/status', [TopicController::class, 'updateStatus']);
+
 Route::prefix('admin/topic/{topicId}')->group(function () {
     Route::put('chapters/{chapterId}', [ChapterController::class, 'update']);
     Route::delete('chapters/{chapterId}', [ChapterController::class, 'destroy']);
 });
+
+Route::patch('/chapters/{chapter}/status', [ChapterController::class, 'updateStatus']);
 
 Route::get('/chapters/{chapter}/final-test', [ChapterController::class, 'finalTest']);

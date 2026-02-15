@@ -23,6 +23,7 @@ class Chapter extends Model
         'presentation_path',   // ← добавили
         'presentation_paths',
         'points',
+        'status',
     ];
 
     

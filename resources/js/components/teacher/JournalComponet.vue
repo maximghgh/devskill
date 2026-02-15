@@ -122,9 +122,20 @@
                                                     <span class="journal__student-index">{{ index + 1 }}</span>
                                                     <span class="journal__student-name">{{ student.name || "Без имени" }}</span>
                                                 </td>
-                                                <td class="journal__cell journal__cell--value">—</td>
+                                                <td class="journal__cell journal__cell--value">
+                                                    <input
+                                                        class="journal__score-input"
+                                                        type="number"
+                                                        min="0"
+                                                        max="100"
+                                                        placeholder="—"
+                                                        v-model.number="scoresByStudent[student.id]"
+                                                        :disabled="scoresLoading || scoreSaving[student.id]"
+                                                        @change="saveScore(student.id)"
+                                                    />
+                                                </td>
                                             </tr>
-                                        </template>
+                                        </template> 
                                     </tbody>
                                 </table>
                             </div>
@@ -139,6 +150,7 @@
 
 <script>
 import axios from "axios";
+import { globalNotification } from "../../globalNotification";
 
 export default {
     data() {
@@ -154,6 +166,10 @@ export default {
             groupsLoading: false,
             lessonsLoading: false,
             studentsLoading: false,
+
+            scoresByStudent: {},
+            scoresLoading: false,
+            scoreSaving: {},
         };
     },
 
@@ -176,6 +192,11 @@ export default {
             this.studentsLoading = false;
             if (!newId || !this.selectedCourseId) return;
             await this.loadGroupStudents(this.selectedCourseId, newId);
+        },
+        async selectedLessonId(newId) {
+            this.scoresByStudent = {};
+            if (!newId || !this.studentsForGroup.length) return;
+            await this.loadScores(newId);
         },
     },
 
@@ -254,6 +275,9 @@ export default {
                 this.studentsForGroup = Array.isArray(data?.students)
                     ? data.students
                     : data?.group?.students || [];
+                if (this.selectedLessonId) {
+                    await this.loadScores(this.selectedLessonId);
+                }
             } catch (e) {
                 console.error("Ошибка при загрузке участников группы:", e);
                 this.studentsForGroup = [];
@@ -292,6 +316,64 @@ export default {
                 this.lessonsForGroup = [];
             } finally {
                 this.lessonsLoading = false;
+            }
+        },
+        async loadScores(lessonId) {
+            const studentIds = this.studentsForGroup.map((s) => s.id).filter(Boolean);
+            if (!lessonId || !studentIds.length) {
+                this.scoresByStudent = {};
+                return;
+            }
+            this.scoresLoading = true;
+            try {
+                const { data } = await axios.get("/api/lesson-scores", {
+                    params: {
+                        chapter_id: lessonId,
+                        student_ids: studentIds.join(","),
+                    },
+                });
+                const map = {};
+                (Array.isArray(data) ? data : []).forEach((row) => {
+                    map[row.user_id] = row.score;
+                });
+                this.scoresByStudent = map;
+            } catch (e) {
+                console.error("Ошибка при загрузке баллов:", e);
+                this.scoresByStudent = {};
+            } finally {
+                this.scoresLoading = false;
+            }
+        },
+        async saveScore(studentId) {
+            const teacherId = this.getTeacherId();
+            if (!teacherId || !this.selectedLessonId) return;
+
+            const value = this.scoresByStudent[studentId];
+            if (value === null || value === undefined || value === "") return;
+            if (Number(value) > 100 || Number(value) < 0) {
+                if (Number(value) > 100) {
+                    globalNotification.categoryMessage =
+                        "Значение должно быть в диапазоне от 0 до 100";
+                } else {
+                    globalNotification.categoryMessage =
+                        "Значение должно быть в диапазоне от 0 до 100";
+                }
+                globalNotification.type = "error";
+                return;
+            }
+
+            this.scoreSaving = { ...this.scoreSaving, [studentId]: true };
+            try {
+                await axios.post("/api/lesson-scores", {
+                    chapter_id: this.selectedLessonId,
+                    user_id: studentId,
+                    teacher_id: teacherId,
+                    score: Number(value),
+                });
+            } catch (e) {
+                console.error("Ошибка при сохранении балла:", e);
+            } finally {
+                this.scoreSaving = { ...this.scoreSaving, [studentId]: false };
             }
         },
     },

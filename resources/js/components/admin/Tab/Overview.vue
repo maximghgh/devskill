@@ -373,7 +373,6 @@ onMounted(() => loadTopics());
         <tr>
           <th>№</th>
           <th>Название</th>
-          <th>Описание</th>
           <th class="col-actions">Действия</th>
         </tr>
       </thead>
@@ -382,7 +381,6 @@ onMounted(() => loadTopics());
         <tr v-for="(chapter, index) in chapters" :key="chapter.id">
           <td>{{ index + 1 }}</td>
           <td>{{ chapter.title }}</td>
-          <td>{{ chapter.type }}</td>
 
           <!-- пока можешь оставить заглушки, потом подключим EditChapterDialog -->
             <td class="col-btn">

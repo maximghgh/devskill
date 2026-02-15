@@ -212,8 +212,8 @@
                                                     <div class="block__logo">
                                                         <img
                                                             :src="selectedCourse.card_image || '/img/logo_placeholder.png'"
-                                                            width="50"
-                                                            height="50"
+                                                            width="65"
+                                                            height="65"
                                                         />
                                                         <h2>{{ selectedCourse.card_title }}</h2>
                                                     </div>
@@ -733,6 +733,7 @@ onMounted(async () => {
   min-height: 300px;
   position: relative;
   border-radius: 8px;
+  margin: 0;
 }
 
 /* Кнопка закрытия */
@@ -781,7 +782,7 @@ onMounted(async () => {
   color: #fff;
 }
 .block-info h2 {
-  font-size: 30px;
+  font-size: 24px;
   margin: 0;
 }
 .block-info_bg-cyan   { background-color: #698dc9; }

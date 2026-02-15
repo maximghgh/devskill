@@ -29,7 +29,7 @@
                     v-for="topic in topics"
                     :key="topic.id"
                     class="course-block"
-                    :class="topicBlockClass"
+                    :class="topicBlockClass(topic)"
                 >
                     <div class="course-block__header">
                         <div class="course-block__info">
@@ -38,9 +38,9 @@
                             </h2>
                             <span
                                 class="course-block__status-badge"
-                                :class="topicBadgeClass"
+                                :class="topicBadgeClass(topic)"
                             >
-                                {{ courseStatusLabel }}
+                                {{ topicStatusLabel(topic) }}
                             </span>
                         </div>
 
@@ -49,11 +49,12 @@
                                 <input
                                     class="switch__input"
                                     type="checkbox"
-                                    checked
+                                    :checked="isTopicActive(topic)"
+                                    :disabled="statusSaving[topic.id]"
+                                    @change="toggleTopicStatus(topic, $event)"
                                 />
                                 <span class="switch__slider"></span>
                             </label>
-
                             <button
                                 class="course-block__collapse"
                                 type="button"
@@ -124,39 +125,30 @@ const topics = ref([]);
 const studentsCount = ref(0);
 const showChapterModal = ref(false);
 const selectedChapter = ref(null);
+const statusSaving = ref({});
 
-const courseStatus = computed(() => {
-    if (!course.value) return "current";
-    const now = new Date();
-    const start = course.value.start_date
-        ? new Date(course.value.start_date)
-        : null;
-    const end = course.value.end_date ? new Date(course.value.end_date) : null;
+function normalizeTopicStatus(topic) {
+    const status = topic?.status || "закрыт";
+    return status === "активный" || status === "закрыт" ? status : "закрыт";
+}
 
-    if (end && now > end) return "past";
-    if (start && now < start) return "future";
-    return "current";
-});
+function isTopicActive(topic) {
+    return normalizeTopicStatus(topic) === "активный";
+}
 
-const courseStatusLabel = computed(() => {
-    if (courseStatus.value === "past") return "Завершен";
-    if (courseStatus.value === "future") return "Закрыт";
-    return "Активен";
-});
+function topicStatusLabel(topic) {
+    return isTopicActive(topic) ? "Активный" : "Закрыт";
+}
 
-const topicBlockClass = computed(() => {
-    if (courseStatus.value === "past") return "course-block--completed";
-    if (courseStatus.value === "future") return "course-block--closed";
-    return "course-block--active";
-});
+function topicBlockClass(topic) {
+    return isTopicActive(topic) ? "course-block--active" : "course-block--closed";
+}
 
-const topicBadgeClass = computed(() => {
-    if (courseStatus.value === "past")
-        return "course-block__status-badge--completed";
-    if (courseStatus.value === "future")
-        return "course-block__status-badge--closed";
-    return "course-block__status-badge--active";
-});
+function topicBadgeClass(topic) {
+    return isTopicActive(topic)
+        ? "course-block__status-badge--active"
+        : "course-block__status-badge--closed";
+}
 
 const currentTopicTitle = computed(() => {
     if (!topics.value.length) return "—";
@@ -210,6 +202,32 @@ function onChapterUpdated(payload) {
     selectedChapter.value = null;
 }
 
+function updateTopicInState(topicId, patch) {
+    topics.value = topics.value.map((topic) => {
+        if (topic.id !== topicId) return topic;
+        return { ...topic, ...patch };
+    });
+}
+
+async function toggleTopicStatus(topic, event) {
+    const nextStatus = event.target.checked ? "активный" : "закрыт";
+    const prevStatus = normalizeTopicStatus(topic);
+    if (nextStatus === prevStatus) return;
+
+    updateTopicInState(topic.id, { status: nextStatus });
+    statusSaving.value = { ...statusSaving.value, [topic.id]: true };
+    try {
+        await axios.patch(`/api/topics/${topic.id}/status`, {
+            status: nextStatus,
+        });
+    } catch (e) {
+        console.error("Ошибка обновления статуса темы:", e);
+        updateTopicInState(topic.id, { status: prevStatus });
+    } finally {
+        statusSaving.value = { ...statusSaving.value, [topic.id]: false };
+    }
+}
+
 async function loadCourse() {
     if (!courseId) return;
     try {
@@ -258,7 +276,10 @@ async function loadTopics() {
                 }
             })
         );
-        topics.value = topicsWithChapters;
+        topics.value = topicsWithChapters.map((topic) => ({
+            ...topic,
+            status: normalizeTopicStatus(topic),
+        }));
     } catch (e) {
         console.error("Ошибка загрузки тем:", e);
         topics.value = [];
