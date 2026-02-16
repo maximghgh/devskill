@@ -62,7 +62,7 @@
                 <input
                     ref="fileInputRef"
                     type="file"
-                    accept=".pdf,.ppt,.pptx,video/*,image/*"
+                    accept=".pdf,.ppt,.pptx,.pps,.ppsx,.pptm,.doc,.docx,video/*,image/*"
                     class="dialog__file-input"
                     :disabled="loading"
                     multiple
@@ -462,6 +462,9 @@ watch(
 
 
 <style scoped>
+:deep .ce-toolbar__actions{
+    left: -35px !important;
+}
 .dialog__error { color: #d40000; font-size: 13px; margin-top: 8px; }
 .editor-container {
   padding: 10px;

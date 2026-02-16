@@ -218,14 +218,23 @@
                         <p>{{ chapter.correct_answer }}</p>
                     </div>
                 </div>
-                <a
-                    v-if="chapter.presentation_path"
-                    :href="`../${chapter.presentation_path}`"
-                    download
-                    class="btn btn-download"
-                >
-                    Скачать учебный материал
-                </a>
+                <div v-if="presentationFiles.length" class="download-list">
+                    <a
+                        v-for="file in presentationFiles"
+                        :key="file"
+                        :href="file"
+                        download
+                        class="file-download"
+                        :title="fileName(file)"
+                    >
+                        <img
+                            class="file-download__icon"
+                            :src="fileIcon(file)"
+                            :alt="fileLabel(file)"
+                        />
+                        <span class="file-download__name">{{ fileName(file) }}</span>
+                    </a>
+                </div>
                 <button
                     v-if="!chapter.is_completed"
                     @click="markChapterCompleted(chapter)"
@@ -355,7 +364,101 @@ const embedUrl = computed(() => {
 const isTask         = computed(() => chapter.value.type === "task");
 const isTerms        = computed(() => chapter.value.type === "terms");
 const hasContent     = computed(() => !!chapter.value.content && chapter.value.type !== quizType);
-const hasPresentation= computed(() => !!chapter.value.presentation_path);
+function normalizeFilePath(raw) {
+  if (!raw) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("data:") || raw.startsWith("blob:")) return raw;
+  if (raw.startsWith("/")) return raw;
+  if (raw.startsWith("storage/")) return `/${raw}`;
+  if (raw.startsWith("public/")) return `/${raw.replace(/^public\//, "storage/")}`;
+  if (raw.startsWith("chapters_files/")) return `/storage/${raw}`;
+  return `/storage/${raw}`;
+}
+
+const presentationFiles = computed(() => {
+  const raw =
+    chapter.value?.presentation_paths ||
+    chapter.value?.presentation_path ||
+    chapter.value?.file_path ||
+    chapter.value?.file ||
+    null;
+
+  if (!raw) return [];
+
+  let list = [];
+  if (Array.isArray(raw)) {
+    list = raw;
+  } else if (typeof raw === "string") {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) list = parsed;
+      } catch {
+        list = [];
+      }
+    }
+    if (!list.length) list = [raw];
+  }
+
+  const normalized = list
+    .map((p) => (typeof p === "string" ? p.trim() : ""))
+    .filter(Boolean)
+    .map(normalizeFilePath);
+
+  const unique = [];
+  const seen = new Set();
+  normalized.forEach((p) => {
+    if (!seen.has(p)) {
+      seen.add(p);
+      unique.push(p);
+    }
+  });
+  return unique;
+});
+
+const FILE_ICON_BASE = "/img/file-icons";
+const DEFAULT_FILE_ICON = "/img/document.svg";
+
+function getFileExt(path) {
+  if (!path) return "";
+  const clean = String(path).split("?")[0].split("#")[0];
+  const parts = clean.split(".");
+  return parts.length > 1 ? parts.pop().toLowerCase() : "";
+}
+
+function fileIcon(path) {
+  const ext = getFileExt(path);
+  if (!ext) return DEFAULT_FILE_ICON;
+
+  const imageExts = ["jpg", "jpeg", "png", "gif", "webp", "bmp"];
+  if (imageExts.includes(ext)) return `${FILE_ICON_BASE}/jpg.svg`;
+
+  if (ext === "pdf") return `${FILE_ICON_BASE}/pdf.svg`;
+
+  if (["ppt", "pptx", "pps", "ppsx", "pptm"].includes(ext)) {
+    return `${FILE_ICON_BASE}/PPTX.png`;
+  }
+
+  if (ext === "doc" || ext === "docx") return `${FILE_ICON_BASE}/docx.png`;
+
+  return DEFAULT_FILE_ICON;
+}
+
+function fileName(path) {
+  if (!path) return "Файл";
+  const clean = String(path).split("?")[0].split("#")[0];
+  return clean.split("/").pop() || "Файл";
+}
+
+function fileLabel(path) {
+  const ext = getFileExt(path);
+  if (!ext) return "Файл";
+  if (["doc", "docx"].includes(ext)) return "Документ Word";
+  if (ext === "pdf") return "PDF файл";
+  if (["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) return "Изображение";
+  return `Файл .${ext}`;
+}
 
 const typeLabel = computed(() => {
   switch (chapter.value?.type) {
@@ -1039,25 +1142,45 @@ onMounted(fetchChapter);
 }
 
 /* кнопка скачивания файла */
-.btn-download {
-    display: inline-block;
-    padding: 12px 20px;
-    background-color: #617aff;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 500;
-    text-align: center;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    cursor: pointer;
+.download-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
     margin: 20px 0;
 }
 
-.btn-download:hover {
-    background-color: #4a3cbb;
-    transform: translateY(-2px);
+.file-download {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 5px;
+    border-radius: 10px;
+    background: #ffffff;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.15s ease;
+    color: #1f2a44;
+}
+
+.file-download:hover {
+    background: #e6e6f8;
+    transform: translateY(-1px);
+}
+
+.file-download__icon {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.file-download__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2a44;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 /* форма */
 .form {

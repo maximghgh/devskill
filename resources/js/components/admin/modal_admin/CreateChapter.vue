@@ -36,7 +36,7 @@
                 <input
                     ref="fileInputRef"
                     type="file"
-                    accept=".pdf,.ppt,.pptx,video/*,image/*"
+                    accept=".pdf,.ppt,.pptx,.pps,.ppsx,.pptm,.doc,.docx,video/*,image/*"
                     class="dialog__file-input"
                     @change="handleFileChange"
                     :disabled="loading"
@@ -94,7 +94,7 @@
                       v-if="!selectedFileLabel && !fileError"
                       class="dialog__dropzone_title dialog__dropzone_hint"
                     >
-                        (JPG/PNG, PDF/PPT/PPTX, Видео — до 20 МБ)
+                        (JPG/PNG, PDF/PPT/PPTX, DOC/DOCX, Видео — до 20 МБ)
                     </p>
                     <p v-if="fileError" class="dialog__dropzone_error">
                       {{ fileError }}
@@ -233,6 +233,11 @@ const ALLOWED_MIMES = new Set([
   "application/pdf",
   "application/vnd.ms-powerpoint",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.ms-powerpoint.presentation.macroenabled.12",
+  "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+  "application/vnd.openxmlformats-officedocument.presentationml.slideshow.main+xml",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ]);
 
 function isAllowedFile(file) {
@@ -244,7 +249,12 @@ function isAllowedFile(file) {
   return (
     name.endsWith(".pdf") ||
     name.endsWith(".ppt") ||
-    name.endsWith(".pptx")
+    name.endsWith(".pptx") ||
+    name.endsWith(".pps") ||
+    name.endsWith(".ppsx") ||
+    name.endsWith(".pptm") ||
+    name.endsWith(".doc") ||
+    name.endsWith(".docx")
   );
 }
 
@@ -387,6 +397,9 @@ watch(
 </script>
 
 <style scoped>
+:deep .ce-toolbar__actions{
+    left: -35px !important;
+}
 .dialog__error {
   color: #d40000;
   font-size: 13px;
