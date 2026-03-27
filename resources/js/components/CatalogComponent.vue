@@ -627,10 +627,16 @@ function validateDuration(e) {
 function base64ToUtf8(str) {
   return decodeURIComponent(escape(atob(str)));
 }
-const logout = () => {
-  localStorage.removeItem("user");
-  user.value = null;
-  window.location.href = "/";
+const logout = async () => {
+  try {
+    await window.axios.post("/logout");
+  } catch (error) {
+    console.error("Ошибка выхода:", error);
+  } finally {
+    localStorage.removeItem("user");
+    user.value = null;
+    window.location.href = "/";
+  }
 };
 function goToCourse(id) {
   window.location.href = `/cpp/${id}`;

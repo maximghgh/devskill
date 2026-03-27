@@ -241,6 +241,7 @@ Route::get('/course/{id}', function ($id) {
     return view('admin.course', ['id' => $id]);
 });
 Route::post('/verify-code', [AuthController::class, 'verifyCode']);
+Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/login', [AuthController::class, 'login']); // Обработка входа
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail'])->name('verify.email');

@@ -139,7 +139,7 @@ class AuthController extends Controller
         ]);
 
         if ($request->code == session('verification_code')) {
-            Auth::loginUsingId(session('user_id'));
+            Auth::loginUsingId(session('user_id'), true);
             session()->forget(['verification_code', 'user_id']);
 
             return response()->json(['success' => true, 'user' => Auth::user()]);
@@ -147,6 +147,17 @@ class AuthController extends Controller
 
         return response()->json(['success' => false], 401);
     }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json(['success' => true]);
+    }
+
     public function resendEmail(Request $request)
     {
         // Получаем email из запроса

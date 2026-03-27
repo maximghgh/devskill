@@ -39,6 +39,7 @@
                         :current-user="user"
                         :users-count="users.length"
                         :courses-count="courses.length"
+                        :open-support-requests-count="openSupportRequestsCount"
                         />
 
                         <AdminUsersBlock
@@ -201,6 +202,10 @@ const directions = ref([]);
 const newsItems = ref([]);
 const faqs = ref([]);
 const supportRequests = ref([]);
+
+const openSupportRequestsCount = computed(() =>
+    supportRequests.value.filter((request) => request.status === "открыта").length
+);
 
 function upsertCourse(course) {
   const idx = courses.value.findIndex(c => c.id === course.id);

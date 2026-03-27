@@ -138,10 +138,16 @@ function closeUserMenu() {
     userMenuOpen.value = false;
 }
 
-function logout() {
-    localStorage.removeItem("user");
-    user.value = null;
-    window.location.href = "/";
+async function logout() {
+    try {
+        await window.axios.post("/logout");
+    } catch (error) {
+        console.error("Ошибка выхода:", error);
+    } finally {
+        localStorage.removeItem("user");
+        user.value = null;
+        window.location.href = "/";
+    }
 }
 
 watch(user, (newValue) => {

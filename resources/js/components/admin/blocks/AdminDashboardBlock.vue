@@ -13,7 +13,7 @@
           <ul class="statistics__list">
             <li class="statistics__item">
               <span class="statistics__text">Открытые обращения пользователей</span>
-              <span class="statistics__text">12</span>
+              <span class="statistics__text">{{ openSupportRequestsCount }}</span>
             </li>
             <li class="statistics__item">
               <span class="statistics__text">Активные курсы</span>
@@ -99,5 +99,6 @@ defineProps({
   currentUser: { type: Object, default: null },
   usersCount: { type: Number, default: 0 },
   coursesCount: { type: Number, default: 0 },
+  openSupportRequestsCount: { type: Number, default: 0 },
 });
 </script>

@@ -8,7 +8,7 @@
                             <div class="course__menu course__menu-persona">
                                 <div class="course__menu-nickname">
                                     <img 
-                                        :src="user.photo ? `/storage/${user.photo}` : '/img/no_foto.jpg'" 
+                                        :src="photoSrc"
                                         alt="Фото пользователя" class="course__menu-foto"
                                     />
                                     <div class="course__menu-name">
@@ -37,7 +37,7 @@
                                 <div lang="infoblock__info-name">
                                     <div class="infoblock__info-name-image">
                                         <img 
-                                            :src="user.photo ? `/storage/${user.photo}` : '/img/no_foto.jpg'" 
+                                            :src="photoSrc"
                                             alt="Фото пользователя" 
                                         />
                                     </div>
@@ -140,7 +140,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 
 // Управление модальным окном
@@ -162,6 +162,29 @@ const isFocused = ref(false);
 
 // Переменная для выбранного файла
 const selectedFile = ref(null);
+const previewPhotoUrl = ref("");
+const photoVersion = ref(Date.now());
+
+const photoSrc = computed(() => {
+  if (previewPhotoUrl.value) {
+    return previewPhotoUrl.value;
+  }
+
+  if (!user.value.photo) {
+    return "/img/no_foto.jpg";
+  }
+
+  return `/storage/${user.value.photo}?v=${photoVersion.value}`;
+});
+
+const clearPreviewPhoto = () => {
+  if (!previewPhotoUrl.value) {
+    return;
+  }
+
+  URL.revokeObjectURL(previewPhotoUrl.value);
+  previewPhotoUrl.value = "";
+};
 
 // onMounted – загрузка данных из localStorage и API
 onMounted(() => {
@@ -192,6 +215,10 @@ onMounted(() => {
 
   // Загружаем актуальные данные из API
   loadUserData();
+});
+
+onBeforeUnmount(() => {
+  clearPreviewPhoto();
 });
 
 // Функции для управления фокусом поля телефона
@@ -263,8 +290,14 @@ const closeModal = () => {
 
 // Функция обработки выбора файла
 function onFileSelected(event) {
-  const file = event.target.files[0];
+  const file = event.target.files?.[0];
+  if (!file) {
+    return;
+  }
+
+  clearPreviewPhoto();
   selectedFile.value = file;
+  previewPhotoUrl.value = URL.createObjectURL(file);
 }
 
 // Функция загрузки фото
@@ -292,6 +325,9 @@ async function uploadPhoto() {
     // Обновляем данные пользователя в localStorage и в реактивной переменной
     localStorage.setItem("user", JSON.stringify(response.data.user));
     user.value = response.data.user;
+    photoVersion.value = Date.now();
+    selectedFile.value = null;
+    clearPreviewPhoto();
   } catch (error) {
     console.error("Ошибка при загрузке фото:", error);
     alert("Ошибка при загрузке фото.");

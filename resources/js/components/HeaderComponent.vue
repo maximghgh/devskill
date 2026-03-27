@@ -145,10 +145,16 @@ export default {
     toggleMenu() {
       this.menuOpen = !this.menuOpen;
     },
-    logout() {
-      localStorage.removeItem("user");
-      this.user = null;
-      window.location.href = "/";
+    async logout() {
+      try {
+        await window.axios.post("/logout");
+      } catch (error) {
+        console.error("Ошибка выхода:", error);
+      } finally {
+        localStorage.removeItem("user");
+        this.user = null;
+        window.location.href = "/";
+      }
     },
     toggleUserMenu() {
       this.userMenuOpen = !this.userMenuOpen;
