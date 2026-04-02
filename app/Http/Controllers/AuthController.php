@@ -138,14 +138,28 @@ class AuthController extends Controller
             'code' => 'required|digits:6'
         ]);
 
-        if ($request->code == session('verification_code')) {
-            Auth::loginUsingId(session('user_id'), true);
+        $expectedCode = (string) session('verification_code', '');
+        $userId = session('user_id');
+
+        if ($expectedCode === '' || empty($userId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Код подтверждения истёк. Войдите заново.',
+            ], 422);
+        }
+
+        if ((string) $request->code === $expectedCode) {
+            Auth::loginUsingId((int) $userId);
+            $request->session()->regenerate();
             session()->forget(['verification_code', 'user_id']);
 
             return response()->json(['success' => true, 'user' => Auth::user()]);
         }
 
-        return response()->json(['success' => false], 401);
+        return response()->json([
+            'success' => false,
+            'message' => 'Неверный код. Попробуйте снова.',
+        ], 401);
     }
 
     public function logout(Request $request)

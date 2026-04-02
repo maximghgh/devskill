@@ -11,6 +11,34 @@ use Illuminate\Validation\Rule;
 
 class TaskSubmissionController extends Controller
 {
+    private function normalizeTeacherIds(mixed $teachers): array
+    {
+        if (is_string($teachers)) {
+            $decoded = json_decode($teachers, true);
+            $teachers = json_last_error() === JSON_ERROR_NONE ? $decoded : $teachers;
+        }
+
+        if ($teachers === null || $teachers === '') {
+            return [];
+        }
+
+        if (!is_array($teachers)) {
+            $teachers = [$teachers];
+        }
+
+        return array_values(array_filter(array_map(function ($teacher) {
+            if (is_array($teacher)) {
+                $teacher = $teacher['id'] ?? null;
+            }
+
+            if ($teacher === null || $teacher === '') {
+                return null;
+            }
+
+            return (int) $teacher;
+        }, $teachers)));
+    }
+
     public function store(Request $request)
     {
         $userId = auth()->id() ?? $request->input('user_id');
@@ -40,8 +68,10 @@ class TaskSubmissionController extends Controller
 
         // Выбираем первого преподавателя из массива teachers
         $teacherId = null;
-        if ($course && is_array($course->teachers) && count($course->teachers) > 0) {
-            $candidate = $course->teachers[0];
+        $teacherIds = $this->normalizeTeacherIds($course?->teachers);
+
+        if (!empty($teacherIds)) {
+            $candidate = $teacherIds[0];
 
             // подстрахуемся: такой пользователь существует?
             if (User::whereKey($candidate)->exists()) {

@@ -484,6 +484,13 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import axios from "axios";
+import {
+  COURSE_DIFFICULTY_OPTIONS,
+  createCourseDifficultyDictionary,
+  getCourseDifficultyBlockClass,
+  getCourseDifficultyCardClass,
+  getCourseDifficultyLabel,
+} from "@/utils/courseDifficulty";
 
 /* ------------------------------------------------------------------ */
 /* 0. FAQ (внутри этой страницы)                                      */
@@ -546,11 +553,7 @@ const pages = computed(() =>
 /* ------------------------------------------------------------------ */
 /* 4. Фильтры                                                         */
 /* ------------------------------------------------------------------ */
-const levelOptions = [
-  { value: "basic", label: "Начинающий" },
-  { value: "middle", label: "Фундаментальный" },
-  { value: "advanced", label: "Олимпиадный" },
-];
+const levelOptions = COURSE_DIFFICULTY_OPTIONS;
 
 const selectedDifficulties = ref([]);
 const selectedDirection = ref("all");
@@ -568,25 +571,9 @@ const validateDuration = (e) => {
 /* ------------------------------------------------------------------ */
 /* 5. Справочники (словарики)                                         */
 /* ------------------------------------------------------------------ */
-const difficultyTranslation = {
-  basic: "Начинающий",
-  middle: "Фундаментальный",
-  advanced: "Олимпиадный",
-};
-
-const difficultyColorClass = {
-  basic: "course__card_bg-cyan",
-  middle: "course__card_bg-fiolet",
-  advanced: "course__card_bg-orange",
-  mixed: "course__card_bg-green",
-};
-
-const difficultyBgClass = {
-  basic: "block-info_bg-cyan",
-  middle: "block-info_bg-fiolet",
-  advanced: "block-info_bg-orange",
-  mixed: "block-info_bg-green",
-};
+const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
+const difficultyColorClass = createCourseDifficultyDictionary(getCourseDifficultyCardClass);
+const difficultyBgClass = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
 
 /* ------------------------------------------------------------------ */
 /* 6. Модалка покупки/консультации                                    */

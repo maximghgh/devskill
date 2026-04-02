@@ -185,6 +185,7 @@ import axios from "axios";
 import { globalNotification } from "../../globalNotification";
 import { useDateFormatters } from "../admin/utils/useDateFormatters";
 import { useDifficultyLabel } from "../admin/utils/useDifficultyLabel";
+import { getCourseDifficultyBadgeClass } from "@/utils/courseDifficulty";
 
 const selectIcon = new URL("../../../img/admin/select.svg", import.meta.url)
     .href;
@@ -206,13 +207,7 @@ const { formatBirthday } = useDateFormatters();
 const { difficultyLabel } = useDifficultyLabel();
 
 function difficultyClass(diff) {
-    const d = String(diff || "").toLowerCase();
-
-    if (d === "basic") return "users-role-pill--basic";
-    if (d === "middle") return "users-role-pill--middle";
-    if (d === "advanced") return "users-role-pill--advanced";
-
-    return "users-role-pill--default";
+    return getCourseDifficultyBadgeClass(diff);
 }
 
 function setCourses(next) {
@@ -283,14 +278,23 @@ function normalizeImageUrl(value) {
 </script>
 
 <style scoped>
+.users-role-pill--beginner-year-1 {
+    background: #d8e9ff;
+}
+.users-role-pill--beginner-year-2 {
+    background: #d6f5d6;
+}
 .users-role-pill--basic {
     background: #bde5b0;
 }
-.users-role-pill--middle {
+.users-role-pill--fundamental {
     background: #e5dfb0;
 }
-.users-role-pill--advanced {
+.users-role-pill--olympiad {
     background: #e5b0b0;
+}
+.users-role-pill--legacy {
+    background: #d7d7d7;
 }
 .users-role-pill--default {
     background: #e9e9e9;

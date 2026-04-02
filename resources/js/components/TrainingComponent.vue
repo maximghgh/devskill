@@ -334,6 +334,11 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import axios from "axios";
+import {
+    createCourseDifficultyDictionary,
+    getCourseDifficultyBlockClass,
+    getCourseDifficultyLabel,
+} from "@/utils/courseDifficulty";
 
 /* ---------- модалка покупки / консультации ---------- */
 
@@ -524,19 +529,8 @@ async function loadCourses() {
 /* =====================================
    4. Маппинг сложности курсов
 ===================================== */
-const difficultyBgClass = {
-    basic: "block-info_bg-cyan",
-    middle: "block-info_bg-fiolet",
-    advanced: "block-info_bg-orange",
-    mixed: "block-info_bg-green",
-};
-
-const difficultyTranslation = {
-    basic: "Начинающий",
-    middle: "Фундаментальный",
-    advanced: "Олимпиадный",
-    mixed: "Смешанный",
-};
+const difficultyBgClass = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
+const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
 const showRequestModal = ref(false);
 const requestForm = ref({
     name: "",

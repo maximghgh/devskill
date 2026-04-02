@@ -376,6 +376,11 @@ import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
+import {
+    createCourseDifficultyDictionary,
+    getCourseDifficultyBlockClass,
+    getCourseDifficultyLabel,
+} from "@/utils/courseDifficulty";
 
 /* ─────────────────── глобальное состояние ────────────────── */
 const AUTH_KEY = "user"; // имя ключа в localStorage
@@ -426,18 +431,8 @@ const submitted = ref(false);
 const successText = ref("");
 
 /* словари для уровней и цветов */
-const diffLabel = {
-    basic: "Начинающий",
-    middle: "Фундаментальный",
-    advanced: "Олимпиадный",
-    mixed: "Смешанный",
-};
-const diffBg = {
-    basic: "block-info_bg-cyan",
-    middle: "block-info_bg-fiolet",
-    advanced: "block-info_bg-orange",
-    mixed: "block-info_bg-green",
-};
+const diffLabel = createCourseDifficultyDictionary(getCourseDifficultyLabel);
+const diffBg = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
 
 /* очистка формы при закрытии */
 function reset() {
@@ -520,9 +515,10 @@ async function loadCourse() {
         const { data } = await axios.get(`/api/courses/${courseId}`);
         course.value = data;
 
-        if (Array.isArray(data.teachers)) {
+        const teacherIds = normalizeTeacherIds(data.teachers);
+        if (teacherIds.length) {
             const { data: teachers } = await axios.post("/api/users/by-ids", {
-                ids: data.teachers,
+                ids: teacherIds,
             });
             course.value.teachersData = teachers;
         }
@@ -560,6 +556,28 @@ async function loadCourse() {
     } catch (e) {
         console.error("Ошибка при загрузке курса:", e);
     }
+}
+
+function normalizeTeacherIds(teachers) {
+    if (Array.isArray(teachers)) {
+        return teachers
+            .map((teacher) =>
+                typeof teacher === "object" && teacher ? teacher.id : teacher
+            )
+            .filter((teacher) => teacher !== null && teacher !== undefined);
+    }
+
+    if (typeof teachers === "string") {
+        try {
+            return normalizeTeacherIds(JSON.parse(teachers));
+        } catch {
+            return [];
+        }
+    }
+
+    if (teachers == null) return [];
+
+    return [teachers];
 }
 /* ────────────────────── экспорт утилит (если нужны) ───────────────── */
 function downloadPdf(path) {

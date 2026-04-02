@@ -43,45 +43,21 @@
                                     Уровень
                                 </div>
                                 <div class="course__sidebar-check">
-                                    <div class="course__sidebar-oncheck">
+                                    <div
+                                        v-for="option in difficultyOptions"
+                                        :key="option.value"
+                                        class="course__sidebar-oncheck"
+                                    >
                                         <input
-                                            id="lvl_1"
-                                            name="lvl_1"
+                                            :id="`lvl_${option.value}`"
+                                            :name="`lvl_${option.value}`"
                                             type="checkbox"
-                                            value="basic"
+                                            :value="option.value"
                                             v-model="selectedDifficulties"
                                         />
-                                        <label for="lvl_1"><span>Начинающий</span></label>
-                                    </div>
-                                    <div class="course__sidebar-oncheck">
-                                        <input
-                                            id="lvl_2"
-                                            name="lvl_2"
-                                            type="checkbox"
-                                            value="middle"
-                                            v-model="selectedDifficulties"
-                                        />
-                                        <label for="lvl_2"><span>Фундаментальный</span></label>
-                                    </div>
-                                    <div class="course__sidebar-oncheck">
-                                        <input
-                                            id="lvl_3"
-                                            name="lvl_3"
-                                            type="checkbox"
-                                            value="advanced"
-                                            v-model="selectedDifficulties"
-                                        />
-                                        <label for="lvl_3"><span>Олимпиадный</span></label>
-                                    </div>
-                                    <div class="course__sidebar-oncheck">
-                                        <input
-                                            id="lvl_4"
-                                            name="lvl_4"
-                                            type="checkbox"
-                                            value="mixed"
-                                            v-model="selectedDifficulties"
-                                        />
-                                        <label for="lvl_4"><span>Смешанный</span></label>
+                                        <label :for="`lvl_${option.value}`">
+                                            <span>{{ option.label }}</span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -486,6 +462,13 @@
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
 import axios from "axios";
+import {
+  COURSE_DIFFICULTY_OPTIONS,
+  createCourseDifficultyDictionary,
+  getCourseDifficultyBlockClass,
+  getCourseDifficultyCardClass,
+  getCourseDifficultyLabel,
+} from "@/utils/courseDifficulty";
 
 const isSidebarOpen = ref(false)
 const showAuthModal = ref(false)
@@ -527,26 +510,12 @@ const selectedDuration     = ref(null);
 const selectedLanguages    = computed(() =>
   languages.value.filter(l => l.checked).map(l => l.id)
 );
+const difficultyOptions = COURSE_DIFFICULTY_OPTIONS;
 
 /* --- Словари сложности для карточек и модалки --- */
-const difficultyTranslation = {
-  basic: "Начинающий",
-  middle: "Фундаментальный",
-  advanced: "Олимпиадный",
-  mixed: "Смешанный",
-};
-const difficultyColorClass = {
-  basic: "course__card_bg-cyan",
-  middle: "course__card_bg-fiolet",
-  advanced: "course__card_bg-orange",
-  mixed: "course__card_bg-green",
-};
-const difficultyBgClass = {
-  basic: "block-info_bg-cyan",
-  middle: "block-info_bg-fiolet",
-  advanced: "block-info_bg-orange",
-  mixed: "block-info_bg-green",
-};
+const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
+const difficultyColorClass = createCourseDifficultyDictionary(getCourseDifficultyCardClass);
+const difficultyBgClass = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
 
 /* --- Методы пагинации --- */
 function nextPage() {

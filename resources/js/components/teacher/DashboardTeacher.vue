@@ -44,7 +44,7 @@
                                         >{{ course.topics_count ?? 0 }} модулей</span
                                     >
                                     <span class="course__desc"
-                                        >{{ studentsByCourse[course.id] ?? 0 }} студентов</span
+                                        >{{ course.students_count ?? 0 }} студентов</span
                                     >
                                 </div>
                                 <span class="course__desc">
@@ -134,7 +134,7 @@
                                         >{{ course.topics_count ?? 0 }} модулей</span
                                     >
                                     <span class="course__desc"
-                                        >{{ studentsByCourse[course.id] ?? 0 }} студентов</span
+                                        >{{ course.students_count ?? 0 }} студентов</span
                                     >
                                 </div>
                                 <span class="course__desc">
@@ -177,8 +177,6 @@ import axios from "axios";
 import "./style.css";
 
 const courses = ref([]);
-const studentsByCourse = ref({});
-const totalStudentsCount = ref(0);
 const pageSize = 2;
 const currentPage = ref(1);
 const futurePage = ref(1);
@@ -229,6 +227,12 @@ const futureCourses = computed(() =>
 );
 
 const activeCoursesCount = computed(() => currentCourses.value.length);
+const totalStudentsCount = computed(() =>
+    courses.value.reduce(
+        (total, course) => total + Number(course.students_count ?? 0),
+        0
+    )
+);
 
 const currentTotalPages = computed(() =>
     Math.max(1, Math.ceil(currentCourses.value.length / pageSize))
@@ -277,25 +281,6 @@ async function loadCourses() {
     }
 }
 
-async function loadStudentsCounts() {
-    const next = {};
-    let total = 0;
-    await Promise.all(
-        courses.value.map(async (course) => {
-            try {
-                const { data } = await axios.get(`/api/students/${course.id}`);
-                const list = Array.isArray(data) ? data : [];
-                next[course.id] = list.length;
-                total += list.length;
-            } catch (e) {
-                next[course.id] = 0;
-            }
-        })
-    );
-    studentsByCourse.value = next;
-    totalStudentsCount.value = total;
-}
-
 watch(courses, () => {
     if (currentPage.value > currentTotalPages.value) currentPage.value = 1;
     if (futurePage.value > futureTotalPages.value) futurePage.value = 1;
@@ -303,6 +288,5 @@ watch(courses, () => {
 
 onMounted(async () => {
     await loadCourses();
-    await loadStudentsCounts();
 });
 </script>

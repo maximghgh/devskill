@@ -13,10 +13,65 @@ use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\Purchase;
 use App\Models\Language;
+use App\Support\CourseDifficulty;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CourseController extends Controller
 {
+    private function courseSummaryQuery(): Builder
+    {
+        return Course::query()
+            ->withCount('topics')
+            ->withCount([
+                'purchases as students_count' => function ($query) {
+                    $query->select(DB::raw('count(distinct user_id)'));
+                },
+            ]);
+    }
+
+    private function normalizeTeacherIds(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            $value = json_last_error() === JSON_ERROR_NONE ? $decoded : $value;
+        }
+
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        $teacherIds = array_map(function ($teacher) {
+            if (is_array($teacher)) {
+                $teacher = $teacher['id'] ?? null;
+            }
+
+            if ($teacher === null || $teacher === '') {
+                return null;
+            }
+
+            return (int) $teacher;
+        }, $value);
+
+        return array_values(array_unique(array_filter($teacherIds, fn ($id) => $id > 0)));
+    }
+
+    private function resolveCourseDates(array $data, ?Course $course = null): array
+    {
+        $startDateProvided = array_key_exists('start_date', $data);
+        $endDateProvided = array_key_exists('end_date', $data);
+
+        return [
+            'start_date' => $startDateProvided ? ($data['start_date'] ?: null) : $course?->start_date,
+            'end_date' => $endDateProvided ? ($data['end_date'] ?: null) : $course?->end_date,
+        ];
+    }
+
     private function transliterateRu(string $value): string
     {
         $map = [
@@ -70,9 +125,8 @@ class CourseController extends Controller
         $data['editorData'] = json_decode($data['editorData'], true);
 
         // Преобразуем поле teachers из JSON в массив, если оно передано
-        if (isset($data['teachers'])) {
-            $data['teachers'] = json_decode($data['teachers'], true);
-        }
+        $data['teachers'] = $this->normalizeTeacherIds($data['teachers'] ?? null);
+        $dates = $this->resolveCourseDates($data);
 
         // Обработка файла для карточки
         if ($request->hasFile('cardImage')) {
@@ -117,15 +171,15 @@ class CourseController extends Controller
             'simulators'         => $data['simulators'],
             'difficulty'         => $data['difficulty'],
             'editor_data'        => $data['editorData'] ?? null,
-            'teachers'           => $data['teachers'] ?? null,
+            'teachers'           => $data['teachers'] ?: null,
             'language'           => $data['language'],
             'direction'          => $data['direction'] ?? null,
             'upgradequalification'=> $data['upgradequalification'] ?? null,
             'card_image'         => $data['card_image'] ?? null,
             'description_image'  => $data['description_image'] ?? null,
             'pdf_path'             => $data['pdf_path'] ?? null, 
-            'start_date'           => $data['start_date'] ?? null, // YYYY-MM-DD
-            'end_date'             => $data['end_date']   ?? null,
+            'start_date'           => $dates['start_date'],
+            'end_date'             => $dates['end_date'],
         ];
         
         // Создаём запись в БД
@@ -151,8 +205,8 @@ class CourseController extends Controller
         if (!empty($validated['language'])) {
             $validated['language'] = json_decode($validated['language'], true);
         }
-        
-        $validated['teachers'] = json_decode($validated['teachers'], true);
+        $validated['teachers'] = $this->normalizeTeacherIds($validated['teachers'] ?? null);
+        $dates = $this->resolveCourseDates($validated, $course);
         // Если editorData приходит как JSON-строка
         if ($request->has('editorData')) {
             $validated['editorData'] = json_decode($request->input('editorData'), true);
@@ -168,8 +222,8 @@ class CourseController extends Controller
         $course->simulators   = $validated['simulators'] ?? $course->simulators;
         $course->difficulty   = $validated['difficulty'];
         $course->language     = $validated['language'];
-        $course->start_date   = $validated['start_date'] ?? null;
-        $course->end_date     = $validated['end_date'] ?? null;
+        $course->start_date   = $dates['start_date'];
+        $course->end_date     = $dates['end_date'];
         if (empty($course->slug)) {
             $course->slug = $this->makeSlug(
                 $validated['courseName'] ?? $course->course_name,
@@ -182,8 +236,7 @@ class CourseController extends Controller
         //     $course->language = json_decode($validated['selectedLanguages'], true);
         // }
         if (array_key_exists('teachers', $validated)) {
-            $course->teachers = array_values(array_unique($validated['teachers']));
-            $course->save();  // ещё раз сохраняем, если нужен этот вариант
+            $course->teachers = $validated['teachers'] ?: null;
         }
         // Обновляем направление, если передано
         if (isset($validated['selectedDirection'])) {
@@ -264,7 +317,7 @@ class CourseController extends Controller
 
     public function show($id)
     {
-        $course = Course::withCount('topics')->findOrFail($id);
+        $course = $this->courseSummaryQuery()->findOrFail($id);
         // $course = Course::findOrFail($id); 
         // // Если записи нет, Laravel автоматически вернет 404
         // if (is_string($course->teachers)) {
@@ -310,13 +363,15 @@ class CourseController extends Controller
     
     public function index()
     {
-        
-        return response()->json(CourseResource::collection(Course::all()), 200);
+        return response()->json(
+            CourseResource::collection($this->courseSummaryQuery()->get()),
+            200
+        );
     }
     public function category(Request $request)
     {
         // Создаём query builder
-        $query = Course::query();
+        $query = $this->courseSummaryQuery();
 
         /**
          * 1) Фильтр по языкам (language)
@@ -344,11 +399,20 @@ class CourseController extends Controller
         
         /**
          * 2) Фильтр по уровню (difficulty)
-         *    На фронте чекбоксы: basic, middle, advanced, mixed
+         *    На фронте передаются актуальные значения уровней курса,
+         *    а также допускаются legacy-коды для обратной совместимости.
          *    Если пользователь выбрал несколько уровней, то мы берём массив.
          */
         if ($request->has('difficulties')) {
-            $diffs = $request->input('difficulties'); 
+            $diffs = array_values(array_intersect(
+                (array) $request->input('difficulties'),
+                CourseDifficulty::allowedValues()
+            ));
+
+            if (empty($diffs)) {
+                return response()->json(CourseResource::collection([]), 200);
+            }
+
             $query->whereIn('difficulty', $diffs);
         }
 
@@ -442,7 +506,7 @@ class CourseController extends Controller
 
         return response()->json([
             'topics' => TopicResource::collection($topics),
-            'course' => new CourseResource(Course::find($courseId)),
+            'course' => new CourseResource($this->courseSummaryQuery()->find($courseId)),
         ]);
     }
     public function taskCount($courseId)
@@ -471,7 +535,9 @@ class CourseController extends Controller
 
         try {
             // Получаем курсы, где массив teachers содержит указанный teacher_id
-            $courses = Course::whereJsonContains('teachers', $teacherId)->get();
+            $courses = $this->courseSummaryQuery()
+                ->whereJsonContains('teachers', $teacherId)
+                ->get();
 
             // Возвращаем найденные курсы
             return response()->json(CourseResource::collection($courses));
@@ -486,20 +552,17 @@ class CourseController extends Controller
 
     public function showStudents($courseId)
     {
-        // Получаем все покупки для данного курса
-        $purchases = Purchase::where('course_id', $courseId)->get();
+        $studentIds = Purchase::where('course_id', $courseId)
+            ->whereNotNull('user_id')
+            ->distinct()
+            ->pluck('user_id');
 
-        // Если нет покупок, вернем пустой массив
-        if ($purchases->isEmpty()) {
+        if ($studentIds->isEmpty()) {
             return response()->json([]);
         }
 
-        // Получаем уникальных пользователей для этого курса
-        $students = $purchases->map(function ($purchase) {
-            return $purchase->user; // Получаем пользователя для каждой покупки
-        });
+        $students = \App\Models\User::whereIn('id', $studentIds)->get();
 
-        // Возвращаем студентов в формате JSON
         return response()->json(UserResource::collection($students));
     }
 

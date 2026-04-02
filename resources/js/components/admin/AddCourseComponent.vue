@@ -17,17 +17,6 @@
         <input v-model="form.cardTitle" type="text" placeholder="Введите название для карточки" class="form-input" />
       </div>
 
-      <!-- Даты старта и конца -->
-      <div class="form-group">
-        <label class="form-label">Дата старта курса</label>
-        <input v-model="form.startDate" type="date" class="form-input form-input--date" />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Дата конца курса</label>
-        <input v-model="form.endDate" type="date" class="form-input form-input--date" />
-      </div>
-
       <!-- Цена/длительность/часы -->
       <div class="form-group">
         <label class="form-label">Цена</label>
@@ -57,24 +46,56 @@
       <div class="form-group">
         <label class="form-label">Уровень курса</label>
         <select v-model="form.difficulty" class="form-input">
-          <option value="basic">ДПО</option>
-          <option value="middle">ДПО детское</option>
-          <option value="advanced">Олимпиадный</option>
-          <option value="mixed">Смешанный</option>
+          <option
+            v-for="option in difficultyOptions"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.label }}
+          </option>
         </select>
       </div>
 
       <!-- Преподаватели -->
       <div class="form-group">
-        <label class="form-label">Выберите преподавателей</label>
-        <select
-          v-model="form.selectedTeachers"
-          multiple
-          class="form-input"
+        <label class="form-label">Преподаватели</label>
+        <Multiselect
+          v-model="selectedTeacherOptions"
+          :options="teachers"
+          :multiple="true"
+          track-by="id"
+          label="name"
+          placeholder="Выберите преподавателей"
+          :close-on-select="false"
+          :clear-on-select="false"
+          :preserve-search="true"
           :disabled="teacherSelectDisabled"
         >
-          <option v-for="t in teachers" :key="t.id" :value="t.id">{{ t.name }}</option>
-        </select>
+          <template #option="{ option }">
+            <label class="teacher-option">
+              <input
+                type="checkbox"
+                class="teacher-option__checkbox"
+                :checked="form.selectedTeachers.includes(option.id)"
+                tabindex="-1"
+                readonly
+              />
+              <span>{{ option.name }}</span>
+            </label>
+          </template>
+          <template #selection="{ values, isOpen }">
+            <span v-if="values.length && !isOpen" class="multiselect__single">
+              {{
+                values.length === 1
+                  ? values[0].name
+                  : `Выбрано преподавателей: ${values.length}`
+              }}
+            </span>
+          </template>
+          <template #noResult>
+            Преподаватели не найдены
+          </template>
+        </Multiselect>
       </div>
 
       <!-- Направление -->
@@ -147,6 +168,7 @@ import Header from '@editorjs/header'
 import List from '@editorjs/list'
 import ImageTool from '@editorjs/image'
 import { globalNotification } from '@/globalNotification' // поправь путь при необходимости
+import { getCourseDifficultyOptions } from '@/utils/courseDifficulty'
 
 
 
@@ -170,7 +192,7 @@ const form = ref({
   description: '',
   hours: '',
   simulators: '',            // как в исходнике
-  difficulty: 'basic',
+  difficulty: 'beginner_year_1',
   selectedTeachers: [],
   selectedLanguages: [],
   selectedDirection: null,
@@ -195,6 +217,16 @@ const languages = ref([])
 const currentUser = ref(null)
 
 const teachers = computed(() => users.value.filter(u => String(u.role) === '2' || u.role === 2))
+const difficultyOptions = computed(() => getCourseDifficultyOptions(form.value.difficulty))
+const selectedTeacherOptions = computed({
+  get() {
+    const teacherIds = form.value.selectedTeachers.map(id => String(id))
+    return teachers.value.filter(teacher => teacherIds.includes(String(teacher.id)))
+  },
+  set(value) {
+    form.value.selectedTeachers = (value || []).map(teacher => Number(teacher.id))
+  }
+})
 const teacherSelectDisabled = computed(() => Number(currentUser.value?.role) === 2)
 
 /** EditorJS */
@@ -387,7 +419,7 @@ function resetForm() {
     description: '',
     hours: '',
     simulators: '',
-    difficulty: 'basic',
+    difficulty: 'beginner_year_1',
     selectedTeachers: [],
     selectedLanguages: [],
     selectedDirection: null,
@@ -435,4 +467,6 @@ function resetForm() {
 .editor-container { padding: 10px; border: 1px solid #ccc; border-radius: 4px; min-height: 150px; background: #fff; }
 .form-button { width: 700px; background: #007bff; color: #fff; padding: 10px 15px; border: 0; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color .3s; margin: 0 auto; }
 .form-button:hover { background: #0056b3; }
+.teacher-option { display: flex; align-items: center; gap: 10px; }
+.teacher-option__checkbox { pointer-events: none; }
 </style>

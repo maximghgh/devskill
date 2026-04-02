@@ -136,6 +136,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import {
+    createCourseDifficultyDictionary,
+    getCourseDifficultyCardClass,
+    getCourseDifficultyLabel,
+} from "@/utils/courseDifficulty";
 
 // Опционально можно задать имя компонента (начиная с Vue 3.3)
 if (import.meta.env.VITE_COMPONENT_NAME) {
@@ -152,18 +157,8 @@ const props = defineProps({
     },
 });
 
-const difficultyColorClass = {
-    basic: "course__card_bg-cyan",
-    middle: "course__card_bg-fiolet",
-    advanced: "course__card_bg-orange",
-    mixed: "course__card_bg-green",
-};
-const difficultyTranslation = {
-    basic: "Начинающий",
-    middle: "Фундаментальный",
-    advanced: "Олимпиадный",
-    mixed: "Смешанный",
-};
+const difficultyColorClass = createCourseDifficultyDictionary(getCourseDifficultyCardClass);
+const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
 
 function getCourseProgress(course) {
     let totalTopics = 0;

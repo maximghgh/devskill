@@ -230,6 +230,11 @@ import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import {
+    createCourseDifficultyDictionary,
+    getCourseDifficultyBlockClass,
+    getCourseDifficultyLabel,
+} from "@/utils/courseDifficulty";
 
 import iconText from "../../img/text.png";
 import iconVideo from "../../img/video.png";
@@ -777,18 +782,8 @@ async function loadCourses() {
     }
 }
 
-const difficultyBgClass = {
-    basic: "block-info_bg-cyan",
-    middle: "block-info_bg-fiolet",
-    advanced: "block-info_bg-orange",
-    mixed: "block-info_bg-green",
-};
-const difficultyTranslation = {
-    basic: "Начинающий",
-    middle: "Фундаментальный",
-    advanced: "Олимпиадный",
-    mixed: "Смешанный",
-};
+const difficultyBgClass = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
+const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
 
 /* ======================================================
    6. onMounted

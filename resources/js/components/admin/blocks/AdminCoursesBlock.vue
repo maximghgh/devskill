@@ -59,31 +59,17 @@
                                 />
                                 <span class="users-roles__span">Все</span>
                             </label>
-                            <label class="users-roles__option">
+                            <label
+                                v-for="option in difficultyOptions"
+                                :key="option.value"
+                                class="users-roles__option"
+                            >
                                 <input
                                     type="radio"
-                                    value="basic"
+                                    :value="option.value"
                                     v-model="selectedDifficulty"
                                 />
-                                <span class="users-roles__span">Базовый</span>
-                            </label>
-                            <label class="users-roles__option">
-                                <input
-                                    type="radio"
-                                    value="middle"
-                                    v-model="selectedDifficulty"
-                                />
-                                <span class="users-roles__span">Фундаментальный</span>
-                            </label>
-                            <label class="users-roles__option">
-                                <input
-                                    type="radio"
-                                    value="advanced"
-                                    v-model="selectedDifficulty"
-                                />
-                                <span class="users-roles__span"
-                                    >Олимпиадный</span
-                                >
+                                <span class="users-roles__span">{{ option.label }}</span>
                             </label>
 
                             <div class="users-roles__actions">
@@ -262,6 +248,10 @@ import axios from "axios";
 import { globalNotification } from "../../../globalNotification";
 import { useDateFormatters } from "../utils/useDateFormatters";
 import { useDifficultyLabel } from "../utils/useDifficultyLabel";
+import {
+    COURSE_DIFFICULTY_OPTIONS,
+    getCourseDifficultyBadgeClass,
+} from "@/utils/courseDifficulty";
 
 const props = defineProps({
     courses: { type: Array, default: () => [] },
@@ -278,6 +268,7 @@ const emit = defineEmits([
 
 const { formatBirthday } = useDateFormatters();
 const { difficultyLabel } = useDifficultyLabel();
+const difficultyOptions = COURSE_DIFFICULTY_OPTIONS;
 
 const usersById = computed(() => {
     const map = new Map();
@@ -328,13 +319,7 @@ function teacherLabel(course) {
 }
 
 function difficultyClass(diff) {
-  const d = String(diff || "").toLowerCase();
-
-  if (d === "basic") return "users-role-pill--basic";
-  if (d === "middle") return "users-role-pill--middle";
-  if (d === "advanced") return "users-role-pill--advanced";
-
-  return "users-role-pill--default";
+    return getCourseDifficultyBadgeClass(diff);
 }
 
 function setCourses(next) {
@@ -409,16 +394,28 @@ async function deleteCourse(courseId) {
 </script>
 
 <style scoped>
+.users-role-pill--beginner-year-1{
+  background: #D8E9FF;
+}
+
+.users-role-pill--beginner-year-2{
+  background: #D6F5D6;
+}
+
 .users-role-pill--basic{
   background: #BDE5B0;
 }
 
-.users-role-pill--middle{
+.users-role-pill--fundamental{
   background: #E5DFB0;
 }
 
-.users-role-pill--advanced{
+.users-role-pill--olympiad{
   background: #E5B0B0;
+}
+
+.users-role-pill--legacy{
+  background: #d7d7d7;
 }
 
 .users-role-pill--default{

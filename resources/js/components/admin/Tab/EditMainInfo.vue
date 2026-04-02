@@ -10,6 +10,7 @@ import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 
 import { globalNotification } from "@/globalNotification";
+import { getCourseDifficultyOptions } from "@/utils/courseDifficulty";
 
 const props = defineProps({
   course: { type: Object, required: true },
@@ -196,7 +197,7 @@ const form = ref({
   description: "",
   hours: "",
   simulators: "",
-  difficulty: "basic",
+  difficulty: "beginner_year_1",
   selectedTeachers: [],
   selectedLanguages: [],
   selectedDirection: null,
@@ -209,13 +210,15 @@ const form = ref({
   endDate: "",
 });
 
-// один преподаватель в UI, а в форме массив id
-const teacherSelectModel = computed({
+const difficultyOptions = computed(() => getCourseDifficultyOptions(form.value.difficulty));
+
+const selectedTeacherOptions = computed({
   get() {
-    return form.value.selectedTeachers[0] ?? null;
+    const teacherIds = form.value.selectedTeachers.map((id) => String(id));
+    return teachers.value.filter((teacher) => teacherIds.includes(String(teacher.id)));
   },
-  set(val) {
-    form.value.selectedTeachers = val ? [val] : [];
+  set(value) {
+    form.value.selectedTeachers = (value || []).map((teacher) => Number(teacher.id));
   },
 });
 
@@ -458,7 +461,7 @@ function fillFormFromCourse(course) {
     description: course.description || "",
     hours: course.hours || "",
     simulators: course.simulators || "",
-    difficulty: course.difficulty || "basic",
+    difficulty: course.difficulty || "beginner_year_1",
     selectedTeachers: teacherIds,
     selectedLanguages: selectedLangs,
     selectedDirection: course.direction ?? null,
@@ -604,35 +607,6 @@ onBeforeUnmount(() => {
       />
     </div>
 
-    <!-- Даты -->
-    <div class="dialog__block">
-      <div class="dialog__component">
-        <p class="dialog__title">Даты проведения</p>
-        <div class="date">
-          <div class="date_start">
-            <p class="dialog__title">От</p>
-            <div class="dialog__component medium">
-              <input
-                v-model="form.startDate"
-                type="date"
-                class="dialog__input dialog__input--m"
-              />
-            </div>
-          </div>
-          <div class="date_start">
-            <p class="dialog__title">До</p>
-            <div class="dialog__component">
-              <input
-                v-model="form.endDate"
-                type="date"
-                class="dialog__input dialog__input--m"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Описание -->
     <div class="dialog__component">
       <p class="dialog__title">Описание</p>
@@ -653,24 +627,57 @@ onBeforeUnmount(() => {
         v-model="form.difficulty"
         class="dialog__input dialog__select"
       >
-        <option value="basic">Базовый</option>
-        <option value="middle">Фундаментальный</option>
-        <option value="advanced">Олимпиадный</option>
+        <option
+          v-for="option in difficultyOptions"
+          :key="option.value"
+          :value="option.value"
+        >
+          {{ option.label }}
+        </option>
       </select>
     </div>
 
-    <!-- Преподаватель -->
     <div class="dialog__component">
-      <p class="dialog__title">Выберите преподавателя</p>
-      <select
-        v-model="teacherSelectModel"
-        class="dialog__input dialog__select"
+      <p class="dialog__title">Преподаватели</p>
+      <Multiselect
+        v-model="selectedTeacherOptions"
+        :options="teachers"
+        :multiple="true"
+        track-by="id"
+        label="name"
+        placeholder="Выберите преподавателей"
+        :close-on-select="false"
+        :clear-on-select="false"
+        :preserve-search="true"
+        select-label=""
+        selected-label="Выбран"
+        deselect-label="Убрать"
       >
-        <option :value="null">Выберите преподавателя</option>
-        <option v-for="t in teachers" :key="t.id" :value="t.id">
-          {{ t.name }}
-        </option>
-      </select>
+        <template #option="{ option }">
+          <label class="teacher-option">
+            <input
+              type="checkbox"
+              class="teacher-option__checkbox"
+              :checked="form.selectedTeachers.includes(option.id)"
+              tabindex="-1"
+              readonly
+            />
+            <span>{{ option.name }}</span>
+          </label>
+        </template>
+        <template #selection="{ values, isOpen }">
+          <span v-if="values.length && !isOpen" class="multiselect__single">
+            {{
+              values.length === 1
+                ? values[0].name
+                : `Выбрано преподавателей: ${values.length}`
+            }}
+          </span>
+        </template>
+        <template #noResult>
+          Преподаватели не найдены
+        </template>
+      </Multiselect>
     </div>
 
     <!-- Направление -->
@@ -841,6 +848,18 @@ onBeforeUnmount(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.teacher-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.teacher-option__checkbox {
+  pointer-events: none;
+}
+</style>
 
 <style scoped>
 :deep .ce-toolbar__actions{

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Support\CourseDifficulty;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCourseRequest extends FormRequest
 {
@@ -21,7 +23,7 @@ class StoreCourseRequest extends FormRequest
             'description'          => 'nullable|string',
             'hours'                => 'required|integer',
             'simulators'           => 'nullable|integer|min:0',
-            'difficulty'           => 'required|string',
+            'difficulty'           => ['required', 'string', Rule::in(CourseDifficulty::allowedValues())],
             'editorData'           => 'required',
             'teachers'             => 'nullable|json',
             'language'             => 'required|string',

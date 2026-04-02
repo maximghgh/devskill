@@ -10,6 +10,7 @@ import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 
 import { globalNotification } from "@/globalNotification";
+import { getCourseDifficultyOptions } from "@/utils/courseDifficulty";
 
 const props = defineProps({
   draft: { type: Object, default: () => ({ slug: null }) },
@@ -190,7 +191,7 @@ const form = ref({
   description: "",
   hours: "",
   simulators: "",
-  difficulty: "basic",
+  difficulty: "beginner_year_1",
   selectedTeachers: [],
   selectedLanguages: [],
   selectedDirection: null,
@@ -203,10 +204,14 @@ const form = ref({
   endDate: "",
 });
 
-/** Состояние селекта преподавателя (у тебя один преподаватель) */
-const teacherSelectModel = ref(null);
-watch(teacherSelectModel, (val) => {
-  form.value.selectedTeachers = val ? [val] : [];
+const selectedTeacherOptions = computed({
+  get() {
+    const teacherIds = form.value.selectedTeachers.map((id) => String(id));
+    return teachers.value.filter((teacher) => teacherIds.includes(String(teacher.id)));
+  },
+  set(value) {
+    form.value.selectedTeachers = (value || []).map((teacher) => Number(teacher.id));
+  },
 });
 
 /** Файлы (UI) */
@@ -337,6 +342,7 @@ const currentUser = ref(null);
 const teachers = computed(() =>
   users.value.filter((u) => String(u.role) === "2" || u.role === 2)
 );
+const difficultyOptions = computed(() => getCourseDifficultyOptions(form.value.difficulty));
 const isTeacher = computed(() => Number(currentUser.value?.role) === 2);
 const teacherSelectDisabled = computed(() => isDisabled.value || isTeacher.value);
 
@@ -430,7 +436,7 @@ function fillFormFromDraft(draft = props.draft) {
     form.value.description = c.description ?? "";
     form.value.hours = c.hours ?? "";
     form.value.simulators = c.simulators ?? "";
-    form.value.difficulty = c.difficulty ?? "basic";
+    form.value.difficulty = c.difficulty ?? "beginner_year_1";
 
     form.value.startDate = c.start_date ? String(c.start_date).slice(0, 10) : "";
     form.value.endDate = c.end_date ? String(c.end_date).slice(0, 10) : "";
@@ -439,7 +445,6 @@ function fillFormFromDraft(draft = props.draft) {
       ? c.teachers.map((t) => (typeof t === "object" ? t.id : t))
       : [];
     form.value.selectedTeachers = teacherIds;
-    teacherSelectModel.value = teacherIds[0] ?? null;
 
     form.value.selectedDirection = c.direction ?? null;
 
@@ -476,7 +481,7 @@ function resetForm() {
     description: "",
     hours: "",
     simulators: "",
-    difficulty: "basic",
+    difficulty: "beginner_year_1",
     selectedTeachers: [],
     selectedLanguages: [],
     selectedDirection: null,
@@ -489,7 +494,6 @@ function resetForm() {
     endDate: "",
   };
 
-  teacherSelectModel.value = null;
   cardFileName.value = "";
   descFileName.value = "";
   cardFileError.value = "";
@@ -518,10 +522,9 @@ function applyTeacherFromStorage() {
 
   if (props.isEdit) return;
   if (!isTeacher.value || !currentUser.value?.id) return;
-  if (teacherSelectModel.value) return;
+  if (form.value.selectedTeachers.length) return;
 
   isHydrating.value = true;
-  teacherSelectModel.value = currentUser.value.id;
   form.value.selectedTeachers = [currentUser.value.id];
   isDirty.value = false;
   emit("dirty", false);
@@ -732,36 +735,6 @@ onBeforeUnmount(() => {
                 :disabled="isDisabled"
             />
         </div>
-        <!-- 3) Даты -->
-        <div class="dialog__block">
-            <div class="dialog__component">
-                <p class="dialog__title">Даты проведения</p>
-                <div class="date">
-                    <div class="date_start">
-                        <p class="dialog__title">От</p>
-                        <div class="dialog__component medium">
-                            <input
-                                v-model="form.startDate"
-                                type="date"
-                                class="dialog__input dialog__input--m"
-                                :disabled="isDisabled"
-                            />
-                        </div>
-                    </div>
-                    <div class="date_start">
-                        <p class="dialog__title">До</p>
-                        <div class="dialog__component">
-                            <input
-                                v-model="form.endDate"
-                                type="date"
-                                class="dialog__input dialog__input--m"
-                                :disabled="isDisabled"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- 5) Описание -->
         <div class="dialog__component">
@@ -785,38 +758,58 @@ onBeforeUnmount(() => {
                 class="dialog__input dialog__select"
                 :disabled="isDisabled"
             >
-        <option value="basic">Базовый</option>
-        <option value="middle">Фундаментальный</option>
-        <option value="advanced">Олимпиадный</option>
-      </select>
-    </div>
+                <option
+                    v-for="option in difficultyOptions"
+                    :key="option.value"
+                    :value="option.value"
+                >
+                    {{ option.label }}
+                </option>
+            </select>
+        </div>
 
-        <!-- 7) Преподаватели -->
-        <!-- <div class="dialog__component">
-            <p class="dialog__title">Выберите преподавателей</p>
-            <select
-                v-model="form.selectedTeachers"
-                multiple
-                class="dialog__input"
-                :disabled="isDisabled"
-            >
-                <option v-for="t in teachers" :key="t.id" :value="t.id">
-                    {{ t.name }}
-                </option>
-            </select>
-        </div> -->
         <div class="dialog__component">
-            <p class="dialog__title">Выберите преподавателя</p>
-            <select
-                v-model="teacherSelectModel"
-                class="dialog__input dialog__select"
+            <p class="dialog__title">Преподаватели</p>
+            <Multiselect
+                v-model="selectedTeacherOptions"
+                :options="teachers"
+                :multiple="true"
+                track-by="id"
+                label="name"
+                placeholder="Выберите преподавателей"
+                :close-on-select="false"
+                :clear-on-select="false"
+                :preserve-search="true"
                 :disabled="teacherSelectDisabled"
+                select-label=""
+                selected-label="Выбран"
+                deselect-label="Убрать"
             >
-                <option :value="null">Выберите преподавателя</option>
-                <option v-for="t in teachers" :key="t.id" :value="t.id">
-                {{ t.name }}
-                </option>
-            </select>
+                <template #option="{ option }">
+                    <label class="teacher-option">
+                        <input
+                            type="checkbox"
+                            class="teacher-option__checkbox"
+                            :checked="form.selectedTeachers.includes(option.id)"
+                            tabindex="-1"
+                            readonly
+                        />
+                        <span>{{ option.name }}</span>
+                    </label>
+                </template>
+                <template #selection="{ values, isOpen }">
+                    <span v-if="values.length && !isOpen" class="multiselect__single">
+                        {{
+                            values.length === 1
+                                ? values[0].name
+                                : `Выбрано преподавателей: ${values.length}`
+                        }}
+                    </span>
+                </template>
+                <template #noResult>
+                    Преподаватели не найдены
+                </template>
+            </Multiselect>
         </div>
         <!-- 8) Направление -->
         <div class="dialog__component">
@@ -981,9 +974,20 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-    :deep .ce-toolbar__actions{
-        left: -200px !important;
-    }
+:deep .ce-toolbar__actions{
+    left: -200px !important;
+}
+
+.teacher-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.teacher-option__checkbox {
+    pointer-events: none;
+}
+
 /* EditorJS внутри визуальной системы dialog */
 .editor-container {
     max-width: unset;

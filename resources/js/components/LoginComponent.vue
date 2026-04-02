@@ -81,6 +81,9 @@
                       v-model="code"
                       required
                       maxlength="6"
+                      inputmode="numeric"
+                      pattern="[0-9]{6}"
+                      @input="normalizeCodeInput"
                     />
                   </div>
                 </div>
@@ -190,6 +193,7 @@ const handleLogin = async () => {
 // Обработчик подтверждения кода
 const handleVerifyCode = async () => {
   errorMessage.value = ''
+  normalizeCodeInput()
   try {
     const response = await axios.post('/verify-code', { code: code.value })
     if (response.data.success) {
@@ -216,9 +220,17 @@ const handleVerifyCode = async () => {
       
     }
   } catch (error) {
-    errorMessage.value = 'Неверный код. Попробуйте снова.'
+    errorMessage.value =
+      error.response?.data?.message ||
+      'Не удалось подтвердить код. Попробуйте снова.'
     console.error('❌ Ошибка подтверждения кода:', error)
   }
+}
+
+const normalizeCodeInput = () => {
+  code.value = String(code.value || '')
+    .replace(/\D/g, '')
+    .slice(0, 6)
 }
 
 // Выход
@@ -268,7 +280,6 @@ watch(password, () => {
   margin-top: 10px;
 }
 </style>
-
 
 
 
