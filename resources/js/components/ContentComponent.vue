@@ -23,10 +23,7 @@
                             </div>
                         </div>
                         <img
-                            :src="
-                                `../${course.card_image}` ||
-                                '/img/logo_placeholder.png'
-                            "
+                            :src="getCourseCardImageUrl(course)"
                             alt="Изображение курса"
                             width="93"
                             height="92"
@@ -235,6 +232,7 @@ import {
     getCourseDifficultyBlockClass,
     getCourseDifficultyLabel,
 } from "@/utils/courseDifficulty";
+import { getCourseCardImageUrl } from "@/utils/courseImage";
 
 import iconText from "../../img/text.png";
 import iconVideo from "../../img/video.png";

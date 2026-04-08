@@ -124,11 +124,7 @@
                                     <div class="course__card-image">
                                         <!-- Проверяем, есть ли путь к файлу. Если нет, можно подставить заглушку -->
                                         <img
-                                            :src="
-                                                course.card_image
-                                                    ? course.card_image
-                                                    : '../../img/logo_placeholder.png'
-                                            "
+                                            :src="getCourseCardImageUrl(course)"
                                             alt="Изображение курса"
                                         />
                                     </div>
@@ -187,7 +183,7 @@
                                                 <div class="block__top">
                                                     <div class="block__logo">
                                                         <img
-                                                            :src="selectedCourse.card_image || '/img/logo_placeholder.png'"
+                                                            :src="getCourseCardImageUrl(selectedCourse)"
                                                             width="65"
                                                             height="65"
                                                         />
@@ -469,6 +465,7 @@ import {
   getCourseDifficultyCardClass,
   getCourseDifficultyLabel,
 } from "@/utils/courseDifficulty";
+import { getCourseCardImageUrl } from "@/utils/courseImage";
 
 const isSidebarOpen = ref(false)
 const showAuthModal = ref(false)

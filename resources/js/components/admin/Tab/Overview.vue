@@ -6,6 +6,7 @@ import CreateTopicDialog from "./../modal_admin/CreateTopic.vue";
 import EditTopicDialog from "./../modal_admin/EditTopic.vue";
 import CreateChapterDialog from "./../modal_admin/CreateChapter.vue";
 import EditChapterDialog from "./../modal_admin/EditChapter.vue";
+import { getChapterFileIcon, getChapterFileName } from "@/utils/chapterFiles";
 
 
 
@@ -92,6 +93,59 @@ async function loadChapters(topicId) {
   } finally {
     chaptersLoading.value = false;
   }
+}
+
+function extractChapterFiles(chapter) {
+  const raw =
+    chapter?.presentation_paths ||
+    chapter?.presentation_path ||
+    chapter?.attachment_path ||
+    chapter?.file_path ||
+    chapter?.file ||
+    null;
+
+  if (!raw) return [];
+
+  if (Array.isArray(raw)) {
+    return raw.filter(Boolean);
+  }
+
+  if (typeof raw === "string") {
+    const trimmed = raw.trim();
+
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(Boolean);
+        }
+      } catch {
+        // fall through to single value
+      }
+    }
+
+    return [raw];
+  }
+
+  return [raw];
+}
+
+function chapterFilesLabel(chapter) {
+  const names = extractChapterFiles(chapter)
+    .map((file) => getChapterFileName(file))
+    .filter(Boolean);
+
+  return names.length ? names.join(", ") : "—";
+}
+
+function chapterFiles(chapter) {
+  return extractChapterFiles(chapter)
+    .map((file, index) => ({
+      key: `${String(file)}-${index}`,
+      name: getChapterFileName(file),
+      icon: getChapterFileIcon(file),
+    }))
+    .filter((file) => file.name);
 }
 
 
@@ -367,12 +421,13 @@ onMounted(() => loadTopics());
     <!-- 2) таблица как в файле глав (без кнопки перехода по центру) -->
     <table
       v-if="chapters.length"
-      class="light-push-table light-push-table--s topics-table"
+      class="light-push-table light-push-table--s topics-table topics-table--chapters"
     >
       <thead>
         <tr>
           <th>№</th>
-          <th>Название</th>
+          <th class="col-title">Название</th>
+          <th class="col-files">Файлы</th>
           <th class="col-actions">Действия</th>
         </tr>
       </thead>
@@ -380,7 +435,26 @@ onMounted(() => loadTopics());
       <tbody>
         <tr v-for="(chapter, index) in chapters" :key="chapter.id">
           <td>{{ index + 1 }}</td>
-          <td>{{ chapter.title }}</td>
+          <td class="cell-title">{{ chapter.title }}</td>
+          <td class="cell-files" :title="chapterFilesLabel(chapter)">
+            <div v-if="chapterFiles(chapter).length" class="cell-files__list">
+              <div
+                v-for="(file, fileIndex) in chapterFiles(chapter)"
+                :key="file.key"
+                class="cell-files__item"
+              >
+                <img
+                  :src="file.icon"
+                  :alt="file.name"
+                  class="cell-files__icon"
+                />
+                <span class="cell-files__name">
+                  {{ file.name }}<span v-if="fileIndex < chapterFiles(chapter).length - 1">,</span>
+                </span>
+              </div>
+            </div>
+            <span v-else>—</span>
+          </td>
 
           <!-- пока можешь оставить заглушки, потом подключим EditChapterDialog -->
             <td class="col-btn">
@@ -430,3 +504,58 @@ onMounted(() => loadTopics());
 
   </div>
 </template>
+
+<style scoped>
+.topics-table--chapters {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.col-title {
+  width: 340px;
+}
+
+.col-files {
+  width: 52%;
+}
+
+.cell-title {
+  min-width: 340px;
+  max-width: 340px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.cell-files {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.cell-files__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.cell-files__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cell-files__icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.cell-files__name {
+  min-width: 0;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+</style>

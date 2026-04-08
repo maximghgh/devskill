@@ -65,37 +65,12 @@
           :multiple="true"
           track-by="id"
           label="name"
-          placeholder="Выберите преподавателей"
+          placeholder="Нажмите на поле, чтобы выбрать преподавателя"
           :close-on-select="false"
           :clear-on-select="false"
           :preserve-search="true"
           :disabled="teacherSelectDisabled"
-        >
-          <template #option="{ option }">
-            <label class="teacher-option">
-              <input
-                type="checkbox"
-                class="teacher-option__checkbox"
-                :checked="form.selectedTeachers.includes(option.id)"
-                tabindex="-1"
-                readonly
-              />
-              <span>{{ option.name }}</span>
-            </label>
-          </template>
-          <template #selection="{ values, isOpen }">
-            <span v-if="values.length && !isOpen" class="multiselect__single">
-              {{
-                values.length === 1
-                  ? values[0].name
-                  : `Выбрано преподавателей: ${values.length}`
-              }}
-            </span>
-          </template>
-          <template #noResult>
-            Преподаватели не найдены
-          </template>
-        </Multiselect>
+        />
       </div>
 
       <!-- Направление -->
@@ -227,7 +202,7 @@ const selectedTeacherOptions = computed({
     form.value.selectedTeachers = (value || []).map(teacher => Number(teacher.id))
   }
 })
-const teacherSelectDisabled = computed(() => Number(currentUser.value?.role) === 2)
+const teacherSelectDisabled = computed(() => false)
 
 /** EditorJS */
 const editor = ref(null)
@@ -238,7 +213,7 @@ onMounted(async () => {
   if (storedUser) {
     try {
       currentUser.value = JSON.parse(storedUser)
-      if (teacherSelectDisabled.value && currentUser.value?.id) {
+      if (Number(currentUser.value?.role) === 2 && currentUser.value?.id) {
         form.value.selectedTeachers = [currentUser.value.id]
       }
     } catch (e) {
@@ -467,6 +442,4 @@ function resetForm() {
 .editor-container { padding: 10px; border: 1px solid #ccc; border-radius: 4px; min-height: 150px; background: #fff; }
 .form-button { width: 700px; background: #007bff; color: #fff; padding: 10px 15px; border: 0; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color .3s; margin: 0 auto; }
 .form-button:hover { background: #0056b3; }
-.teacher-option { display: flex; align-items: center; gap: 10px; }
-.teacher-option__checkbox { pointer-events: none; }
 </style>

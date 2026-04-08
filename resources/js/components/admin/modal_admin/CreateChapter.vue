@@ -51,7 +51,19 @@
                       :key="fileKey(file, idx)"
                       class="dialog__file-item"
                     >
-                      <span class="dialog__file-name">{{ file.name }}</span>
+                      <div class="dialog__file-card">
+                        <img
+                          class="dialog__file-icon"
+                          :src="getChapterFileIcon(file)"
+                          :alt="getChapterFileLabel(file)"
+                        />
+                        <span
+                          class="dialog__file-name"
+                          :title="getChapterFileName(file)"
+                        >
+                          {{ getChapterFileName(file) }}
+                        </span>
+                      </div>
                       <button
                         type="button"
                         class="dialog__file-remove"
@@ -140,6 +152,11 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 import { globalNotification } from "@/globalNotification";
+import {
+  getChapterFileIcon,
+  getChapterFileLabel,
+  getChapterFileName,
+} from "@/utils/chapterFiles";
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -160,10 +177,7 @@ const selectedFileNames = computed(() =>
   selectedFiles.value.map((file) => file.name)
 );
 const selectedFileLabel = computed(() => {
-  const count = selectedFileNames.value.length;
-  if (!count) return "";
-  if (count === 1) return selectedFileNames.value[0];
-  return `Выбрано файлов: ${count}`;
+  return selectedFileNames.value.join(", ");
 });
 
 function triggerFileSelect() {
@@ -418,6 +432,10 @@ watch(
   text-align: center;
 }
 
+.dialog__dropzone_title {
+  overflow-wrap: anywhere;
+}
+
 .dialog__close {
   cursor: pointer;
 }
@@ -441,39 +459,68 @@ watch(
 }
 
 .dialog__file-list-items {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
 }
 
 .dialog__file-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 12px;
+  padding: 10px 14px;
   border: 1px solid #e1e1e1;
-  border-radius: 8px;
+  border-radius: 14px;
   background: #fff;
+  min-width: 0;
+}
+
+.dialog__file-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.dialog__file-icon {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 
 .dialog__file-name {
-  font-size: 13px;
-  color: #333;
-  word-break: break-word;
+  font-size: 15px;
+  font-weight: 600;
+  color: #26314d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .dialog__file-remove {
+  width: 28px;
+  height: 28px;
   border: none;
-  background: transparent;
-  color: #8d8d8d;
-  font-size: 14px;
+  border-radius: 999px;
+  background: #f3f1ff;
+  color: #6c57d9;
+  font-size: 16px;
+  line-height: 1;
   cursor: pointer;
+  flex: 0 0 auto;
 }
 
 .dialog__file-remove:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.dialog__file-remove:not(:disabled):hover {
+  background: #e6e0ff;
 }
 
 .dialog__file-add {

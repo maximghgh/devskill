@@ -344,7 +344,7 @@ const teachers = computed(() =>
 );
 const difficultyOptions = computed(() => getCourseDifficultyOptions(form.value.difficulty));
 const isTeacher = computed(() => Number(currentUser.value?.role) === 2);
-const teacherSelectDisabled = computed(() => isDisabled.value || isTeacher.value);
+const teacherSelectDisabled = computed(() => isDisabled.value);
 
 async function loadUsers() {
   const { data } = await axios.get("/api/users");
@@ -776,40 +776,12 @@ onBeforeUnmount(() => {
                 :multiple="true"
                 track-by="id"
                 label="name"
-                placeholder="Выберите преподавателей"
+                placeholder="Нажмите на поле, чтобы выбрать преподавателя"
                 :close-on-select="false"
                 :clear-on-select="false"
                 :preserve-search="true"
                 :disabled="teacherSelectDisabled"
-                select-label=""
-                selected-label="Выбран"
-                deselect-label="Убрать"
-            >
-                <template #option="{ option }">
-                    <label class="teacher-option">
-                        <input
-                            type="checkbox"
-                            class="teacher-option__checkbox"
-                            :checked="form.selectedTeachers.includes(option.id)"
-                            tabindex="-1"
-                            readonly
-                        />
-                        <span>{{ option.name }}</span>
-                    </label>
-                </template>
-                <template #selection="{ values, isOpen }">
-                    <span v-if="values.length && !isOpen" class="multiselect__single">
-                        {{
-                            values.length === 1
-                                ? values[0].name
-                                : `Выбрано преподавателей: ${values.length}`
-                        }}
-                    </span>
-                </template>
-                <template #noResult>
-                    Преподаватели не найдены
-                </template>
-            </Multiselect>
+            />
         </div>
         <!-- 8) Направление -->
         <div class="dialog__component">
@@ -976,16 +948,6 @@ onBeforeUnmount(() => {
 <style scoped>
 :deep .ce-toolbar__actions{
     left: -200px !important;
-}
-
-.teacher-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.teacher-option__checkbox {
-    pointer-events: none;
 }
 
 /* EditorJS внутри визуальной системы dialog */

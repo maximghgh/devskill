@@ -42,11 +42,7 @@
                                 >
                                     <div class="course__card-image">
                                         <img
-                                            :src="
-                                                course.card_image
-                                                    ? course.card_image
-                                                    : '/public/img/logo_placeholder.png'
-                                            "
+                                            :src="getCourseCardImageUrl(course)"
                                             alt="Изображение курса"
                                         />
                                     </div>
@@ -90,7 +86,7 @@
         <div :class="['block-info', difficultyBgClass[selectedCourse?.difficulty]]">
           <div class="block__top">
             <div class="block__logo">
-              <img :src="selectedCourse?.card_image || '/img/logo_placeholder.png'" width="50" height="50" />
+              <img :src="getCourseCardImageUrl(selectedCourse)" width="50" height="50" />
               <h2>{{ selectedCourse?.card_title }}</h2>
             </div>
             <p class="block__difficul block-bg">{{ selectedCourse?.description }}</p>
@@ -339,6 +335,7 @@ import {
     getCourseDifficultyBlockClass,
     getCourseDifficultyLabel,
 } from "@/utils/courseDifficulty";
+import { getCourseCardImageUrl } from "@/utils/courseImage";
 
 /* ---------- модалка покупки / консультации ---------- */
 

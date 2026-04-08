@@ -645,39 +645,11 @@ onBeforeUnmount(() => {
         :multiple="true"
         track-by="id"
         label="name"
-        placeholder="Выберите преподавателей"
+        placeholder="Нажмите на поле, чтобы выбрать преподавателя"
         :close-on-select="false"
         :clear-on-select="false"
         :preserve-search="true"
-        select-label=""
-        selected-label="Выбран"
-        deselect-label="Убрать"
-      >
-        <template #option="{ option }">
-          <label class="teacher-option">
-            <input
-              type="checkbox"
-              class="teacher-option__checkbox"
-              :checked="form.selectedTeachers.includes(option.id)"
-              tabindex="-1"
-              readonly
-            />
-            <span>{{ option.name }}</span>
-          </label>
-        </template>
-        <template #selection="{ values, isOpen }">
-          <span v-if="values.length && !isOpen" class="multiselect__single">
-            {{
-              values.length === 1
-                ? values[0].name
-                : `Выбрано преподавателей: ${values.length}`
-            }}
-          </span>
-        </template>
-        <template #noResult>
-          Преподаватели не найдены
-        </template>
-      </Multiselect>
+      />
     </div>
 
     <!-- Направление -->
@@ -848,18 +820,6 @@ onBeforeUnmount(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.teacher-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.teacher-option__checkbox {
-  pointer-events: none;
-}
-</style>
 
 <style scoped>
 :deep .ce-toolbar__actions{

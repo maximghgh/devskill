@@ -174,7 +174,7 @@
                                     >
                                         <div class="course__card-image">
                                             <img
-                                                :src="course.card_image || '/img/logo_placeholder.png'"
+                                                :src="getCourseCardImageUrl(course)"
                                                 alt="Изображение курса"
                                                 width="100"
                                                 height="100"
@@ -233,7 +233,7 @@
                                                     <div class="block__top">
                                                         <div class="block__logo">
                                                             <img
-                                                                :src="selectedCourse.card_image || '/img/logo_placeholder.png'"
+                                                                :src="getCourseCardImageUrl(selectedCourse)"
                                                                 width="65"
                                                                 height="65"
                                                             />
@@ -491,6 +491,7 @@ import {
   getCourseDifficultyCardClass,
   getCourseDifficultyLabel,
 } from "@/utils/courseDifficulty";
+import { getCourseCardImageUrl } from "@/utils/courseImage";
 
 /* ------------------------------------------------------------------ */
 /* 0. FAQ (внутри этой страницы)                                      */

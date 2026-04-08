@@ -12,11 +12,7 @@
                             </div>
                             <div class="course-content__top-block">
                                 <img
-                                    :src="
-                                        course.description_image
-                                            ? '/' + course.description_image
-                                            : '../../img/course_image_main.jpg'
-                                    "
+                                    :src="getCourseDescriptionImageUrl(course)"
                                     class="course-content__top-img"
                                     alt="Изображение курса"
                                     width="600"
@@ -132,12 +128,7 @@
                             <div class="block__top">
                                 <div class="block__logo">
                                     <img
-                                        :src="
-                                            selectedCourse &&
-                                            selectedCourse.card_image
-                                                ? `/${selectedCourse.card_image}`
-                                                : '/img/logo_placeholder.png'
-                                        "
+                                        :src="getCourseCardImageUrl(selectedCourse)"
                                         width="65"
                                         height="65"
                                     />
@@ -381,6 +372,10 @@ import {
     getCourseDifficultyBlockClass,
     getCourseDifficultyLabel,
 } from "@/utils/courseDifficulty";
+import {
+    getCourseCardImageUrl,
+    getCourseDescriptionImageUrl,
+} from "@/utils/courseImage";
 
 /* ─────────────────── глобальное состояние ────────────────── */
 const AUTH_KEY = "user"; // имя ключа в localStorage
