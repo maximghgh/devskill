@@ -47,7 +47,6 @@
                                         >{{ course.students_count ?? 0 }} студентов</span
                                     >
                                 </div>
-                                <span class="course__desc">{{ courseDateLabel(course) }}</span>
                             </div>
                             <a
                                 :href="`/teacher/course/${course.id}`"
@@ -161,25 +160,6 @@ const coursesPage = computed(() => {
     const start = (page.value - 1) * pageSize;
     return courses.value.slice(start, start + pageSize);
 });
-
-function formatDate(value) {
-    if (!value) return "";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleDateString("ru-RU");
-}
-
-function courseDateLabel(course) {
-    if (course?.end_date) {
-        return `Дата завершения: ${formatDate(course.end_date)}`;
-    }
-
-    if (course?.start_date) {
-        return `Дата старта: ${formatDate(course.start_date)}`;
-    }
-
-    return "Дата не указана";
-}
 
 async function loadCourses() {
     try {
