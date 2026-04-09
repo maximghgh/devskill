@@ -51,7 +51,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import axios from "axios";
 
 const courses = ref([]);
-const pageSize = 4;
+const pageSize = 6;
 const page = ref(1);
 
 function getTeacherId() {
