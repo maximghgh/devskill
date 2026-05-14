@@ -314,11 +314,10 @@
                 <div class="modal-content__block modal-close--auth">
                 <button class="modal-close modal-close--auth" @click="showAuthModal = false"> × </button>
                 <div class="modal-content modal-content--auth">
-                    <h2 class="modal__h2--auth">Войдите или зарегистрируйтесь</h2>
+                    <h2 class="modal__h2--auth">Войдите в аккаунт</h2>
                     <p>Чтобы приобрести курс или заказать консультацию</p>
                     <div class="auth-buttons">
                     <a href="/login" class="button button_white--auth">Войти</a>
-                    <a href="/register" class="button button_white--auth">Регистрация</a>
                     </div>
                 </div>
                 </div>
@@ -342,7 +341,7 @@ import { getCourseCardImageUrl } from "@/utils/courseImage";
 
 const AUTH_KEY       = 'user';      // ключ в localStorage
 const user           = ref(null);   // текущий пользователь
-const showAuthModal  = ref(false);  // модалка «Войти/Регистрация»
+const showAuthModal  = ref(false);  // модалка входа
 
 const isModalOpen            = ref(false);
 const isSubmitted            = ref(false);

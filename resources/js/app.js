@@ -3,7 +3,6 @@ import "../css/quiz.css";
 import { createApp } from "vue";
 import VueTheMask from "vue-the-mask";
 
-// import Register from './components/RegisterComponent.vue';
 import HeaderComponent from "./components/HeaderComponent.vue";
 import FooterComponent from "./components/FooterComponent.vue";
 
@@ -41,7 +40,6 @@ import FinalTestPage from "./components/FinalTestPage.vue";
 import ExampleComponent from "./components/ExampleComponent.vue";
 import ProfileComponent from "./components/ProfileComponent.vue";
 import CabinetComponent from "./components/CabinetComponent.vue";
-import RegisterComponent from "./components/RegisterComponent.vue";
 import VerifyComponent from "./components/VerifyComponent.vue";
 import LoginComponent from "./components/LoginComponent.vue";
 import ResetpasswordComponent from "./components/Reset-passwordComponent.vue";
@@ -99,7 +97,6 @@ app.component("profile-component", ProfileComponent);
 app.component("cabinet-component", CabinetComponent);
 app.component("example-component", ExampleComponent);
 app.component("verify-component", VerifyComponent);
-app.component("register-component", RegisterComponent);
 app.component("reset-password-component", ResetpasswordComponent);
 app.component("login-component", LoginComponent);
 app.component("about-component", AboutComponent);

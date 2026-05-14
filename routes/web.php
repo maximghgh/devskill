@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ChapterController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FinalTestController;
 use App\Http\Controllers\CourseQrController;
 use App\Models\Course;
@@ -210,7 +211,7 @@ Route::get('/robots.txt', function () {
 });
 
 Route::get('/register', function () {
-    return view('register');
+    return redirect('/login');
 })->name('register');
 
 Route::get('/login', function () {
@@ -243,7 +244,12 @@ Route::get('/course/{id}', function ($id) {
 Route::post('/verify-code', [AuthController::class, 'verifyCode']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/login', [AuthController::class, 'login']); // Обработка входа
-Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/register', function () {
+    return response()->json([
+        'success' => false,
+        'message' => 'Самостоятельная регистрация отключена. Пользователей создаёт администратор.',
+    ], 410);
+});
 Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail'])->name('verify.email');
 
 

@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
-use App\Mail\VerificationCodeMail;
 
 class AuthController extends Controller
 {
@@ -113,23 +112,32 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'login' => 'required|email',
-            'password' => 'required'
+        $validated = $request->validate([
+            'login' => 'required|string|max:255',
+            'password' => 'required|string',
         ]);
 
-        if (Auth::validate(['email' => $request->login, 'password' => $request->password])) {
-            $user = \App\Models\User::where('email', $request->login)->first();
+        $login = mb_strtolower(trim($validated['login']));
 
-            $verificationCode = rand(100000, 999999);
-            session(['verification_code' => $verificationCode, 'user_id' => $user->id]);
+        $user = User::query()
+            ->whereRaw('LOWER(login) = ?', [$login])
+            ->orWhereRaw('LOWER(email) = ?', [$login])
+            ->first();
 
-            Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
+        if ($user && Hash::check($validated['password'], $user->password)) {
+            Auth::login($user);
+            $request->session()->regenerate();
 
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'user' => Auth::user(),
+            ]);
         }
 
-        return response()->json(['success' => false], 401);
+        return response()->json([
+            'success' => false,
+            'message' => 'Неверный логин или пароль.',
+        ], 401);
     }
 
     public function verifyCode(Request $request)

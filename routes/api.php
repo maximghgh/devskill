@@ -124,6 +124,8 @@ Route::get('/chapter/{id}', [ChapterController::class, 'showteach'])
 
 // Получение id пользователя 
 Route::post('/users/by-ids', [UserController::class, 'getByIds']);
+Route::post('/users/import', [UserController::class, 'import']);
+Route::post('/users/credentials-export', [UserController::class, 'exportCredentials']);
 Route::get('/users/{id}', [UserController::class, 'show']);
 
 // Маршрут для сохранения картинки
@@ -166,8 +168,18 @@ Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
 
 
 // Создание пользователя и редактирование пользователя
-Route::post('/create-user', [AuthController::class, 'createUser']);
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/create-user', function () {
+    return response()->json([
+        'success' => false,
+        'message' => 'Создание пользователей доступно через импорт Excel в админ-панели.',
+    ], 410);
+});
+Route::post('/register', function () {
+    return response()->json([
+        'success' => false,
+        'message' => 'Самостоятельная регистрация отключена. Пользователей создаёт администратор.',
+    ], 410);
+});
 
 // Добавление категорий обучения(языков программирования)
 Route::post('/languages', [LanguageController::class, 'store']);

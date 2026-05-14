@@ -709,17 +709,12 @@
                     </button>
                     <div class="modal-content modal-content--auth">
                         <h2 class="modal__h2--auth">
-                            Войдите или зарегистрируйтесь
+                            Войдите в аккаунт
                         </h2>
                         <p>Чтобы приобрести курс или заказать консультацию</p>
                         <div class="auth-buttons">
                             <a href="/login" class="button button_white--auth"
                                 >Войти</a
-                            >
-                            <a
-                                href="/register"
-                                class="button button_white--auth"
-                                >Регистрация</a
                             >
                         </div>
                     </div>

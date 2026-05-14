@@ -80,6 +80,14 @@
                                 />
                                 <span>Администратор</span>
                             </label>
+                            <label class="users-roles__option">
+                                <input
+                                    type="radio"
+                                    value="4"
+                                    v-model="selectedRole"
+                                />
+                                <span>Родитель</span>
+                            </label>
 
                             <div class="users-roles__actions">
                                 <button
@@ -126,6 +134,71 @@
                             ×
                         </button>
                     </div>
+                    <input
+                        ref="importInput"
+                        type="file"
+                        class="users-import__input"
+                        accept=".xlsx,.csv,text/csv"
+                        @change="handleImportFile"
+                    />
+                    <button
+                        type="button"
+                        class="users-btn-new users-import__btn"
+                        :disabled="importing"
+                        @click="openImportDialog"
+                    >
+                        <span class="users-btn-desc">+</span>
+                        {{ importing ? "Импорт..." : "Импорт Excel" }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="importResult" class="users-import-result">
+            <div class="users-import-result__head">
+                <div>
+                    Создано: {{ importResult.created_count || 0 }}
+                    <span v-if="importResult.skipped_count">
+                        · Пропущено: {{ importResult.skipped_count }}
+                    </span>
+                </div>
+                <button
+                    v-if="createdCredentials.length"
+                    type="button"
+                    class="users-import-result__download"
+                    @click="downloadCredentialsExcel"
+                >
+                    Скачать логины и пароли
+                </button>
+            </div>
+
+            <div v-if="createdCredentials.length" class="users-import-result__table-wrap">
+                <table class="users-import-result__table">
+                    <thead>
+                        <tr>
+                            <th>ФИО</th>
+                            <th>Логин</th>
+                            <th>Пароль</th>
+                            <th>E-mail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in createdCredentials" :key="item.login">
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.login }}</td>
+                            <td>{{ item.password }}</td>
+                            <td>{{ item.email || "—" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div v-if="importResult.skipped?.length" class="users-import-result__errors">
+                <div
+                    v-for="item in importResult.skipped"
+                    :key="`${item.row}-${item.name}`"
+                >
+                    Строка {{ item.row }}: {{ item.errors.join(", ") }}
                 </div>
             </div>
         </div>
@@ -136,6 +209,8 @@
                     <tr>
                         <th>ID</th>
                         <th>ФИО</th>
+                        <th>Логин</th>
+                        <th>E-mail</th>
                         <th>Дата регистрации</th>
                         <th>Телефон</th>
                         <th>Роль</th>
@@ -162,8 +237,10 @@
                             {{ userItem.name }}
                         </td>
 
+                        <td>{{ userItem.login || "—" }}</td>
+                        <td>{{ userItem.email || "—" }}</td>
                         <td>{{ formatBirthday(userItem.created_at) }}</td>
-                        <td>{{ userItem.phone }}</td>
+                        <td>{{ userItem.phone || "—" }}</td>
 
                         <td>
                             <!-- Inline-редактирование роли -->
@@ -342,6 +419,10 @@ function setUsers(next) {
 const selectedRole = ref("all");
 const searchQuery = ref("");
 const roleDropdownOpen = ref(false);
+const importInput = ref(null);
+const importing = ref(false);
+const importResult = ref(null);
+const createdCredentials = ref([]);
 
 function resetRoleFilter() {
     selectedRole.value = "all";
@@ -376,6 +457,7 @@ const filteredUsers = computed(() => {
 
     return base.filter((u) => {
         const name = (u.name || "").toLowerCase();
+        const login = (u.login || "").toLowerCase();
         const email = (u.email || "").toLowerCase();
         const phone = u.phone || "";
         const phoneLc = phone.toLowerCase();
@@ -387,6 +469,7 @@ const filteredUsers = computed(() => {
 
         return (
             name.includes(q) ||
+            login.includes(q) ||
             email.includes(q) ||
             country.includes(q) ||
             phoneLc.includes(q) ||
@@ -433,6 +516,86 @@ watch(
         }
     }
 );
+
+function openImportDialog() {
+    importInput.value?.click();
+}
+
+async function handleImportFile(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    importing.value = true;
+    importResult.value = null;
+    createdCredentials.value = [];
+
+    try {
+        const { data } = await axios.post("/api/users/import", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        importResult.value = data;
+        createdCredentials.value = data.created || [];
+
+        const importedUsers = createdCredentials.value
+            .map((item) => item.user)
+            .filter(Boolean);
+
+        if (importedUsers.length) {
+            const byId = new Map();
+            [...props.users, ...importedUsers].forEach((user) => {
+                byId.set(user.id, user);
+            });
+            setUsers(
+                Array.from(byId.values()).sort(
+                    (a, b) => Number(a.id || 0) - Number(b.id || 0)
+                )
+            );
+        }
+
+        globalNotification.categoryMessage = `Импорт завершён. Создано: ${
+            data.created_count || 0
+        }`;
+        globalNotification.type = "success";
+    } catch (e) {
+        console.error(e);
+        globalNotification.categoryMessage =
+            e.response?.data?.message || "Ошибка импорта пользователей";
+        globalNotification.type = "error";
+    } finally {
+        importing.value = false;
+        event.target.value = "";
+    }
+}
+
+async function downloadCredentialsExcel() {
+    if (!createdCredentials.value.length) return;
+
+    try {
+        const response = await axios.post(
+            "/api/users/credentials-export",
+            { credentials: createdCredentials.value },
+            { responseType: "blob" }
+        );
+
+        const blob = new Blob([response.data], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "users_credentials.xlsx";
+        link.click();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error(e);
+        globalNotification.categoryMessage =
+            "Ошибка при скачивании Excel-файла";
+        globalNotification.type = "error";
+    }
+}
 
 /* ===== inline роль ===== */
 const inlineRoleEdit = reactive({ id: null, role: null });
@@ -486,10 +649,11 @@ function closeUserEditModal() {
 
 async function saveUserModal() {
     try {
-        const { id, name, email, phone, birthday, country, role, position } =
+        const { id, name, login, email, phone, birthday, country, role, position } =
             editingUser.value;
         const resp = await axios.patch(`/api/users/${id}`, {
             name,
+            login,
             email,
             phone,
             birthday,
@@ -526,13 +690,73 @@ async function deleteUser(userId) {
         globalNotification.type = "error";
     }
 }
-
-watch(currentPageUsers, () => {
-    refresh();
-});
 </script>
 
 <style scoped>
+.users-toolbar__search {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.users-import__input {
+    display: none;
+}
+
+.users-import__btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.users-import-result {
+    margin: 18px 0;
+    padding: 16px;
+    border: 1px solid #dedcec;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.users-import-result__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.users-import-result__download {
+    border: 1px solid #41328f;
+    border-radius: 6px;
+    background: #fff;
+    color: #41328f;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.users-import-result__table-wrap {
+    overflow-x: auto;
+}
+
+.users-import-result__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.users-import-result__table th,
+.users-import-result__table td {
+    padding: 8px;
+    border-bottom: 1px solid #eceaf5;
+    text-align: left;
+}
+
+.users-import-result__errors {
+    margin-top: 12px;
+    color: #9c1f1f;
+    font-size: 14px;
+}
+
 /* Ученик */
 .users-role-pill--student {
     background: #bde5b0;

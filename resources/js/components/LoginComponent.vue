@@ -15,14 +15,15 @@
                   autocomplete="off"
                 />
                 <div class="b-popup__block">
-                  <p :class="{ 'input-error--p': errors.login }">E-mail</p>
+                  <p :class="{ 'input-error--p': errors.login }">Логин</p>
                   <div class="b-popup__block-right">
                     <input
                       id="login"
                       type="text"
                       v-model="login"
-                      placeholder="E-mail"
+                      placeholder="Введите логин"
                       autofocus
+                      autocomplete="username"
                       :class="{ 'input-error': errors.login }"
                       @input="validateLogin"
                     />
@@ -68,39 +69,6 @@
                 </div>
               </form>
             </div>
-            <!-- Форма ввода кода и успешный вход можно оставить без изменений -->
-            <div v-if="currentStep === 2">
-              <div class="b-popup__title">Введите код подтверждения</div>
-              <form @submit.prevent="handleVerifyCode">
-                <div class="b-popup__block">
-                  <p>Код</p>
-                  <div class="b-popup__block-right">
-                    <input
-                      id="code"
-                      type="text"
-                      v-model="code"
-                      required
-                      maxlength="6"
-                      inputmode="numeric"
-                      pattern="[0-9]{6}"
-                      @input="normalizeCodeInput"
-                    />
-                  </div>
-                </div>
-                <div class="b-popup__block">
-                  <div class="b-popup__block-right">
-                    <input
-                      type="submit"
-                      class="button"
-                      value="Подтвердить"
-                    />
-                  </div>
-                </div>
-                <div v-if="errorMessage" class="error">
-                  {{ errorMessage }}
-                </div>
-              </form>
-            </div>
             <div v-if="currentStep === 3">
               <div class="b-popup__title">Добро пожаловать!</div>
               <p>Вы успешно вошли в систему.</p>
@@ -116,10 +84,9 @@
 import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 
-const currentStep = ref(1) // 1 - вход, 2 - подтверждение кода, 3 - успешный вход
+const currentStep = ref(1)
 const login = ref('')
 const password = ref('')
-const code = ref('')
 const errorMessage = ref('')
 const csrfToken = ref('')
 
@@ -137,12 +104,10 @@ function toBase64(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
 
-// Проверка поля E-mail
+// Проверка поля Логин
 const validateLogin = () => {
   if (!login.value) {
-    errors.value.login = "Поле E-mail обязательно."
-  } else if (!/\S+@\S+\.\S+/.test(login.value)) {
-    errors.value.login = "Введите корректный E-mail."
+    errors.value.login = "Поле Логин обязательно."
   } else {
     errors.value.login = null
   }
@@ -181,56 +146,26 @@ const handleLogin = async () => {
     )
 
     if (response.data.success) {
-      console.log(`✅ Код отправлен на почту: ${login.value}`)
-      currentStep.value = 2
+      const { password, created_at, updated_at, ...userData } = response.data.user
+      localStorage.setItem('user', JSON.stringify(userData))
+      currentStep.value = 3
+
+      const base64User = encodeURIComponent(toBase64(JSON.stringify(userData)))
+
+      if (userData.role === 4) {
+        window.location.href = `/student?verifiedUser=${base64User}`
+      } else if (userData.role === 3) {
+        window.location.href = `/admin?verifiedUser=${base64User}`
+      } else if (userData.role === 2) {
+        window.location.href = `/teacher?verifiedUser=${base64User}`
+      } else if (userData.role === 1) {
+        window.location.href = `/?verifiedUser=${base64User}`
+      }
     }
   } catch (error) {
     console.error('❌ Ошибка входа:', error.response?.data || error)
     errorMessage.value = error.response?.data?.message || 'Ошибка входа. Проверьте данные.'
   }
-}
-
-// Обработчик подтверждения кода
-const handleVerifyCode = async () => {
-  errorMessage.value = ''
-  normalizeCodeInput()
-  try {
-    const response = await axios.post('/verify-code', { code: code.value })
-    if (response.data.success) {
-      const { password, created_at, updated_at, ...userData } = response.data.user
-      // Сохраняем пользователя в localStorage
-      localStorage.setItem('user', JSON.stringify(userData))
-      currentStep.value = 3
-      
-      // Кодируем userData в Base64, безопасно для не-латинских символов
-      const base64User = encodeURIComponent(toBase64(JSON.stringify(userData)))
-      
-      // Перенаправляем в зависимости от роли
-      if (userData.role === 4) {
-        window.location.href = `/student?verifiedUser=${base64User}`
-      } else if(userData.role === 3){
-      window.location.href = `/admin?verifiedUser=${base64User}`
-      } else if(userData.role === 2){
-        window.location.href = `/teacher?verifiedUser=${base64User}`
-      }
-      else if(userData.role === 1) {
-        window.location.href = `/?verifiedUser=${base64User}`
-      }
-        
-      
-    }
-  } catch (error) {
-    errorMessage.value =
-      error.response?.data?.message ||
-      'Не удалось подтвердить код. Попробуйте снова.'
-    console.error('❌ Ошибка подтверждения кода:', error)
-  }
-}
-
-const normalizeCodeInput = () => {
-  code.value = String(code.value || '')
-    .replace(/\D/g, '')
-    .slice(0, 6)
 }
 
 // Выход
@@ -280,6 +215,5 @@ watch(password, () => {
   margin-top: 10px;
 }
 </style>
-
 
 

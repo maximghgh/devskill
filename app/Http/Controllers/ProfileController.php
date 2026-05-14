@@ -21,7 +21,7 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
             // исключаем текущего пользователя из проверки уникальности email
-            'email'    => 'required|email|unique:users,email,' . $user->id,
+            'email'    => 'nullable|email|unique:users,email,' . $user->id,
             'birthday' => 'nullable|date',
             'phone'    => 'nullable|string|max:20',
             'country'  => 'nullable|string|max:255',

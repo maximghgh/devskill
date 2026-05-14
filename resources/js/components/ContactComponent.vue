@@ -155,11 +155,10 @@
                             </template>
                             <template v-else>
                                 <p class="contacts__desc">
-                                    Чтобы написать обращение, войдите в аккаунт или зарегистрируйтесь.
+                                    Чтобы написать обращение, войдите в аккаунт.
                                 </p>
                                 <div class="dialog__btns" style="margin-top: 20px;">
                                     <a href="/login" class="main__btn">Войти</a>
-                                    <a href="/register" class="main__btn main__btn--white" style="margin-left: 12px;">Регистрация</a>
                                 </div>
                             </template>
                         </div>

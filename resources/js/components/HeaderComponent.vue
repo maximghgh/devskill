@@ -111,9 +111,6 @@
                             <a href="/login" class="personal-area__username"
                                 >Войти</a
                             >
-                            <a href="/register" class="personal-area__username"
-                                >Регистрация</a
-                            >
                         </div>
                     </div>
                 </div>

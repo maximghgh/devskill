@@ -14,6 +14,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $fillable = [
         'name',
+        'login',
         'email',
         'birthday',
         'role',
@@ -25,7 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'position',
     ];
     protected $hidden = [
-         // поле, которое хотим скрыть
+        'password',
         'remember_token',
     ];
 
@@ -39,4 +40,3 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserChapterProgress::class);
     }
 }
-
