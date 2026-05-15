@@ -179,7 +179,6 @@
                             <th>ФИО</th>
                             <th>Логин</th>
                             <th>Пароль</th>
-                            <th>E-mail</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -187,7 +186,6 @@
                             <td>{{ item.name }}</td>
                             <td>{{ item.login }}</td>
                             <td>{{ item.password }}</td>
-                            <td>{{ item.email || "—" }}</td>
                         </tr>
                     </tbody>
                 </table>

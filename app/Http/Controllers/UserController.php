@@ -319,7 +319,7 @@ class UserController extends Controller
             throw new \RuntimeException('Не удалось создать временный Excel-файл.');
         }
 
-        $headers = ['ФИО', 'Логин', 'Пароль', 'E-mail'];
+        $headers = ['ФИО', 'Логин', 'Пароль'];
         $rows = [$headers];
 
         foreach ($credentials as $item) {
@@ -327,7 +327,6 @@ class UserController extends Controller
                 (string) ($item['name'] ?? ''),
                 (string) ($item['login'] ?? ''),
                 (string) ($item['password'] ?? ''),
-                (string) ($item['email'] ?? ''),
             ];
         }
 
@@ -352,8 +351,7 @@ class UserController extends Controller
 
             foreach ($row as $columnIndex => $value) {
                 $cell = $this->xlsxColumnName($columnIndex + 1) . $excelRow;
-                $style = $rowIndex === 0 ? ' s="1"' : '';
-                $cells .= '<c r="' . $cell . '"' . $style . ' t="inlineStr"><is><t>'
+                $cells .= '<c r="' . $cell . '" t="inlineStr"><is><t>'
                     . $this->xml($value)
                     . '</t></is></c>';
             }
@@ -367,7 +365,6 @@ class UserController extends Controller
             . '<col min="1" max="1" width="32" customWidth="1"/>'
             . '<col min="2" max="2" width="22" customWidth="1"/>'
             . '<col min="3" max="3" width="18" customWidth="1"/>'
-            . '<col min="4" max="4" width="32" customWidth="1"/>'
             . '</cols>'
             . '<sheetData>' . $sheetData . '</sheetData>'
             . '</worksheet>';

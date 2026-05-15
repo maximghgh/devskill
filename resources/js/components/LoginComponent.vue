@@ -15,13 +15,13 @@
                   autocomplete="off"
                 />
                 <div class="b-popup__block">
-                  <p :class="{ 'input-error--p': errors.login }">Логин</p>
+                  <p :class="{ 'input-error--p': errors.login }">Логин или E-mail</p>
                   <div class="b-popup__block-right">
                     <input
                       id="login"
                       type="text"
                       v-model="login"
-                      placeholder="Введите логин"
+                      placeholder="Введите логин или e-mail"
                       autofocus
                       autocomplete="username"
                       :class="{ 'input-error': errors.login }"
@@ -107,7 +107,7 @@ function toBase64(str) {
 // Проверка поля Логин
 const validateLogin = () => {
   if (!login.value) {
-    errors.value.login = "Поле Логин обязательно."
+    errors.value.login = "Поле Логин или E-mail обязательно."
   } else {
     errors.value.login = null
   }
@@ -215,5 +215,4 @@ watch(password, () => {
   margin-top: 10px;
 }
 </style>
-
 
