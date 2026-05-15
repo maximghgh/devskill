@@ -9,7 +9,7 @@
                         <div class="infoblock__inner">
                             <div class="infoblock-title">Личный кабинет</div>
                             <div class="infoblock__info">
-                                <div lang="infoblock__info-name">
+                                <div class="infoblock__info-name">
                                     <div class="infoblock__info-name-image">
                                         <img 
                                             :src="photoSrc"
@@ -158,7 +158,6 @@ import axios from "axios";
 
 // Управление модальным окном
 const showModal = ref(false);
-
 // Данные пользователя и форма для редактирования профиля
 const user = ref({});
 const form = reactive({
