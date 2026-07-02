@@ -1,10 +1,10 @@
 <template>
-  <div v-if="modelValue" class="dialog" @click.self="close" style="z-index: 1">
+  <div v-if="modelValue" class="dialog" @mousedown.self="close" style="z-index: 1">
     <div class="dialog__container_custom dialog__container_custom--s" @click.stop>
       <div class="dialog__inner" :class="{ 'is-saving': loading }">
         <!-- Header -->
         <div class="dialog__header">
-          <p>Изменить роль</p>
+          <p>Изменить роль / родителя</p>
 
           <div class="dialog__close" @click="close">
             <svg width="13" height="12" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -21,11 +21,22 @@
           <div class="form__admin">
 
             <div class="dialog__component">
+              <p class="dialog__title">Роль</p>
               <select v-model.number="form.role" class="dialog__input dialog__select" :disabled="loading">
                 <option :value="3">Администратор</option>
                 <option :value="2">Преподаватель</option>
                 <option :value="1">Ученик</option>
                 <option :value="4">Родитель</option>
+              </select>
+            </div>
+
+            <div class="dialog__component" v-if="form.role === 1">
+              <p class="dialog__title">Родитель</p>
+              <select v-model.number="form.parent_id" class="dialog__input dialog__select" :disabled="loading">
+                <option :value="null">— Без родителя —</option>
+                <option v-for="p in parents" :key="p.id" :value="p.id">
+                  {{ p.name }}<template v-if="p.login || p.email"> ({{ p.login || p.email }})</template>
+                </option>
               </select>
             </div>
 
@@ -56,11 +67,12 @@ import { globalNotification } from "@/globalNotification"; // <-- поправь
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   user: { type: Object, default: null }, // сюда передаем пользователя
+  parents: { type: Array, default: () => [] }, // список родителей (role 4) для привязки
 });
 
 const emit = defineEmits(["update:modelValue", "saved"]);
 
-const form = ref({ id: null, role: 1 });
+const form = ref({ id: null, role: 1, parent_id: null });
 const loading = ref(false);
 const error = ref("");
 
@@ -71,6 +83,7 @@ function fillFromUser() {
   form.value = {
     id: props.user?.id ?? null,
     role: Number(props.user?.role ?? 1),
+    parent_id: props.user?.parent_id ?? null,
   };
 }
 
@@ -103,6 +116,7 @@ async function submit() {
   try {
     const { data } = await axios.patch(`/api/users/${form.value.id}`, {
       role: form.value.role,
+      parent_id: form.value.role === 1 ? form.value.parent_id : null,
     });
 
     const updated = data.user ?? data;

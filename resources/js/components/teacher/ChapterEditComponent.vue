@@ -1,5 +1,5 @@
 <template>
-    <div v-if="visible" class="dialog" @click.self="close">
+    <div v-if="visible" class="dialog" @mousedown.self="close">
         <div class="dialog__container_custom dialog__container_custom--s" @click.stop>
             <div class="dialog__inner">
                 <div class="dialog__header">

@@ -304,7 +304,7 @@ onMounted(() => {
             Нет пользователей — группы не сформированы.
         </p>
 
-        <div v-if="modalOpen" class="dialog" @click.self="closeModal" style="z-index: 1">
+        <div v-if="modalOpen" class="dialog" @mousedown.self="closeModal" style="z-index: 1">
             <div
                 class="dialog__container_custom dialog__container_custom--s"
                 @click.stop

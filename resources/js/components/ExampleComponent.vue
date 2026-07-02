@@ -217,7 +217,7 @@
                                 </div>
                                 <!-- ===== Modal purchase / consult ===== -->
                                 <transition name="modal">
-                                    <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
+                                    <div v-if="isModalOpen" class="modal-overlay" @mousedown.self="closeModal">
                                         <div class="modal-content__block">
                                             <button
                                                 class="modal-close"
@@ -463,7 +463,7 @@
             <div
                 v-if="showAuthModal"
                 class="modal-overlay modal-overlay--auth"
-                @click.self="showAuthModal = false"
+                @mousedown.self="showAuthModal = false"
             >
                 <div class="modal-content__block modal-close--auth">
                 <button class="modal-close modal-close--auth" @click="showAuthModal = false"> × </button>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modelValue" class="dialog" style="z-index: 10" @click.self="closeDialog">
+  <div v-if="modelValue" class="dialog" style="z-index: 10" @mousedown.self="closeDialog">
     <div class="dialog__container_custom dialog__container_custom--xl" @click.stop>
       <div class="dialog__inner">
         <!-- Заголовок -->

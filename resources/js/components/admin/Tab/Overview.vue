@@ -62,12 +62,18 @@ function onTopicUpdated(updated) {
 }
 
 
+// сортировка по дате создания (вывод тем/уроков в админке — по порядку создания)
+function byCreatedAt(a, b) {
+  return new Date(a?.created_at || 0) - new Date(b?.created_at || 0);
+}
+
 // загрузка тем
 async function loadTopics() {
   if (!courseId.value) return;
   try {
     const { data } = await axios.get(`${API}/course/${courseId.value}/topics`);
-    topics.value = Array.isArray(data) ? data : (data.topics || []);
+    const list = Array.isArray(data) ? data : (data.topics || []);
+    topics.value = list.sort(byCreatedAt);
   } catch (e) {
     console.error("Ошибка загрузки тем", e);
   }
@@ -86,7 +92,7 @@ async function loadChapters(topicId) {
     const { data } = await axios.get(`${API}/topic/${topicId}/chapters`);
 
     // твой контроллер возвращает { topic, chapters }
-    chapters.value = data?.chapters || [];
+    chapters.value = (data?.chapters || []).slice().sort(byCreatedAt);
   } catch (e) {
     console.error("Ошибка загрузки уроков:", e);
     chapters.value = [];

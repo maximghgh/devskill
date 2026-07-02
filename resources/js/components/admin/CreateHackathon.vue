@@ -1,6 +1,5 @@
 <script setup>
 import {computed, defineAsyncComponent, onMounted, reactive, ref, watch} from 'vue'
-// import ConfirmDialog from './Tab/ConfirmDialog.vue'
 
 import OverviewTab      from './Tab/Overview.vue'
 import PinMaxTab from './Tab/PinMax.vue'
@@ -39,8 +38,6 @@ const tabs = [
 ]
 
 const active = ref(0)
-const pendingTab     = ref(null)
-const showLeaveDlg   = ref(false)
 const hasUnsaved     = ref(false)
 const tabsRu = ref(['Основная информация','Темы', 'Закрепить MAX', 'Группы']);
 const tCert = (t) => capitalizeFirstLetter(t?.certificates || 'Сертификаты')
@@ -91,20 +88,11 @@ function toTab (i) {
     if (isTabLocked(i)) return
     if (i === active.value)    return
 
-    if (hasUnsaved.value) {
-        pendingTab.value  = i
-        showLeaveDlg.value = true
-    } else {
-        active.value = i
+    if (hasUnsaved.value && !window.confirm('Внесённые изменения не сохранены. Всё-таки перейти на другую вкладку?')) {
+        return
     }
-}
-function confirmLeave () {
     hasUnsaved.value = false
-    active.value     = pendingTab.value
-    pendingTab.value = null
-}
-function cancelLeave () {
-    pendingTab.value   = null
+    active.value = i
 }
 function resetDialog () {
     draft.id = null
@@ -174,7 +162,7 @@ onMounted(() => {
         v-if="modelValue"
         class="dialog"
         style="z-index: 1"
-        @click.self="close"
+        @mousedown.self="close"
     >
         <div class="dialog__container_custom" @click.stop>
             <div class="dialog__inner" :class="{ 'is-saving': saving }">
@@ -225,12 +213,6 @@ onMounted(() => {
             </div>
         </div>
     </div>
-    <ConfirmDialog
-        v-model="showLeaveDlg"
-        text="Внесённые изменения не сохранены. Всё-таки перейти на другую вкладку?"
-        @confirm="confirmLeave"
-        @cancel="cancelLeave"
-    />
 </template>
 
 <style scoped>

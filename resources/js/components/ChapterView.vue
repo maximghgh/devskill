@@ -208,7 +208,7 @@
                 <div
                     v-if="showModal"
                     class="modal-overlay"
-                    @click.self="showModal = false"
+                    @mousedown.self="showModal = false"
                 >
                     <div class="modal">
                         <button class="modal-close" @click="showModal = false">

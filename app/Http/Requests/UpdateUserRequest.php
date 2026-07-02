@@ -36,6 +36,7 @@ class UpdateUserRequest extends FormRequest
             'country'  => 'nullable|string|max:100',
             'role'     => 'nullable|in:1,2,3,4',
             'position' => 'nullable|string|max:255',
+            'parent_id' => 'nullable|integer|exists:users,id',
         ];
     }
 }

@@ -1045,6 +1045,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .course__card-task {
     font-family: JanoSansProSemiBold;
     font-size: 0.9em;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 .course__card-task p:first-child {
     opacity: 0.67;
@@ -1053,6 +1056,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .course__card-buttons {
     display: flex;
+    flex-direction: column;
     gap: 6px;
 }
 .course__menu-nickname {
@@ -1228,6 +1232,9 @@ input[type="number"]::-webkit-outer-spin-button {
     text-align: center;
     box-sizing: border-box;
     padding: 0 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .infoblock__data input[type="submit"] {
     background: #575adf;

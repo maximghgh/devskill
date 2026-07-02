@@ -10,7 +10,7 @@
 <body>
     <div id="app">
         <header-component></header-component>
-        <cabinet-component></cabinet-component>
+        <profile-component></profile-component>
         <footer-component></footer-component>
     </div>
 </body>

@@ -742,17 +742,28 @@ h2 {
 }
 /* .. */
 .menus {
-    width: 1320px;
+    width: min(1320px, calc(100vw - 32px));
+    max-width: 1320px;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 32px;
 }
 
 .containers {
+    width: 100%;
     margin: 0 auto;
+    padding: 0 16px;
+    box-sizing: border-box;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+}
+
+.menu-block {
+    flex: 1;
+    min-width: 0;
 }
 
 .filters {
@@ -839,6 +850,24 @@ h2 {
 
 .aside__link--active .aside__icon svg path {
     fill: #ffffff;
+}
+
+@media (max-width: 900px) {
+    .menus {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .aside__menu,
+    .aside__list,
+    .aside__item {
+        width: 100%;
+    }
+
+    .aside__link,
+    .aside__link--active {
+        width: 100%;
+    }
 }
 .hadle {
     max-width: 121px;
@@ -1275,7 +1304,10 @@ table.light-push-table {
     background-color: rgba(0, 0, 0, 0.4);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;        /* было center — иначе верх модалки уходит под хедер */
+    overflow-y: auto;               /* прокручивается сам оверлей, а не только контент коробки */
+    padding: 160px 16px 24px;       /* сверху ≥ высоты фикс-хедера (146px), чтобы он не перекрывал модалку */
+    box-sizing: border-box;
     z-index: 11 !important;
 }
 .date {
@@ -1313,7 +1345,8 @@ table.light-push-table {
 .dialog__container_custom {
     width: 100%;
     max-width: 1063px;
-    max-height: 85vh;
+    margin: auto;                   /* центр по вертикали, когда влезает; не пиннится наверх */
+    max-height: none;               /* высоту регулирует прокручиваемый оверлей */
     background-color: white;
     border-radius: 20px;
     overflow-y: auto;

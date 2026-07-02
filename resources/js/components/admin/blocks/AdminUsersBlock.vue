@@ -367,6 +367,7 @@
         <EditRoleUser
             v-model="showEditRoleModal"
             :user="userToEditRole"
+            :parents="parents"
             @saved="onRoleUpdated"
         />
     </div>
@@ -413,6 +414,11 @@ const { formatBirthday } = useDateFormatters();
 function setUsers(next) {
     emit("update:users", next);
 }
+
+// родители (role 4) для привязки ученика в модалке смены роли
+const parents = computed(() =>
+    props.users.filter((u) => Number(u.role) === 4)
+);
 
 const selectedRole = ref("all");
 const searchQuery = ref("");

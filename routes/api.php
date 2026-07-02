@@ -244,6 +244,8 @@ Route::post('/comments/{id}/undislike', [CommentController::class, 'undislike'])
 
 
 Route::get('/user/{id}/purchased-courses', [UserController::class, 'getPurchasedCourses']);
+Route::get('/user/{id}/children', [UserController::class, 'getChildren']);
+Route::get('/user/{userId}/course/{courseId}/grades', [UserController::class, 'courseGrades']);
 
 Route::middleware('auth:sanctum')->get('/user/purchased-courses', [UserController::class, 'getPurchasedCourses']);
     

@@ -1,3 +1,42 @@
+# DevSkill
+
+## Локальный запуск в VS Code
+
+Проект настроен на простую локальную SQLite-базу без Docker.
+
+1. Открой папку проекта в VS Code.
+2. В терминале один раз выполни:
+
+```bash
+composer install
+npm install
+php artisan migrate
+php artisan storage:link --force
+```
+
+3. Создать/обновить локального админа можно командой:
+
+```bash
+php artisan tinker --execute="use App\Models\User; use Illuminate\Support\Facades\Hash; User::updateOrCreate(['login' => 'admin'], ['name' => 'Администратор', 'email' => null, 'password' => Hash::make('admin12345'), 'role' => 3]);"
+```
+
+4. Запуск из VS Code:
+   `Terminal` -> `Run Task...` -> `Dev: Start`.
+
+5. Открой сайт:
+   `http://127.0.0.1:8000`
+
+Данные для входа в админку:
+
+```text
+Логин: admin
+Пароль: admin12345
+```
+
+Админка откроется после входа по адресу `http://127.0.0.1:8000/admin`.
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

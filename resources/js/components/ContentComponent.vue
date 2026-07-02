@@ -194,7 +194,7 @@
         <div
             v-if="showTestLockModal"
             class="modal-overlay"
-            @click.self="closeTestLockModal"
+            @mousedown.self="closeTestLockModal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="test-lock-title"

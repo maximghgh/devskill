@@ -80,7 +80,7 @@
                                                 </p>
                                                 <div class="card__info-ch">
                                                     <div class="course__card-task">
-                                                        <p>Пройдено тем</p>
+                                                        <p>Пройдено тем:</p>
                                                         <p>
                                                             {{
                                                                 getCourseProgress(
@@ -94,7 +94,7 @@
                                                         </p>
                                                     </div>
                                                     <div class="course__card-task">
-                                                        <p>Решено заданий</p>
+                                                        <p>Решено заданий:</p>
                                                         <p>
                                                             {{
                                                                 getCourseProgress(

@@ -294,7 +294,7 @@
                                     <div
                                         v-if="isModalOpen"
                                         class="modal-overlay"
-                                        @click.self="closeModal"
+                                        @mousedown.self="closeModal"
                                     >
                                         <div class="modal-content__block">
                                             <button
@@ -698,7 +698,7 @@
             <div
                 v-if="showAuthModal"
                 class="modal-overlay modal-overlay--auth"
-                @click.self="showAuthModal = false"
+                @mousedown.self="showAuthModal = false"
             >
                 <div class="modal-content__block modal-close--auth">
                     <button

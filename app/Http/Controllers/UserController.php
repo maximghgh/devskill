@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index()
     {
         // Получаем всех пользователей
-        $users = User::select('id', 'name', 'login', 'email', 'phone', 'country', 'role', 'birthday', 'created_at', 'photo', 'position','inn')
+        $users = User::select('id', 'name', 'login', 'email', 'phone', 'country', 'role', 'parent_id', 'birthday', 'created_at', 'photo', 'position','inn')
                      ->orderBy('id', 'asc')
                      ->get();
 
@@ -69,6 +69,60 @@ class UserController extends Controller
         return response()->json([
             'courses' => CourseResource::collection($courses),
         ]);
+    }
+
+    /**
+     * Дети родителя (role 1, привязанные через parent_id) с их задолженностью.
+     */
+    public function getChildren($id)
+    {
+        $parent = User::findOrFail($id);
+
+        $children = $parent->children()
+            ->get(['id', 'name', 'login', 'email', 'phone', 'birthday', 'photo'])
+            ->map(function ($child) {
+                return [
+                    'id'       => $child->id,
+                    'name'     => $child->name,
+                    'login'    => $child->login,
+                    'email'    => $child->email,
+                    'phone'    => $child->phone,
+                    'birthday' => $child->birthday,
+                    'photo'    => $child->photo,
+                    'debt'     => $child->debt,
+                ];
+            });
+
+        return response()->json([
+            'children' => $children,
+        ]);
+    }
+
+    /**
+     * Табель ученика по курсу: уроки (занятия) с датой и баллом из lesson_scores.
+     */
+    public function courseGrades($userId, $courseId)
+    {
+        $topicIds = \App\Models\Topic::where('course_id', $courseId)->pluck('id');
+
+        $chapters = \App\Models\Chapter::whereIn('topic_id', $topicIds)
+            ->orderBy('created_at')
+            ->get(['id', 'title', 'created_at']);
+
+        $scores = \App\Models\LessonScore::where('user_id', $userId)
+            ->whereIn('chapter_id', $chapters->pluck('id'))
+            ->pluck('score', 'chapter_id');
+
+        $lessons = $chapters->map(function ($ch) use ($scores) {
+            return [
+                'id'     => $ch->id,
+                'lesson' => $ch->title,
+                'date'   => optional($ch->created_at)->toDateString(),
+                'score'  => $scores[$ch->id] ?? null,
+            ];
+        });
+
+        return response()->json(['lessons' => $lessons]);
     }
 
     public function update(UpdateUserRequest $request, $id)
