@@ -16,7 +16,8 @@ class CourseCommentController extends Controller
         // Загружаем комментарии верхнего уровня с вложенными ответами
         $comments = CourseComment::where('course_id', $courseId)
             ->whereNull('parent_id')
-            ->with('children', 'user')
+            // Автор комментария — только публичные поля (id, name, photo).
+            ->with(['user:id,name,photo', 'children.user:id,name,photo'])
             ->get();
 
         return response()->json($comments);

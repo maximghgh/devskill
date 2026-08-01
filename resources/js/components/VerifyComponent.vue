@@ -64,7 +64,6 @@ export default {
           }
         });
 
-        console.log('Ответ сервера:', response.data);
         // Если сервер возвращает JSON с каким-то сообщением, покажем его
         if (response.data.status) {
           this.statusMessage = response.data.status;

@@ -26,7 +26,6 @@ onMounted(async () => {
     const response = await axios.get(`/api/students/${courseId}`);
     
     // Отладочная информация
-    console.log("Ответ от сервера:", response.data);
     
     // Сохраняем данные студентов
     students.value = response.data; 

@@ -4,6 +4,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TopicController;
@@ -244,6 +245,23 @@ Route::get('/course/{id}', function ($id) {
 Route::post('/verify-code', [AuthController::class, 'verifyCode']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/login', [AuthController::class, 'login']); // Обработка входа
+
+// Вход администратора под аккаунтом пользователя.
+// Только web-роуты: сессия существует лишь в группе web (в api её нет).
+// Возврат выполняется уже НЕ администратором, поэтому role:3 тут нельзя —
+// право на возврат подтверждается меткой в сессии.
+// Важно: /impersonate/stop и /status объявлены ДО /impersonate/{user},
+// иначе параметр {user} перехватил бы слово "stop".
+Route::post('/impersonate/stop', [ImpersonationController::class, 'stop'])
+    ->middleware('auth')
+    ->name('impersonate.stop');
+Route::get('/impersonate/status', [ImpersonationController::class, 'status'])
+    ->middleware('auth')
+    ->name('impersonate.status');
+Route::post('/impersonate/{user}', [ImpersonationController::class, 'start'])
+    ->whereNumber('user')
+    ->middleware(['auth', 'role:3'])
+    ->name('impersonate.start');
 Route::post('/register', function () {
     return response()->json([
         'success' => false,

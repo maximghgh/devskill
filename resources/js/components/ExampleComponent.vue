@@ -398,6 +398,7 @@
                                                                         </div>
                                                                     </div>
                                                                 </div>
+
                                                             </div>
                                                         </transition>
                                                         <input
@@ -658,36 +659,32 @@ watch(
 async function submitForm() {
   if (!selectedCourse.value) return;
 
-  const payload = {
-    user_id: user.value.id,
-    ...formData.value,
-    type: selectedOption.value,
-  };
+  const isConsultation = selectedOption.value === "consultation";
+  const paymentMethod =
+    selectedOption.value === "discount" ? selectedDiscountOption.value : "card";
+  const paymentDetails =
+    selectedOption.value === "discount" && selectedDiscountOption.value === "card"
+      ? JSON.stringify(cardInfo.value)
+      : null;
 
-  if (selectedOption.value === "discount") {
-    payload.payment_method = selectedDiscountOption.value;
-    if (selectedDiscountOption.value === "card") {
-      payload.payment_details = JSON.stringify(cardInfo.value);
-    }
-  } else {
-    payload.payment_method = "card";
-    payload.payment_details = null;
-  }
-
-  const url =
-    selectedOption.value === "consultation"
-      ? `/api/${selectedCourse.value.id}/consultation`
-      : `/api/${selectedCourse.value.id}/purchase`;
+  const url = isConsultation
+    ? `/api/${selectedCourse.value.id}/consultation`
+    : `/api/${selectedCourse.value.id}/purchase`;
 
   try {
-    await axios.post(url, payload);
+    await axios.post(url, {
+      user_id: user.value.id,
+      ...formData.value,
+      type: selectedOption.value,
+      payment_method: paymentMethod,
+      payment_details: paymentDetails,
+    });
 
     lastSubmittedOption.value = selectedOption.value;
 
-    successMessage.value =
-      selectedOption.value === "consultation"
-        ? "Спасибо за заявку!"
-        : "Поздравляем с покупкой!";
+    successMessage.value = isConsultation
+      ? "Спасибо за заявку!"
+      : "Поздравляем с покупкой!";
 
     isSubmitted.value = true;
 

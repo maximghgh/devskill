@@ -4,6 +4,7 @@ import { createApp } from "vue";
 import VueTheMask from "vue-the-mask";
 
 import HeaderComponent from "./components/HeaderComponent.vue";
+import ImpersonationBanner from "./components/ImpersonationBanner.vue";
 import FooterComponent from "./components/FooterComponent.vue";
 
 // Импорт всех компонентов студентов
@@ -89,6 +90,7 @@ app.component("cabinet-admin-component", CabinetadminComponent);
 app.component("profile-admin-component", ProfileadminComponent);
 // Регистрация компонентов (имена в kebab-case)
 app.component("header-component", HeaderComponent);
+app.component("impersonation-banner", ImpersonationBanner);
 app.component("finaltest-component", FinalTestPage);
 app.component("chapter-component", ChapterView);
 app.component("footer-component", FooterComponent);

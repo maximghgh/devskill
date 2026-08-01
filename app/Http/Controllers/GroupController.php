@@ -32,6 +32,7 @@ class GroupController extends Controller
             'name_group' => 'required|string|max:255',
             'student_ids' => 'array',
             'student_ids.*' => 'integer|exists:users,id',
+            'open_topics_count' => 'nullable|integer|min:0',
         ]);
 
         $studentIds = $validated['student_ids'] ?? [];
@@ -40,6 +41,7 @@ class GroupController extends Controller
             'name_group' => $validated['name_group'],
             'course_id' => $course->id,
             'students_count' => count($studentIds),
+            'open_topics_count' => $validated['open_topics_count'] ?? 0,
         ]);
 
         if (!empty($studentIds)) {
@@ -61,12 +63,16 @@ class GroupController extends Controller
             'name_group' => 'required|string|max:255',
             'student_ids' => 'array',
             'student_ids.*' => 'integer|exists:users,id',
+            'open_topics_count' => 'nullable|integer|min:0',
         ]);
 
         $studentIds = $validated['student_ids'] ?? [];
 
         $group->name_group = $validated['name_group'];
         $group->students_count = count($studentIds);
+        if (array_key_exists('open_topics_count', $validated)) {
+            $group->open_topics_count = $validated['open_topics_count'] ?? 0;
+        }
         $group->save();
 
         $group->students()->sync($studentIds);

@@ -1,4 +1,5 @@
 <template>
+    <impersonation-banner />
     <header class="header header_main">
         <div class="header__inner">
             <div class="header__logos">
@@ -142,6 +143,7 @@ async function logout() {
         console.error("Ошибка выхода:", error);
     } finally {
         localStorage.removeItem("user");
+        localStorage.removeItem("impersonator");
         user.value = null;
         window.location.href = "/";
     }

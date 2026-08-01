@@ -13,6 +13,38 @@ class TeacherController extends Controller
         // можно передать в view любые данные, например авторизованного юзера
         return view('app');
     }
+
+    /**
+     * Получить расписание преподавателя (свободный текст).
+     */
+    public function getSchedule($teacherId)
+    {
+        $teacher = User::findOrFail($teacherId);
+
+        return response()->json([
+            'schedule' => $teacher->schedule ?? '',
+        ]);
+    }
+
+    /**
+     * Сохранить расписание преподавателя (свободный текст).
+     */
+    public function updateSchedule(Request $request, $teacherId)
+    {
+        $teacher = User::findOrFail($teacherId);
+
+        $validated = $request->validate([
+            'schedule' => 'nullable|string|max:5000',
+        ]);
+
+        $teacher->schedule = $validated['schedule'] ?? '';
+        $teacher->save();
+
+        return response()->json([
+            'success' => true,
+            'schedule' => $teacher->schedule,
+        ]);
+    }
     public function studentsResults($teacherId)
     {
         $courseIds = Course::whereJsonContains('teachers', $teacherId)

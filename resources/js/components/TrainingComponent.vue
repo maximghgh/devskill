@@ -439,7 +439,6 @@ function toggleAnswer(index) {
 async function loadFaqs() {
     try {
         const response = await axios.get("/api/faqs");
-        console.log("Полученные FAQ:", response.data);
         // Добавляем флаг isOpen для анимации раскрытия
         questions.value = response.data.map((item) => ({
             ...item,

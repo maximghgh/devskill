@@ -27,13 +27,14 @@ use App\Http\Controllers\CourseQrController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\SupportRequestController;
 use App\Http\Controllers\LessonScoreController;
+use App\Http\Controllers\StudentReviewController;
+
 //проверка задания и отправка задания
 Route::get('chapter/{chapter}/my-submission', [TaskSubmissionController::class, 'mySubmission']);
 Route::post('/submitTask', [TaskSubmissionController::class, 'store']);               // студент отправляет
 Route::get('/submissions', [TaskSubmissionController::class, 'index']);               // список (для кабинета студента/препода)
 Route::post('/submissions/{submission}/review', [TaskSubmissionController::class, 'review']); // проверка преподом
 Route::get('/submissions/{submission}/download', [TaskSubmissionController::class, 'download']); // опционально
-Route::get('/students/{courseId}', [StudentController::class, 'listByCourse']);
 Route::get('/course/{courseId}/student/{studentId}/submissions', [TaskSubmissionController::class, 'getByStudent']);
 Route::put('/submissions/{id}', [TaskSubmissionController::class, 'update']);
 
@@ -41,7 +42,6 @@ Route::put('/submissions/{id}', [TaskSubmissionController::class, 'update']);
 Route::post('/coursestaks', [CourseController::class, 'getCoursesByTeacher']);
 Route::get('/students/{courseId}', [CourseController::class, 'showStudents']);
 
-Route::post('/chapters/{chapter}/complete', [ChapterController::class,'complete']);
 Route::get('/courses/{course}/final-test', [FinalTestController::class,'show']);
 Route::get('final-test/{courseId}', [FinalTestController::class, 'show'])
      ->whereNumber('courseId');
@@ -54,6 +54,9 @@ Route::get(
     '/teacher/{teacher}/students-results',
     [TeacherController::class, 'studentsResults']
 );
+// Расписание преподавателя (редактируемый текст в панели преподавателя)
+Route::get('/teacher/{teacher}/schedule', [TeacherController::class, 'getSchedule']);
+Route::post('/teacher/{teacher}/schedule', [TeacherController::class, 'updateSchedule']);
 Route::get('/final-test-results', [FinalTestResultController::class, 'index']);
 Route::get('final-test/status', [FinalTestController::class, 'status']);
 Route::get(
@@ -100,6 +103,8 @@ Route::prefix('admin')->group(function(){
 */
 Route::get('/chapters/stats', [ChapterController::class, 'getStats']);
 Route::get('/purchases', [PurchaseController::class, 'index']);
+// Прикрепить чек (скриншот оплаты) к существующей покупке
+Route::post('/purchases/{purchase}/receipt', [PurchaseController::class, 'uploadReceipt']);
 Route::get('/consultations', [ConsultationController::class, 'index']);
 Route::post('/consultations/{id}/complete', [ConsultationController::class, 'complete']);
 Route::post('/consultations/{id}/status', [ConsultationController::class, 'updateStatus']);
@@ -112,7 +117,6 @@ Route::post('/chapters/{chapter}/complete', [ChapterController::class, 'complete
 
 Route::post('courses/{course}/certificate', [CertificateController::class, 'generate']);
 
-Route::get('/courses/{id}', [CourseController::class, 'show']);
 Route::prefix('admin')->name('admin.')->group(function () {
     // Создание курса (API)
     Route::post('/courses', [CourseController::class, 'store'])
@@ -126,6 +130,8 @@ Route::get('/chapter/{id}', [ChapterController::class, 'showteach'])
 Route::post('/users/by-ids', [UserController::class, 'getByIds']);
 Route::post('/users/import', [UserController::class, 'import']);
 Route::post('/users/credentials-export', [UserController::class, 'exportCredentials']);
+// Выгрузка списка пользователей (ФИО, почта) — работает по данным из БД
+Route::post('/users/export', [UserController::class, 'exportUsers']);
 Route::get('/users/{id}', [UserController::class, 'show']);
 
 // Маршрут для сохранения картинки
@@ -138,8 +144,7 @@ Route::post('/courses', [CourseController::class, 'store']);
 Route::get('/courses/{id}', [CourseController::class, 'show']);
 Route::post('/courses/{id}', [CourseController::class, 'update']); 
 
-// Должен быть маршрут для получения курсов
-Route::get('/courses', [CourseController::class, 'index']);
+// Список/каталог курсов (с фильтрами: язык, уровень, направление, длительность)
 Route::get('/courses', [CourseController::class, 'category']);
 
 Route::get('/courses/{course}/qr', [CourseQrController::class, 'show']);
@@ -245,6 +250,8 @@ Route::post('/comments/{id}/undislike', [CommentController::class, 'undislike'])
 
 Route::get('/user/{id}/purchased-courses', [UserController::class, 'getPurchasedCourses']);
 Route::get('/user/{id}/children', [UserController::class, 'getChildren']);
+// История оплат пользователя (родителю — включая платежи детей)
+Route::get('/user/{id}/purchases', [UserController::class, 'purchaseHistory']);
 Route::get('/user/{userId}/course/{courseId}/grades', [UserController::class, 'courseGrades']);
 
 Route::middleware('auth:sanctum')->get('/user/purchased-courses', [UserController::class, 'getPurchasedCourses']);
@@ -260,6 +267,10 @@ Route::patch('/support-requests/{supportRequest}/status', [SupportRequestControl
 // оценки в журнале
 Route::get('/lesson-scores', [LessonScoreController::class, 'index']);
 Route::post('/lesson-scores', [LessonScoreController::class, 'upsert']);
+
+// отзывы преподавателя об учениках (колонка в журнале)
+Route::get('/student-reviews', [StudentReviewController::class, 'index']);
+Route::post('/student-reviews', [StudentReviewController::class, 'upsert']);
 
 Route::prefix('admin/course/{course}')->group(function () {
     // Получить список тем курса

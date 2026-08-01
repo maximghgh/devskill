@@ -83,8 +83,9 @@
                                     </form>
                                 </div>
                                 <form class="infoblock__data" @submit.prevent="saveProfile">
-                                    <!-- Личные данные = данные ученика (на обоих табах) -->
+                                    <!-- Данные обучающегося (подтягиваются из списка при регистрации) -->
                                     <div
+                                        v-show="activeInfoTab === 'student'"
                                         class="infoblock__data-top profile-person-panel"
                                     >
                                         <div class="custom-input">
@@ -138,6 +139,75 @@
                                             <label class="custom-label">Статус</label>
                                         </div>
                                     </div>
+
+                                    <!-- Данные родителя: заполняются вручную, поля обязательны -->
+                                    <div
+                                        v-show="activeInfoTab === 'parent'"
+                                        class="infoblock__data-top profile-person-panel"
+                                    >
+                                        <div class="custom-input">
+                                            <input
+                                                type="text"
+                                                v-model="parentForm.name"
+                                                :class="{ 'is-invalid': parentErrors.name }"
+                                                placeholder="ФИО родителя"
+                                            />
+                                            <label class="custom-label">ФИО родителя *</label>
+                                            <span v-if="parentErrors.name" class="field-error">
+                                                {{ parentErrors.name }}
+                                            </span>
+                                        </div>
+                                        <div class="custom-input">
+                                            <input
+                                                type="email"
+                                                v-model="parentForm.email"
+                                                :class="{ 'is-invalid': parentErrors.email }"
+                                                placeholder="E-mail"
+                                            />
+                                            <label class="custom-label">E-mail *</label>
+                                            <span v-if="parentErrors.email" class="field-error">
+                                                {{ parentErrors.email }}
+                                            </span>
+                                        </div>
+                                        <div class="custom-input">
+                                            <input
+                                                v-model="parentForm.phone"
+                                                v-mask="'+7 (###) ###-##-##'"
+                                                :class="{ 'is-invalid': parentErrors.phone }"
+                                                placeholder="+7 999 999-99-99"
+                                            />
+                                            <label class="custom-label">Телефон *</label>
+                                            <span v-if="parentErrors.phone" class="field-error">
+                                                {{ parentErrors.phone }}
+                                            </span>
+                                        </div>
+                                        <div class="custom-input">
+                                            <input
+                                                class="profile-date-input"
+                                                type="date"
+                                                v-model="parentForm.birthday"
+                                                placeholder="Дата рождения"
+                                            />
+                                            <label class="custom-label">Дата рождения</label>
+                                        </div>
+                                        <div class="custom-input">
+                                            <input
+                                                type="text"
+                                                v-model="parentForm.country"
+                                                placeholder="Страна + город"
+                                            />
+                                            <label class="custom-label">Местоположение</label>
+                                        </div>
+                                        <div class="custom-input">
+                                            <input
+                                                class="custom-status"
+                                                type="text"
+                                                :value="parentStatus"
+                                                readonly
+                                            />
+                                            <label class="custom-label">Статус</label>
+                                        </div>
+                                    </div>
                                 </form>
                             </div>
 
@@ -171,6 +241,75 @@
                                     </div>
                                 </div>
                                 <div v-else class="cabinet-empty">Пока нет курсов для оплаты.</div>
+
+                                <!-- ====== ИСТОРИЯ ОПЛАТ ====== -->
+                                <div class="payments-history">
+                                    <div class="profile-children__title">История оплат</div>
+
+                                    <div v-if="paymentsLoading" class="cabinet-empty">Загрузка...</div>
+                                    <div v-else-if="!payments.length" class="cabinet-empty">
+                                        Оплат пока нет.
+                                    </div>
+                                    <div v-else class="payments-history__list">
+                                        <div
+                                            v-for="payment in payments"
+                                            :key="payment.id"
+                                            class="payments-history__item"
+                                        >
+                                            <div class="payments-history__main">
+                                                <span class="payments-history__course">
+                                                    {{ payment.course_title || "Курс" }}
+                                                </span>
+                                                <span class="payments-history__meta">
+                                                    {{ formatPaymentDate(payment.paid_at) }}
+                                                    <template v-if="payment.student_name">
+                                                        · {{ payment.student_name }}
+                                                    </template>
+                                                    · {{ paymentMethodLabel(payment.payment_method) }}
+                                                </span>
+                                            </div>
+
+                                            <span class="payments-history__amount">
+                                                {{ formatMoney(payment.amount) }}
+                                            </span>
+
+                                            <span
+                                                class="payments-history__status"
+                                                :class="paymentStatusClass(payment.status)"
+                                            >
+                                                {{ paymentStatusLabel(payment.status) }}
+                                            </span>
+
+                                            <div class="payments-history__receipt">
+                                                <a
+                                                    v-if="payment.receipt_url"
+                                                    :href="payment.receipt_url"
+                                                    target="_blank"
+                                                    rel="noopener"
+                                                    class="payments-history__link"
+                                                >Чек</a>
+                                                <label class="payments-history__upload">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*,application/pdf"
+                                                        class="payments-history__file"
+                                                        :disabled="receiptUploadingId === payment.id"
+                                                        @change="uploadReceipt(payment, $event)"
+                                                    />
+                                                    <span>
+                                                        {{
+                                                            receiptUploadingId === payment.id
+                                                                ? "Загрузка..."
+                                                                : payment.receipt_url
+                                                                ? "Заменить"
+                                                                : "Прикрепить чек"
+                                                        }}
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- ====== РАЗДЕЛ: МОИ КУРСЫ ====== -->
@@ -240,6 +379,12 @@
                                 <div v-else class="cabinet-empty">
                                     {{ gradeCourseId ? 'Нет занятий по выбранному курсу.' : 'Выберите курс, чтобы увидеть табель.' }}
                                 </div>
+
+                                <!-- Отзыв преподавателя о ребёнке -->
+                                <div v-if="gradeCourseId && teacherReview" class="teacher-review">
+                                    <div class="teacher-review__title">Отзыв от преподавателя</div>
+                                    <p class="teacher-review__text">{{ teacherReview }}</p>
+                                </div>
                             </div>
 
                             <!-- модалка «Данные изменены» -->
@@ -297,9 +442,85 @@ const formatMoney = (value) =>
     currency: "RUB",
     maximumFractionDigits: 0,
   }).format(Number(value) || 0);
-// суммарная задолженность по всем детям
+// --- История оплат ---
+const payments = ref([]);
+const paymentsLoading = ref(false);
+const serverDebt = ref(null);
+const receiptUploadingId = ref(null);
+
+const loadPayments = async () => {
+  if (!user.value.id) return;
+  paymentsLoading.value = true;
+  try {
+    const { data } = await axios.get(`/api/user/${user.value.id}/purchases`);
+    payments.value = data.payments || [];
+    serverDebt.value = Number(data.debt) || 0;
+  } catch (error) {
+    console.error("Ошибка загрузки истории оплат:", error);
+    payments.value = [];
+    serverDebt.value = null;
+  } finally {
+    paymentsLoading.value = false;
+  }
+};
+
+const paymentStatusLabels = {
+  completed: "Оплачено",
+  pending: "Ожидает подтверждения",
+  failed: "Не прошла",
+};
+const paymentStatusLabel = (status) =>
+  paymentStatusLabels[status] || status || "—";
+const paymentStatusClass = (status) => ({
+  "payments-history__status--ok": status === "completed",
+  "payments-history__status--pending": status === "pending",
+  "payments-history__status--failed": status === "failed",
+});
+const paymentMethodLabel = (method) =>
+  method === "sbp" ? "СБП" : method === "card" ? "Картой" : method || "—";
+const formatPaymentDate = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString("ru-RU");
+};
+
+const uploadReceipt = async (payment, event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  receiptUploadingId.value = payment.id;
+  try {
+    const form = new FormData();
+    form.append("receipt", file);
+    const { data } = await axios.post(
+      `/api/purchases/${payment.id}/receipt`,
+      form
+    );
+    // Обновляем ссылку на чек в уже загруженном списке.
+    const updated = data?.purchase;
+    if (updated) {
+      const idx = payments.value.findIndex((p) => p.id === payment.id);
+      if (idx !== -1) {
+        payments.value[idx] = {
+          ...payments.value[idx],
+          receipt_url: updated.receipt_url,
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Ошибка загрузки чека:", error);
+    alert("Не удалось загрузить чек. Проверьте формат (jpg, png, pdf) и размер.");
+  } finally {
+    receiptUploadingId.value = null;
+    event.target.value = "";
+  }
+};
+
+// Задолженность: с сервера (учитывает статус оплаты), иначе — сумма цен курсов.
 const paymentDebt = computed(() =>
-  purchasedCourses.value.reduce((sum, c) => sum + (Number(c.price) || 0), 0)
+  serverDebt.value !== null
+    ? serverDebt.value
+    : purchasedCourses.value.reduce((sum, c) => sum + (Number(c.price) || 0), 0)
 );
 const formattedDebt = computed(() => formatMoney(paymentDebt.value));
 
@@ -369,8 +590,11 @@ const formatLessonDate = (value) => {
   const p = String(value).slice(0, 10).split("-"); // YYYY-MM-DD
   return p.length === 3 ? `${p[2]}.${p[1]}` : String(value);
 };
+// отзыв преподавателя по выбранному курсу
+const teacherReview = ref("");
 const loadGrades = async () => {
   gradeRows.value = [];
+  teacherReview.value = "";
   if (!gradeCourseId.value || !user.value.id) return;
   try {
     const { data } = await axios.get(
@@ -381,9 +605,11 @@ const loadGrades = async () => {
       date: formatLessonDate(l.date),
       score: l.score,
     }));
+    teacherReview.value = data.review || "";
   } catch (error) {
     console.error("Ошибка загрузки табеля:", error);
     gradeRows.value = [];
+    teacherReview.value = "";
   }
 };
 watch(gradeCourseId, () => loadGrades());
@@ -497,6 +723,7 @@ onMounted(async () => {
   await loadUserData();
   await loadChildren();
   await loadCourses();
+  await loadPayments();
 });
 
 onBeforeUnmount(() => {
@@ -532,8 +759,47 @@ const loadChildren = async () => {
   }
 };
 
+// --- Валидация данных родителя (обязательные поля) ---
+const parentErrors = reactive({ name: "", email: "", phone: "" });
+
+const isFilled = (value) => String(value || "").trim().length > 0;
+
+/** Заполнена ли форма родителя хотя бы частично. */
+const parentFormTouched = computed(() =>
+  ["name", "email", "phone", "birthday", "country"].some((key) =>
+    isFilled(parentForm[key])
+  )
+);
+
+function validateParentForm() {
+  parentErrors.name = "";
+  parentErrors.email = "";
+  parentErrors.phone = "";
+
+  // Пустую форму не проверяем: родитель мог ещё не дойти до этой вкладки.
+  if (!parentFormTouched.value && currentRole.value !== 4) return true;
+
+  if (!isFilled(parentForm.name)) {
+    parentErrors.name = "Укажите ФИО родителя";
+  }
+  if (!isFilled(parentForm.email)) {
+    parentErrors.email = "Укажите e-mail";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentForm.email.trim())) {
+    parentErrors.email = "Некорректный e-mail";
+  }
+  if (!isFilled(parentForm.phone)) {
+    parentErrors.phone = "Укажите телефон";
+  }
+
+  return !parentErrors.name && !parentErrors.email && !parentErrors.phone;
+}
+
 const saveProfile = async () => {
   try {
+    if (!validateParentForm()) {
+      activeInfoTab.value = "parent";
+      return;
+    }
     if (selectedFile.value) {
       await uploadPhoto();
     }
@@ -554,9 +820,12 @@ const updateProfile = async () => {
       birthday: primaryInfo.birthday || null,
       phone: primaryInfo.phone || null,
       country: primaryInfo.country || null,
-      parent_info: normalizePersonInfo(parentForm),
       student_info: normalizePersonInfo(studentForm),
     };
+    // Пустую форму родителя не отправляем — иначе затрём уже сохранённые данные.
+    if (parentFormTouched.value) {
+      payload.parent_info = normalizePersonInfo(parentForm);
+    }
     const response = await axios.post("/api/profile", payload);
     const updatedUser = getResponseUser(response.data.user);
     // Убираем пароль из данных, если он есть
@@ -898,6 +1167,133 @@ async function uploadPhoto() {
 }
 .profile-children__debt--has {
     color: #c62828;
+}
+
+/* --- Валидация формы родителя --- */
+.profile-person-panel__hint {
+    width: 100%;
+    font-size: 13px;
+    color: #888;
+    margin: 0 0 8px;
+}
+.custom-input input.is-invalid {
+    border-color: #c62828;
+}
+.field-error {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #c62828;
+}
+
+/* --- Отзыв преподавателя --- */
+.teacher-review {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border: 1px solid #ececec;
+    border-left: 3px solid #6c5ce7;
+    border-radius: 10px;
+    background: #fafaff;
+}
+.teacher-review__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
+}
+.teacher-review__text {
+    font-size: 14px;
+    color: #333;
+    white-space: pre-line;
+    margin: 0;
+}
+
+/* --- История оплат --- */
+.payments-history {
+    margin-top: 26px;
+}
+.payments-history__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+.payments-history__item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    border: 1px solid #ececec;
+    border-radius: 12px;
+    background: #fff;
+}
+.payments-history__main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1 1 200px;
+    min-width: 0;
+}
+.payments-history__course {
+    font-size: 15px;
+    font-weight: 600;
+    color: #222;
+}
+.payments-history__meta {
+    font-size: 13px;
+    color: #888;
+}
+.payments-history__amount {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.payments-history__status {
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #f2f2f2;
+    color: #555;
+    white-space: nowrap;
+}
+.payments-history__status--ok {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+.payments-history__status--pending {
+    background: #fff8e1;
+    color: #b26a00;
+}
+.payments-history__status--failed {
+    background: #ffebee;
+    color: #c62828;
+}
+.payments-history__receipt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.payments-history__link {
+    font-size: 13px;
+    color: #6c5ce7;
+    text-decoration: underline;
+}
+.payments-history__file {
+    display: none;
+}
+.payments-history__upload {
+    cursor: pointer;
+    font-size: 13px;
+    padding: 5px 12px;
+    border: 1px solid #6c5ce7;
+    border-radius: 8px;
+    color: #6c5ce7;
+    white-space: nowrap;
+}
+.payments-history__upload:hover {
+    background: #6c5ce7;
+    color: #fff;
 }
 
 .custom-input {

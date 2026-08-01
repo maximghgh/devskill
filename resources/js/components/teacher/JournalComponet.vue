@@ -63,7 +63,7 @@
                             <select
                                 class="dialog__input dialog__select"
                                 v-model="selectedLessonId"
-                                :disabled="lessonsLoading || !lessonsForGroup.length"
+                                :disabled="lessonsLoading"
                             >
                                 <option disabled value="">Выберите урок</option>
                                 <option
@@ -72,6 +72,9 @@
                                     :value="l.id"
                                 >
                                     {{ l.title }}
+                                </option>
+                                <option :value="REVIEW_OPTION">
+                                    Отзыв за курс
                                 </option>
                             </select>
                             <p v-if="lessonsLoading" class="course-filter__note">
@@ -99,8 +102,17 @@
                                                 <img width="20" height="20" src="../../../img/teacher/table_icon.svg" alt="">
                                                 <span class="journal__head-title">ФИО</span>
                                             </th>
-                                            <th class="journal__head-cell journal__head-cell--score">
+                                            <th
+                                                v-if="!isReviewMode"
+                                                class="journal__head-cell journal__head-cell--score"
+                                            >
                                                 <span class="journal__head-title">Баллы</span>
+                                            </th>
+                                            <th
+                                                v-else
+                                                class="journal__head-cell journal__head-cell--review"
+                                            >
+                                                <span class="journal__head-title">Отзыв за курс</span>
                                             </th>
                                         </tr>
                                     </thead>
@@ -122,7 +134,10 @@
                                                     <span class="journal__student-index">{{ index + 1 }}</span>
                                                     <span class="journal__student-name">{{ student.name || "Без имени" }}</span>
                                                 </td>
-                                                <td class="journal__cell journal__cell--value">
+                                                <td
+                                                    v-if="!isReviewMode"
+                                                    class="journal__cell journal__cell--value"
+                                                >
                                                     <input
                                                         class="journal__score-input"
                                                         type="number"
@@ -133,6 +148,16 @@
                                                         :disabled="scoresLoading || scoreSaving[student.id]"
                                                         @change="saveScore(student.id)"
                                                     />
+                                                </td>
+                                                <td v-else class="journal__cell journal__cell--review">
+                                                    <textarea
+                                                        class="journal__review-input"
+                                                        rows="2"
+                                                        placeholder="Отзыв о ребёнке для родителя"
+                                                        v-model="reviewsByStudent[student.id]"
+                                                        :disabled="reviewsLoading || reviewSaving[student.id]"
+                                                        @change="saveReview(student.id)"
+                                                    ></textarea>
                                                 </td>
                                             </tr>
                                         </template> 
@@ -155,6 +180,9 @@ import { globalNotification } from "../../globalNotification";
 export default {
     data() {
         return {
+            // Псевдо-урок в конце списка: отзыв ставится один на весь курс.
+            REVIEW_OPTION: "__review__",
+
             selectedCourseId: "",
             selectedGroupId: "",
             selectedLessonId: "",
@@ -170,7 +198,19 @@ export default {
             scoresByStudent: {},
             scoresLoading: false,
             scoreSaving: {},
+
+            // Отзыв преподавателя — на ученика в рамках курса,
+            // поэтому не зависит от выбранного занятия.
+            reviewsByStudent: {},
+            reviewsLoading: false,
+            reviewSaving: {},
         };
+    },
+
+    computed: {
+        isReviewMode() {
+            return this.selectedLessonId === this.REVIEW_OPTION;
+        },
     },
 
     watch: {
@@ -181,6 +221,7 @@ export default {
             this.lessonsForGroup = [];
             this.studentsForGroup = [];
             this.studentsLoading = false;
+            this.reviewsByStudent = {};
 
             if (!newId) return;
 
@@ -190,12 +231,17 @@ export default {
             this.selectedLessonId = "";
             this.studentsForGroup = [];
             this.studentsLoading = false;
+            this.reviewsByStudent = {};
             if (!newId || !this.selectedCourseId) return;
             await this.loadGroupStudents(this.selectedCourseId, newId);
+            // Отзывы грузим после состава группы — нужны id учеников.
+            await this.loadReviews();
         },
         async selectedLessonId(newId) {
             this.scoresByStudent = {};
             if (!newId || !this.studentsForGroup.length) return;
+            // В режиме отзыва баллы не нужны — отзывы уже загружены с составом группы.
+            if (newId === this.REVIEW_OPTION) return;
             await this.loadScores(newId);
         },
     },
@@ -320,7 +366,7 @@ export default {
         },
         async loadScores(lessonId) {
             const studentIds = this.studentsForGroup.map((s) => s.id).filter(Boolean);
-            if (!lessonId || !studentIds.length) {
+            if (!lessonId || lessonId === this.REVIEW_OPTION || !studentIds.length) {
                 this.scoresByStudent = {};
                 return;
             }
@@ -376,6 +422,61 @@ export default {
                 this.scoreSaving = { ...this.scoreSaving, [studentId]: false };
             }
         },
+
+        async loadReviews() {
+            const studentIds = this.studentsForGroup
+                .map((s) => s.id)
+                .filter(Boolean);
+            if (!this.selectedCourseId || !studentIds.length) {
+                this.reviewsByStudent = {};
+                return;
+            }
+
+            this.reviewsLoading = true;
+            try {
+                const { data } = await axios.get("/api/student-reviews", {
+                    params: {
+                        course_id: this.selectedCourseId,
+                        student_ids: studentIds.join(","),
+                    },
+                });
+                const map = {};
+                (Array.isArray(data) ? data : []).forEach((row) => {
+                    map[row.user_id] = row.review || "";
+                });
+                this.reviewsByStudent = map;
+            } catch (e) {
+                console.error("Ошибка при загрузке отзывов:", e);
+                this.reviewsByStudent = {};
+            } finally {
+                this.reviewsLoading = false;
+            }
+        },
+
+        async saveReview(studentId) {
+            if (!this.selectedCourseId) return;
+
+            const teacherId = this.getTeacherId();
+            const text = (this.reviewsByStudent[studentId] || "").trim();
+
+            this.reviewSaving = { ...this.reviewSaving, [studentId]: true };
+            try {
+                await axios.post("/api/student-reviews", {
+                    user_id: studentId,
+                    course_id: this.selectedCourseId,
+                    teacher_id: teacherId,
+                    review: text,
+                });
+                globalNotification.categoryMessage = "Отзыв сохранён";
+                globalNotification.type = "success";
+            } catch (e) {
+                console.error("Ошибка при сохранении отзыва:", e);
+                globalNotification.categoryMessage = "Не удалось сохранить отзыв";
+                globalNotification.type = "error";
+            } finally {
+                this.reviewSaving = { ...this.reviewSaving, [studentId]: false };
+            }
+        },
     },
 
     mounted() {
@@ -383,3 +484,63 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+/* Таблица журнала занимает всю ширину, при нехватке места — скролл в обёртке */
+.journal__table {
+    min-width: 640px;
+}
+
+/* Заголовок ФИО должен остаться ячейкой таблицы, иначе колонки разъезжаются */
+.journal__head-cell--sticky {
+    display: table-cell;
+    vertical-align: middle;
+}
+.journal__head-cell--sticky img {
+    vertical-align: middle;
+    margin-right: 9px;
+}
+
+.journal__head-cell--sticky,
+.journal__cell--name {
+    width: 40%;
+}
+.journal__head-cell--score,
+.journal__cell--value {
+    width: 120px;
+}
+.journal__head-cell--review,
+.journal__cell--review {
+    min-width: 260px;
+    width: calc(60% - 120px);
+}
+
+/* строки: воздух и разделители, чтобы 10 учеников читались списком */
+.journal__cell {
+    padding: 10px 8px;
+    vertical-align: middle;
+}
+.journal__row + .journal__row .journal__cell {
+    border-top: 1px solid #ededf3;
+}
+.journal__row:hover .journal__cell {
+    background: #faf9ff;
+}
+.journal__review-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    font: inherit;
+    resize: vertical;
+    outline: none;
+    background: #fff;
+}
+.journal__review-input:focus {
+    border-color: #6c5ce7;
+}
+.journal__review-input:disabled {
+    opacity: 0.6;
+}
+</style>

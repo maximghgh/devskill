@@ -11,6 +11,7 @@
                     <th>Курс</th>
                     <th>Метод оплаты</th>
                     <th>Статус</th>
+                    <th>Чек</th>
                     <th>Дата покупки</th>
                 </tr>
             </thead>
@@ -20,6 +21,15 @@
                     <td>{{ purchase.course_title }}</td>
                     <td>{{ purchase.payment_method }}</td>
                     <td>{{ purchase.status === 'completed' ? 'Успешно' : purchase.status }}</td>
+                    <td>
+                        <a
+                            v-if="purchase.receipt_url"
+                            :href="purchase.receipt_url"
+                            target="_blank"
+                            rel="noopener"
+                        >Открыть</a>
+                        <span v-else>—</span>
+                    </td>
                     <td>
                         {{ new Date(purchase.purchase_date).toLocaleString() }}
                     </td>

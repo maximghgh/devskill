@@ -10,7 +10,7 @@ class StudentController extends Controller
     {
         $students = User::whereHas('purchases', function($q) use ($courseId) {
             $q->where('course_id', $courseId);
-        })->get();
+        })->get(['id', 'name', 'email', 'photo']);
 
         return response()->json($students);
     }

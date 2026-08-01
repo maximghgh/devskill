@@ -308,6 +308,7 @@
                                                 />
                                             </div>
                                         </div>
+
                                     </div>
                                 </transition>
 
@@ -446,29 +447,28 @@ const emit = defineEmits(["success"]); //  FIX: emit теперь объявле
 async function submit() {
     if (!selectedCourse.value) return;
 
-    /* формируем payload */
-    const payload = {
-        user_id: user.value?.id ?? null,
-        ...form.value,
-        type: option.value,
-    };
-    if (option.value === "discount") {
-        payload.payment_method = payWay.value;
-        if (payWay.value === "card")
-            payload.payment_details = JSON.stringify(card.value);
-    }
+    const isConsultation = option.value === "consultation";
 
-    const endpoint =
-        option.value === "consultation"
-            ? `/api/${selectedCourse.value.id}/consultation`
-            : `/api/${selectedCourse.value.id}/purchase`;
+    const endpoint = isConsultation
+        ? `/api/${selectedCourse.value.id}/consultation`
+        : `/api/${selectedCourse.value.id}/purchase`;
 
     try {
+        const payload = {
+            user_id: user.value?.id ?? null,
+            ...form.value,
+            type: option.value,
+        };
+        if (option.value === "discount") {
+            payload.payment_method = payWay.value;
+            if (payWay.value === "card")
+                payload.payment_details = JSON.stringify(card.value);
+        }
         await axios.post(endpoint, payload);
-        successText.value =
-            option.value === "consultation"
-                ? "Спасибо за заявку!"
-                : "Поздравляем с покупкой!";
+
+        successText.value = isConsultation
+            ? "Спасибо за заявку!"
+            : "Поздравляем с покупкой!";
         submitted.value = true;
         emit("success"); // уведомляем родителя
     } catch (err) {

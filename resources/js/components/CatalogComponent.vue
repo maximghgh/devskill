@@ -345,6 +345,7 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
+
                                                         </div>
                                                     </transition>
                                                         <input
@@ -540,31 +541,31 @@ function closeModal() {
 async function submitForm() {
   if (!selectedCourse.value) return;
 
-  const payload = {
-    user_id: user.value.id,
-    ...formData.value,
-    type: selectedOption.value,
-    payment_method:
-      selectedOption.value === "discount"
-        ? selectedDiscountOption.value
-        : "card",
-    payment_details:
-      selectedOption.value === "discount" && selectedDiscountOption.value === "card"
-        ? JSON.stringify(cardInfo.value)
-        : null,
-  };
+  const isConsultation = selectedOption.value === "consultation";
+  const paymentMethod =
+    selectedOption.value === "discount" ? selectedDiscountOption.value : "card";
+  const paymentDetails =
+    selectedOption.value === "discount" && selectedDiscountOption.value === "card"
+      ? JSON.stringify(cardInfo.value)
+      : null;
 
-  const url =
-    selectedOption.value === "consultation"
-      ? `/api/${selectedCourse.value.id}/consultation`
-      : `/api/${selectedCourse.value.id}/purchase`;
+  const url = isConsultation
+    ? `/api/${selectedCourse.value.id}/consultation`
+    : `/api/${selectedCourse.value.id}/purchase`;
 
   try {
+    const payload = {
+      user_id: user.value.id,
+      ...formData.value,
+      type: selectedOption.value,
+      payment_method: paymentMethod,
+      payment_details: paymentDetails,
+    };
     await axios.post(url, payload);
-    successMessage.value =
-      selectedOption.value === "consultation"
-        ? "Спасибо за заявку!"
-        : "Поздравляем с покупкой!";
+
+    successMessage.value = isConsultation
+      ? "Спасибо за заявку!"
+      : "Поздравляем с покупкой!";
     isSubmitted.value = true;
   } catch (e) {
     console.error(e);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -25,11 +26,14 @@ class ProfileController extends Controller
             'birthday' => 'nullable|date',
             'phone' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:255',
+            // Блок родителя приходит только с вкладки «Родитель».
+            // Если он передан — ФИО, e-mail и телефон обязательны;
+            // профили админа и преподавателя его не шлют и не ломаются.
             'parent_info' => 'nullable|array',
-            'parent_info.name' => 'nullable|string|max:255',
-            'parent_info.email' => 'nullable|email|max:255',
+            'parent_info.name' => 'required_with:parent_info|string|max:255',
+            'parent_info.email' => 'required_with:parent_info|email|max:255',
+            'parent_info.phone' => 'required_with:parent_info|string|max:20',
             'parent_info.birthday' => 'nullable|date',
-            'parent_info.phone' => 'nullable|string|max:20',
             'parent_info.country' => 'nullable|string|max:255',
             'student_info' => 'nullable|array',
             'student_info.name' => 'nullable|string|max:255',
@@ -37,22 +41,34 @@ class ProfileController extends Controller
             'student_info.birthday' => 'nullable|date',
             'student_info.phone' => 'nullable|string|max:20',
             'student_info.country' => 'nullable|string|max:255',
+        ], [
+            'parent_info.name.required_with' => 'Укажите ФИО родителя.',
+            'parent_info.email.required_with' => 'Укажите e-mail родителя.',
+            'parent_info.phone.required_with' => 'Укажите телефон родителя.',
         ]);
 
-        // Обновляем запись в таблице
-        $user->update([
+        $payload = [
             'name' => $validated['name'],
             'email' => $validated['email'] ?? null,
             'birthday' => $validated['birthday'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'country' => $validated['country'] ?? null,
-            'parent_info' => $this->profileInfo($validated['parent_info'] ?? []),
-            'student_info' => $this->profileInfo($validated['student_info'] ?? []),
-        ]);
+        ];
+
+        // Блоки перезаписываем только если они реально пришли в запросе,
+        // иначе сохранённые данные затёрлись бы пустыми значениями.
+        if ($request->has('parent_info')) {
+            $payload['parent_info'] = $this->profileInfo($validated['parent_info'] ?? []);
+        }
+        if ($request->has('student_info')) {
+            $payload['student_info'] = $this->profileInfo($validated['student_info'] ?? []);
+        }
+
+        $user->update($payload);
 
         return response()->json([
             'message' => 'Данные успешно обновлены!',
-            'user' => $user,
+            'user' => new UserResource($user),
         ], 200);
     }
 

@@ -336,7 +336,6 @@ async function uploadPhoto() {
         "Content-Type": "multipart/form-data",
       },
     });
-    console.log("Фото обновлено:", response.data.user);
     // Обновляем данные пользователя в localStorage и в реактивной переменной
     localStorage.setItem("user", JSON.stringify(response.data.user));
     user.value = response.data.user;

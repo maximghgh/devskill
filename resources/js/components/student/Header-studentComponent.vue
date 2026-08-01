@@ -1,4 +1,5 @@
 <template>
+    <impersonation-banner />
     <header class="header header_main" :class="{ active: menuOpen }">
         <div class="header__inner">
             <div class="header__logo">
@@ -108,6 +109,7 @@ export default {
                 console.error("Ошибка выхода:", error);
             } finally {
                 localStorage.removeItem("user");
+                localStorage.removeItem("impersonator");
                 this.user = null;
                 window.location.href = "/";
             }

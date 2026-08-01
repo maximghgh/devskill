@@ -20,9 +20,9 @@ class UpdateChapterRequest extends FormRequest
             'video_url'      => 'nullable|string',
             'correct_answer' => 'nullable|string',
             'points'         => 'nullable|integer|min:0',
-            'file'           => 'nullable|file|max:20480',
+            'file'           => 'nullable|file|mimes:pdf,ppt,pptx,doc,docx,png,jpg,jpeg,webp|max:20480',
             'files'          => 'nullable|array',
-            'files.*'        => 'file|max:20480',
+            'files.*'        => 'file|mimes:pdf,ppt,pptx,doc,docx,png,jpg,jpeg,webp|max:20480',
             'retain_files'   => 'nullable',
         ];
     }

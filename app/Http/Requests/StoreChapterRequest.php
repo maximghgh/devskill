@@ -18,9 +18,9 @@ class StoreChapterRequest extends FormRequest
             'type'           => 'required|in:video,text,task,terms,presentation',
             'content'        => 'nullable',
             'correct_answer' => 'nullable|string',
-            'file'           => 'nullable|file|max:20480',
+            'file'           => 'nullable|file|mimes:pdf,ppt,pptx,doc,docx,png,jpg,jpeg,webp|max:20480',
             'files'          => 'nullable|array',
-            'files.*'        => 'file|max:20480',
+            'files.*'        => 'file|mimes:pdf,ppt,pptx,doc,docx,png,jpg,jpeg,webp|max:20480',
             'video_url'      => 'nullable|string',
             'points'         => 'nullable|integer|min:0',
         ];

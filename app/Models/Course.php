@@ -40,7 +40,6 @@ class Course extends Model
         'end_date'    => 'date',
     ];
 
-    // Отношение "многие ко многим" с преподавателями
     public function topics()
     {
         return $this->hasMany(\App\Models\Topic::class, 'course_id');

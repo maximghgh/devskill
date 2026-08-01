@@ -304,15 +304,4 @@ class ChapterController extends Controller
             'settings'  => $ft->settings ?? [],
         ]);
     }
-    public function complete(Chapter $chapter, Request $r)
-    {
-        $userId = $r->user_id ?? auth()->id();
-        UserProgress::updateOrCreate(
-            ['user_id'=>$userId,'chapter_id'=>$chapter->id],
-            ['completed_at'=>now()]
-        );
-        return response()->noContent();
-    }
-
-
 }

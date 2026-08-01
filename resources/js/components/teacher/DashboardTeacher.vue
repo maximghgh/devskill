@@ -13,16 +13,56 @@
                 </div>
             </div>
             <div class="info__events">
-                <p class="info__text">Ближайшие занятия</p>
-                <span class="info__events-desc"
-                    >Веб- разработка: 12 ноября 18.00, 3 корпус Ижгту, 3-1</span
+                <button
+                    v-if="!scheduleEditing"
+                    type="button"
+                    class="schedule__edit"
+                    title="Редактировать расписание"
+                    aria-label="Редактировать расписание"
+                    @click="startEditSchedule"
                 >
-                <span class="info__events-desc"
-                    >Дизайн: 15 ноября 18.00, 3 корпус Ижгту, 3-1</span
+                    <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M12 20h9" />
+                        <path
+                            d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"
+                        />
+                    </svg>
+                </button>
+
+                <p class="info__text">Расписание</p>
+
+                <textarea
+                    v-if="scheduleEditing"
+                    ref="scheduleInput"
+                    v-model="scheduleDraft"
+                    class="schedule__input"
+                    rows="2"
+                    :disabled="scheduleSaving"
+                    placeholder="Например:&#10;Веб-разработка: 12 ноября 18.00, 3 корпус Ижгту, ауд. 3-1&#10;Дизайн: 15 ноября 18.00, 3 корпус Ижгту, ауд. 3-1"
+                    @input="autoGrowSchedule"
+                    @keydown.esc="cancelEditSchedule"
+                    @keydown.enter.ctrl.prevent="saveSchedule"
+                    @keydown.enter.meta.prevent="saveSchedule"
+                    @blur="saveSchedule"
+                ></textarea>
+                <p
+                    v-else-if="scheduleText"
+                    class="info__events-desc schedule__text"
                 >
-                <span class="info__events-desc"
-                    >Дизайн: 15 ноября 18.00, 3 корпус Ижгту, 3-1</span
-                >
+                    {{ scheduleText }}
+                </p>
+                <span v-else class="info__events-desc">
+                    Расписание не заполнено
+                </span>
             </div>
         </div>
         <div class="main">
@@ -110,13 +150,78 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import axios from "axios";
 import "./style.css";
 
 const courses = ref([]);
 const pageSize = 2;
 const page = ref(1);
+
+/* --- Расписание преподавателя (редактируемый текст) --- */
+const scheduleText = ref("");
+const scheduleDraft = ref("");
+const scheduleEditing = ref(false);
+const scheduleSaving = ref(false);
+
+const scheduleInput = ref(null);
+
+async function startEditSchedule() {
+    scheduleDraft.value = scheduleText.value;
+    scheduleEditing.value = true;
+    await nextTick();
+    scheduleInput.value?.focus();
+    autoGrowSchedule();
+}
+
+/** Высота поля подстраивается под количество строк расписания. */
+function autoGrowSchedule() {
+    const el = scheduleInput.value;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+}
+
+function cancelEditSchedule() {
+    scheduleEditing.value = false;
+    scheduleDraft.value = scheduleText.value;
+}
+
+async function loadSchedule() {
+    const teacherId = getTeacherId();
+    if (!teacherId) return;
+    try {
+        const { data } = await axios.get(`/api/teacher/${teacherId}/schedule`);
+        scheduleText.value = data?.schedule || "";
+    } catch (e) {
+        console.error("Ошибка при загрузке расписания:", e);
+    }
+}
+
+async function saveSchedule() {
+    // Сохранение вызывается и по Enter, и по потере фокуса — второй раз не шлём.
+    if (!scheduleEditing.value || scheduleSaving.value) return;
+
+    if (scheduleDraft.value === scheduleText.value) {
+        scheduleEditing.value = false;
+        return;
+    }
+
+    const teacherId = getTeacherId();
+    if (!teacherId) return;
+    scheduleSaving.value = true;
+    try {
+        const { data } = await axios.post(`/api/teacher/${teacherId}/schedule`, {
+            schedule: scheduleDraft.value,
+        });
+        scheduleText.value = data?.schedule ?? scheduleDraft.value;
+        scheduleEditing.value = false;
+    } catch (e) {
+        console.error("Ошибка при сохранении расписания:", e);
+    } finally {
+        scheduleSaving.value = false;
+    }
+}
 
 function getTeacherId() {
     const stored = localStorage.getItem("user");
@@ -191,5 +296,63 @@ watch(courses, () => {
 
 onMounted(async () => {
     await loadCourses();
+    await loadSchedule();
 });
 </script>
+
+<style scoped>
+.info__events {
+    position: relative;
+}
+
+/* карандаш в правом верхнем углу блока */
+.schedule__edit {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #6c5ce7;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: background 0.15s, opacity 0.15s;
+}
+.schedule__edit:hover {
+    background: rgba(108, 92, 231, 0.12);
+    opacity: 1;
+}
+
+.schedule__text {
+    white-space: pre-line;
+}
+
+/* поле редактирования на месте текста расписания */
+.schedule__input {
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+    resize: vertical;
+    overflow: hidden;
+    min-height: 44px;
+    padding: 6px 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    font: inherit;
+    color: inherit;
+    background: #fff;
+    outline: none;
+}
+.schedule__input:focus {
+    border-color: #6c5ce7;
+}
+.schedule__input:disabled {
+    opacity: 0.6;
+}
+</style>

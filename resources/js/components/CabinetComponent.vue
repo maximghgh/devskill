@@ -218,8 +218,6 @@ onMounted(async () => {
             const response = await axios.get(
                 `/api/user/${user.value.id}/purchased-courses`
             );
-            console.log("Ответ сервера:", response.data);
-            console.log("purchasedCourses:", purchasedCourses.value);
             purchasedCourses.value = response.data.courses;
         } catch (error) {
             console.error("Ошибка при загрузке купленных курсов", error);

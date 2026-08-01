@@ -11,8 +11,11 @@ class FinalTestResultController extends Controller
      */
     public function index()
     {
-        // Подтягиваем отношения, если нужны данные пользователя и курса
-        $results = FinalTestResult::with(['user', 'course'])->get();
+        // Узкие выборки по связям — без утечки PII пользователя и лишних полей курса.
+        $results = FinalTestResult::with([
+            'user:id,name',
+            'course:id,card_title',
+        ])->get();
 
         return response()->json($results);
     }

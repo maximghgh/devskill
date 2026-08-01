@@ -11,7 +11,7 @@ class ImageUploadController extends Controller
     {
         // 1. Валидируем, что загружается файл изображения
         $request->validate([
-            'image' => 'required|image'
+            'image' => 'required|image|mimes:png,jpg,jpeg,webp,gif|max:5120'
         ]);
 
         // 2. Сохраняем файл в папку public/uploads (storage/app/public/uploads)

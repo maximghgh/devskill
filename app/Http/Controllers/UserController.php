@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index()
     {
         // Получаем всех пользователей
-        $users = User::select('id', 'name', 'login', 'email', 'phone', 'country', 'role', 'parent_id', 'birthday', 'created_at', 'photo', 'position','inn')
+        $users = User::select('id', 'name', 'login', 'email', 'phone', 'country', 'role', 'parent_id', 'birthday', 'created_at', 'photo', 'position')
                      ->orderBy('id', 'asc')
                      ->get();
 
@@ -34,9 +34,9 @@ class UserController extends Controller
     {
         // Массив ID, которые передаёт фронтенд
         $ids = $request->input('ids', []);
-        // Получаем пользователей с этими ID
-        $users = User::whereIn('id', $ids)->get();
-        return response()->json(UserResource::collection($users));
+        // Публичный lookup (карточки преподавателей и т.п.) — только безопасные поля.
+        $users = User::whereIn('id', $ids)->get(['id', 'name', 'photo', 'position']);
+        return response()->json($users);
     }
 
     public function getPurchasedCourses($id)
@@ -68,6 +68,66 @@ class UserController extends Controller
         // 5. Возвращаем JSON-ответ
         return response()->json([
             'courses' => CourseResource::collection($courses),
+        ]);
+    }
+
+    /**
+     * История оплат пользователя (и его детей, если это родитель).
+     *
+     * Сумма берётся из цены курса: в purchases своей суммы не хранится.
+     */
+    public function purchaseHistory($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Родитель видит и свои платежи, и платежи своих детей.
+        $userIds = collect([$user->id])
+            ->merge($user->children()->pluck('id'))
+            ->unique()
+            ->all();
+
+        $purchases = Purchase::query()
+            ->join('courses', 'purchases.course_id', '=', 'courses.id')
+            ->join('users', 'purchases.user_id', '=', 'users.id')
+            ->whereIn('purchases.user_id', $userIds)
+            ->orderByDesc('purchases.created_at')
+            ->get([
+                'purchases.id',
+                'purchases.user_id',
+                'purchases.status',
+                'purchases.payment_method',
+                'purchases.receipt_path',
+                'purchases.created_at',
+                'courses.id as course_id',
+                'courses.card_title as course_title',
+                'courses.price as amount',
+                'users.name as student_name',
+            ]);
+
+        $payments = $purchases->map(function ($row) {
+            return [
+                'id' => $row->id,
+                'course_id' => $row->course_id,
+                'course_title' => $row->course_title,
+                'student_name' => $row->student_name,
+                'amount' => $row->amount,
+                'status' => $row->status,
+                'payment_method' => $row->payment_method,
+                'receipt_url' => $row->receipt_path
+                    ? '/' . ltrim($row->receipt_path, '/')
+                    : null,
+                'paid_at' => $row->created_at,
+            ];
+        });
+
+        return response()->json([
+            'payments' => $payments,
+            // Долг считаем на сервере: неоплаченные покупки по цене курса.
+            'debt' => (float) Purchase::query()
+                ->join('courses', 'purchases.course_id', '=', 'courses.id')
+                ->whereIn('purchases.user_id', $userIds)
+                ->where('purchases.status', '!=', 'completed')
+                ->sum('courses.price'),
         ]);
     }
 
@@ -122,7 +182,16 @@ class UserController extends Controller
             ];
         });
 
-        return response()->json(['lessons' => $lessons]);
+        // Отзыв преподавателя об ученике по этому курсу (виден родителю).
+        $review = \App\Models\StudentReview::where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->first();
+
+        return response()->json([
+            'lessons' => $lessons,
+            'review' => $review?->review,
+            'review_updated_at' => $review?->updated_at,
+        ]);
     }
 
     public function update(UpdateUserRequest $request, $id)
@@ -318,6 +387,62 @@ class UserController extends Controller
             ->deleteFileAfterSend(true);
     }
 
+    /**
+     * Выгрузка списка пользователей из админки (ФИО, почта и пр.).
+     *
+     * В отличие от exportCredentials работает по данным из БД,
+     * поэтому доступна в любой момент, а не только после импорта.
+     * Пароли не выгружаются — в базе хранится только хэш.
+     */
+    public function exportUsers(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'nullable|array',
+            'ids.*' => 'integer',
+            'role' => 'nullable|integer|in:1,2,3,4',
+        ]);
+
+        $query = User::query()->orderBy('id');
+
+        if (!empty($validated['ids'])) {
+            $query->whereIn('id', $validated['ids']);
+        }
+        if (!empty($validated['role'])) {
+            $query->where('role', $validated['role']);
+        }
+
+        $users = $query->get(['id', 'name', 'login', 'email', 'phone', 'role', 'created_at']);
+
+        $roles = [1 => 'Ученик', 2 => 'Преподаватель', 3 => 'Администратор', 4 => 'Родитель'];
+
+        $rows = [['ФИО', 'Логин', 'Почта', 'Телефон', 'Роль', 'Дата регистрации']];
+        foreach ($users as $user) {
+            $rows[] = [
+                (string) $user->name,
+                (string) $user->login,
+                (string) $user->email,
+                (string) $user->phone,
+                $roles[(int) $user->role] ?? (string) $user->role,
+                optional($user->created_at)->format('d.m.Y') ?? '',
+            ];
+        }
+
+        try {
+            $path = $this->createXlsx($rows, [32, 22, 30, 20, 18, 18], 'users_list');
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Не удалось сформировать Excel-файл: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        return response()
+            ->download($path, 'users.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])
+            ->deleteFileAfterSend(true);
+    }
+
     public function updateAvatar(UpdateUserAvatarRequest $request, $id)
     {
         // Находим пользователя по ID
@@ -373,7 +498,7 @@ class UserController extends Controller
             throw new \RuntimeException('Не удалось создать временный Excel-файл.');
         }
 
-        $headers = ['ФИО', 'Логин', 'Пароль'];
+        $headers = ['ФИО', 'Логин', 'Пароль', 'Почта'];
         $rows = [$headers];
 
         foreach ($credentials as $item) {
@@ -381,6 +506,7 @@ class UserController extends Controller
                 (string) ($item['name'] ?? ''),
                 (string) ($item['login'] ?? ''),
                 (string) ($item['password'] ?? ''),
+                (string) ($item['email'] ?? ''),
             ];
         }
 
@@ -389,13 +515,45 @@ class UserController extends Controller
         $zip->addFromString('xl/workbook.xml', $this->xlsxWorkbookXml());
         $zip->addFromString('xl/_rels/workbook.xml.rels', $this->xlsxWorkbookRelsXml());
         $zip->addFromString('xl/styles.xml', $this->xlsxStylesXml());
-        $zip->addFromString('xl/worksheets/sheet1.xml', $this->xlsxWorksheetXml($rows));
+        $zip->addFromString('xl/worksheets/sheet1.xml', $this->xlsxWorksheetXml($rows, [32, 22, 18, 30]));
         $zip->close();
 
         return $path;
     }
 
-    private function xlsxWorksheetXml(array $rows): string
+    /**
+     * Собирает .xlsx из произвольной таблицы (первая строка — заголовки).
+     */
+    private function createXlsx(array $rows, array $widths, string $prefix): string
+    {
+        if (!class_exists(\ZipArchive::class)) {
+            throw new \RuntimeException('На сервере недоступен ZipArchive для создания .xlsx.');
+        }
+
+        $dir = storage_path('app/temp');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        $path = $dir . '/' . $prefix . '_' . uniqid('', true) . '.xlsx';
+        $zip = new \ZipArchive();
+
+        if ($zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            throw new \RuntimeException('Не удалось создать временный Excel-файл.');
+        }
+
+        $zip->addFromString('[Content_Types].xml', $this->xlsxContentTypesXml());
+        $zip->addFromString('_rels/.rels', $this->xlsxRootRelsXml());
+        $zip->addFromString('xl/workbook.xml', $this->xlsxWorkbookXml());
+        $zip->addFromString('xl/_rels/workbook.xml.rels', $this->xlsxWorkbookRelsXml());
+        $zip->addFromString('xl/styles.xml', $this->xlsxStylesXml());
+        $zip->addFromString('xl/worksheets/sheet1.xml', $this->xlsxWorksheetXml($rows, $widths));
+        $zip->close();
+
+        return $path;
+    }
+
+    private function xlsxWorksheetXml(array $rows, array $widths = [32, 22, 18]): string
     {
         $sheetData = '';
 
@@ -413,13 +571,16 @@ class UserController extends Controller
             $sheetData .= '<row r="' . $excelRow . '">' . $cells . '</row>';
         }
 
+        $cols = '';
+        foreach (array_values($widths) as $i => $width) {
+            $number = $i + 1;
+            $cols .= '<col min="' . $number . '" max="' . $number . '" width="'
+                . (int) $width . '" customWidth="1"/>';
+        }
+
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-            . '<cols>'
-            . '<col min="1" max="1" width="32" customWidth="1"/>'
-            . '<col min="2" max="2" width="22" customWidth="1"/>'
-            . '<col min="3" max="3" width="18" customWidth="1"/>'
-            . '</cols>'
+            . '<cols>' . $cols . '</cols>'
             . '<sheetData>' . $sheetData . '</sheetData>'
             . '</worksheet>';
     }

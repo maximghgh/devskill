@@ -13,6 +13,7 @@ class Group extends Model
         'name_group',
         'course_id',
         'students_count',
+        'open_topics_count',
     ];
 
     public function course()

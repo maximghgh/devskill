@@ -46,7 +46,7 @@ class TaskSubmissionController extends Controller
         $request->validate([
             'chapter_id' => ['required','integer','exists:chapters,id'],
             'message'    => ['nullable','string','max:20000'],
-            'file'       => ['nullable','file','max:102400'],
+            'file'       => ['nullable','file','mimes:pdf,doc,docx,txt,zip,rar,7z,png,jpg,jpeg,webp','max:51200'],
         ]);
 
         if (!$userId) {
@@ -111,7 +111,8 @@ class TaskSubmissionController extends Controller
 
     public function getByStudent($courseId, $studentId)
     {
-        $student = User::findOrFail($studentId);
+        // Только безопасные поля ученика — без ИНН/телефона/персональных JSON.
+        $student = User::findOrFail($studentId)->only(['id', 'name', 'email', 'photo']);
 
         $submissions = TaskSubmission::with(['chapter:id,title'])   // 👈 подтягиваем title
             ->where('course_id', $courseId)

@@ -150,6 +150,15 @@
                         <span class="users-btn-desc">+</span>
                         {{ importing ? "Импорт..." : "Импорт Excel" }}
                     </button>
+                    <button
+                        type="button"
+                        class="users-btn-new users-import__btn"
+                        :disabled="exportingUsers"
+                        @click="downloadUsersExcel"
+                        title="Выгрузить ФИО и почту (с учётом фильтра по роли)"
+                    >
+                        {{ exportingUsers ? "Выгрузка..." : "Скачать список" }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -201,7 +210,7 @@
             </div>
         </div>
 
-        <div v-if="filteredUsers.length > 0">
+        <div v-if="filteredUsers.length > 0" class="users-table-wrap">
             <table class="light-push-table">
                 <thead>
                     <tr>
@@ -329,6 +338,34 @@
                                     class="tooltip"
                                 >
                                     Удалить пользователя
+                                </div>
+                            </div>
+                            <div
+                                v-if="canImpersonate(userItem)"
+                                class="tooltip-container"
+                            >
+                                <button
+                                    class="btn__user--edit"
+                                    :disabled="impersonatingId === userItem.id"
+                                    @click="impersonate(userItem)"
+                                >
+                                    <svg
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                                        <polyline points="10 17 15 12 10 7" />
+                                        <line x1="15" y1="12" x2="3" y2="12" />
+                                    </svg>
+                                </button>
+                                <div role="tooltip" class="tooltip">
+                                    Войти под пользователем
                                 </div>
                             </div>
                         </td>
@@ -601,6 +638,39 @@ async function downloadCredentialsExcel() {
     }
 }
 
+/** Выгрузка списка пользователей (ФИО, почта) с учётом фильтра по роли. */
+const exportingUsers = ref(false);
+async function downloadUsersExcel() {
+    exportingUsers.value = true;
+    try {
+        const payload = {};
+        if (selectedRole.value && selectedRole.value !== "all") {
+            payload.role = Number(selectedRole.value);
+        }
+
+        const response = await axios.post("/api/users/export", payload, {
+            responseType: "blob",
+        });
+
+        const blob = new Blob([response.data], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "users.xlsx";
+        link.click();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error(e);
+        globalNotification.categoryMessage =
+            "Ошибка при выгрузке списка пользователей";
+        globalNotification.type = "error";
+    } finally {
+        exportingUsers.value = false;
+    }
+}
+
 /* ===== inline роль ===== */
 const inlineRoleEdit = reactive({ id: null, role: null });
 
@@ -694,23 +764,185 @@ async function deleteUser(userId) {
         globalNotification.type = "error";
     }
 }
+
+/* ---------- Вход под аккаунтом пользователя ---------- */
+const impersonatingId = ref(null);
+
+function currentAdminId() {
+    try {
+        return JSON.parse(localStorage.getItem("user") || "null")?.id ?? null;
+    } catch {
+        return null;
+    }
+}
+
+/** Под другим админом и под самим собой заходить нельзя. */
+function canImpersonate(userItem) {
+    return (
+        Number(userItem.role) !== 3 && userItem.id !== currentAdminId()
+    );
+}
+
+/** Куда отправлять администратора после входа — как при обычном логине. */
+function homeUrlForRole(role) {
+    switch (Number(role)) {
+        case 4:
+            return "/student";
+        case 2:
+            return "/teacher";
+        case 1:
+            return "/";
+        default:
+            return "/";
+    }
+}
+
+async function impersonate(userItem) {
+    if (!canImpersonate(userItem)) return;
+    if (
+        !confirm(
+            `Войти под аккаунтом «${userItem.name}»? Вы сможете вернуться в админку через баннер сверху.`
+        )
+    ) {
+        return;
+    }
+
+    impersonatingId.value = userItem.id;
+    try {
+        // Web-роут (не /api): вход выполняется через сессию.
+        const { data } = await axios.post(`/impersonate/${userItem.id}`);
+
+        // Запоминаем администратора, чтобы баннер показался сразу.
+        localStorage.setItem("impersonator", JSON.stringify(data.impersonator));
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        window.location.href = homeUrlForRole(data.user.role);
+    } catch (e) {
+        console.error(e);
+        globalNotification.categoryMessage =
+            e?.response?.data?.message || "Не удалось войти под пользователем";
+        globalNotification.type = "error";
+        impersonatingId.value = null;
+    }
+}
 </script>
 
 <style scoped>
+.asdf {
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.users-toolbar__left {
+    flex: 0 0 auto;
+}
+
 .users-toolbar__search {
     display: flex;
     gap: 12px;
     align-items: center;
-    flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-end;
+}
+
+/* поиск тянется по остатку строки, кнопки не переносятся */
+.users-toolbar__search .users-search {
+    flex: 1 1 auto;
+    min-width: 180px;
+}
+
+.users-search__input {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 28px;
 }
 
 .users-import__input {
     display: none;
 }
 
+.users-import__btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
 .users-import__btn:disabled {
     cursor: not-allowed;
     opacity: 0.65;
+}
+
+/* таблица не должна вылезать за контейнер: фиксированная раскладка колонок,
+   на узких экранах — горизонтальный скролл внутри обёртки */
+.users-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.light-push-table {
+    width: 100%;
+    min-width: 1314px;
+    table-layout: fixed;
+}
+
+.light-push-table th:nth-child(1),
+.light-push-table td:nth-child(1) {
+    width: 64px;
+}
+
+.light-push-table th:nth-child(2),
+.light-push-table td:nth-child(2) {
+    width: 220px;
+}
+
+.light-push-table th:nth-child(3),
+.light-push-table td:nth-child(3) {
+    width: 180px;
+}
+
+.light-push-table th:nth-child(4),
+.light-push-table td:nth-child(4) {
+    width: 250px;
+}
+
+/* длинные логины и почты переносим внутри колонки, а не растягиваем таблицу */
+.light-push-table td:nth-child(3),
+.light-push-table td:nth-child(4) {
+    overflow-wrap: anywhere;
+}
+
+.light-push-table th:nth-child(5),
+.light-push-table td:nth-child(5) {
+    width: 118px;
+}
+
+.light-push-table th:nth-child(6),
+.light-push-table td:nth-child(6) {
+    width: 170px;
+}
+
+.light-push-table th:nth-child(7),
+.light-push-table td:nth-child(7) {
+    width: 160px;
+}
+
+/* данные в коротких колонках не переносим (заголовки переносить можно) */
+.light-push-table td:nth-child(5),
+.light-push-table td:nth-child(6),
+.light-push-table td:nth-child(7) {
+    white-space: nowrap;
+}
+
+/* колонка действий: три иконки (правка / удаление / вход под пользователем) */
+.light-push-table th:last-child,
+.light-push-table td:last-child {
+    width: 152px;
+    max-width: 152px;
+}
+
+.hadle {
+    max-width: none;
+    gap: 8px;
 }
 
 .users-import-result {

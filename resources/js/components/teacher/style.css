@@ -757,9 +757,9 @@ h3 {
 .journal__table-wrapper {
     border-radius: 18px;
     border: 1px solid #c3bdd7;
-    padding: 10px 9px 35px;
+    padding: 10px 16px 20px;
     overflow-x: auto;
-    max-width: 400px;
+    width: 100%;
 }
 
 /* Таблица */
@@ -984,9 +984,16 @@ h3 {
 
 .course-accordion__filter {
     display: grid;
-    grid-template-columns: 400px 400px 400px;
+    grid-template-columns: repeat(3, minmax(220px, 400px));
     gap: 30px;
     margin-bottom: 30px;
+}
+
+@media (max-width: 900px) {
+    .course-accordion__filter {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
 }
 
 /* шапка курса */

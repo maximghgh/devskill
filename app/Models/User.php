@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'position',
         'parent_info',
         'student_info',
+        'schedule',
     ];
 
     protected $casts = [

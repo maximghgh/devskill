@@ -17,7 +17,7 @@ class StoreNewsRequest extends FormRequest
             'title'       => 'required|string|max:255',
             'content'     => 'required|string',
             'editor_data' => 'nullable',
-            'image'       => 'nullable|image|max:102400',
+            'image'       => 'nullable|image|mimes:png,jpg,jpeg,webp|max:5120',
         ];
     }
 }

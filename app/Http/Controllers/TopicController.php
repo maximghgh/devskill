@@ -28,11 +28,6 @@ class TopicController extends Controller
         ]);
         
     }
-    public function getTopicsJson($courseId)
-    {
-        return view('admin.course');
-    }
-
     /**
      * Показать форму создания новой темы для курса.
      *
@@ -55,7 +50,10 @@ class TopicController extends Controller
     public function store(StoreTopicRequest $request)
     {
         // Берём из маршрута параметр "course" (зависит от того, как назвали в Route)
-        $courseId = $request->route('course'); 
+        $courseId = $request->route('course');
+
+        // Курс должен существовать — иначе создадим «осиротевшую» тему.
+        Course::findOrFail($courseId);
 
         $validated = $request->validated();
 

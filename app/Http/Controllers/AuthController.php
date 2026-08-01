@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Resources\UserResource;
 use App\Mail\VerifyEmail;
 use App\Models\User;
 use App\Models\PendingUser;
@@ -18,8 +20,6 @@ class AuthController extends Controller
     // Регистрация пользователя
     public function register(Request $request)
     {
-        \Log::info('📥 Полученные данные в register:', $request->all());
-
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -130,7 +130,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'user' => Auth::user(),
+                'user' => new UserResource(Auth::user()),
             ]);
         }
 
@@ -161,7 +161,7 @@ class AuthController extends Controller
             $request->session()->regenerate();
             session()->forget(['verification_code', 'user_id']);
 
-            return response()->json(['success' => true, 'user' => Auth::user()]);
+            return response()->json(['success' => true, 'user' => new UserResource(Auth::user())]);
         }
 
         return response()->json([
