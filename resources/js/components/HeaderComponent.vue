@@ -200,8 +200,8 @@ export default {
         return [
           { label: "Панель преподавателя", href: "/teacher" },
           { label: "Журнал", href: "/teacher/journal" },
-          { label: "Курс", href: "/teacher/course" },
-          { label: "Мои курсы", href: "/teacher/mycourses" },
+          { label: "Мои курсы", href: "/teacher/course" },
+          { label: "Курсы", href: "/teacher/mycourses" },
           { label: "Профиль", href: "/teacher/profile" },
           { label: "Выйти", action: "logout" },
         ];

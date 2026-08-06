@@ -4,7 +4,7 @@
         <div class="header__inner">
             <div class="header__logo">
                 <div class="logos">
-                    <a href="/student">
+                    <a href="/">
                         <img
                             src="../../../img/logo.png"
                             class="header__logo"

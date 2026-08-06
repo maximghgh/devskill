@@ -286,6 +286,8 @@ Route::prefix('admin/course/{course}')->group(function () {
     Route::post('/groups', [GroupController::class, 'store']);
     Route::get('/groups/{group}', [GroupController::class, 'show']);
     Route::patch('/groups/{group}', [GroupController::class, 'update']);
+    // Набор открытых тем группы — со страницы курса у преподавателя
+    Route::put('/groups/{group}/topics', [GroupController::class, 'syncTopics']);
     Route::delete('/groups/{group}', [GroupController::class, 'destroy']);
 });
 

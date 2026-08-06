@@ -703,7 +703,17 @@ nav a:hover {
 }
 
 .offer_about {
-    background-image: url("../img/bg_about.jpg");
+    /* Затемняющий слой поверх баннера: на средних ширинах текст заезжает
+       на белый логотип. Слева плотнее, к правому краю сходит на нет,
+       чтобы логотип не тускнел там, где текста нет. */
+    background-image: linear-gradient(
+            90deg,
+            rgba(40, 24, 86, 0.55) 0%,
+            rgba(40, 24, 86, 0.45) 50%,
+            rgba(40, 24, 86, 0.25) 72%,
+            rgba(40, 24, 86, 0) 88%
+        ),
+        url("../img/bg_about.jpg");
 }
 .offer_training {
     background-image: url("../img/bg_training.jpg");

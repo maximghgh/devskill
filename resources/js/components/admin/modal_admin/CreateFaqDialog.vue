@@ -39,12 +39,11 @@
 
             <div class="dialog__component">
               <p class="dialog__title">Ответ</p>
-              <textarea
-                v-model="form.answer"
-                class="dialog__textarea dialog__textarea--s"
-                placeholder="Введите ответ"
+              <RichTextEditor
+                v-model="answerHtml"
+                placeholder="Введите ответ..."
                 :disabled="loading"
-              ></textarea>
+              />
             </div>
 
             <p v-if="error" class="dialog__error">{{ error }}</p>
@@ -63,7 +62,7 @@
                 type="button"
                 class="main__btn"
                 @click="submit"
-                :disabled="loading || !form.question.trim() || !form.answer.trim()"
+                :disabled="loading || !form.question.trim() || !hasAnswer"
               >
                 {{ loading ? "Сохранение..." : "Создать" }}
               </button>
@@ -76,9 +75,11 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, computed, watch } from "vue";
 import axios from "axios";
 import { globalNotification } from "../../../globalNotification";
+import { htmlHasText } from "../../../utils/editorContent";
+import RichTextEditor from "../../common/RichTextEditor.vue";
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -88,21 +89,23 @@ const emit = defineEmits(["update:modelValue", "created"]);
 
 const form = reactive({
   question: "",
-  answer: "",
 });
 
+const answerHtml = ref("");
 const loading = ref(false);
 const error = ref("");
+
+const hasAnswer = computed(() => htmlHasText(answerHtml.value));
 
 watch(
   () => props.modelValue,
   (v) => {
-    if (v) {
-      form.question = "";
-      form.answer = "";
-      error.value = "";
-      loading.value = false;
-    }
+    if (!v) return;
+
+    form.question = "";
+    answerHtml.value = "";
+    error.value = "";
+    loading.value = false;
   }
 );
 
@@ -117,7 +120,7 @@ async function submit() {
   try {
     const { data } = await axios.post("/api/faqs", {
       question: form.question,
-      answer: form.answer,
+      answer_html: answerHtml.value,
     });
 
     globalNotification.categoryMessage = "FAQ успешно создан";

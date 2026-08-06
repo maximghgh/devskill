@@ -3,6 +3,43 @@
         <h2 class="courses_h2">
             Курс: {{ course?.course_name || "Без названия" }}
         </h2>
+
+        <!-- Выбор группы: набор открытых тем у каждой группы свой -->
+        <section class="group-scope">
+            <div class="group-scope__row">
+                <label class="group-scope__label" for="course-scope-group">
+                    Группа
+                </label>
+                <select
+                    id="course-scope-group"
+                    class="group-scope__select"
+                    v-model="selectedGroupId"
+                    :disabled="groupsLoading"
+                >
+                    <option :value="null">Все ученики</option>
+                    <option
+                        v-for="group in groups"
+                        :key="group.id"
+                        :value="group.id"
+                    >
+                        {{ group.name_group }}
+                    </option>
+                </select>
+                <span
+                    class="group-scope__badge"
+                    :class="
+                        openTopicsCount
+                            ? 'group-scope__badge--active'
+                            : 'group-scope__badge--empty'
+                    "
+                >
+                    Открыто {{ openTopicsCount }} из {{ topics.length }}
+                </span>
+            </div>
+
+            <p class="group-scope__hint">{{ scopeHint }}</p>
+        </section>
+
         <div class="info__course">
             <div class="info__card info__card--course">
                 <p class="info__text">Всего студентов:</p>
@@ -127,14 +164,50 @@ const showChapterModal = ref(false);
 const selectedChapter = ref(null);
 const statusSaving = ref({});
 
+// Группы курса и выбранная область настройки.
+// null — базовый статус темы (для тех, кто не состоит ни в одной группе).
+const groups = ref([]);
+const groupsLoading = ref(false);
+const selectedGroupId = ref(null);
+
+const selectedGroup = computed(
+    () => groups.value.find((g) => g.id === selectedGroupId.value) || null
+);
+
+/** id тем, открытых выбранной группе. */
+const openTopicIds = computed(
+    () => new Set(selectedGroup.value?.topic_ids ?? [])
+);
+
+const scopeHint = computed(() => {
+    if (groupsLoading.value) {
+        return "Загружаем группы курса...";
+    }
+    if (!groups.value.length) {
+        return "На курсе пока нет групп — переключатели задают статус темы для всех учеников.";
+    }
+    if (!selectedGroup.value) {
+        return "Переключатели задают статус темы для учеников вне групп.";
+    }
+    return `Отмеченные темы открыты только ученикам группы «${selectedGroup.value.name_group}».`;
+});
+
 function normalizeTopicStatus(topic) {
     const status = topic?.status || "закрыт";
     return status === "активный" || status === "закрыт" ? status : "закрыт";
 }
 
 function isTopicActive(topic) {
+    if (selectedGroup.value) {
+        return openTopicIds.value.has(topic.id);
+    }
     return normalizeTopicStatus(topic) === "активный";
 }
+
+/** Сколько тем открыто в выбранной области — для счётчика в шапке. */
+const openTopicsCount = computed(
+    () => topics.value.filter((topic) => isTopicActive(topic)).length
+);
 
 function topicStatusLabel(topic) {
     return isTopicActive(topic) ? "Активный" : "Закрыт";
@@ -209,13 +282,56 @@ function updateTopicInState(topicId, patch) {
     });
 }
 
+function setGroupTopicIds(groupId, topicIds) {
+    groups.value = groups.value.map((group) =>
+        group.id === groupId ? { ...group, topic_ids: topicIds } : group
+    );
+}
+
+/**
+ * Переключатель темы. Если выбрана группа — меняем её набор открытых тем,
+ * иначе правим базовый статус самой темы.
+ */
 async function toggleTopicStatus(topic, event) {
-    const nextStatus = event.target.checked ? "активный" : "закрыт";
+    const shouldOpen = event.target.checked;
+    statusSaving.value = { ...statusSaving.value, [topic.id]: true };
+
+    try {
+        if (selectedGroup.value) {
+            await toggleTopicForGroup(topic, shouldOpen);
+        } else {
+            await toggleTopicGlobally(topic, shouldOpen);
+        }
+    } finally {
+        statusSaving.value = { ...statusSaving.value, [topic.id]: false };
+    }
+}
+
+async function toggleTopicForGroup(topic, shouldOpen) {
+    const group = selectedGroup.value;
+    const prevIds = group.topic_ids ?? [];
+    const nextIds = shouldOpen
+        ? [...new Set([...prevIds, topic.id])]
+        : prevIds.filter((id) => id !== topic.id);
+
+    setGroupTopicIds(group.id, nextIds);
+    try {
+        await axios.put(
+            `/api/admin/course/${courseId}/groups/${group.id}/topics`,
+            { topic_ids: nextIds }
+        );
+    } catch (e) {
+        console.error("Ошибка обновления тем группы:", e);
+        setGroupTopicIds(group.id, prevIds);
+    }
+}
+
+async function toggleTopicGlobally(topic, shouldOpen) {
+    const nextStatus = shouldOpen ? "активный" : "закрыт";
     const prevStatus = normalizeTopicStatus(topic);
     if (nextStatus === prevStatus) return;
 
     updateTopicInState(topic.id, { status: nextStatus });
-    statusSaving.value = { ...statusSaving.value, [topic.id]: true };
     try {
         await axios.patch(`/api/topics/${topic.id}/status`, {
             status: nextStatus,
@@ -223,8 +339,26 @@ async function toggleTopicStatus(topic, event) {
     } catch (e) {
         console.error("Ошибка обновления статуса темы:", e);
         updateTopicInState(topic.id, { status: prevStatus });
+    }
+}
+
+async function loadGroups() {
+    if (!courseId) return;
+    groupsLoading.value = true;
+    try {
+        const { data } = await axios.get(
+            `/api/admin/course/${courseId}/groups`
+        );
+        const list = Array.isArray(data) ? data : [];
+        groups.value = list.map((group) => ({
+            ...group,
+            topic_ids: Array.isArray(group.topic_ids) ? group.topic_ids : [],
+        }));
+    } catch (e) {
+        console.error("Ошибка загрузки групп:", e);
+        groups.value = [];
     } finally {
-        statusSaving.value = { ...statusSaving.value, [topic.id]: false };
+        groupsLoading.value = false;
     }
 }
 
@@ -287,6 +421,109 @@ async function loadTopics() {
 }
 
 onMounted(async () => {
-    await Promise.all([loadCourse(), loadStudents(), loadTopics()]);
+    await Promise.all([
+        loadCourse(),
+        loadStudents(),
+        loadTopics(),
+        loadGroups(),
+    ]);
 });
 </script>
+
+<style scoped>
+.group-scope {
+    margin: 16px 0 32px;
+}
+
+.group-scope__row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.group-scope__label {
+    font-family: JanoSansProRegular;
+    font-size: 16px;
+    color: #858585;
+}
+
+/* Селект и бейдж — одна высота, чтобы строка читалась ровной */
+.group-scope__select,
+.group-scope__badge {
+    box-sizing: border-box;
+    height: 42px;
+    border-radius: 21px;
+    font-family: JanoSansProRegular;
+    font-size: 16px;
+}
+
+.group-scope__select {
+    flex: 0 1 300px;
+    min-width: 220px;
+    color: #121212;
+    padding: 0 42px 0 18px;
+    border: 1px solid #d9c7ec;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%237A2ABD' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 12px 8px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    transition: border-color var(--transition-3, 0.3s);
+}
+
+.group-scope__select option {
+    font-family: JanoSansProRegular;
+}
+
+.group-scope__select:hover:not(:disabled) {
+    border-color: #7a2abd;
+}
+
+/* Специфичность выше глобального `:focus { border: 0 }` в app.css */
+.group-scope__select:focus {
+    outline: none;
+    border: 1px solid #7a2abd;
+}
+
+.group-scope__select:disabled {
+    cursor: default;
+    color: #858585;
+    border-color: #e8e6f0;
+    background-color: #f6f5fb;
+}
+
+.group-scope__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 18px;
+    white-space: nowrap;
+    color: #121212;
+}
+
+.group-scope__badge--active {
+    background-color: #bde5b0;
+}
+
+.group-scope__badge--empty {
+    background-color: #e5b0b0;
+}
+
+.group-scope__hint {
+    margin: 10px 0 0;
+    font-family: JanoSansProLight;
+    font-size: 14px;
+    line-height: 146%;
+    color: #858585;
+}
+
+@media screen and (max-width: 575.98px) {
+    .group-scope__select {
+        flex: 1 1 100%;
+    }
+}
+</style>

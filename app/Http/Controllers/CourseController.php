@@ -460,21 +460,25 @@ class CourseController extends Controller
             ->orderBy('id')
             ->get();
 
-        // Определяем, к какой группе на этом курсе относится ученик.
-        // Разные группы могут иметь разное число открытых тем: например,
-        // одной группе открыто 3 темы, другой — 1. Число берём максимальное
-        // среди групп ученика на курсе.
-        $openTopicsCount = \App\Models\Group::where('course_id', $courseId)
+        // Определяем, в каких группах курса состоит ученик.
+        // Набор открытых тем у групп разный — его задаёт преподаватель
+        // на странице курса. Если групп несколько, берём объединение наборов.
+        $groupIds = \App\Models\Group::where('course_id', $courseId)
             ->whereHas('students', function ($q) use ($userId) {
                 $q->where('users.id', $userId);
             })
-            ->max('open_topics_count');
+            ->pluck('id');
 
-        // Если ученик состоит в группе — открываем первые N тем по порядку,
-        // остальные закрываем (переопределяем глобальный статус темы).
-        if (!is_null($openTopicsCount)) {
-            foreach ($topics as $index => $topic) {
-                $topic->status = ($index < (int) $openTopicsCount) ? 'активный' : 'закрыт';
+        // Ученик в группе — статус темы определяется её набором и
+        // переопределяет глобальный статус. Не в группе — статус темы как есть.
+        if ($groupIds->isNotEmpty()) {
+            $openTopicIds = DB::table('group_topics')
+                ->whereIn('group_id', $groupIds)
+                ->pluck('topic_id')
+                ->flip();
+
+            foreach ($topics as $topic) {
+                $topic->status = $openTopicIds->has($topic->id) ? 'активный' : 'закрыт';
             }
         }
 

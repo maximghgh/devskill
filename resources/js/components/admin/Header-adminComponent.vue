@@ -4,7 +4,7 @@
         <div class="header__inner header__inner--admin">
             <div class="header__logos">
                 <div class="logos">
-                    <a href="/admin">
+                    <a href="/">
                         <img
                             src="../../../img/logo.png"
                             class="header__logo"

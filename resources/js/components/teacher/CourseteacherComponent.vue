@@ -1,6 +1,6 @@
 <template>
     <div class="center">
-        <h2>Курсы</h2>
+        <h2>Мои курсы</h2>
         <div class="div">
             <h3>Текущие курсы</h3>
             <div class="course__block course__block--current">

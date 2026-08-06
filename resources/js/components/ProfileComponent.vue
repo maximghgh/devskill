@@ -240,74 +240,42 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div v-else class="cabinet-empty">Пока нет курсов для оплаты.</div>
+                                <div v-else class="cabinet-empty cabinet-empty--spaced">
+                                    Пока нет курсов для оплаты.
+                                </div>
 
-                                <!-- ====== ИСТОРИЯ ОПЛАТ ====== -->
-                                <div class="payments-history">
-                                    <div class="profile-children__title">История оплат</div>
-
-                                    <div v-if="paymentsLoading" class="cabinet-empty">Загрузка...</div>
-                                    <div v-else-if="!payments.length" class="cabinet-empty">
-                                        Оплат пока нет.
-                                    </div>
-                                    <div v-else class="payments-history__list">
-                                        <div
-                                            v-for="payment in payments"
-                                            :key="payment.id"
-                                            class="payments-history__item"
-                                        >
-                                            <div class="payments-history__main">
-                                                <span class="payments-history__course">
-                                                    {{ payment.course_title || "Курс" }}
-                                                </span>
-                                                <span class="payments-history__meta">
-                                                    {{ formatPaymentDate(payment.paid_at) }}
-                                                    <template v-if="payment.student_name">
-                                                        · {{ payment.student_name }}
-                                                    </template>
-                                                    · {{ paymentMethodLabel(payment.payment_method) }}
-                                                </span>
-                                            </div>
-
-                                            <span class="payments-history__amount">
-                                                {{ formatMoney(payment.amount) }}
-                                            </span>
-
-                                            <span
-                                                class="payments-history__status"
-                                                :class="paymentStatusClass(payment.status)"
-                                            >
-                                                {{ paymentStatusLabel(payment.status) }}
-                                            </span>
-
-                                            <div class="payments-history__receipt">
-                                                <a
-                                                    v-if="payment.receipt_url"
-                                                    :href="payment.receipt_url"
-                                                    target="_blank"
-                                                    rel="noopener"
-                                                    class="payments-history__link"
-                                                >Чек</a>
-                                                <label class="payments-history__upload">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*,application/pdf"
-                                                        class="payments-history__file"
-                                                        :disabled="receiptUploadingId === payment.id"
-                                                        @change="uploadReceipt(payment, $event)"
-                                                    />
-                                                    <span>
-                                                        {{
-                                                            receiptUploadingId === payment.id
-                                                                ? "Загрузка..."
-                                                                : payment.receipt_url
-                                                                ? "Заменить"
-                                                                : "Прикрепить чек"
-                                                        }}
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </div>
+                                <!-- ====== КУДА ПРИХОДЯТ ЧЕКИ ====== -->
+                                <div class="payments-note">
+                                    <svg
+                                        class="payments-note__icon"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <rect x="2" y="4" width="20" height="16" rx="3" />
+                                        <path d="m3 7 9 6 9-6" />
+                                    </svg>
+                                    <div class="payments-note__body">
+                                        <p class="payments-note__title">
+                                            Чеки приходят на почту
+                                        </p>
+                                        <p class="payments-note__text">
+                                            После оплаты чек отправляется на
+                                            <template v-if="receiptEmail">
+                                                <span class="payments-note__email">{{ receiptEmail }}</span>
+                                            </template>
+                                            <template v-else>
+                                                почту, указанную в личных данных
+                                            </template>.
+                                            Изменить адрес можно в разделе
+                                            «Личные данные».
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -442,79 +410,26 @@ const formatMoney = (value) =>
     currency: "RUB",
     maximumFractionDigits: 0,
   }).format(Number(value) || 0);
-// --- История оплат ---
-const payments = ref([]);
-const paymentsLoading = ref(false);
+// --- Оплаты ---
+// Список оплат в кабинете не показываем: чеки уходят на почту.
+// С сервера берём только задолженность — она учитывает статус оплаты.
 const serverDebt = ref(null);
-const receiptUploadingId = ref(null);
 
-const loadPayments = async () => {
+const loadPaymentDebt = async () => {
   if (!user.value.id) return;
-  paymentsLoading.value = true;
   try {
     const { data } = await axios.get(`/api/user/${user.value.id}/purchases`);
-    payments.value = data.payments || [];
     serverDebt.value = Number(data.debt) || 0;
   } catch (error) {
-    console.error("Ошибка загрузки истории оплат:", error);
-    payments.value = [];
+    console.error("Ошибка загрузки данных об оплате:", error);
     serverDebt.value = null;
-  } finally {
-    paymentsLoading.value = false;
   }
 };
 
-const paymentStatusLabels = {
-  completed: "Оплачено",
-  pending: "Ожидает подтверждения",
-  failed: "Не прошла",
-};
-const paymentStatusLabel = (status) =>
-  paymentStatusLabels[status] || status || "—";
-const paymentStatusClass = (status) => ({
-  "payments-history__status--ok": status === "completed",
-  "payments-history__status--pending": status === "pending",
-  "payments-history__status--failed": status === "failed",
-});
-const paymentMethodLabel = (method) =>
-  method === "sbp" ? "СБП" : method === "card" ? "Картой" : method || "—";
-const formatPaymentDate = (value) => {
-  if (!value) return "";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString("ru-RU");
-};
-
-const uploadReceipt = async (payment, event) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  receiptUploadingId.value = payment.id;
-  try {
-    const form = new FormData();
-    form.append("receipt", file);
-    const { data } = await axios.post(
-      `/api/purchases/${payment.id}/receipt`,
-      form
-    );
-    // Обновляем ссылку на чек в уже загруженном списке.
-    const updated = data?.purchase;
-    if (updated) {
-      const idx = payments.value.findIndex((p) => p.id === payment.id);
-      if (idx !== -1) {
-        payments.value[idx] = {
-          ...payments.value[idx],
-          receipt_url: updated.receipt_url,
-        };
-      }
-    }
-  } catch (error) {
-    console.error("Ошибка загрузки чека:", error);
-    alert("Не удалось загрузить чек. Проверьте формат (jpg, png, pdf) и размер.");
-  } finally {
-    receiptUploadingId.value = null;
-    event.target.value = "";
-  }
-};
+// Почта, на которую уходят чеки: из данных родителя, иначе из аккаунта.
+const receiptEmail = computed(
+  () => parentForm.email?.trim() || user.value?.email || ""
+);
 
 // Задолженность: с сервера (учитывает статус оплаты), иначе — сумма цен курсов.
 const paymentDebt = computed(() =>
@@ -723,7 +638,7 @@ onMounted(async () => {
   await loadUserData();
   await loadChildren();
   await loadCourses();
-  await loadPayments();
+  await loadPaymentDebt();
 });
 
 onBeforeUnmount(() => {
@@ -1208,92 +1123,46 @@ async function uploadPhoto() {
     margin: 0;
 }
 
-/* --- История оплат --- */
-.payments-history {
+/* --- Инфо-блок: куда приходят чеки --- */
+.payments-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
     margin-top: 26px;
+    padding: 18px 20px;
+    background: #f5f4fb;
+    border-left: 4px solid #6352c1;
+    border-radius: 14px;
 }
-.payments-history__list {
+.payments-note__icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: #6352c1;
+}
+.payments-note__body {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 12px;
+    gap: 6px;
 }
-.payments-history__item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding: 12px 16px;
-    border: 1px solid #ececec;
-    border-radius: 12px;
-    background: #fff;
+.payments-note__title {
+    margin: 0;
+    font-size: 16px;
+    color: #1a1a1a;
 }
-.payments-history__main {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1 1 200px;
-    min-width: 0;
+.payments-note__text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #555555;
 }
-.payments-history__course {
-    font-size: 15px;
-    font-weight: 600;
-    color: #222;
+.payments-note__email {
+    color: #6352c1;
+    word-break: break-all;
 }
-.payments-history__meta {
-    font-size: 13px;
-    color: #888;
-}
-.payments-history__amount {
-    font-size: 15px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-.payments-history__status {
-    font-size: 13px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: #f2f2f2;
-    color: #555;
-    white-space: nowrap;
-}
-.payments-history__status--ok {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-.payments-history__status--pending {
-    background: #fff8e1;
-    color: #b26a00;
-}
-.payments-history__status--failed {
-    background: #ffebee;
-    color: #c62828;
-}
-.payments-history__receipt {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.payments-history__link {
-    font-size: 13px;
-    color: #6c5ce7;
-    text-decoration: underline;
-}
-.payments-history__file {
-    display: none;
-}
-.payments-history__upload {
-    cursor: pointer;
-    font-size: 13px;
-    padding: 5px 12px;
-    border: 1px solid #6c5ce7;
-    border-radius: 8px;
-    color: #6c5ce7;
-    white-space: nowrap;
-}
-.payments-history__upload:hover {
-    background: #6c5ce7;
-    color: #fff;
+
+/* Пустое состояние в разделе оплаты не должно прилипать к блоку выше */
+.cabinet-empty--spaced {
+    margin-top: 22px;
 }
 
 .custom-input {

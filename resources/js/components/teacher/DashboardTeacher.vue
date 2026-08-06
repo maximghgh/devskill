@@ -52,8 +52,27 @@
                     @keydown.esc="cancelEditSchedule"
                     @keydown.enter.ctrl.prevent="saveSchedule"
                     @keydown.enter.meta.prevent="saveSchedule"
-                    @blur="saveSchedule"
                 ></textarea>
+
+                <div v-if="scheduleEditing" class="schedule__actions">
+                    <button
+                        type="button"
+                        class="schedule__btn schedule__btn--primary"
+                        :disabled="scheduleSaving"
+                        @click="saveSchedule"
+                    >
+                        {{ scheduleSaving ? "Сохранение..." : "Сохранить" }}
+                    </button>
+                    <button
+                        type="button"
+                        class="schedule__btn"
+                        :disabled="scheduleSaving"
+                        @click="cancelEditSchedule"
+                    >
+                        Отмена
+                    </button>
+                </div>
+
                 <p
                     v-else-if="scheduleText"
                     class="info__events-desc schedule__text"
@@ -199,7 +218,7 @@ async function loadSchedule() {
 }
 
 async function saveSchedule() {
-    // Сохранение вызывается и по Enter, и по потере фокуса — второй раз не шлём.
+    // Сохранение вызывается кнопкой и по Ctrl+Enter — второй раз не шлём.
     if (!scheduleEditing.value || scheduleSaving.value) return;
 
     if (scheduleDraft.value === scheduleText.value) {
@@ -301,13 +320,19 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Содержимое прижато к верху: в глобальных стилях у блока
+   justify-content: center, из-за чего расписание висело по центру. */
 .info__events {
     position: relative;
+    justify-content: flex-start;
 }
 
-/* карандаш в правом верхнем углу блока */
+/* Карандаш в правом верхнем углу блока.
+   z-index обязателен: соседние flex-элементы рисуются как позиционированные
+   и без него перекрывают кнопку — кликалась только незакрытая часть. */
 .schedule__edit {
     position: absolute;
+    z-index: 1;
     top: 12px;
     right: 12px;
     display: flex;
@@ -353,6 +378,48 @@ onMounted(async () => {
     border-color: #6c5ce7;
 }
 .schedule__input:disabled {
+    opacity: 0.6;
+}
+
+/* Кнопки редактирования: сохранение больше не происходит молча по потере фокуса */
+.schedule__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 2px;
+}
+
+.schedule__btn {
+    box-sizing: border-box;
+    height: 38px;
+    padding: 0 20px;
+    border: 1px solid #d9c7ec;
+    border-radius: 19px;
+    background: #ffffff;
+    color: var(--primary-600, #4e187b);
+    font-family: JanoSansProRegular;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background var(--transition-3, 0.3s),
+        border-color var(--transition-3, 0.3s);
+}
+
+.schedule__btn:hover:not(:disabled) {
+    border-color: #7a2abd;
+}
+
+.schedule__btn--primary {
+    border-color: #7a2abd;
+    background: #7a2abd;
+    color: #ffffff;
+}
+
+.schedule__btn--primary:hover:not(:disabled) {
+    background: #68219f;
+    border-color: #68219f;
+}
+
+.schedule__btn:disabled {
+    cursor: default;
     opacity: 0.6;
 }
 </style>

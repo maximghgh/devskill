@@ -30,7 +30,6 @@ const groupsLoading = ref(false);
 const createLoading = ref(false);
 const groups = ref([]);
 const selectedStudentIds = ref([]);
-const openTopicsCount = ref(0);
 
 const hasStudents = computed(() => students.value.length > 0);
 const noStudents = computed(
@@ -77,7 +76,6 @@ function resetForm() {
     groupName.value = "";
     searchQuery.value = "";
     selectedStudentIds.value = [];
-    openTopicsCount.value = 0;
     studentPage.value = 1;
 }
 
@@ -157,8 +155,6 @@ async function openEditGroup(group) {
             `/api/admin/course/${courseId.value}/groups/${group.id}`
         );
         groupName.value = data?.name_group || group.name_group || "";
-        openTopicsCount.value =
-            data?.open_topics_count ?? group.open_topics_count ?? 0;
         const ids = Array.isArray(data?.students)
             ? data.students.map((s) => s.id)
             : [];
@@ -219,10 +215,11 @@ async function submitGroup() {
     createLoading.value = true;
     emit("saving", true);
     try {
+        // Набор открытых тем здесь не трогаем — им управляет преподаватель
+        // на странице курса, а сохранение группы его не должно сбрасывать.
         const payload = {
             name_group: name,
             student_ids: selectedStudentIds.value,
-            open_topics_count: Math.max(0, Number(openTopicsCount.value) || 0),
         };
 
         if (modalMode.value === "edit" && editingGroupId.value) {
@@ -346,22 +343,6 @@ onMounted(() => {
                                     placeholder="Например, Группа 1"
                                     :disabled="modalLoading"
                                 />
-                            </div>
-
-                            <div class="dialog__component">
-                                <p class="dialog__title">Открыто тем</p>
-                                <input
-                                    v-model.number="openTopicsCount"
-                                    type="number"
-                                    min="0"
-                                    class="dialog__input"
-                                    placeholder="0"
-                                    :disabled="modalLoading"
-                                />
-                                <p class="dialog__hint">
-                                    Сколько первых тем курса открыто ученикам этой
-                                    группы. Например, одной группе — 3, другой — 1.
-                                </p>
                             </div>
 
                             <div class="dialog__component">
@@ -509,7 +490,8 @@ onMounted(() => {
                     <td>{{ idx + 1 }}</td>
                     <td>{{ group.name_group }}</td>
                     <td>{{ group.students_count ?? 0 }}</td>
-                    <td>{{ group.open_topics_count ?? 0 }}</td>
+                    <!-- Только для справки: набор тем задаёт преподаватель на странице курса -->
+                    <td>{{ group.topic_ids?.length ?? 0 }}</td>
                     <td class="col-btn">
                         <div class="btn__edit">
                             <div class="tooltip-container">

@@ -39,12 +39,11 @@
 
             <div class="dialog__component">
               <p class="dialog__title">Ответ</p>
-              <textarea
-                v-model="answer"
-                class="dialog__textarea dialog__textarea--s"
-                placeholder="Введите ответ"
+              <RichTextEditor
+                v-model="answerHtml"
+                placeholder="Введите ответ..."
                 :disabled="loading"
-              ></textarea>
+              />
             </div>
 
             <p v-if="error" class="dialog__error">{{ error }}</p>
@@ -63,7 +62,7 @@
                 type="button"
                 class="main__btn"
                 @click="submit"
-                :disabled="loading || !question.trim() || !answer.trim()"
+                :disabled="loading || !question.trim() || !hasAnswer"
               >
                 {{ loading ? "Сохранение..." : "Сохранить" }}
               </button>
@@ -76,31 +75,35 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import axios from "axios";
 import { globalNotification } from "../../../globalNotification";
+import { answerToHtml, htmlHasText } from "../../../utils/editorContent";
+import RichTextEditor from "../../common/RichTextEditor.vue";
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
-  faq: { type: Object, default: null }, // {id, question, answer}
+  faq: { type: Object, default: null }, // {id, question, answer, answer_html}
 });
 
 const emit = defineEmits(["update:modelValue", "saved"]);
 
 const question = ref("");
-const answer = ref("");
+const answerHtml = ref("");
 const loading = ref(false);
 const error = ref("");
+
+const hasAnswer = computed(() => htmlHasText(answerHtml.value));
 
 watch(
   () => props.modelValue,
   (v) => {
-    if (v) {
-      question.value = props.faq?.question ?? "";
-      answer.value = props.faq?.answer ?? "";
-      error.value = "";
-      loading.value = false;
-    }
+    if (!v) return;
+
+    question.value = props.faq?.question ?? "";
+    answerHtml.value = answerToHtml(props.faq);
+    error.value = "";
+    loading.value = false;
   }
 );
 
@@ -117,7 +120,7 @@ async function submit() {
   try {
     const { data } = await axios.put(`/api/faqs/${props.faq.id}`, {
       question: question.value,
-      answer: answer.value,
+      answer_html: answerHtml.value,
     });
 
     globalNotification.categoryMessage = "Вопрос изменен";

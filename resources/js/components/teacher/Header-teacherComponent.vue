@@ -4,7 +4,7 @@
         <div class="header__inner">
             <div class="header__logos">
                 <div class="logos">
-                    <a href="/teacher">
+                    <a href="/">
                         <img
                             src="../../../img/logo.png"
                             class="header__logo"
@@ -65,8 +65,8 @@
                                 >
                                     <a href="/teacher" class="header-user-menu__item">Панель преподавателя</a>
                                     <a href="/teacher/journal" class="header-user-menu__item">Журнал</a>
-                                    <a href="/teacher/course" class="header-user-menu__item">Курсы</a>
-                                    <a href="/teacher/mycourses" class="header-user-menu__item">Мои курсы</a>
+                                    <a href="/teacher/course" class="header-user-menu__item">Мои курсы</a>
+                                    <a href="/teacher/mycourses" class="header-user-menu__item">Курсы</a>
                                     <a href="/teacher/profile" class="header-user-menu__item">Профиль</a>
                                     <a href="#" class="header-user-menu__item" @click.prevent="logout">Выйти</a>
                                 </div>

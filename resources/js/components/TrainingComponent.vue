@@ -294,10 +294,9 @@
                             <transition name="slide-fade">
                                 <div
                                     v-if="item.isOpen"
-                                    class="question__answer"
-                                >
-                                    {{ item.answer }}
-                                </div>
+                                    class="question__answer faq-answer"
+                                    v-html="renderFaqAnswer(item)"
+                                ></div>
                             </transition>
                         </div>
                     </div>
@@ -335,6 +334,7 @@ import {
     getCourseDifficultyLabel,
 } from "@/utils/courseDifficulty";
 import { getCourseCardImageUrl } from "@/utils/courseImage";
+import { renderFaqAnswer } from "@/utils/editorContent";
 
 /* ---------- модалка покупки / консультации ---------- */
 
@@ -1166,5 +1166,58 @@ function scrollToCourse() {
         padding: 0px 20px;
         border-radius: 25px;
     }
+}
+
+/* Ответ из редактора: абзацы, подзаголовки и списки */
+.faq-answer :deep(p) {
+    margin: 0 0 8px;
+    line-height: 1.5;
+}
+.faq-answer :deep(p:last-child) {
+    margin-bottom: 0;
+}
+.faq-answer :deep(h3),
+.faq-answer :deep(h4) {
+    margin: 14px 0 6px;
+    font-size: 1.05em;
+    font-weight: 600;
+    text-align: left;
+}
+.faq-answer :deep(h3:first-child),
+.faq-answer :deep(h4:first-child) {
+    margin-top: 0;
+}
+.faq-answer :deep(ul),
+.faq-answer :deep(ol) {
+    margin: 0 0 8px;
+    padding-left: 22px;
+}
+.faq-answer :deep(ul) {
+    list-style: disc;
+}
+.faq-answer :deep(ol) {
+    list-style: decimal;
+}
+.faq-answer :deep(li) {
+    margin-bottom: 4px;
+    line-height: 1.5;
+}
+.faq-answer :deep(li:last-child) {
+    margin-bottom: 0;
+}
+.faq-answer :deep(li > ul),
+.faq-answer :deep(li > ol) {
+    margin: 4px 0 0;
+}
+.faq-answer :deep(a) {
+    color: #6352c1;
+    text-decoration: underline;
+}
+/* Глобальный сброс в app.css ставит этим тегам font-weight: inherit,
+   а жирное начертание шрифта подключено отдельным семейством */
+.faq-answer :deep(b),
+.faq-answer :deep(strong) {
+    font-family: JanoSansProBold;
+    font-weight: 700;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
     <div class="teacher__block">
-        <h1 class="page__title">Мои курсы</h1>
+        <h1 class="page__title">Курсы</h1>
 
         <div class="users-toolbar">
             <div class="asdf">

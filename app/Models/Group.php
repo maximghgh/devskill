@@ -13,12 +13,21 @@ class Group extends Model
         'name_group',
         'course_id',
         'students_count',
-        'open_topics_count',
     ];
 
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
+    }
+
+    /**
+     * Темы курса, открытые этой группе. Набор задаёт преподаватель
+     * на странице курса — у разных групп он может отличаться.
+     */
+    public function topics()
+    {
+        return $this->belongsToMany(Topic::class, 'group_topics', 'group_id', 'topic_id')
+            ->withTimestamps();
     }
 
     public function students()
