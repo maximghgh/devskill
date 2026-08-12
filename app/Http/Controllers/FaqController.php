@@ -26,7 +26,7 @@ class FaqController extends Controller
 
     public function index()
     {
-        $faqs = Faq::all();
+        $faqs = Faq::orderBy('id')->get();
         return response()->json($faqs);
     }
 

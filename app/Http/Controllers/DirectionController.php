@@ -27,7 +27,7 @@ class DirectionController extends Controller
     public function index()
     {
         // Получаем все направления из таблицы directions
-        $directions = Direction::all();
+        $directions = Direction::orderBy('id')->get();
         return response()->json($directions);
     }
     public function update(Request $request, $id)

@@ -221,8 +221,12 @@
                                             :class="{ 'profile-payment__amount--debt': paymentDebt > 0 }"
                                         >{{ formattedDebt }}</span>
                                     </div>
-                                    <!-- TODO: подключить редирект на оплату ИжГТУ, когда обсудим интеграцию. Пока только вёрстка. -->
-                                    <a class="profile-payment__link" href="#" @click.prevent>Перейти к оплате в ИжГТУ</a>
+                                    <a
+                                        class="profile-payment__link"
+                                        href="https://istu.ru/payment"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >Перейти к оплате в ИжГТУ</a>
                                 </div>
 
                                 <div class="profile-children" v-if="purchasedCourses.length">
@@ -263,18 +267,16 @@
                                     </svg>
                                     <div class="payments-note__body">
                                         <p class="payments-note__title">
-                                            Чеки приходят на почту
+                                            Отправьте чек об оплате
                                         </p>
                                         <p class="payments-note__text">
-                                            После оплаты чек отправляется на
-                                            <template v-if="receiptEmail">
-                                                <span class="payments-note__email">{{ receiptEmail }}</span>
-                                            </template>
-                                            <template v-else>
-                                                почту, указанную в личных данных
-                                            </template>.
-                                            Изменить адрес можно в разделе
-                                            «Личные данные».
+                                            После оплаты отправьте чек на почту
+                                            университета
+                                            <a
+                                                class="payments-note__email"
+                                                href="mailto:info@istu.ru"
+                                                >info@istu.ru</a
+                                            >. Так мы быстрее подтвердим оплату.
                                         </p>
                                     </div>
                                 </div>
@@ -328,8 +330,8 @@
                                     <table class="cabinet-grades__table cabinet-grades__table--dates">
                                         <thead>
                                             <tr>
-                                                <th class="cabinet-grades__corner">Дата</th>
-                                                <th v-for="(row, i) in gradeRows" :key="i">{{ row.date }}</th>
+                                                <th class="cabinet-grades__corner">Урок</th>
+                                                <th v-for="(row, i) in gradeRows" :key="i">{{ row.lesson }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -426,11 +428,6 @@ const loadPaymentDebt = async () => {
   }
 };
 
-// Почта, на которую уходят чеки: из данных родителя, иначе из аккаунта.
-const receiptEmail = computed(
-  () => parentForm.email?.trim() || user.value?.email || ""
-);
-
 // Задолженность: с сервера (учитывает статус оплаты), иначе — сумма цен курсов.
 const paymentDebt = computed(() =>
   serverDebt.value !== null
@@ -488,9 +485,9 @@ function getCourseProgress(course) {
   return { completedTopics, totalTopics, completedTasks, totalTasks };
 }
 
-// --- Табель успеваемости (read-only): даты занятий в шапке, баллы снизу ---
+// --- Табель успеваемости (read-only): уроки в шапке, баллы снизу ---
 const gradeCourseId = ref("");
-const gradeRows = ref([]); // [{ date, score }]
+const gradeRows = ref([]); // [{ lesson, score }]
 const gradeCourses = computed(() => purchasedCourses.value);
 // цвет балла: зелёный (высокий) / оранжевый (средний) / красный (низкий)
 const scoreClass = (s) => {
@@ -498,12 +495,6 @@ const scoreClass = (s) => {
   if (s >= 85) return "grade--high";
   if (s >= 60) return "grade--mid";
   return "grade--low";
-};
-// дата занятия -> ДД.ММ
-const formatLessonDate = (value) => {
-  if (!value) return "—";
-  const p = String(value).slice(0, 10).split("-"); // YYYY-MM-DD
-  return p.length === 3 ? `${p[2]}.${p[1]}` : String(value);
 };
 // отзыв преподавателя по выбранному курсу
 const teacherReview = ref("");
@@ -516,8 +507,7 @@ const loadGrades = async () => {
       `/api/user/${user.value.id}/course/${gradeCourseId.value}/grades`
     );
     gradeRows.value = (data.lessons || []).map((l) => ({
-      lesson: l.lesson,
-      date: formatLessonDate(l.date),
+      lesson: l.lesson || "Без названия",
       score: l.score,
     }));
     teacherReview.value = data.review || "";
@@ -912,6 +902,8 @@ async function uploadPhoto() {
 /* ===== Кабинет: панели разделов ===== */
 .cabinet-pane {
     padding: 4px 0 8px;
+    min-width: 0;
+    max-width: 100%;
 }
 .cabinet-empty {
     padding: 28px;
@@ -977,6 +969,7 @@ async function uploadPhoto() {
     background: #ffffff;
 }
 .cabinet-grades__table-wrap {
+    max-width: 100%;
     overflow-x: auto;
 }
 .cabinet-grades__table {
@@ -1000,6 +993,11 @@ async function uploadPhoto() {
     color: #ffffff;
     font-weight: 600;
     font-size: 15px;
+}
+.cabinet-grades__table th:not(.cabinet-grades__corner) {
+    min-width: 96px;
+    max-width: 220px;
+    white-space: normal;
 }
 .cabinet-grades__table td {
     background: #ffffff;
@@ -1157,6 +1155,7 @@ async function uploadPhoto() {
 }
 .payments-note__email {
     color: #6352c1;
+    text-decoration: underline;
     word-break: break-all;
 }
 

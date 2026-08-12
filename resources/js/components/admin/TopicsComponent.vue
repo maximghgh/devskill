@@ -702,7 +702,7 @@ h2 {
 .editor-container {
     min-height: 150px;
     border: 1px solid #ccc;
-    padding: 8px;
+    padding: 8px 8px 8px 74px;
 }
 .btn__user--edit {
     cursor: pointer;
@@ -840,11 +840,25 @@ h2 {
 }
 
 .editor-container {
-    padding: 10px;
+    padding: 10px 10px 10px 74px;
     border: 1px solid #ccc;
     border-radius: 4px;
     min-height: 150px;
     background-color: #fff;
+}
+
+.editor-container :deep(.ce-toolbar__content) {
+    max-width: none;
+}
+
+.editor-container :deep(.ce-toolbar__actions) {
+    left: auto !important;
+    right: 100% !important;
+}
+
+.editor-container :deep(.codex-editor__redactor) {
+    min-height: 130px !important;
+    margin-right: 0 !important;
 }
 
 .form-button {

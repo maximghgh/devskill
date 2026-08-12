@@ -391,11 +391,25 @@ async function submit() {
 }
 
 .editor-container {
-    padding: 12px 40px;
+    padding: 12px 40px 12px 74px;
     max-width: unset;
     width: 100%;
     min-height: 220px;
     background: #fff;
+}
+
+.editor-container :deep(.ce-toolbar__content) {
+    max-width: none;
+}
+
+.editor-container :deep(.ce-toolbar__actions) {
+    left: auto !important;
+    right: 100% !important;
+}
+
+.editor-container :deep(.codex-editor__redactor) {
+    min-height: 200px !important;
+    margin-right: 0 !important;
 }
 
 .dialog__inner {

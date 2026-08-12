@@ -3,11 +3,11 @@
         <div class="maincontainer">
             <div class="container">
                 <section class="offer offer_about">
-                    <div class="offer__inner">
-                        <h1 class="intro__title">
+                    <div class="offer__inner offer__inner_main">
+                        <h1>
                             Об образовательном портале
                         </h1>
-                        <p class="intro__text">
+                        <p class="offer__desc intro__text">
                             В современном мире, где технологический прогресс
                             неуклонно продвигается вперед, образование играет
                             всё более важную роль. Возможность получить
@@ -219,20 +219,6 @@ onMounted(async () => {
     font-size: 35px;
   }
 }
-/* Адаптив */
-@media (max-width: 600px) {
-  .intro__title{
-    font-size: 31px !important;
-  }
-}
-@media (max-width: 510px) {
-  .intro__title{
-    font-size: 28px !important;
-  }
-  .intro__text{
-    font-size: 15px !important;
-  }
-}
 .metrics-grid {
   margin: 0 0 95px;
   display: grid;
@@ -274,13 +260,7 @@ onMounted(async () => {
     text-align: center;
     margin-bottom: 40px;
 }
-.intro__title {
-    font-size: 37px;
-    margin-bottom: 30px;
-}
 .intro__text {
-    font-size: 18px;
-    line-height: 1.6;
     max-width: 800px;
 }
 

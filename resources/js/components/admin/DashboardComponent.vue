@@ -209,7 +209,7 @@ const openSupportRequestsCount = computed(() =>
 
 function upsertCourse(course) {
   const idx = courses.value.findIndex(c => c.id === course.id);
-  if (idx === -1) courses.value = [course, ...courses.value];
+  if (idx === -1) courses.value = [...courses.value, course];
   else courses.value = courses.value.map(c => c.id === course.id ? course : c);
 }
 

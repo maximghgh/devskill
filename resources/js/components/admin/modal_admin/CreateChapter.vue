@@ -411,8 +411,18 @@ watch(
 </script>
 
 <style scoped>
-:deep .ce-toolbar__actions{
-    left: -35px !important;
+.editor-container :deep(.ce-toolbar__content) {
+    max-width: none;
+}
+
+.editor-container :deep(.ce-toolbar__actions) {
+    left: auto !important;
+    right: 100% !important;
+}
+
+.editor-container :deep(.codex-editor__redactor) {
+    min-height: 130px !important;
+    margin-right: 0 !important;
 }
 .dialog__error {
   color: #d40000;
@@ -441,7 +451,7 @@ watch(
 }
 
 .editor-container {
-  padding: 10px;
+  padding: 10px 10px 10px 74px;
   border: 1px solid #ccc;
   border-radius: 4px;
   min-height: 150px;

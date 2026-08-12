@@ -439,7 +439,10 @@ function resetForm() {
 .form-textarea { resize: none; min-height: 80px; }
 .form-hint { font-size: 12px; color: #7c7c7c; margin-top: 6px; }
 .form-error { font-size: 12px; color: #e80024; margin-top: 6px; }
-.editor-container { padding: 10px; border: 1px solid #ccc; border-radius: 4px; min-height: 150px; background: #fff; }
+.editor-container { padding: 10px 10px 10px 74px; border: 1px solid #ccc; border-radius: 4px; min-height: 150px; background: #fff; }
+.editor-container :deep(.ce-toolbar__content) { max-width: none; }
+.editor-container :deep(.ce-toolbar__actions) { left: auto !important; right: 100% !important; }
+.editor-container :deep(.codex-editor__redactor) { min-height: 130px !important; margin-right: 0 !important; }
 .form-button { width: 700px; background: #007bff; color: #fff; padding: 10px 15px; border: 0; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color .3s; margin: 0 auto; }
 .form-button:hover { background: #0056b3; }
 </style>

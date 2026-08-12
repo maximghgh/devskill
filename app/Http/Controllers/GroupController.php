@@ -12,10 +12,17 @@ class GroupController extends Controller
     public function index(Course $course)
     {
         $groups = $course->groups()
-            ->with('topics:id')
+            ->with(['topics:id', 'students:id'])
             ->orderByDesc('created_at')
             ->get()
-            ->map(fn (Group $group) => $this->withTopicIds($group));
+            ->map(function (Group $group) {
+                $group = $this->withTopicIds($group);
+
+                $group->setAttribute('student_ids', $group->students->pluck('id')->all());
+                $group->unsetRelation('students');
+
+                return $group;
+            });
 
         return response()->json($groups);
     }

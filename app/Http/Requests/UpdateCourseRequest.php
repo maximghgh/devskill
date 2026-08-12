@@ -26,7 +26,7 @@ class UpdateCourseRequest extends FormRequest
             'difficulty'           => ['required', 'string', Rule::in(CourseDifficulty::allowedValues())],
             'teachers'             => 'nullable|json',
             'language'             => 'nullable|json',
-            'selectedDirection'    => 'nullable|integer',
+            'direction'            => 'nullable|string',
             'upgradequalification' => 'required|in:0,1',
             'cardImage'            => 'nullable|file|image|max:5120',
             'descriptionImage'     => 'nullable|image|max:2048',

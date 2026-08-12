@@ -25,16 +25,6 @@
                         {{ group.name_group }}
                     </option>
                 </select>
-                <span
-                    class="group-scope__badge"
-                    :class="
-                        openTopicsCount
-                            ? 'group-scope__badge--active'
-                            : 'group-scope__badge--empty'
-                    "
-                >
-                    Открыто {{ openTopicsCount }} из {{ topics.length }}
-                </span>
             </div>
 
             <p class="group-scope__hint">{{ scopeHint }}</p>
@@ -43,7 +33,9 @@
         <div class="info__course">
             <div class="info__card info__card--course">
                 <p class="info__text">Всего студентов:</p>
-                <span class="info__desc info__desc--s">{{ studentsCount }}</span>
+                <span class="info__desc info__desc--s">
+                    {{ scopedStudentsCount }}
+                </span>
             </div>
             <div class="info__card info__card--course">
                 <p class="info__text">Текущий блок:</p>
@@ -52,9 +44,9 @@
                 </span>
             </div>
             <div class="info__card info__card--course">
-                <p class="info__text">Ближайшие занятия:</p>
-                <span class="info__desc info__desc--s">
-                    {{ courseDatesText }}
+                <p class="info__text">Открыто занятий:</p>
+                <span class="open-badge">
+                    {{ openTopicsCount }} из {{ topics.length }}
                 </span>
             </div>
         </div>
@@ -224,32 +216,17 @@ function topicBadgeClass(topic) {
 }
 
 const currentTopicTitle = computed(() => {
-    if (!topics.value.length) return "—";
-    return topics.value[0]?.title || "—";
+    const opened = topics.value.filter((topic) => isTopicActive(topic));
+    if (!opened.length) return "—";
+    return opened[opened.length - 1]?.title || "—";
 });
 
-const courseDatesText = computed(() => {
-    if (!course.value) return "—";
-    if (course.value.start_date && course.value.end_date) {
-        return `С ${formatDate(course.value.start_date)} до ${formatDate(
-            course.value.end_date
-        )}`;
+const scopedStudentsCount = computed(() => {
+    if (selectedGroup.value) {
+        return selectedGroup.value.student_ids?.length ?? 0;
     }
-    if (course.value.start_date) {
-        return `Старт: ${formatDate(course.value.start_date)}`;
-    }
-    if (course.value.end_date) {
-        return `Окончание: ${formatDate(course.value.end_date)}`;
-    }
-    return "—";
+    return studentsCount.value;
 });
-
-function formatDate(value) {
-    if (!value) return "";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleDateString("ru-RU");
-}
 
 function openChapterEdit(chapter) {
     selectedChapter.value = chapter;
@@ -353,6 +330,9 @@ async function loadGroups() {
         groups.value = list.map((group) => ({
             ...group,
             topic_ids: Array.isArray(group.topic_ids) ? group.topic_ids : [],
+            student_ids: Array.isArray(group.student_ids)
+                ? group.student_ids
+                : [],
         }));
     } catch (e) {
         console.error("Ошибка загрузки групп:", e);
@@ -448,17 +428,12 @@ onMounted(async () => {
     color: #858585;
 }
 
-/* Селект и бейдж — одна высота, чтобы строка читалась ровной */
-.group-scope__select,
-.group-scope__badge {
+.group-scope__select {
     box-sizing: border-box;
     height: 42px;
     border-radius: 21px;
     font-family: JanoSansProRegular;
     font-size: 16px;
-}
-
-.group-scope__select {
     flex: 0 1 300px;
     min-width: 220px;
     color: #121212;
@@ -497,20 +472,19 @@ onMounted(async () => {
     background-color: #f6f5fb;
 }
 
-.group-scope__badge {
+.open-badge {
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
+    height: 32px;
     padding: 0 18px;
+    border-radius: 16px;
+    font-family: JanoSansProRegular;
+    font-size: 16px;
+    line-height: 146%;
     white-space: nowrap;
-    color: #121212;
-}
-
-.group-scope__badge--active {
-    background-color: #bde5b0;
-}
-
-.group-scope__badge--empty {
-    background-color: #e5b0b0;
+    background-color: #7a2abd;
+    color: #ffffff;
 }
 
 .group-scope__hint {

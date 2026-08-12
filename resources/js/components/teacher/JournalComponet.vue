@@ -150,14 +150,39 @@
                                                     />
                                                 </td>
                                                 <td v-else class="journal__cell journal__cell--review">
-                                                    <textarea
-                                                        class="journal__review-input"
-                                                        rows="2"
-                                                        placeholder="Отзыв о ребёнке для родителя"
-                                                        v-model="reviewsByStudent[student.id]"
-                                                        :disabled="reviewsLoading || reviewSaving[student.id]"
-                                                        @change="saveReview(student.id)"
-                                                    ></textarea>
+                                                    <div class="journal__review">
+                                                        <textarea
+                                                            class="journal__review-input"
+                                                            rows="2"
+                                                            placeholder="Отзыв о ребёнке для родителя"
+                                                            v-model="reviewsByStudent[student.id]"
+                                                            :disabled="reviewsLoading || reviewSaving[student.id]"
+                                                        ></textarea>
+                                                        <div class="journal__review-actions">
+                                                            <span
+                                                                v-if="isReviewDirty(student.id)"
+                                                                class="journal__review-hint"
+                                                            >
+                                                                Есть несохранённые изменения
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                class="journal__review-save"
+                                                                :disabled="
+                                                                    reviewsLoading ||
+                                                                    reviewSaving[student.id] ||
+                                                                    !isReviewDirty(student.id)
+                                                                "
+                                                                @click="saveReview(student.id)"
+                                                            >
+                                                                {{
+                                                                    reviewSaving[student.id]
+                                                                        ? "Сохранение…"
+                                                                        : "Сохранить"
+                                                                }}
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         </template> 
@@ -202,6 +227,7 @@ export default {
             // Отзыв преподавателя — на ученика в рамках курса,
             // поэтому не зависит от выбранного занятия.
             reviewsByStudent: {},
+            savedReviews: {},
             reviewsLoading: false,
             reviewSaving: {},
         };
@@ -222,6 +248,7 @@ export default {
             this.studentsForGroup = [];
             this.studentsLoading = false;
             this.reviewsByStudent = {};
+            this.savedReviews = {};
 
             if (!newId) return;
 
@@ -232,6 +259,7 @@ export default {
             this.studentsForGroup = [];
             this.studentsLoading = false;
             this.reviewsByStudent = {};
+            this.savedReviews = {};
             if (!newId || !this.selectedCourseId) return;
             await this.loadGroupStudents(this.selectedCourseId, newId);
             // Отзывы грузим после состава группы — нужны id учеников.
@@ -423,12 +451,19 @@ export default {
             }
         },
 
+        isReviewDirty(studentId) {
+            const current = (this.reviewsByStudent[studentId] || "").trim();
+            const saved = (this.savedReviews[studentId] || "").trim();
+            return current !== saved;
+        },
+
         async loadReviews() {
             const studentIds = this.studentsForGroup
                 .map((s) => s.id)
                 .filter(Boolean);
             if (!this.selectedCourseId || !studentIds.length) {
                 this.reviewsByStudent = {};
+                this.savedReviews = {};
                 return;
             }
 
@@ -445,9 +480,11 @@ export default {
                     map[row.user_id] = row.review || "";
                 });
                 this.reviewsByStudent = map;
+                this.savedReviews = { ...map };
             } catch (e) {
                 console.error("Ошибка при загрузке отзывов:", e);
                 this.reviewsByStudent = {};
+                this.savedReviews = {};
             } finally {
                 this.reviewsLoading = false;
             }
@@ -467,6 +504,7 @@ export default {
                     teacher_id: teacherId,
                     review: text,
                 });
+                this.savedReviews = { ...this.savedReviews, [studentId]: text };
                 globalNotification.categoryMessage = "Отзыв сохранён";
                 globalNotification.type = "success";
             } catch (e) {
@@ -527,6 +565,7 @@ export default {
     background: #faf9ff;
 }
 .journal__review-input {
+    box-sizing: border-box;
     width: 100%;
     min-height: 44px;
     padding: 8px 10px;
@@ -542,5 +581,44 @@ export default {
 }
 .journal__review-input:disabled {
     opacity: 0.6;
+}
+
+.journal__review {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.journal__review-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+.journal__review-hint {
+    font-size: 13px;
+    color: #a06a00;
+}
+.journal__review-save {
+    padding: 8px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #6c5ce7;
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.journal__review-save:hover:not(:disabled) {
+    background: #5a4bd1;
+}
+.journal__review-save:disabled {
+    background: #c9c5e6;
+    cursor: default;
+}
+
+.dialog__select {
+    padding-right: 34px;
+    text-overflow: ellipsis;
 }
 </style>

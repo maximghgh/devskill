@@ -26,7 +26,7 @@ class LanguageController extends Controller
     public function index()
     {
         // Получаем все языки из базы
-        $languages = Language::all(['id', 'name']);
+        $languages = Language::orderBy('id')->get(['id', 'name']);
         return response()->json($languages);
     }
     public function update(Request $request, $id)

@@ -189,9 +189,6 @@ h1 {
     margin-bottom: 80px;
     text-align: left;
 }
-.offer_about h1 {
-    margin-bottom: 70px;
-}
 .content h1 {
     font-size: 1.8em;
     text-align: left;
@@ -2745,9 +2742,6 @@ footer {
     }
     .category__one_defualt {
         font-size: 1em;
-    }
-    .offer_about h1 {
-        margin-bottom: 40px;
     }
     .footer__row {
         font-size: 0.8em;

@@ -822,13 +822,25 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-:deep .ce-toolbar__actions{
-  left: -200px !important;
+.editor-container :deep(.ce-toolbar__content) {
+  max-width: none;
 }
+
+.editor-container :deep(.ce-toolbar__actions) {
+  left: auto !important;
+  right: 100% !important;
+}
+
 .editor-container {
   max-width: unset;
   width: 100%;
   min-height: 220px;
+  padding-left: 74px;
   background: #fff;
+}
+
+.editor-container :deep(.codex-editor__redactor) {
+  min-height: 200px !important;
+  margin-right: 0 !important;
 }
 </style>

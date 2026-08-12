@@ -242,8 +242,8 @@ class CourseController extends Controller
         if (array_key_exists('teachers', $validated)) {
             $course->teachers = $validated['teachers'] ?: null;
         }
-        if (isset($validated['selectedDirection'])) {
-            $course->direction = $validated['selectedDirection'];
+        if (array_key_exists('direction', $validated)) {
+            $course->direction = $validated['direction'];
         }
         if (isset($validated['editorData'])) {
             $course->editor_data = $validated['editorData'];
@@ -337,7 +337,7 @@ class CourseController extends Controller
     public function index()
     {
         return response()->json(
-            CourseResource::collection($this->courseSummaryQuery()->get()),
+            CourseResource::collection($this->courseSummaryQuery()->orderBy('id')->get()),
             200
         );
     }

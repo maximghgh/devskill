@@ -202,7 +202,7 @@ function openCreateFaq() {
 async function onFaqCreated(created) {
   // если API вернул объект — добавим/обновим; иначе перечитаем
   if (created?.id) {
-    setFaqs([created, ...(props.faqs ?? [])]);
+    setFaqs([...(props.faqs ?? []), created]);
   } else {
     await reloadFaqs();
   }
