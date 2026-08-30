@@ -157,68 +157,25 @@
                         <!-- правая часть — форма -->
                         <div class="form-block">
                             <form @submit.prevent="submit" class="space-y-6">
-                                <!-- вариант действия -->
-                                <div class="radio-group">
-                                    <label
-                                        :class="[
-                                            'radio-option',
-                                            {
-                                                active:
-                                                    option === 'consultation',
-                                            },
-                                        ]"
-                                        ><input
-                                            type="radio"
-                                            value="consultation"
-                                            v-model="option"
-                                        /><span class="custom-radio"></span
-                                        ><span class="custom-radio__text"
-                                            >Записаться на бесплатную
-                                            консультацию</span
-                                        ></label
-                                    >
-                                    <label
-                                        :class="[
-                                            'radio-option',
-                                            {
-                                                active: option === 'discount',
-                                            },
-                                        ]"
-                                        ><input
-                                            type="radio"
-                                            value="discount"
-                                            v-model="option"
-                                        /><span class="custom-radio"></span
-                                        ><span class="custom-radio__text"
-                                            >Оплатить курс</span
-                                        ></label
-                                    >
+                                <p class="application-form__lead">
+                                    Оставьте заявку — мы свяжемся с вами,
+                                    подпишем договор и откроем доступ к курсу.
+                                </p>
+
+                                <div class="floating-label">
+                                    <input
+                                        id="application-name"
+                                        type="text"
+                                        v-model="form.full_name"
+                                        placeholder=" "
+                                        required
+                                    />
+                                    <label for="application-name">ФИО</label>
                                 </div>
 
-                                <!-- контакты -->
                                 <div class="floating-label">
                                     <input
-                                        id="email"
-                                        type="email"
-                                        v-model="form.email"
-                                        placeholder=" "
-                                        required
-                                    /><label for="email"
-                                        >Электронная почта</label
-                                    >
-                                </div>
-                                <div class="floating-label">
-                                    <input
-                                        id="name"
-                                        type="text"
-                                        v-model="form.name"
-                                        placeholder=" "
-                                        required
-                                    /><label for="name">Имя</label>
-                                </div>
-                                <div class="floating-label">
-                                    <input
-                                        id="phone"
+                                        id="application-phone"
                                         type="tel"
                                         v-model="form.phone"
                                         placeholder="+7 999 999-99-99"
@@ -227,99 +184,22 @@
                                     />
                                 </div>
 
-                                <!-- блок оплаты появится, когда выбран discount -->
-                                <transition name="fade-slide">
-                                    <div
-                                        v-if="option === 'discount'"
-                                        class="payment-block space-y-4"
-                                    >
-                                        <h3 class="payment__h3">
-                                            Оплата курса
-                                        </h3>
-
-                                        <div class="radio-group">
-                                            <label
-                                                :class="[
-                                                    'radio-option',
-                                                    {
-                                                        active:
-                                                            payWay === 'card',
-                                                    },
-                                                ]"
-                                                ><input
-                                                    type="radio"
-                                                    value="card"
-                                                    v-model="payWay"
-                                                /><span
-                                                    class="custom-radio"
-                                                ></span
-                                                ><span
-                                                    class="custom-radio__text"
-                                                    >Покупка картой</span
-                                                ></label
-                                            >
-                                            <label
-                                                :class="[
-                                                    'radio-option',
-                                                    {
-                                                        active:
-                                                            payWay === 'sbp',
-                                                    },
-                                                ]"
-                                                ><input
-                                                    type="radio"
-                                                    value="sbp"
-                                                    v-model="payWay"
-                                                /><span
-                                                    class="custom-radio"
-                                                ></span
-                                                ><span
-                                                    class="custom-radio__text"
-                                                    >Через СБП</span
-                                                ></label
-                                            >
-                                        </div>
-
-                                        <div
-                                            v-if="payWay === 'card'"
-                                            class="space-y-4"
-                                        >
-                                            <div class="floating-label">
-                                                <input
-                                                    v-model="card.cardNumber"
-                                                    placeholder="0000 0000 0000 0000"
-                                                    v-mask="
-                                                        '#### #### #### ####'
-                                                    "
-                                                />
-                                            </div>
-                                            <div class="block-card">
-                                                <input
-                                                    v-model="card.expiry"
-                                                    placeholder="ММ/ГГ"
-                                                    class="form__input--card"
-                                                    v-mask="'##/##'"
-                                                />
-                                                <input
-                                                    v-model="card.cvc"
-                                                    placeholder="CVC"
-                                                    class="form__input--card"
-                                                    v-mask="'###'"
-                                                />
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </transition>
+                                <div class="floating-label">
+                                    <input
+                                        id="application-email"
+                                        type="email"
+                                        v-model="form.email"
+                                        placeholder=" "
+                                        required
+                                    />
+                                    <label for="application-email">Электронная почта</label>
+                                </div>
 
                                 <input
+                                    class="form-submit form-submit--button"
                                     type="submit"
-                                    class="form-submit w-full"
-                                    :value="
-                                        option === 'consultation'
-                                            ? 'Заказать консультацию'
-                                            : 'Оплатить'
-                                    "
+                                    :disabled="isSending"
+                                    :value="isSending ? 'Отправляем...' : 'Оставить заявку'"
                                 />
                             </form>
                         </div>
@@ -329,10 +209,10 @@
                     <div v-else class="modal__else">
                         <div class="else__info">
                             <h2>{{ successText }}</h2>
-                            <p v-if="option === 'consultation'">
-                                Скоро с вами свяжется специалист
+                            <p>
+                                Мы свяжемся с вами, подпишем договор
+                                и откроем доступ к курсу.
                             </p>
-                            <p v-else>Вы успешно купили курс, поздравляем!</p>
                         </div>
                     </div>
                 </div>
@@ -406,11 +286,14 @@ const selectedCourse = ref(null);
 
 /* открыть / закрыть */
 function openModal(course) {
-    if (!user.value) {
-        showAuthModal.value = true;   // показываем окно авторизации
-        return;                       // дальше не идём
-    }
+    // Заявку может оставить и гость: аккаунт заводит админ после подписания.
     selectedCourse.value = course;
+    submitted.value = false;
+    form.value = {
+        full_name: user.value?.name || "",
+        phone: user.value?.phone || "",
+        email: user.value?.email || "",
+    };
     showModal.value = true;
 }
 function closeModal() {
@@ -418,10 +301,8 @@ function closeModal() {
 }
 
 /* локальное состояние формы */
-const option = ref("consultation"); // consultation | discount
-const payWay = ref("card"); // card | sbp
-const form = ref({ email: "", name: "", phone: "" });
-const card = ref({ cardNumber: "", expiry: "", cvc: "" });
+const form = ref({ full_name: "", phone: "", email: "" });
+const isSending = ref(false);
 const submitted = ref(false);
 const successText = ref("");
 
@@ -433,10 +314,7 @@ const diffBg = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
 function reset() {
     submitted.value = false;
     successText.value = "";
-    option.value = "consultation";
-    payWay.value = "card";
-    form.value = { email: "", name: "", phone: "" };
-    card.value = { cardNumber: "", expiry: "", cvc: "" };
+    form.value = { full_name: "", phone: "", email: "" };
 }
 watch(showModal, (open) => !open && reset()); // закрыли ⇒ чистим
 
@@ -445,34 +323,24 @@ const emit = defineEmits(["success"]); //  FIX: emit теперь объявле
 
 /* ----------- отправка формы ----------- */
 async function submit() {
-    if (!selectedCourse.value) return;
+    if (!selectedCourse.value || isSending.value) return;
 
-    const isConsultation = option.value === "consultation";
-
-    const endpoint = isConsultation
-        ? `/api/${selectedCourse.value.id}/consultation`
-        : `/api/${selectedCourse.value.id}/purchase`;
-
+    isSending.value = true;
     try {
-        const payload = {
+        await axios.post(`/api/${selectedCourse.value.id}/application`, {
+            full_name: form.value.full_name,
+            phone: form.value.phone,
+            email: form.value.email,
             user_id: user.value?.id ?? null,
-            ...form.value,
-            type: option.value,
-        };
-        if (option.value === "discount") {
-            payload.payment_method = payWay.value;
-            if (payWay.value === "card")
-                payload.payment_details = JSON.stringify(card.value);
-        }
-        await axios.post(endpoint, payload);
+        });
 
-        successText.value = isConsultation
-            ? "Спасибо за заявку!"
-            : "Поздравляем с покупкой!";
+        successText.value = "Спасибо за заявку!";
         submitted.value = true;
-        emit("success"); // уведомляем родителя
+        emit("success");
     } catch (err) {
         console.error(err);
+    } finally {
+        isSending.value = false;
     }
 }
 

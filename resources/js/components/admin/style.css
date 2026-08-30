@@ -98,6 +98,9 @@
     justify-content: center;
     gap: 8px;
     margin-top: 20px;
+    /* padding, а не margin: нижний margin схлопывался с .user-block
+       и пагинация прилипала к краю блока */
+    padding-bottom: 40px;
     font-family: Arial, sans-serif;
 }
 

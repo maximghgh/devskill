@@ -996,6 +996,12 @@ input[type="number"]::-webkit-outer-spin-button {
 .course__card_bg-blue {
     background-color: #269aca;
 }
+.course__card_bg-plum {
+    background-color: #9a6ab8;
+}
+.course__card_bg-teal {
+    background-color: #4aa8a0;
+}
 .course__card_bg-cyan:hover {
     box-shadow: 13px 13px 30px -8px #698dc9;
 }
@@ -1011,6 +1017,12 @@ input[type="number"]::-webkit-outer-spin-button {
 .course__card_bg-blue:hover {
     box-shadow: 13px 13px 30px -8px #269aca;
 }
+.course__card_bg-plum:hover {
+    box-shadow: 13px 13px 30px -8px #9a6ab8;
+}
+.course__card_bg-teal:hover {
+    box-shadow: 13px 13px 30px -8px #4aa8a0;
+}
 .course__card-image {
     position: absolute;
     top: 20px;
@@ -1019,6 +1031,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .course__card-image img {
     width: 74px;
     height: 74px;
+    object-fit: cover;
+    border-radius: 16px;
+    display: block;
 }
 .categorys {
     margin-bottom: 100px;
@@ -1029,8 +1044,9 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: 0 0 5px;
     max-width: 80%;
     line-height: 1.1;
-    overflow-wrap: anywhere;
-    word-break: break-word;
+    /* anywhere рвал слова посреди («Программировани/е»);
+       break-word переносит только то, что реально не влезает */
+    overflow-wrap: break-word;
 }
 /* .course__card-desc {
     width: 67%;
@@ -1088,10 +1104,15 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 61px;
 }
 .course__card_personal .course__card-image img {
+    width: 61px;
+    height: 61px;
     max-width: 61px;
 }
 .course__cards_additional .course__card-image img {
+    width: 44px;
+    height: 44px;
     max-width: 44px;
+    border-radius: 10px;
 }
 .block-tab {
     display: none;
@@ -2846,4 +2867,10 @@ footer {
     .header__logo img {
         max-width: 105px;
     }
+}
+
+/* Пояснение над формой заявки: без отступа текст слипается с первым полем */
+.application-form__lead {
+    margin: 0 0 22px;
+    line-height: 1.35;
 }

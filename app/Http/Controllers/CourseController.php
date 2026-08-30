@@ -151,7 +151,7 @@ class CourseController extends Controller
     private function buildCourseData(array $data, array $dates): array
     {
         return [
-            'card_title'           => $data['cardTitle'] ?? null,
+            'card_title'           => $data['cardTitle'] ?: $data['courseName'],
             'course_name'          => $data['courseName'],
             'price'                => $data['price'],
             'duration'             => $data['duration'],
@@ -223,7 +223,7 @@ class CourseController extends Controller
         }
 
         // Поля (частичное обновление: если поле не пришло — оставляем прежнее)
-        $course->card_title  = $validated['cardTitle'] ?? null;
+        $course->card_title  = $validated['cardTitle'] ?: $validated['courseName'];
         $course->course_name = $validated['courseName'];
         $course->price       = $validated['price'];
         $course->duration    = $validated['duration'];
@@ -395,7 +395,16 @@ class CourseController extends Controller
          *    На фронте может быть выпадающий список. Если выбрано "Все направления",
          *    то параметр вообще не отправляем, либо передаём что-то вроде direction=all и пропускаем фильтр.
          */
-        if ($request->has('direction') && $request->direction !== 'all') {
+        if ($request->filled('directions')) {
+            $directions = array_values(array_filter(
+                array_map('trim', explode(',', (string) $request->input('directions'))),
+                fn ($value) => $value !== ''
+            ));
+
+            if (!empty($directions)) {
+                $query->whereIn('direction', $directions);
+            }
+        } elseif ($request->has('direction') && $request->direction !== 'all') {
             $query->where('direction', $request->direction);
         }
 
@@ -411,7 +420,7 @@ class CourseController extends Controller
         
 
         // Получаем отфильтрованные курсы
-        $courses = $query->get();
+        $courses = $query->orderBy('id')->get();
 
         return response()->json(CourseResource::collection($courses), 200);
     }

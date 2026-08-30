@@ -17,7 +17,30 @@
                         <div class="course__sidebar" :class="{ course__sidebar_open: isSidebarOpen }">
                             <div class="course__sidebar-block">
                                 <div class="course__sidebar-title">
-                                    Тематика
+                                    Направленность
+                                </div>
+                                <div class="course__sidebar-check">
+                                    <div
+                                        class="course__sidebar-oncheck"
+                                        v-for="direction in directions"
+                                        :key="direction.id"
+                                    >
+                                        <input
+                                            :id="'dir_' + direction.id"
+                                            type="checkbox"
+                                            :name="'dir_' + direction.id"
+                                            :value="direction.id"
+                                            v-model="selectedDirections"
+                                        />
+                                        <label :for="'dir_' + direction.id">
+                                            <span>{{ direction.name }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="course__sidebar-block course__sidebar-block_noline">
+                                <div class="course__sidebar-title">
+                                    Классы
                                 </div>
                                 <div class="course__sidebar-check">
                                     <div
@@ -25,7 +48,7 @@
                                         v-for="language in languages"
                                         :key="language.id"
                                     >
-                                        <!-- Привязываем состояние конкретного языка -->
+                                        <!-- Привязываем состояние конкретного класса -->
                                         <input
                                             :id="'lang_' + language.id"
                                             type="checkbox"
@@ -38,78 +61,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="course__sidebar-block">
-                                <div class="course__sidebar-title">
-                                    Уровень
-                                </div>
-                                <div class="course__sidebar-check">
-                                    <div
-                                        v-for="option in difficultyOptions"
-                                        :key="option.value"
-                                        class="course__sidebar-oncheck"
-                                    >
-                                        <input
-                                            :id="`lvl_${option.value}`"
-                                            :name="`lvl_${option.value}`"
-                                            type="checkbox"
-                                            :value="option.value"
-                                            v-model="selectedDifficulties"
-                                        />
-                                        <label :for="`lvl_${option.value}`">
-                                            <span>{{ option.label }}</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="course__sidebar-block course__sidebar-block_noline">
-                                <div class="course__sidebar-title">
-                                    Длительность
-                                </div>
-                                <div class="course__sidebar-check">
-                                    <div class="course__sidebar-input">
-                                        <label>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                max="24"
-                                                v-model="selectedDuration"
-                                                @input="validateDuration"
-                                            />
-                                            <span>От 1 до 24 месяцев</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                         <div class="course__content">
                           <div class="block__filter">
                             <h2>Все программы обучения</h2>
                           </div>
-                            <div class="course__menu">
-                                <!-- Пункт "Все направления" -->
-                                <div
-                                    class="course__menu-one"
-                                    :class="{
-                                        active: selectedDirection === 'all',
-                                    }"
-                                    @click="selectedDirection = 'all'"
-                                >
-                                    Все направления
-                                </div>
-                                <!-- Остальные направления -->
-                                <div
-                                    class="course__menu-one"
-                                    v-for="direction in directions"
-                                    :key="direction.id"
-                                    :class="{
-                                        active:
-                                            selectedDirection === direction.id,
-                                    }"
-                                    @click="selectedDirection = direction.id"
-                                >
-                                    {{ direction.name }}
-                                </div>
-                            </div>
                             <div class="course__cards">
                                 <div
                                     v-for="course in paginatedCourses"
@@ -117,7 +73,7 @@
                                     :class="[
                                         'course__card',
                                         'course__card_bg1 ',
-                                        difficultyColorClass[course.difficulty],
+                                        getDirectionCardClass(course.direction),
                                     ]"
                                 >
                                     <!-- Изображение курса -->
@@ -207,62 +163,25 @@
                                             <!-- form -->
                                             <div class="form-block">
                                                 <form @submit.prevent="submitForm" class="forma">
-                                                    <!-- radio main -->
-                                                    <div class="radio-group">
-                                                        <label
-                                                            :class="['radio-option', { active: selectedOption === 'consultation' }]"
-                                                        >
-                                                            <input
-                                                                type="radio"
-                                                                value="consultation"
-                                                                v-model="selectedOption"
-                                                            />
-                                                            <span class="custom-radio"></span>
-                                                            <span class="custom-radio__text">
-                                                                Записаться на бесплатную консультацию
-                                                            </span>
-                                                        </label>
-
-                                                        <label
-                                                            :class="['radio-option', { active: selectedOption === 'discount' }]"
-                                                        >
-                                                            <input
-                                                                type="radio"
-                                                                value="discount"
-                                                                v-model="selectedOption"
-                                                            />
-                                                            <span class="custom-radio"></span>
-                                                            <span class="custom-radio__text">
-                                                                Оплатить курс
-                                                            </span>
-                                                        </label>
-                                                    </div>
+                                                    <p class="application-form__lead">
+                                                        Оставьте заявку — мы свяжемся с вами,
+                                                        подпишем договор и откроем доступ к курсу.
+                                                    </p>
 
                                                     <div class="form-group floating-label">
                                                         <input
-                                                            id="email"
-                                                            type="email"
-                                                            required
-                                                            v-model="formData.email"
-                                                            placeholder=" "
-                                                        />
-                                                        <label for="email">Электронная почта</label>
-                                                    </div>
-
-                                                    <div class="form-group floating-label">
-                                                        <input
-                                                            id="name"
+                                                            id="application-name"
                                                             type="text"
                                                             required
-                                                            v-model="formData.name"
+                                                            v-model="formData.full_name"
                                                             placeholder=" "
                                                         />
-                                                        <label for="name">Имя</label>
+                                                        <label for="application-name">ФИО</label>
                                                     </div>
 
-                                                    <div class="floating-label">
+                                                    <div class="form-group floating-label">
                                                         <input
-                                                            id="phone"
+                                                            id="application-phone"
                                                             type="tel"
                                                             required
                                                             v-model="formData.phone"
@@ -271,90 +190,23 @@
                                                         />
                                                     </div>
 
-                                                    <!-- payment -->
-                                                    <transition name="fade-slide">
-                                                        <div
-                                                            v-if="selectedOption === 'discount'"
-                                                            class="payment-block space-y-4"
-                                                        >
-                                                            <h3 class="payment__h3">
-                                                                Оплата курса
-                                                            </h3>
-
-                                                            <div class="radio-group">
-                                                                <label
-                                                                    :class="['radio-option', { active: selectedDiscountOption === 'card' }]"
-                                                                >
-                                                                    <input
-                                                                        type="radio"
-                                                                        value="card"
-                                                                        v-model="selectedDiscountOption"
-                                                                    />
-                                                                    <span class="custom-radio"></span>
-                                                                    <span class="custom-radio__text">
-                                                                        Покупка картой
-                                                                    </span>
-                                                                </label>
-
-                                                                <label
-                                                                    :class="['radio-option', { active: selectedDiscountOption === 'sbp' }]"
-                                                                >
-                                                                    <input
-                                                                        type="radio"
-                                                                        value="sbp"
-                                                                        v-model="selectedDiscountOption"
-                                                                    />
-                                                                    <span class="custom-radio"></span>
-                                                                    <span class="custom-radio__text">
-                                                                        Покупка через СБП
-                                                                    </span>
-                                                                </label>
-                                                            </div>
-
-                                                            <!-- card fields -->
-                                                            <div v-if="selectedDiscountOption === 'card'" class="space-y-4">
-                                                                <div class="floating-label">
-                                                                    <input
-                                                                        id="cardNumber"
-                                                                        type="text"
-                                                                        v-model="cardInfo.cardNumber"
-                                                                        placeholder="0000 0000 0000 0000"
-                                                                        v-mask="'#### #### #### ####'"
-                                                                    />
-                                                                </div>
-                                                                <div class="block-card">
-                                                                    <div class="form-group">
-                                                                        <input
-                                                                            id="cardExpiry"
-                                                                            type="text"
-                                                                            v-model="cardInfo.expiry"
-                                                                            placeholder="ММ/ГГ"
-                                                                            class="form__input--card"
-                                                                            v-mask="'##/##'"
-                                                                        />
-                                                                    </div>
-                                                                    <div class="form-group">
-                                                                        <input
-                                                                            id="cardCVC"
-                                                                            type="text"
-                                                                            v-model="cardInfo.cvc"
-                                                                            placeholder="CVC"
-                                                                            class="form__input--card"
-                                                                            v-mask="'###'"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-                                                    </transition>
+                                                    <div class="form-group floating-label">
                                                         <input
-                                                            class="form-submit form-submit--button"
-                                                            type="submit"
-                                                            :value="selectedOption === 'consultation'
-                                                                ? 'Заказать консультацию'
-                                                                : 'Оплатить'"
+                                                            id="application-email"
+                                                            type="email"
+                                                            required
+                                                            v-model="formData.email"
+                                                            placeholder=" "
                                                         />
+                                                        <label for="application-email">Электронная почта</label>
+                                                    </div>
+
+                                                    <input
+                                                        class="form-submit form-submit--button"
+                                                        type="submit"
+                                                        :disabled="isSending"
+                                                        :value="isSending ? 'Отправляем...' : 'Оставить заявку'"
+                                                    />
                                                 </form>
                                             </div>
                                         </div>
@@ -363,11 +215,9 @@
                                         <div v-else class="modal__else">
                                             <div class="else__info">
                                                 <h2>{{ successMessage }}</h2>
-                                                <p v-if="selectedOption === 'consultation'">
-                                                    Скоро с вами свяжется специалист
-                                                </p>
-                                                <p v-else>
-                                                    Вы успешно купили курс, поздравляем!
+                                                <p>
+                                                    Мы свяжемся с вами, подпишем договор
+                                                    и откроем доступ к курсу.
                                                 </p>
                                             </div>
                                         </div>
@@ -459,13 +309,13 @@
 import { ref, onMounted, watch, computed } from "vue";
 import axios from "axios";
 import {
-  COURSE_DIFFICULTY_OPTIONS,
   createCourseDifficultyDictionary,
   getCourseDifficultyBlockClass,
-  getCourseDifficultyCardClass,
   getCourseDifficultyLabel,
 } from "@/utils/courseDifficulty";
+import { getDirectionCardClass } from "@/utils/courseDirection";
 import { getCourseCardImageUrl } from "@/utils/courseImage";
+import { globalNotification } from "../globalNotification";
 
 const isSidebarOpen = ref(false)
 const showAuthModal = ref(false)
@@ -485,10 +335,8 @@ const isModalOpen           = ref(false);
 const selectedCourse        = ref(null);
 const isSubmitted           = ref(false);
 const successMessage        = ref("");
-const selectedOption        = ref("consultation");
-const selectedDiscountOption= ref("card");
-const formData              = ref({ email: "", name: "", phone: "" });
-const cardInfo              = ref({ cardNumber: "", expiry: "", cvc: "" });
+const formData              = ref({ full_name: "", phone: "", email: "" });
+const isSending             = ref(false);
 
 /* --- Переменные пагинации --- */
 const pageSize   = 6;
@@ -501,17 +349,13 @@ const totalPages = computed(() => Math.ceil(courses.value.length / pageSize));
 const pages      = computed(() => Array.from({ length: totalPages.value }, (_, i) => i + 1));
 
 /* --- Фильтры --- */
-const selectedDifficulties = ref([]);
-const selectedDirection    = ref("all");
-const selectedDuration     = ref(null);
+const selectedDirections   = ref([]);
 const selectedLanguages    = computed(() =>
   languages.value.filter(l => l.checked).map(l => l.id)
 );
-const difficultyOptions = COURSE_DIFFICULTY_OPTIONS;
 
 /* --- Словари сложности для карточек и модалки --- */
 const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
-const difficultyColorClass = createCourseDifficultyDictionary(getCourseDifficultyCardClass);
 const difficultyBgClass = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
 
 /* --- Методы пагинации --- */
@@ -524,72 +368,46 @@ function prevPage() {
 
 /* --- Методы открытия/закрытия модалки --- */
 function openModal(course) {
-  if (!user.value) {
-    showAuthModal.value = true; // если у вас есть auth-модалка
-    return;
-  }
+  // Заявку может оставить и гость: аккаунт заводит админ после подписания.
   selectedCourse.value = course;
   isSubmitted.value    = false;
   successMessage.value = "";
+  formData.value = {
+    full_name: user.value?.name || "",
+    phone: user.value?.phone || "",
+    email: user.value?.email || "",
+  };
   isModalOpen.value    = true;
 }
 function closeModal() {
   isModalOpen.value = false;
 }
 
-/* --- Отправка формы покупки/консультации --- */
+/* --- Отправка заявки на курс --- */
 async function submitForm() {
-  if (!selectedCourse.value) return;
+  if (!selectedCourse.value || isSending.value) return;
 
-  const isConsultation = selectedOption.value === "consultation";
-  const paymentMethod =
-    selectedOption.value === "discount" ? selectedDiscountOption.value : "card";
-  const paymentDetails =
-    selectedOption.value === "discount" && selectedDiscountOption.value === "card"
-      ? JSON.stringify(cardInfo.value)
-      : null;
-
-  const url = isConsultation
-    ? `/api/${selectedCourse.value.id}/consultation`
-    : `/api/${selectedCourse.value.id}/purchase`;
-
+  isSending.value = true;
   try {
-    const payload = {
-      user_id: user.value.id,
-      ...formData.value,
-      type: selectedOption.value,
-      payment_method: paymentMethod,
-      payment_details: paymentDetails,
-    };
-    await axios.post(url, payload);
+    await axios.post(`/api/${selectedCourse.value.id}/application`, {
+      full_name: formData.value.full_name,
+      phone: formData.value.phone,
+      email: formData.value.email,
+            user_id: user.value?.id ?? null,
+    });
 
-    successMessage.value = isConsultation
-      ? "Спасибо за заявку!"
-      : "Поздравляем с покупкой!";
+    successMessage.value = "Спасибо за заявку!";
     isSubmitted.value = true;
   } catch (e) {
     console.error(e);
+    globalNotification.categoryMessage = "Не удалось отправить заявку";
+    globalNotification.type = "error";
+  } finally {
+    isSending.value = false;
   }
 }
 
 /* --- Прочие вспомогательные функции --- */
-function validateDuration(e) {
-  const v = e.target.value;
-  if (v === "") {
-    selectedDuration.value = "";
-    return;
-  }
-  const n = Number(v);
-  if (n > 24) {
-    e.target.value = 24;
-    selectedDuration.value = 24;
-  } else if (n < 1) {
-    e.target.value = "";
-    selectedDuration.value = "";
-  } else {
-    selectedDuration.value = n;
-  }
-}
 function base64ToUtf8(str) {
   return decodeURIComponent(escape(atob(str)));
 }
@@ -618,10 +436,8 @@ async function loadDirections() {
 async function fetchCourses() {
   try {
     const params = {};
-    if (selectedLanguages.value.length)    params.languages   = selectedLanguages.value.join(",");
-    if (selectedDifficulties.value.length) params.difficulties= selectedDifficulties.value;
-    if (selectedDirection.value !== "all") params.direction   = selectedDirection.value;
-    if (selectedDuration.value)            params.duration    = selectedDuration.value;
+    if (selectedLanguages.value.length)  params.languages  = selectedLanguages.value.join(",");
+    if (selectedDirections.value.length) params.directions = selectedDirections.value.join(",");
 
     const { data } = await axios.get("/api/courses", { params });
     const arr = Array.isArray(data) ? data : data.data || [];
@@ -631,7 +447,7 @@ async function fetchCourses() {
 
 /* --- Рендер-эффекты и начальная инициация --- */
 watch(() => courses.value.length, () => (currentPage.value = 1));
-watch([ selectedDifficulties, selectedDirection, selectedDuration, selectedLanguages ], fetchCourses, { deep: true });
+watch([ selectedDirections, selectedLanguages ], fetchCourses, { deep: true });
 
 onMounted(async () => {
   // подтягиваем verifiedUser из URL, если был

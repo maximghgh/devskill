@@ -213,39 +213,13 @@
 
                             <!-- ====== РАЗДЕЛ: ОПЛАТА КУРСОВ (родитель) ====== -->
                             <div v-show="activeSection === 'payment'" class="cabinet-pane">
-                                <div class="profile-payment">
-                                    <div class="profile-payment__info">
-                                        <span class="profile-payment__label">Задолженность по оплате</span>
-                                        <span
-                                            class="profile-payment__amount"
-                                            :class="{ 'profile-payment__amount--debt': paymentDebt > 0 }"
-                                        >{{ formattedDebt }}</span>
-                                    </div>
+                                <div class="profile-payment profile-payment--single">
                                     <a
                                         class="profile-payment__link"
                                         href="https://istu.ru/payment"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >Перейти к оплате в ИжГТУ</a>
-                                </div>
-
-                                <div class="profile-children" v-if="purchasedCourses.length">
-                                    <div class="profile-children__title">Курсы</div>
-                                    <div class="profile-children__list">
-                                        <div
-                                            v-for="course in purchasedCourses"
-                                            :key="course.id"
-                                            class="profile-children__item"
-                                        >
-                                            <div class="profile-children__info">
-                                                <span class="profile-children__name">{{ course.card_title || course.course_name }}</span>
-                                            </div>
-                                            <span class="profile-children__debt">{{ formatMoney(course.price) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div v-else class="cabinet-empty cabinet-empty--spaced">
-                                    Пока нет курсов для оплаты.
                                 </div>
 
                                 <!-- ====== КУДА ПРИХОДЯТ ЧЕКИ ====== -->
@@ -288,7 +262,7 @@
                                     <div
                                         v-for="course in purchasedCourses"
                                         :key="course.id"
-                                        :class="['course__cardss','course__card_personal','course__card_bg1', difficultyColorClass[course.difficulty]]"
+                                        :class="['course__cardss','course__card_personal','course__card_bg1', getDirectionCardClass(course.direction)]"
                                     >
                                         <div class="course__card-image">
                                             <img :src="course.card_image ? course.card_image : '/img/no_foto.jpg'" alt="Изображение курса" />
@@ -312,7 +286,82 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div v-else class="cabinet-empty">Вы пока не выбрали ни одного курса.</div>
+
+                                <!-- Курсы, по которым заявка ещё в работе -->
+                                <div class="pending-courses" v-if="pendingApplications.length">
+                                    <div class="pending-courses__title">Заявки в работе</div>
+                                    <div class="pending-courses__list">
+                                        <div
+                                            v-for="application in pendingApplications"
+                                            :key="application.id"
+                                            class="pending-course"
+                                        >
+                                            <div class="pending-course__info">
+                                                <span class="pending-course__name">
+                                                    {{ applicationCourseTitle(application) }}
+                                                </span>
+                                                <span class="pending-course__status">
+                                                    {{ application.status_label }}
+                                                </span>
+                                            </div>
+                                            <div class="pending-course__actions">
+                                                <span
+                                                    v-if="application.course?.price"
+                                                    class="pending-course__price"
+                                                >
+                                                    {{ formatMoney(application.course.price) }}
+                                                </span>
+                                                <a
+                                                    v-if="application.status === 'awaiting_payment'"
+                                                    class="pending-course__pay"
+                                                    href="https://istu.ru/payment"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >Перейти к оплате</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    v-if="!purchasedCourses.length && !pendingApplications.length"
+                                    class="cabinet-empty"
+                                >
+                                    Вы пока не выбрали ни одного курса.
+                                </div>
+
+                                <!-- ====== КУДА ПРИХОДЯТ ЧЕКИ ====== -->
+                                <div class="payments-note" v-if="pendingApplications.length">
+                                    <svg
+                                        class="payments-note__icon"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                    >
+                                        <rect x="2" y="4" width="20" height="16" rx="3" />
+                                        <path d="m3 7 9 6 9-6" />
+                                    </svg>
+                                    <div class="payments-note__body">
+                                        <p class="payments-note__title">
+                                            Отправьте чек об оплате
+                                        </p>
+                                        <p class="payments-note__text">
+                                            После оплаты отправьте чек на почту
+                                            университета
+                                            <a
+                                                class="payments-note__email"
+                                                href="mailto:info@istu.ru"
+                                                >info@istu.ru</a
+                                            >. Так мы быстрее подтвердим оплату.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- ====== РАЗДЕЛ: ТАБЕЛЬ УСПЕВАЕМОСТИ (read-only) ====== -->
@@ -379,10 +428,10 @@ import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from "vue"
 import axios from "axios";
 import {
   createCourseDifficultyDictionary,
-  getCourseDifficultyCardClass,
   getCourseDifficultyLabel,
 } from "@/utils/courseDifficulty";
 
+import { getDirectionCardClass } from "@/utils/courseDirection";
 // Управление модальным окном
 const showModal = ref(false);
 // Данные пользователя и форма для редактирования профиля
@@ -412,29 +461,6 @@ const formatMoney = (value) =>
     currency: "RUB",
     maximumFractionDigits: 0,
   }).format(Number(value) || 0);
-// --- Оплаты ---
-// Список оплат в кабинете не показываем: чеки уходят на почту.
-// С сервера берём только задолженность — она учитывает статус оплаты.
-const serverDebt = ref(null);
-
-const loadPaymentDebt = async () => {
-  if (!user.value.id) return;
-  try {
-    const { data } = await axios.get(`/api/user/${user.value.id}/purchases`);
-    serverDebt.value = Number(data.debt) || 0;
-  } catch (error) {
-    console.error("Ошибка загрузки данных об оплате:", error);
-    serverDebt.value = null;
-  }
-};
-
-// Задолженность: с сервера (учитывает статус оплаты), иначе — сумма цен курсов.
-const paymentDebt = computed(() =>
-  serverDebt.value !== null
-    ? serverDebt.value
-    : purchasedCourses.value.reduce((sum, c) => sum + (Number(c.price) || 0), 0)
-);
-const formattedDebt = computed(() => formatMoney(paymentDebt.value));
 
 // --- Разделы кабинета (переключаются на странице) ---
 const activeSection = ref("personal"); // personal | courses | grades | payment
@@ -453,6 +479,31 @@ watch(activeInfoTab, (tab) => {
   }
 });
 
+// --- Заявки на курсы: этап до того, как курс открыт ---
+const applications = ref([]);
+const loadApplications = async () => {
+  if (!user.value.id) return;
+  try {
+    const { data } = await axios.get(
+      `/api/user/${user.value.id}/course-applications`
+    );
+    applications.value = Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("Ошибка загрузки заявок:", error);
+    applications.value = [];
+  }
+};
+
+// Выданные курсы приходят отдельно, здесь — только те, что ещё в работе.
+const pendingApplications = computed(() =>
+  applications.value.filter((a) => a.status !== "issued")
+);
+
+const applicationCourseTitle = (application) =>
+  application.course?.card_title ||
+  application.course?.course_name ||
+  "Курс";
+
 // --- Мои курсы ---
 const purchasedCourses = ref([]);
 const loadCourses = async () => {
@@ -467,7 +518,6 @@ const loadCourses = async () => {
 };
 
 // Карточки «Мои курсы» — хелперы как в старом кабинете
-const difficultyColorClass = createCourseDifficultyDictionary(getCourseDifficultyCardClass);
 const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
 function getCourseProgress(course) {
   let totalTopics = 0, completedTopics = 0, totalTasks = 0, completedTasks = 0;
@@ -628,7 +678,7 @@ onMounted(async () => {
   await loadUserData();
   await loadChildren();
   await loadCourses();
-  await loadPaymentDebt();
+  await loadApplications();
 });
 
 onBeforeUnmount(() => {
@@ -808,6 +858,70 @@ async function uploadPhoto() {
     flex-direction: column;
     gap: 12px;
 }
+/* Заявки в работе: курс ещё не открыт, показываем этап и цену */
+.pending-courses {
+    margin-top: 26px;
+}
+.pending-courses__title {
+    margin-bottom: 14px;
+    font-size: 20px;
+    color: #2b2b3a;
+}
+.pending-courses__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.pending-course {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    background: #f5f4fb;
+}
+.pending-course__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.pending-course__name {
+    font-size: 16px;
+    color: #2b2b3a;
+    overflow-wrap: anywhere;
+}
+.pending-course__status {
+    font-size: 14px;
+    color: #6352c1;
+}
+.pending-course__actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.pending-course__price {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2b2b3a;
+    white-space: nowrap;
+}
+.pending-course__pay {
+    padding: 10px 18px;
+    border-radius: 12px;
+    background: #6352c1;
+    color: #ffffff;
+    font-size: 15px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s ease;
+}
+.pending-course__pay:hover {
+    background: #5343ab;
+}
+
 .profile-payment__info {
     display: flex;
     align-items: center;
@@ -923,6 +1037,12 @@ async function uploadPhoto() {
     .course__cards_cabinet {
         grid-template-columns: 1fr;
     }
+}
+/* Карточки в кабинете узкие: при max-width 80% и шрифте 24px
+   «Программирование» не влезало и рвалось посреди слова. */
+.course__cardss .course__card-title {
+    max-width: calc(100% - 64px);
+    font-size: 20px;
 }
 .course__cardss {
     width: 100%;

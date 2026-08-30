@@ -497,6 +497,10 @@ async function save() {
       form.value.editorData = data;
     }
 
+    // Отдельного поля для названия на карточке в форме нет,
+    // поэтому оно всегда следует за полным названием курса.
+    form.value.cardTitle = form.value.courseName;
+
     const fd = new FormData();
     fd.append("cardTitle", form.value.cardTitle);
     fd.append("courseName", form.value.courseName);
@@ -652,30 +656,30 @@ onBeforeUnmount(() => {
       />
     </div>
 
-    <!-- Направление -->
+    <!-- Направленность -->
     <div class="dialog__component">
-      <p class="dialog__title">Выберите направление</p>
+      <p class="dialog__title">Выберите направленность</p>
       <select
         v-model="form.selectedDirection"
         class="dialog__input dialog__select"
       >
-        <option :value="null">Выберите направление</option>
+        <option :value="null">Выберите направленность</option>
         <option v-for="d in directions" :key="d.id" :value="d.id">
           {{ d.name }}
         </option>
       </select>
     </div>
 
-    <!-- Языки -->
+    <!-- Классы -->
     <div class="dialog__component">
-      <p class="dialog__title">Выберите языки программирования</p>
+      <p class="dialog__title">Выберите классы</p>
       <Multiselect
         v-model="form.selectedLanguages"
         :options="languages"
         :multiple="true"
         track-by="id"
         label="name"
-        placeholder="Нажмите на поле, чтобы выбрать язык"
+        placeholder="Нажмите на поле, чтобы выбрать класс"
         :close-on-select="false"
         :clear-on-select="false"
         :preserve-search="true"

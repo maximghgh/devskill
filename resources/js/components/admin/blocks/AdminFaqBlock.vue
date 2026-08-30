@@ -185,7 +185,7 @@ const paginatedFaqs = computed(() => {
   return filteredFaqs.value.slice(start, start + pageSizeFaq.value);
 });
 
-watch([() => props.faqs, searchQuery, pageSizeFaq], () => {
+watch([searchQuery, pageSizeFaq], () => {
   currentPageFaq.value = 1;
 });
 

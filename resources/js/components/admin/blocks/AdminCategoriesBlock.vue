@@ -5,10 +5,10 @@
     <!-- Tabs -->
     <div class="tabs dialog__tabs">
       <button type="button" class="dialog__tabs_item tab" :class="{ active: activeTab === 'langs' }" @click="setTab('langs')">
-        Языки программирования
+        Классы
       </button>
       <button type="button" class="dialog__tabs_item tab" :class="{ active: activeTab === 'dirs' }" @click="setTab('dirs')">
-        Направления
+        Направленность
       </button>
     </div>
 
@@ -46,7 +46,7 @@
           </div>
 
           <button type="button" class="users-btn-new" @click="showAddLang = true">
-            <span class="users-btn-desc">+</span> Добавить язык
+            <span class="users-btn-desc">+</span> Добавить класс
           </button>
         </div>
       </div>
@@ -55,7 +55,7 @@
         <thead>
           <tr>
             <th>№</th>
-            <th>Название языка</th>
+            <th>Название класса</th>
             <th>Действия</th>
           </tr>
         </thead>
@@ -74,7 +74,7 @@
                         />
                     </button>
                     <div role="tooltip" id="help-tooltip" class="tooltip">
-                        Редактировать язык
+                        Редактировать класс
                     </div>
                 </div>
                 <div class="tooltip-container">
@@ -87,7 +87,7 @@
                     />
                     </button>
                     <div role="tooltip" id="help-tooltip" class="tooltip">
-                        Удалить язык
+                        Удалить класс
                     </div>
                 </div>
             </td>
@@ -103,7 +103,7 @@
         <button :disabled="currentPage === totalPages" @click="currentPage++">Вперёд ›</button>
       </div>
 
-      <p v-if="!filteredLangs.length">Нет языков</p>
+      <p v-if="!filteredLangs.length">Нет классов</p>
     </div>
 
     <!-- TAB: DIRECTIONS -->
@@ -284,15 +284,15 @@ watch(totalPages, (tp) => {
 
 /* delete */
 async function deleteLanguage(id) {
-  if (!confirm("Вы действительно хотите удалить этот язык?")) return;
+  if (!confirm("Вы действительно хотите удалить этот класс?")) return;
   try {
     await axios.delete(`/api/languages/${id}`);
     setLanguages(props.languages.filter((l) => l.id !== id));
-    globalNotification.categoryMessage = "Язык успешно удалён";
+    globalNotification.categoryMessage = "Класс успешно удалён";
     globalNotification.type = "success";
   } catch (e) {
     console.error(e);
-    globalNotification.categoryMessage = "Ошибка при удалении языка";
+    globalNotification.categoryMessage = "Ошибка при удалении класса";
     globalNotification.type = "error";
   }
 }

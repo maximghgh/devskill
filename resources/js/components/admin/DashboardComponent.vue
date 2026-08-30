@@ -56,6 +56,13 @@
                         v-model:requests="supportRequests"
                         />
 
+                        <AdminApplicationsBlock
+                        v-else-if="activeId === 'applications'"
+                        id="applications"
+                        v-model:applications="applications"
+                        :users="users"
+                        />
+
                         <AdminCoursesBlock
                         v-else-if="activeId === 'courses'"
                         id="courses"
@@ -114,6 +121,7 @@ import AdminCategoriesBlock from "./blocks/AdminCategoriesBlock.vue";
 import AdminNewsBlock from "./blocks/AdminNewsBlock.vue";
 import AdminFaqBlock from "./blocks/AdminFaqBlock.vue";
 import AdminSupportBlock from "./blocks/AdminSupportBlock.vue";
+import AdminApplicationsBlock from "./blocks/AdminApplicationsBlock.vue";
 
 import CreateCourseDialog from "./CreateHackathon.vue";
 import EditCourseDialog from "./EditCourseDialog.vue";
@@ -149,6 +157,12 @@ const menuItems = [
     },
     { id: "users", label: "Пользователи", href: "#users", icon: iconUsers },
     { id: "support", label: "Обращения", href: "#support", icon: iconSupport },
+    {
+        id: "applications",
+        label: "Заявки",
+        href: "#applications",
+        icon: iconSupport,
+    },
     { id: "courses", label: "Курсы", href: "#courses", icon: iconCourses },
     { id: "other", label: "Категории", href: "#other", icon: iconCategory },
     { id: "news", label: "Новости", href: "#news", icon: iconNews },
@@ -202,6 +216,7 @@ const directions = ref([]);
 const newsItems = ref([]);
 const faqs = ref([]);
 const supportRequests = ref([]);
+const applications = ref([]);
 
 const openSupportRequestsCount = computed(() =>
     supportRequests.value.filter((request) => request.status === "открыта").length
@@ -276,6 +291,16 @@ async function loadFaqs() {
         console.error(e);
     }
 }
+async function loadApplications() {
+    try {
+        const { data } = await axios.get("/api/course-applications");
+        applications.value = Array.isArray(data) ? data : data.data || [];
+    } catch (e) {
+        console.error(e);
+        globalNotification.categoryMessage = "Ошибка при загрузке заявок";
+        globalNotification.type = "error";
+    }
+}
 async function loadSupportRequests() {
     try {
         const { data } = await axios.get("/api/support-requests");
@@ -324,6 +349,7 @@ onMounted(async () => {
         loadNews(),
         loadFaqs(),
         loadSupportRequests(),
+        loadApplications(),
     ]);
 });
 </script>

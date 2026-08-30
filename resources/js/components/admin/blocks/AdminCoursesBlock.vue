@@ -372,12 +372,9 @@ const paginatedCourses = computed(() => {
 watch([selectedDifficulty, searchCourseQuery, pageSizeCourses], () => {
     currentPageCourses.value = 1;
 });
-watch(
-    () => props.courses,
-    () => {
-        currentPageCourses.value = 1;
-    }
-);
+watch(totalPagesCourses, (tp) => {
+    if (currentPageCourses.value > tp) currentPageCourses.value = tp;
+});
 
 async function deleteCourse(courseId) {
     try {

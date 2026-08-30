@@ -550,8 +550,10 @@ async function save() {
       form.value.editorData = normalizeEditorData(data);
     }
 
-    const ct = (form.value.cardTitle || form.value.courseName || "").trim();
-    if (!ct) throw new Error("Заполните краткое название (cardTitle)");
+    // Отдельного поля для названия на карточке в форме нет,
+    // поэтому оно всегда следует за полным названием курса.
+    const ct = (form.value.courseName || "").trim();
+    if (!ct) throw new Error("Заполните название курса");
     form.value.cardTitle = ct;
 
     // 2) FormData
@@ -783,31 +785,31 @@ onBeforeUnmount(() => {
                 :disabled="teacherSelectDisabled"
             />
         </div>
-        <!-- 8) Направление -->
+        <!-- 8) Направленность -->
         <div class="dialog__component">
-            <p class="dialog__title">Выберите направление</p>
+            <p class="dialog__title">Выберите направленность</p>
             <select
                 v-model="form.selectedDirection"
                 class="dialog__input dialog__select"
                 :disabled="isDisabled"
             >
-                <option :value="null">Выберите направление</option>
+                <option :value="null">Выберите направленность</option>
                 <option v-for="d in directions" :key="d.id" :value="d.id">
                     {{ d.name }}
                 </option>
             </select>
         </div>
 
-        <!-- 9) Языки -->
+        <!-- 9) Классы -->
         <div class="dialog__component">
-            <p class="dialog__title">Выберите языки программирования</p>
+            <p class="dialog__title">Выберите классы</p>
             <Multiselect
                 v-model="form.selectedLanguages"
                 :options="languages"
                 :multiple="true"
                 track-by="id"
                 label="name"
-                placeholder="Нажмите на поле, чтобы выбрать язык"
+                placeholder="Нажмите на поле, чтобы выбрать класс"
                 :close-on-select="false"
                 :clear-on-select="false"
                 :preserve-search="true"

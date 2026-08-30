@@ -12,11 +12,6 @@
         <input v-model="form.courseName" type="text" placeholder="Введите название курса" class="form-input" />
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Краткое название курса</label>
-        <input v-model="form.cardTitle" type="text" placeholder="Введите название для карточки" class="form-input" />
-      </div>
-
       <!-- Цена/длительность/часы -->
       <div class="form-group">
         <label class="form-label">Цена</label>
@@ -73,25 +68,25 @@
         />
       </div>
 
-      <!-- Направление -->
+      <!-- Направленность -->
       <div class="form-group">
-        <label class="form-label">Выберите направление</label>
+        <label class="form-label">Выберите направленность</label>
         <select v-model="form.selectedDirection" class="form-input">
-          <option :value="null">-- Выберите направление --</option>
+          <option :value="null">-- Выберите направленность --</option>
           <option v-for="d in directions" :key="d.id" :value="d.id">{{ d.name }}</option>
         </select>
       </div>
 
-      <!-- Языки -->
+      <!-- Классы -->
       <div class="form-group">
-        <label class="form-label">Выберите языки программирования</label>
+        <label class="form-label">Выберите классы</label>
         <Multiselect
           v-model="form.selectedLanguages"
           :options="languages"
           :multiple="true"
           track-by="id"
           label="name"
-          placeholder="Нажмите на поле, чтобы выбрать язык"
+          placeholder="Нажмите на поле, чтобы выбрать класс"
           :close-on-select="false"
           :clear-on-select="false"
           :preserve-search="true"
@@ -328,7 +323,7 @@ async function submitForm () {
 
     // 2) FormData
     const fd = new FormData()
-    fd.append('cardTitle', form.value.cardTitle)
+    fd.append('cardTitle', form.value.courseName)
     fd.append('courseName', form.value.courseName)
     fd.append('price', form.value.price)
     fd.append('duration', form.value.duration)

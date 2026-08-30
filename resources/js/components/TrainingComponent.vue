@@ -104,72 +104,50 @@
         <div class="form-block">
           <!-- ===== форма покупки/консультации ===== -->
           <form @submit.prevent="submitForm" class="space-y-6">
-            <!-- radio main -->
-            <div class="radio-group">
-              <label :class="['radio-option',{active:selectedOption==='consultation'}]">
-                <input type="radio" value="consultation" v-model="selectedOption" />
-                <span class="custom-radio"></span>
-                <span class="custom-radio__text">Записаться на бесплатную консультацию</span>
-              </label>
+            <p class="application-form__lead">
+                Оставьте заявку — мы свяжемся с вами,
+                подпишем договор и откроем доступ к курсу.
+            </p>
 
-              <label :class="['radio-option',{active:selectedOption==='discount'}]">
-                <input type="radio" value="discount" v-model="selectedOption" />
-                <span class="custom-radio"></span>
-                <span class="custom-radio__text">Оплатить курс</span>
-              </label>
+            <div class="form-group floating-label">
+                <input
+                    id="application-name"
+                    type="text"
+                    required
+                    v-model="formData.full_name"
+                    placeholder=" "
+                />
+                <label for="application-name">ФИО</label>
             </div>
 
-            <!-- контакты -->
-            <div class="floating-label">
-              <input id="email" type="email" v-model="formData.email" placeholder=" " required />
-              <label for="email">Электронная почта</label>
-            </div>
-            <div class="floating-label">
-              <input id="name" type="text" v-model="formData.name" placeholder=" " required />
-              <label for="name">Имя</label>
-            </div>
-            <div class="floating-label">
-              <input id="phone" type="tel"
-                     v-model="formData.phone"
-                     placeholder="+7 999 999-99-99"
-                     v-mask="'+7 (###) ###-##-##'"
-                     required />
+            <div class="form-group floating-label">
+                <input
+                    id="application-phone"
+                    type="tel"
+                    required
+                    v-model="formData.phone"
+                    placeholder="+7 999 999-99-99"
+                    v-mask="'+7 (###) ###-##-##'"
+                />
             </div>
 
-            <!-- payment (отображается, когда выбран discount) -->
-            <transition name="fade-slide">
-              <div v-if="selectedOption==='discount'" class="payment-block space-y-4">
-                <h3 class="payment__h3">Оплата курса</h3>
+            <div class="form-group floating-label">
+                <input
+                    id="application-email"
+                    type="email"
+                    required
+                    v-model="formData.email"
+                    placeholder=" "
+                />
+                <label for="application-email">Электронная почта</label>
+            </div>
 
-                <div class="radio-group">
-                  <label :class="['radio-option',{active:selectedDiscountOption==='card'}]">
-                    <input type="radio" value="card" v-model="selectedDiscountOption" />
-                    <span class="custom-radio"></span><span class="custom-radio__text">Покупка картой</span>
-                  </label>
-                  <label :class="['radio-option',{active:selectedDiscountOption==='sbp'}]">
-                    <input type="radio" value="sbp" v-model="selectedDiscountOption" />
-                    <span class="custom-radio"></span><span class="custom-radio__text">Через СБП</span>
-                  </label>
-                </div>
-
-                <div v-if="selectedDiscountOption==='card'" class="space-y-4">
-                    <div class="floating-label">
-                        <input v-model="cardInfo.cardNumber" placeholder="0000 0000 0000 0000" v-mask="'#### #### #### ####'" />
-                    </div>
-                  
-                  <div class="block-card">
-                    <input v-model="cardInfo.expiry" placeholder="ММ/ГГ"
-                           class="form__input--card" v-mask="'##/##'" />
-                    <input v-model="cardInfo.cvc" placeholder="CVC"
-                           class="form__input--card" v-mask="'###'" />
-                  </div>
-                </div>
-              </div>
-            </transition>
-
-            <input type="submit"
-                   class="form-submit w-full"
-                   :value="selectedOption==='consultation' ? 'Заказать консультацию' : 'Оплатить'" />
+            <input
+                class="form-submit form-submit--button"
+                type="submit"
+                :disabled="isSending"
+                :value="isSending ? 'Отправляем...' : 'Оставить заявку'"
+            />
           </form>
         </div>
       </div>
@@ -178,8 +156,7 @@
       <div v-else class="modal__else">
         <div class="else__info">
           <h2>{{ successMessage }}</h2>
-          <p v-if="selectedOption==='consultation'">Скоро с вами свяжется специалист</p>
-          <p v-else>Вы успешно купили курс, поздравляем!</p>
+          <p>Мы свяжемся с вами, подпишем договор и откроем доступ к курсу.</p>
         </div>
       </div>
     </div>
@@ -347,63 +324,47 @@ const isModalOpen            = ref(false);
 const isSubmitted            = ref(false);
 const selectedCourse         = ref(null);
 
-const selectedOption         = ref('consultation'); // consultation | discount
-const selectedDiscountOption = ref('card');         // card | sbp
 
 const successMessage = ref('');
 
-const formData = ref({ email:'', name:'', phone:'' });
-const cardInfo = ref({ cardNumber:'', expiry:'', cvc:'' });
+const formData = ref({ full_name: "", phone: "", email: "" });
+const isSending = ref(false);
 
 function openModal(course){
-  // проверка авторизации (у вас уже есть showAuthModal ↑)
-  if(!user.value){ showAuthModal.value = true; return; }
-
-  selectedCourse.value   = course;
-  isModalOpen.value      = true;
-  isSubmitted.value      = false;
-  successMessage.value   = '';
-  selectedOption.value   = 'consultation';
-  selectedDiscountOption.value = 'card';
-  formData.value         = { email:'', name:'', phone:'' };
-  cardInfo.value         = { cardNumber:'', expiry:'', cvc:'' };
+  // Заявку может оставить и гость: аккаунт заводит админ после подписания.
+  selectedCourse.value = course;
+  isSubmitted.value = false;
+  successMessage.value = "";
+  formData.value = {
+    full_name: user.value?.name || "",
+    phone: user.value?.phone || "",
+    email: user.value?.email || "",
+  };
+  isModalOpen.value = true;
 }
 function closeModal(){ isModalOpen.value = false; }
 
 /*  — отправка формы — */
-async function submitForm(){
-  if(!selectedCourse.value) return;
+async function submitForm() {
+  if (!selectedCourse.value || isSending.value) return;
 
-  const payload = {
-    user_id : user.value?.id ?? null,
-    ...formData.value,
-    type    : selectedOption.value,
-  };
+  isSending.value = true;
+  try {
+    await axios.post(`/api/${selectedCourse.value.id}/application`, {
+      full_name: formData.value.full_name,
+      phone: formData.value.phone,
+      email: formData.value.email,
+            user_id: user.value?.id ?? null,
+    });
 
-  if(selectedOption.value==='discount'){
-    payload.payment_method = selectedDiscountOption.value;
-    if(selectedDiscountOption.value==='card')
-      payload.payment_details = JSON.stringify(cardInfo.value);
-  }else{
-    payload.payment_method  = 'card';
-    payload.payment_details = null;
-  }
-
-  const url = selectedOption.value==='consultation'
-      ? `/api/${selectedCourse.value.id}/consultation`
-      : `/api/${selectedCourse.value.id}/purchase`;
-
-  try{
-    await axios.post(url, payload);
-    successMessage.value = selectedOption.value==='consultation'
-        ? 'Спасибо за заявку!' : 'Поздравляем с покупкой!';
+    successMessage.value = "Спасибо за заявку!";
     isSubmitted.value = true;
-  }catch(e){
+  } catch (e) {
     console.error(e);
-    alert('Не удалось отправить форму');
+  } finally {
+    isSending.value = false;
   }
-}
-function handleLoginEvent(e) {
+}function handleLoginEvent(e) {
   user.value = e.detail;                // e.detail = объект пользователя
   localStorage.setItem(AUTH_KEY, JSON.stringify(e.detail));
   showAuthModal.value = false;

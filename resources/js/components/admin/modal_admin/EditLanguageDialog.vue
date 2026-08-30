@@ -3,7 +3,7 @@
     <div class="dialog__container_custom dialog__container_custom--s" @click.stop>
       <div class="dialog__inner" :class="{ 'is-saving': loading }">
         <div class="dialog__header">
-          <p>Редактировать язык</p>
+          <p>Редактировать класс</p>
           <div class="dialog__close" @click="close">
             <svg width="13" height="12" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -17,12 +17,12 @@
         <div class="dialog__content">
           <div class="form__admin">
             <div class="dialog__component">
-              <p class="dialog__title">Название языка</p>
+              <p class="dialog__title">Название класса</p>
               <input
                 v-model="name"
                 type="text"
                 class="dialog__input"
-                placeholder="Введите язык"
+                placeholder="Введите класс"
                 :disabled="loading"
                 required
               />
@@ -86,7 +86,7 @@ async function submit() {
   try {
     const { data } = await axios.patch(`/api/languages/${props.language.id}`, { name: name.value });
 
-    globalNotification.categoryMessage = "Язык успешно обновлён";
+    globalNotification.categoryMessage = "Класс успешно обновлён";
     globalNotification.type = "success";
 
     emit("saved", data.language ?? data);
@@ -94,7 +94,7 @@ async function submit() {
   } catch (e) {
     console.error(e);
     error.value = "Ошибка сохранения.";
-    globalNotification.categoryMessage = "Ошибка при обновлении языка";
+    globalNotification.categoryMessage = "Ошибка при обновлении класса";
     globalNotification.type = "error";
   } finally {
     loading.value = false;

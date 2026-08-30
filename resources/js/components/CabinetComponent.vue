@@ -52,9 +52,7 @@
                                                 'course__cardss',
                                                 'course__card_personal',
                                                 'course__card_bg1',
-                                                difficultyColorClass[
-                                                    course.difficulty
-                                                ],
+                                                getDirectionCardClass(course.direction),
                                             ]"
                                         >
                                             <div class="course__card-image">
@@ -138,10 +136,10 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import {
     createCourseDifficultyDictionary,
-    getCourseDifficultyCardClass,
     getCourseDifficultyLabel,
 } from "@/utils/courseDifficulty";
 
+import { getDirectionCardClass } from "@/utils/courseDirection";
 // Опционально можно задать имя компонента (начиная с Vue 3.3)
 if (import.meta.env.VITE_COMPONENT_NAME) {
     defineOptions({ name: "UserHeader" });
@@ -157,7 +155,6 @@ const props = defineProps({
     },
 });
 
-const difficultyColorClass = createCourseDifficultyDictionary(getCourseDifficultyCardClass);
 const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
 
 function getCourseProgress(course) {

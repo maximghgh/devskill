@@ -14,6 +14,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ConsultationController;
+use App\Http\Controllers\CourseApplicationController;
 use App\Http\Controllers\CourseCommentController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ChapterController;
@@ -258,6 +259,13 @@ Route::middleware('auth:sanctum')->get('/user/purchased-courses', [UserControlle
     
 Route::post('/{course}/purchase', [PurchaseController::class, 'store'])->name('purchases.store');
 Route::post('/{course}/consultation', [ConsultationController::class, 'store'])->name('consultations.store');
+
+// заявки на курс: оставляет любой посетитель, ведёт админ
+Route::post('/{course}/application', [CourseApplicationController::class, 'store']);
+Route::get('/course-applications', [CourseApplicationController::class, 'index']);
+Route::patch('/course-applications/{application}', [CourseApplicationController::class, 'update']);
+Route::delete('/course-applications/{application}', [CourseApplicationController::class, 'destroy']);
+Route::get('/user/{id}/course-applications', [CourseApplicationController::class, 'forUser']);
 
 // обращения (support)
 Route::get('/support-requests', [SupportRequestController::class, 'index']);

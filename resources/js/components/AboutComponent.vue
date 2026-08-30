@@ -5,18 +5,20 @@
                 <section class="offer offer_about">
                     <div class="offer__inner offer__inner_main">
                         <h1>
-                            Об образовательном портале
+                            О нас
                         </h1>
                         <p class="offer__desc intro__text">
-                            В современном мире, где технологический прогресс
-                            неуклонно продвигается вперед, образование играет
-                            всё более важную роль. Возможность получить
-                            качественное образование становится доступной для
-                            все большего числа людей благодаря развитию
-                            онлайн-образования. В этом контексте образовательные
-                            порталы предоставляют уникальные возможности для
-                            саморазвития и приобретения новых навыков из любой
-                            точки мира.
+                            <span>
+                                Хочешь сдать ОГЭ/ЕГЭ на высокий балл
+                                и поступить в ИжГТУ?
+                            </span>
+                            <span>Начни готовиться уже сейчас!</span>
+                            <span>
+                                Курсы для школьников от ИжГТУ имени
+                                М.Т. Калашникова — это возможность учиться
+                                у тех, кто знает экзамен изнутри
+                                и учит студентов.
+                            </span>
                         </p>
                     </div>
                 </section>
@@ -36,58 +38,67 @@
                     </div>
                   </div>
                 </section>
-                <!-- Features Section -->
-                <section class="features-section">
-                    <div class="container">
-                        <h2 class="features-title">Преимущества платформы</h2>
-                        <div class="features-grid">
-                            <div class="feature-card">
-                                <img src="../../assets/img/image_3.jpg" alt="24/7 доступ" class="feature-icon">
-                                <h3 class="feature-name">Инновационная платформа</h3>
-                                <p class="feature-desc">
-                                Один из таких порталов. Это инновационная платформа, объединяющая специалистов из разных областей информационных технологий и предоставляющая широкий спектр образовательных материалов и курсов. становится незаменимым инструментом для всех, кто желает расширить свои знания и умения в IT-сфере. Благодаря удобному интерфейсу и доступности материалов на различных языках, каждый может выбирать подходящие курсы и изучать их в любое время и из любой точки мира.
-                                </p>
-                            </div>
-                            <div class="feature-card">
-                                <img src="../../assets/img/image_2.jpg" alt="Портал" class="feature-icon">
-                                <h3 class="feature-name">Обучение, практика и сертификат в одном месте</h3>
-                                <p class="feature-desc">
-                                Портал открывает двери в мир новых возможностей и перспектив. Здесь можно получить качественное образование от лучших экспертов, развивать свои навыки и применять их на практике. Одной из особенностей платформы является возможность получения сертификата по окончании курса, подтверждающего уровень знаний. Институтом образовательных технологий — это не только место для обучения, но и площадка для создания профессиональных контактов и обмена опытом.
-                                </p>
-                            </div>
-                            <div class="feature-card">
-                                <img src="../../assets/img/image_7.jpg" alt="Менторская поддержка" class="feature-icon">
-                                <h3 class="feature-name">Курсы с глубокой проработкой</h3>
-                                <p class="feature-desc">
-                                Курсы, разработанные профессионалами, предлагают систематическое обучение с постепенным углублением материала. Практические задания и разбор кейсов помогают студентам закрепить полученные знания.
-                                </p>
-                            </div>
-                            <div class="feature-card">
-                                <img src="../../assets/img/image_4.jpg" alt="Соревнования" class="feature-icon">
-                                <h3 class="feature-name">Соревнуйтесь и прокачивайте навыки</h3>
-                                <p class="feature-desc">
-                                Одной из ключевых особенностей портала является возможность участия в соревнованиях по спортивному программированию, что способствует развитию навыков быстрого мышления и командной работы.
-                                </p>
-                            </div>
-                        </div>
+                <!-- Что мы предлагаем -->
+                <section class="offers-section">
+                    <h2 class="section-title">Что мы предлагаем</h2>
+                    <ul class="offers-list">
+                        <li v-for="(item, i) in offers" :key="i" class="offers-item">
+                            {{ item }}
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Направленность -->
+                <section class="directions-section">
+                    <h2 class="section-title">Направленность</h2>
+                    <div class="directions-grid">
+                        <article
+                            v-for="direction in directionGroups"
+                            :key="direction.name"
+                            class="direction-card"
+                        >
+                            <h3 class="direction-card__title">{{ direction.name }}</h3>
+                            <ul class="direction-card__list">
+                                <li
+                                    v-for="course in direction.courses"
+                                    :key="course.title"
+                                    class="direction-card__item"
+                                >
+                                    {{ course.title }}
+                                    <span v-if="course.note" class="direction-card__note">
+                                        {{ course.note }}
+                                    </span>
+                                </li>
+                            </ul>
+                        </article>
                     </div>
                 </section>
-                <section class="ecosystem-section">
-                    <div class="container">
-                        <h2 class="ecosystem-title">
-                        Экосистема Института образовательных технологий
-                        </h2>
-                        <p class="ecosystem-text">
-                        Институт образовательных технологий активно сотрудничает с 
-                        <span class="highlight">ведущими компаниями России</span>, 
-                        предоставляя студентам возможность получать 
-                        <span class="highlight">актуальные знания и практический опыт</span> 
-                        от экспертов крупных корпораций. Это делает платформу незаменимой. 
-                        В итоге наш портал — это не просто образовательный ресурс, а 
-                        <span class="highlight">целая экосистема</span>, где каждый студент может 
-                        найти поддержку, обменяться опытом и получить качественное образование, 
-                        соответствующее требованиям современного рынка труда.
-                        </p>
+
+                <!-- Контакты -->
+                <section class="contacts-section">
+                    <h2 class="section-title">Контакты</h2>
+                    <p class="contacts-lead">По всем вопросам:</p>
+                    <div class="contacts-grid">
+                        <a
+                            v-for="phone in phones"
+                            :key="phone.href"
+                            class="contacts-item"
+                            :href="`tel:${phone.href}`"
+                        >
+                            <span class="contacts-item__icon">📞</span>
+                            <span class="contacts-item__text">{{ phone.label }}</span>
+                        </a>
+                        <a
+                            class="contacts-item"
+                            href="https://vk.ru/istuschooluniverity"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span class="contacts-item__icon">📲</span>
+                            <span class="contacts-item__text">
+                                ВК: vk.ru/istuschooluniverity
+                            </span>
+                        </a>
                     </div>
                 </section>
             </div>
@@ -105,6 +116,84 @@ const stats = ref({
   directions: 0,
 });
 
+const offers = [
+  "Программы для 5–11 классов",
+  "Подготовка к ОГЭ и ЕГЭ по русскому языку, математике, физике и информатике",
+  "Погружение в профессию задолго до поступления",
+  "Уверенность, знания и высокие баллы",
+];
+
+const phones = [
+  { label: "57-60-30", href: "+73412576030" },
+  { label: "+7 982 117 60 30", href: "+79821176030" },
+  { label: "+7 982 990 37 89", href: "+79829903789" },
+];
+
+const directionGroups = [
+  {
+    name: "Программирование",
+    courses: [
+      { title: "Введение в программирование на языках C и C++" },
+      { title: "WEB-разработка" },
+      { title: "Основы программирования C и C++. Базовый уровень" },
+      { title: "Основы программирования C и C++. Фундаментальный уровень" },
+      { title: "Основы программирования C и C++. Олимпиадный уровень (3 года обучения)" },
+      { title: "Информационные технологии и программирование" },
+      { title: "Основы программирования на Python" },
+      { title: "Проектная деятельность на Python" },
+    ],
+  },
+  {
+    name: "Системное администрирование",
+    courses: [
+      { title: "Основы сетевых технологий" },
+      { title: "Основы кибербезопасности" },
+      { title: "Linux" },
+    ],
+  },
+  {
+    name: "Подготовка к ОГЭ",
+    courses: [
+      { title: "Подготовка к ОГЭ. Информатика" },
+      { title: "Подготовка к ОГЭ. Математика" },
+      { title: "Подготовка к ОГЭ. Русский язык" },
+      { title: "Подготовка к ОГЭ. Физика" },
+    ],
+  },
+  {
+    name: "Подготовка к ЕГЭ",
+    courses: [
+      { title: "Подготовка к ЕГЭ. Информатика" },
+      { title: "Подготовка к ЕГЭ. Математика" },
+      { title: "Подготовка к ЕГЭ. Русский язык" },
+      { title: "Подготовка к ЕГЭ. Физика" },
+      { title: "Подготовка к творческому экзамену" },
+    ],
+  },
+  {
+    name: "Технико-прикладная",
+    courses: [
+      { title: "Основы оружейного дела (3 года обучения)" },
+      {
+        title: "Физико-технические основы стрелкового оружия",
+        note: "курс в разработке",
+      },
+      { title: "Основы дизайна: графический дизайн, 3D-моделирование, 3D-печать" },
+    ],
+  },
+  {
+    name: "Общеобразовательные",
+    courses: [
+      { title: "Игра Го. Правила и теория для начинающих — стратегическое мышление, анализ, самоконтроль" },
+      { title: "Программа по формированию цифровых навыков — широкий набор цифровых умений без узкой специализации" },
+      { title: "Олимпиадная математика — нестандартное мышление, логика, культура рассуждений" },
+      { title: "Методы решения физических задач — углубление понимания физики и развитие исследовательских навыков" },
+      { title: "Общение без границ и потерь: слышать других, оставаясь собой — социально-коммуникативные навыки, эмпатия, уверенная коммуникация" },
+      { title: "Подготовка к творческому экзамену — развитие креативности и навыков презентации идей" },
+    ],
+  },
+];
+
 // при монтировании забираем цифры
 onMounted(async () => {
   try {
@@ -117,106 +206,151 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.ecosystem-section {
-  background-color: #fff;
-  padding: 80px 20px;
+.about-article,
+.offers-section,
+.directions-section,
+.contacts-section {
+  box-sizing: border-box;
+  max-width: var(--max-width);
+  padding: var(--padding);
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.ecosystem-title {
+.section-title {
   font-size: 2.25rem;
   font-weight: 700;
-  text-align: center;
   color: #1f2937;
-  margin-bottom: 24px;
+  margin: 0 0 32px;
 }
 
-.ecosystem-text {
-  text-align: center;
-  margin: 0 auto;
-  font-size: 1.125rem;
-  line-height: 1.8;
-  color: #4b5563;
+/* Что мы предлагаем */
+.offers-section {
+  margin-bottom: 80px;
 }
-
-.ecosystem-text .highlight {
-  color: #2563eb;
-  font-weight: 600;
-  background: rgba(37, 99, 235, 0.1);
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-.features-section {
-  border-radius: 12px;
-  background-color: #f9fafb;
-  padding: 80px 0;
-}
-.features-title {
-  text-align: center;
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 60px;
-  color: #1f2937;
-}
-
-/* Сетка карточек */
-.features-grid {
+.offers-list {
   display: grid;
-  justify-content: center;
-  grid-template-columns: repeat(2, minmax(240px, 600px));
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-
-/* Карточка преимущества */
-.feature-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 32px 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+.offers-item {
+  position: relative;
+  padding: 20px 20px 20px 56px;
+  border-radius: 14px;
+  background-color: #f1f0fa;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: #2b2b3a;
+}
+.offers-item::before {
+  content: "✓";
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #7a2abd;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 24px;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.feature-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.10);
 }
 
-/* Иконка */
-.feature-icon {
-  width: 100%;
-  border-radius: 60px;
-  margin-bottom: 24px;
+/* Направленность */
+.directions-section {
+  margin-bottom: 80px;
 }
-
-/* Заголовок и текст */
-.feature-name {
+.directions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+.direction-card {
+  padding: 28px 24px;
+  border-radius: 18px;
+  background-color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+.direction-card__title {
+  margin: 0 0 16px;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #2563eb;
-  margin-bottom: 16px;
+  color: #4e187b;
 }
-.feature-desc {
+.direction-card__list {
+  margin: 0;
+  padding: 0 0 0 20px;
+}
+.direction-card__item {
+  margin-bottom: 10px;
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.5;
   color: #4b5563;
 }
+.direction-card__item:last-child {
+  margin-bottom: 0;
+}
+.direction-card__note {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background-color: #f0ecf7;
+  font-size: 0.8125rem;
+  color: #7a2abd;
+  white-space: nowrap;
+}
+
+/* Контакты */
+.contacts-section {
+  margin-bottom: 95px;
+}
+.contacts-lead {
+  margin: 0 0 20px;
+  font-size: 1.0625rem;
+  color: #4b5563;
+}
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.contacts-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background-color: #f1f0fa;
+  font-size: 1.0625rem;
+  color: #2b2b3a;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+.contacts-item:hover {
+  background-color: #e6e3f5;
+}
+.contacts-item__icon {
+  flex: 0 0 auto;
+  font-size: 1.25rem;
+}
+.contacts-item__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 768px) {
-  .features-grid{
-    grid-template-columns: repeat(1, minmax(240px, 600px));
+  .section-title {
+    font-size: 1.75rem;
+    margin-bottom: 24px;
   }
-  .features-section {
-    padding: 60px 0;
-  }
-  .features-title {
-    font-size: 2rem;
-    margin-bottom: 40px;
-  }
-  .feature-card {
-    margin: 0 20px;
-    padding: 24px 16px;
-  }
-  .ecosystem-title{
-    font-size: 35px;
+  .offers-section,
+  .directions-section {
+    margin-bottom: 56px;
   }
 }
 .metrics-grid {
@@ -262,6 +396,9 @@ onMounted(async () => {
 }
 .intro__text {
     max-width: 800px;
+}
+.intro__text span {
+    display: block;
 }
 
 /* Статья */

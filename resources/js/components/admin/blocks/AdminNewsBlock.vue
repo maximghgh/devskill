@@ -492,11 +492,6 @@ watch(totalPagesNews, (tp) => {
     if (currentPageNews.value > tp) currentPageNews.value = tp;
 });
 
-watch(
-    () => props.newsItems,
-    () => (currentPageNews.value = 1)
-);
-
 /* =========================================================
    Комментарии (у тебя уже было)
    ========================================================= */
