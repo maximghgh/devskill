@@ -23,7 +23,7 @@ class StoreCourseRequest extends FormRequest
             'description'          => 'nullable|string',
             'hours'                => 'required|integer',
             'simulators'           => 'nullable|integer|min:0',
-            'difficulty'           => ['required', 'string', Rule::in(CourseDifficulty::allowedValues())],
+            'difficulty'           => ['nullable', 'string', Rule::in(CourseDifficulty::allowedValues())],
             'editorData'           => 'required',
             'teachers'             => 'nullable|json',
             'language'             => 'required|string',

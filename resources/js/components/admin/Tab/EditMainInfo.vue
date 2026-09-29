@@ -10,7 +10,6 @@ import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 
 import { globalNotification } from "@/globalNotification";
-import { getCourseDifficultyOptions } from "@/utils/courseDifficulty";
 
 const props = defineProps({
   course: { type: Object, required: true },
@@ -197,7 +196,6 @@ const form = ref({
   description: "",
   hours: "",
   simulators: "",
-  difficulty: "beginner_year_1",
   selectedTeachers: [],
   selectedLanguages: [],
   selectedDirection: null,
@@ -209,8 +207,6 @@ const form = ref({
   startDate: "",
   endDate: "",
 });
-
-const difficultyOptions = computed(() => getCourseDifficultyOptions(form.value.difficulty));
 
 const selectedTeacherOptions = computed({
   get() {
@@ -461,7 +457,6 @@ function fillFormFromCourse(course) {
     description: course.description || "",
     hours: course.hours || "",
     simulators: course.simulators || "",
-    difficulty: course.difficulty || "beginner_year_1",
     selectedTeachers: teacherIds,
     selectedLanguages: selectedLangs,
     selectedDirection: course.direction ?? null,
@@ -509,7 +504,6 @@ async function save() {
     fd.append("description", form.value.description);
     fd.append("hours", form.value.hours);
     if (form.value.simulators != null) fd.append("simulators", form.value.simulators);
-    fd.append("difficulty", form.value.difficulty);
 
     const uniqueTeachers = [...new Set(form.value.selectedTeachers)];
     fd.append("teachers", JSON.stringify(uniqueTeachers));
@@ -623,23 +617,6 @@ onBeforeUnmount(() => {
 
     <!-- simulators скрыто -->
     <input v-model="form.simulators" type="hidden" />
-
-    <!-- Уровень -->
-    <div class="dialog__component">
-      <p class="dialog__title">Уровень курса</p>
-      <select
-        v-model="form.difficulty"
-        class="dialog__input dialog__select"
-      >
-        <option
-          v-for="option in difficultyOptions"
-          :key="option.value"
-          :value="option.value"
-        >
-          {{ option.label }}
-        </option>
-      </select>
-    </div>
 
     <div class="dialog__component">
       <p class="dialog__title">Преподаватели</p>

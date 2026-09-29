@@ -88,19 +88,11 @@
                                     <div class="course__card-title">
                                         {{ course.card_title }}
                                     </div>
-                                    <!-- Уровень сложности -->
 
                                     <!-- Цена -->
                                     <!-- Кнопки -->
                                     <div class="course__card-buttons">
                                         <div class="course__card-price">
-                                            <p class="course__card-desc">
-                                                {{
-                                                    difficultyTranslation[
-                                                        course.difficulty
-                                                    ]
-                                                }}
-                                            </p>
                                             <span>{{ course.price }} P</span>
                                         </div>
                                         <!-- Ссылка «Подробнее» может вести на страницу с подробной информацией, например /courses/ID -->
@@ -134,7 +126,7 @@
                                             <!-- info -->
                                             <div
                                                 class="block-info"
-                                                :class="selectedCourse ? difficultyBgClass[selectedCourse.difficulty] : ''"
+                                                :class="selectedCourse ? getDirectionBlockClass(selectedCourse.direction) : ''"
                                             >
                                                 <div class="block__top">
                                                     <div class="block__logo">
@@ -150,10 +142,6 @@
                                                     </p>
                                                 </div>
                                                 <div class="block__bottom">
-                                                    <p class="block__difficul">
-                                                        Уровень:&nbsp;
-                                                        {{ difficultyTranslation[selectedCourse.difficulty] }}
-                                                    </p>
                                                     <div class="block__price">
                                                         <p>Цена: {{ selectedCourse.price }} P</p>
                                                     </div>
@@ -308,12 +296,7 @@
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
 import axios from "axios";
-import {
-  createCourseDifficultyDictionary,
-  getCourseDifficultyBlockClass,
-  getCourseDifficultyLabel,
-} from "@/utils/courseDifficulty";
-import { getDirectionCardClass } from "@/utils/courseDirection";
+import { getDirectionCardClass, getDirectionBlockClass } from "@/utils/courseDirection";
 import { getCourseCardImageUrl } from "@/utils/courseImage";
 import { globalNotification } from "../globalNotification";
 
@@ -353,10 +336,6 @@ const selectedDirections   = ref([]);
 const selectedLanguages    = computed(() =>
   languages.value.filter(l => l.checked).map(l => l.id)
 );
-
-/* --- Словари сложности для карточек и модалки --- */
-const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
-const difficultyBgClass = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
 
 /* --- Методы пагинации --- */
 function nextPage() {
@@ -577,6 +556,9 @@ onMounted(async () => {
 .block-info_bg-fiolet { background-color: #727dcc; }
 .block-info_bg-orange { background-color: #d48a66; }
 .block-info_bg-green  { background-color: #5bcaa7; }
+.block-info_bg-blue   { background-color: #269aca; }
+.block-info_bg-plum   { background-color: #9a6ab8; }
+.block-info_bg-teal   { background-color: #4aa8a0; }
 
 /* Анимация для платежного блока */
 .fade-slide-enter-active,

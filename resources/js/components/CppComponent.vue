@@ -124,7 +124,7 @@
                         class="modal-content grid md:grid-cols-2"
                     >
                         <!-- левая часть — краткая информация о курсе -->
-                        <div :class="['block-info', diffBg[course.difficulty]]">
+                        <div :class="['block-info', getDirectionBlockClass(course.direction)]">
                             <div class="block__top">
                                 <div class="block__logo">
                                     <img
@@ -143,10 +143,6 @@
                             </div>
 
                             <div class="block__bottom mt-auto">
-                                <p class="block__difficul">
-                                    Уровень:
-                                    {{ diffLabel[course.difficulty] }}
-                                </p>
                                 <div class="block__price">
                                     Цена:
                                     {{ course.price }} ₽
@@ -247,11 +243,7 @@ import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
-import {
-    createCourseDifficultyDictionary,
-    getCourseDifficultyBlockClass,
-    getCourseDifficultyLabel,
-} from "@/utils/courseDifficulty";
+import { getDirectionBlockClass } from "@/utils/courseDirection";
 import {
     getCourseCardImageUrl,
     getCourseDescriptionImageUrl,
@@ -305,10 +297,6 @@ const form = ref({ full_name: "", phone: "", email: "" });
 const isSending = ref(false);
 const submitted = ref(false);
 const successText = ref("");
-
-/* словари для уровней и цветов */
-const diffLabel = createCourseDifficultyDictionary(getCourseDifficultyLabel);
-const diffBg = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
 
 /* очистка формы при закрытии */
 function reset() {
@@ -598,6 +586,15 @@ function downloadPdf(path) {
 }
 .block-info_bg-green {
     background-color: #5bcaa7;
+}
+.block-info_bg-blue {
+    background-color: #269aca;
+}
+.block-info_bg-plum {
+    background-color: #9a6ab8;
+}
+.block-info_bg-teal {
+    background-color: #4aa8a0;
 }
 
 /* Анимация для платежного блока */

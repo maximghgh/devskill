@@ -24,74 +24,6 @@
                         </span>
                         курсов
                     </label>
-
-                    <div class="users-roles">
-                        <button
-                            type="button"
-                            class="users-roles__btn"
-                            @click="
-                                courseDifficultyDropdownOpen =
-                                    !courseDifficultyDropdownOpen
-                            "
-                        >
-                            Уровень
-                            <span
-                                class="users-roles__chevron"
-                                :class="{
-                                    'users-roles__chevron--open':
-                                        courseDifficultyDropdownOpen,
-                                }"
-                            ></span>
-                        </button>
-
-                        <div
-                            v-if="courseDifficultyDropdownOpen"
-                            class="users-roles__dropdown"
-                            @click.stop
-                        >
-                            <p class="users-roles__title">Фильтр по уровню</p>
-
-                            <label class="users-roles__option">
-                                <input
-                                    type="radio"
-                                    value="all"
-                                    v-model="selectedDifficulty"
-                                />
-                                <span class="users-roles__span">Все</span>
-                            </label>
-                            <label
-                                v-for="option in difficultyOptions"
-                                :key="option.value"
-                                class="users-roles__option"
-                            >
-                                <input
-                                    type="radio"
-                                    :value="option.value"
-                                    v-model="selectedDifficulty"
-                                />
-                                <span class="users-roles__span">{{ option.label }}</span>
-                            </label>
-
-                            <div class="users-roles__actions">
-                                <button
-                                    type="button"
-                                    class="btn users-roles__apply"
-                                    @click="
-                                        courseDifficultyDropdownOpen = false
-                                    "
-                                >
-                                    Фильтр
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn users-roles__reset"
-                                    @click="resetCourseDifficultyFilter"
-                                >
-                                    Сброс
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="users-toolbar__search">
@@ -142,7 +74,6 @@
                             <th>Активен</th>
                             <th>Дата создания</th>
                             <th>Участники</th>
-                            <th>Уровень</th>
                             <th v-if="showActions">Действия</th>
                         </tr>
                     </thead>
@@ -168,12 +99,6 @@
                             <td>Да</td>
                             <td>{{ formatBirthday(course.created_at) }}</td>
                             <td>0</td>
-
-                            <td>
-                                <div class="users-role-pill" :class="difficultyClass(course.difficulty)">
-                                    {{ difficultyLabel(course.difficulty) }}
-                                </div>
-                            </td>
 
                             <td v-if="showActions" class="hadle">
                                 <div class="tooltip-container">
@@ -247,11 +172,6 @@ import { ref, computed, watch } from "vue";
 import axios from "axios";
 import { globalNotification } from "../../../globalNotification";
 import { useDateFormatters } from "../utils/useDateFormatters";
-import { useDifficultyLabel } from "../utils/useDifficultyLabel";
-import {
-    COURSE_DIFFICULTY_OPTIONS,
-    getCourseDifficultyBadgeClass,
-} from "@/utils/courseDifficulty";
 
 const props = defineProps({
     courses: { type: Array, default: () => [] },
@@ -267,8 +187,6 @@ const emit = defineEmits([
 ]);
 
 const { formatBirthday } = useDateFormatters();
-const { difficultyLabel } = useDifficultyLabel();
-const difficultyOptions = COURSE_DIFFICULTY_OPTIONS;
 
 const usersById = computed(() => {
     const map = new Map();
@@ -318,31 +236,14 @@ function teacherLabel(course) {
     return course?.teacher || "Неизвестно";
 }
 
-function difficultyClass(diff) {
-    return getCourseDifficultyBadgeClass(diff);
-}
-
 function setCourses(next) {
     emit("update:courses", next);
 }
 
-const selectedDifficulty = ref("all");
 const searchCourseQuery = ref("");
-const courseDifficultyDropdownOpen = ref(false);
-
-function resetCourseDifficultyFilter() {
-    selectedDifficulty.value = "all";
-    courseDifficultyDropdownOpen.value = false;
-}
 
 const filteredCourses = computed(() => {
-    let base = props.courses;
-
-    if (selectedDifficulty.value !== "all") {
-        base = base.filter(
-            (c) => String(c.difficulty || "") === selectedDifficulty.value
-        );
-    }
+    const base = props.courses;
 
     const q = (searchCourseQuery.value || "").trim().toLowerCase();
     if (!q) return base;
@@ -369,7 +270,7 @@ const paginatedCourses = computed(() => {
     return filteredCourses.value.slice(start, start + size);
 });
 
-watch([selectedDifficulty, searchCourseQuery, pageSizeCourses], () => {
+watch([searchCourseQuery, pageSizeCourses], () => {
     currentPageCourses.value = 1;
 });
 watch(totalPagesCourses, (tp) => {

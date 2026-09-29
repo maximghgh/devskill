@@ -73,34 +73,6 @@
                         </article>
                     </div>
                 </section>
-
-                <!-- Контакты -->
-                <section class="contacts-section">
-                    <h2 class="section-title">Контакты</h2>
-                    <p class="contacts-lead">По всем вопросам:</p>
-                    <div class="contacts-grid">
-                        <a
-                            v-for="phone in phones"
-                            :key="phone.href"
-                            class="contacts-item"
-                            :href="`tel:${phone.href}`"
-                        >
-                            <span class="contacts-item__icon">📞</span>
-                            <span class="contacts-item__text">{{ phone.label }}</span>
-                        </a>
-                        <a
-                            class="contacts-item"
-                            href="https://vk.ru/istuschooluniverity"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <span class="contacts-item__icon">📲</span>
-                            <span class="contacts-item__text">
-                                ВК: vk.ru/istuschooluniverity
-                            </span>
-                        </a>
-                    </div>
-                </section>
             </div>
         </div>
     </div>
@@ -121,12 +93,6 @@ const offers = [
   "Подготовка к ОГЭ и ЕГЭ по русскому языку, математике, физике и информатике",
   "Погружение в профессию задолго до поступления",
   "Уверенность, знания и высокие баллы",
-];
-
-const phones = [
-  { label: "57-60-30", href: "+73412576030" },
-  { label: "+7 982 117 60 30", href: "+79821176030" },
-  { label: "+7 982 990 37 89", href: "+79829903789" },
 ];
 
 const directionGroups = [
@@ -208,8 +174,7 @@ onMounted(async () => {
 <style scoped>
 .about-article,
 .offers-section,
-.directions-section,
-.contacts-section {
+.directions-section {
   box-sizing: border-box;
   max-width: var(--max-width);
   padding: var(--padding);
@@ -303,44 +268,6 @@ onMounted(async () => {
   font-size: 0.8125rem;
   color: #7a2abd;
   white-space: nowrap;
-}
-
-/* Контакты */
-.contacts-section {
-  margin-bottom: 95px;
-}
-.contacts-lead {
-  margin: 0 0 20px;
-  font-size: 1.0625rem;
-  color: #4b5563;
-}
-.contacts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-}
-.contacts-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 18px 20px;
-  border-radius: 14px;
-  background-color: #f1f0fa;
-  font-size: 1.0625rem;
-  color: #2b2b3a;
-  text-decoration: none;
-  transition: background-color 0.2s ease;
-}
-.contacts-item:hover {
-  background-color: #e6e3f5;
-}
-.contacts-item__icon {
-  flex: 0 0 auto;
-  font-size: 1.25rem;
-}
-.contacts-item__text {
-  min-width: 0;
-  overflow-wrap: anywhere;
 }
 
 @media (max-width: 768px) {

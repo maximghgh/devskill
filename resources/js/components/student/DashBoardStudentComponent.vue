@@ -191,13 +191,6 @@
                                             </div>
                                             <div class="course__card-buttons">
                                                 <div class="course__card-price">
-                                                    <p class="course__card-desc">
-                                                        {{
-                                                            difficultyTranslation[
-                                                                course.difficulty
-                                                            ]
-                                                        }}
-                                                    </p>
                                                     <div class="price">
                                                         <span>{{ course.price }} ₽</span>
                                                         <span class="credit">В рассрочку на 4 месяца*</span>
@@ -260,10 +253,7 @@
                                                     class="block-info"
                                                     :class="
                                                         selectedCourse
-                                                            ? difficultyBgClass[
-                                                                selectedCourse
-                                                                    .difficulty
-                                                            ]
+                                                            ? getDirectionBlockClass(selectedCourse.direction)
                                                             : ''
                                                     "
                                                 >
@@ -291,17 +281,6 @@
                                                         </p>
                                                     </div>
                                                     <div class="block__bottom">
-                                                        <p
-                                                            class="block__difficul--level"
-                                                        >
-                                                            Уровень:&nbsp;
-                                                            {{
-                                                                difficultyTranslation[
-                                                                    selectedCourse
-                                                                        .difficulty
-                                                                ]
-                                                            }}
-                                                        </p>
                                                         <div
                                                             class="block__price"
                                                         >
@@ -438,12 +417,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import axios from "axios";
 import "./style.css"
-import {
-    createCourseDifficultyDictionary,
-    getCourseDifficultyBlockClass,
-    getCourseDifficultyLabel,
-} from "@/utils/courseDifficulty";
-import { getDirectionCardClass } from "@/utils/courseDirection";
+import { getDirectionCardClass, getDirectionBlockClass } from "@/utils/courseDirection";
 import { getCourseCardImageUrl } from "@/utils/courseImage";
 /* ------------------------------------------------------------------ */
 /* 1. Константы                                                       */
@@ -487,11 +461,6 @@ const selectedDirections = ref([]);
 const selectedLanguages = computed(() =>
     languages.value.filter((l) => l.checked).map((l) => l.id)
 );
-/* ------------------------------------------------------------------ */
-/* 5. Справочники (словарики)                                         */
-/* ------------------------------------------------------------------ */
-const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
-const difficultyBgClass = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
 /* ------------------------------------------------------------------ */
 /* 6. Модалка покупки/консультации                                    */
 /* ------------------------------------------------------------------ */
@@ -989,6 +958,15 @@ function scrollToCourse() {
 }
 .block-info_bg-green {
     background-color: #5bcaa7;
+}
+.block-info_bg-blue {
+    background-color: #269aca;
+}
+.block-info_bg-plum {
+    background-color: #9a6ab8;
+}
+.block-info_bg-teal {
+    background-color: #4aa8a0;
 }
 
 .block-info h2 {

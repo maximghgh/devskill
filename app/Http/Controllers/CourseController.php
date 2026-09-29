@@ -158,7 +158,7 @@ class CourseController extends Controller
             'description'          => $data['description'] ?? null,
             'hours'                => $data['hours'],
             'simulators'           => $data['simulators'],
-            'difficulty'           => $data['difficulty'],
+            'difficulty'           => $data['difficulty'] ?? CourseDifficulty::BASIC,
             'editor_data'          => $data['editorData'] ?? null,
             'teachers'             => $data['teachers'] ?: null,
             'language'             => $data['language'],
@@ -230,7 +230,7 @@ class CourseController extends Controller
         $course->description = $validated['description'] ?? $course->description;
         $course->hours       = $validated['hours'] ?? $course->hours;
         $course->simulators  = $validated['simulators'] ?? $course->simulators;
-        $course->difficulty  = $validated['difficulty'];
+        $course->difficulty  = $validated['difficulty'] ?? $course->difficulty;
         $course->language    = $validated['language'];
         $course->start_date  = $dates['start_date'];
         $course->end_date    = $dates['end_date'];

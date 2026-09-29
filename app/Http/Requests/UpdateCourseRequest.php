@@ -23,7 +23,7 @@ class UpdateCourseRequest extends FormRequest
             'description'          => 'nullable|string',
             'hours'                => 'nullable|integer',
             'simulators'           => 'nullable|integer',
-            'difficulty'           => ['required', 'string', Rule::in(CourseDifficulty::allowedValues())],
+            'difficulty'           => ['nullable', 'string', Rule::in(CourseDifficulty::allowedValues())],
             'teachers'             => 'nullable|json',
             'language'             => 'nullable|json',
             'direction'            => 'nullable|string',

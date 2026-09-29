@@ -269,7 +269,6 @@
                                         </div>
                                         <div class="course__card-title">{{ course.card_title }}</div>
                                         <div class="course__card-buttons">
-                                            <p class="course__card-desc">{{ difficultyTranslation[course.difficulty] }}</p>
                                             <div class="card__info-ch">
                                                 <div class="course__card-task">
                                                     <p>Пройдено тем:</p>
@@ -426,10 +425,6 @@
 <script setup>
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
-import {
-  createCourseDifficultyDictionary,
-  getCourseDifficultyLabel,
-} from "@/utils/courseDifficulty";
 
 import { getDirectionCardClass } from "@/utils/courseDirection";
 // Управление модальным окном
@@ -518,7 +513,6 @@ const loadCourses = async () => {
 };
 
 // Карточки «Мои курсы» — хелперы как в старом кабинете
-const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
 function getCourseProgress(course) {
   let totalTopics = 0, completedTopics = 0, totalTasks = 0, completedTasks = 0;
   if (course.topics && course.topics.length) {

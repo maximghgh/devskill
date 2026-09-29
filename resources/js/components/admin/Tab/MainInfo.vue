@@ -10,7 +10,6 @@ import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 
 import { globalNotification } from "@/globalNotification";
-import { getCourseDifficultyOptions } from "@/utils/courseDifficulty";
 
 const props = defineProps({
   draft: { type: Object, default: () => ({ slug: null }) },
@@ -191,7 +190,6 @@ const form = ref({
   description: "",
   hours: "",
   simulators: "",
-  difficulty: "beginner_year_1",
   selectedTeachers: [],
   selectedLanguages: [],
   selectedDirection: null,
@@ -342,7 +340,6 @@ const currentUser = ref(null);
 const teachers = computed(() =>
   users.value.filter((u) => String(u.role) === "2" || u.role === 2)
 );
-const difficultyOptions = computed(() => getCourseDifficultyOptions(form.value.difficulty));
 const isTeacher = computed(() => Number(currentUser.value?.role) === 2);
 const teacherSelectDisabled = computed(() => isDisabled.value);
 
@@ -436,7 +433,6 @@ function fillFormFromDraft(draft = props.draft) {
     form.value.description = c.description ?? "";
     form.value.hours = c.hours ?? "";
     form.value.simulators = c.simulators ?? "";
-    form.value.difficulty = c.difficulty ?? "beginner_year_1";
 
     form.value.startDate = c.start_date ? String(c.start_date).slice(0, 10) : "";
     form.value.endDate = c.end_date ? String(c.end_date).slice(0, 10) : "";
@@ -481,7 +477,6 @@ function resetForm() {
     description: "",
     hours: "",
     simulators: "",
-    difficulty: "beginner_year_1",
     selectedTeachers: [],
     selectedLanguages: [],
     selectedDirection: null,
@@ -567,7 +562,6 @@ async function save() {
 
     if (form.value.simulators != null) fd.append("simulators", form.value.simulators);
 
-    fd.append("difficulty", form.value.difficulty);
     fd.append("editorData", JSON.stringify(normalizeEditorData(form.value.editorData)));
 
     fd.append("teachers", JSON.stringify(form.value.selectedTeachers));
@@ -751,24 +745,6 @@ onBeforeUnmount(() => {
 
         <!-- simulators hidden -->
         <input v-model="form.simulators" type="hidden" />
-
-        <!-- 6) Уровень -->
-        <div class="dialog__component ">
-            <p class="dialog__title">Уровень курса</p>
-            <select
-                v-model="form.difficulty"
-                class="dialog__input dialog__select"
-                :disabled="isDisabled"
-            >
-                <option
-                    v-for="option in difficultyOptions"
-                    :key="option.value"
-                    :value="option.value"
-                >
-                    {{ option.label }}
-                </option>
-            </select>
-        </div>
 
         <div class="dialog__component">
             <p class="dialog__title">Преподаватели</p>

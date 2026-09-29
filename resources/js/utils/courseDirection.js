@@ -19,3 +19,7 @@ export function getDirectionCardClass(direction) {
 
   return DIRECTION_CARD_CLASSES[(id - 1) % DIRECTION_CARD_CLASSES.length];
 }
+
+export function getDirectionBlockClass(direction) {
+  return getDirectionCardClass(direction).replace("course__card_bg-", "block-info_bg-");
+}

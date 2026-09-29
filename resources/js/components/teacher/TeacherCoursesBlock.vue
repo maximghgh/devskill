@@ -72,7 +72,6 @@
                             <th>Активен</th>
                             <th>Дата создания</th>
                             <th>Участники</th>
-                            <th>Уровень</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -97,12 +96,6 @@
                             <td>Да</td>
                             <td>{{ formatBirthday(course.created_at) }}</td>
                             <td>0</td>
-
-                            <td>
-                                <div class="users-role-pill" :class="difficultyClass(course.difficulty)">
-                                    {{ difficultyLabel(course.difficulty) }}
-                                </div>
-                            </td>
 
                             <td class="hadle">
                                 <div class="tooltip-container">
@@ -184,8 +177,6 @@ import { ref, computed, watch } from "vue";
 import axios from "axios";
 import { globalNotification } from "../../globalNotification";
 import { useDateFormatters } from "../admin/utils/useDateFormatters";
-import { useDifficultyLabel } from "../admin/utils/useDifficultyLabel";
-import { getCourseDifficultyBadgeClass } from "@/utils/courseDifficulty";
 
 const selectIcon = new URL("../../../img/admin/select.svg", import.meta.url)
     .href;
@@ -204,11 +195,6 @@ const emit = defineEmits([
 ]);
 
 const { formatBirthday } = useDateFormatters();
-const { difficultyLabel } = useDifficultyLabel();
-
-function difficultyClass(diff) {
-    return getCourseDifficultyBadgeClass(diff);
-}
 
 function setCourses(next) {
     emit("update:courses", next);

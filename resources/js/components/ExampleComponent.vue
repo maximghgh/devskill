@@ -147,9 +147,6 @@
                                         </div>
                                         <div class="course__card-buttons">
                                             <div class="course__card-price">
-                                                <p class="course__card-desc">
-                                                    {{ difficultyTranslation[course.difficulty] }}
-                                                </p>
                                                 <span>{{ course.price }} P</span>
                                             </div>
                                             <div class="menu__button">
@@ -190,7 +187,7 @@
                                                 <!-- info -->
                                                 <div
                                                     class="block-info"
-                                                    :class="selectedCourse ? difficultyBgClass[selectedCourse.difficulty] : ''"
+                                                    :class="selectedCourse ? getDirectionBlockClass(selectedCourse.direction) : ''"
                                                 >
                                                     <div class="block__top">
                                                         <div class="block__logo">
@@ -206,10 +203,6 @@
                                                         </p>
                                                     </div>
                                                     <div class="block__bottom">
-                                                        <p class="block__difficul--level">
-                                                            Уровень:&nbsp;
-                                                            {{ difficultyTranslation[selectedCourse.difficulty] }}
-                                                        </p>
                                                         <div class="block__price">
                                                             <p>Цена: {{ selectedCourse.price }} P</p>
                                                         </div>
@@ -338,12 +331,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import axios from "axios";
-import {
-  createCourseDifficultyDictionary,
-  getCourseDifficultyBlockClass,
-  getCourseDifficultyLabel,
-} from "@/utils/courseDifficulty";
-import { getDirectionCardClass } from "@/utils/courseDirection";
+import { getDirectionCardClass, getDirectionBlockClass } from "@/utils/courseDirection";
 import { getCourseCardImageUrl } from "@/utils/courseImage";
 import { renderFaqAnswer } from "@/utils/editorContent";
 
@@ -412,12 +400,6 @@ const selectedDirections = ref([]);
 const selectedLanguages = computed(() =>
   languages.value.filter((l) => l.checked).map((l) => l.id)
 );
-
-/* ------------------------------------------------------------------ */
-/* 5. Справочники (словарики)                                         */
-/* ------------------------------------------------------------------ */
-const difficultyTranslation = createCourseDifficultyDictionary(getCourseDifficultyLabel);
-const difficultyBgClass = createCourseDifficultyDictionary(getCourseDifficultyBlockClass);
 
 /* ------------------------------------------------------------------ */
 /* 6. Модалка покупки/консультации                                    */
@@ -1003,6 +985,15 @@ function scrollToCourse() {
 }
 .block-info_bg-green {
     background-color: #5bcaa7;
+}
+.block-info_bg-blue {
+    background-color: #269aca;
+}
+.block-info_bg-plum {
+    background-color: #9a6ab8;
+}
+.block-info_bg-teal {
+    background-color: #4aa8a0;
 }
 
 .block-info h2 {

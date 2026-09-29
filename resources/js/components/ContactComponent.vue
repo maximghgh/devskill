@@ -5,6 +5,31 @@
                 <section class="contacts">
                     <div class="contacts__inner">
                         <p class="contacts__name">Контакты</p>
+                        <div class="contacts-main">
+                            <p class="contacts-lead">По всем вопросам:</p>
+                            <div class="contacts-grid">
+                                <a
+                                    v-for="phone in phones"
+                                    :key="phone.href"
+                                    class="contacts-item"
+                                    :href="`tel:${phone.href}`"
+                                >
+                                    <span class="contacts-item__icon">📞</span>
+                                    <span class="contacts-item__text">{{ phone.label }}</span>
+                                </a>
+                                <a
+                                    class="contacts-item"
+                                    href="https://vk.ru/istuschooluniverity"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <span class="contacts-item__icon">📲</span>
+                                    <span class="contacts-item__text">
+                                        ВК: vk.ru/istuschooluniverity
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
                         <div class="contacts__content">
                             <div class="contacts__block">
                                 <div class="contacts__img">
@@ -242,6 +267,12 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 
+const phones = [
+    { label: "57-60-30", href: "+73412576030" },
+    { label: "+7 982 117 60 30", href: "+79821176030" },
+    { label: "+7 982 990 37 89", href: "+79829903789" },
+];
+
 const user = ref(null);
 const isAuthenticated = computed(() => Boolean(user.value && user.value.id));
 const message = ref("");
@@ -300,3 +331,40 @@ const submitSupportRequest = async () => {
     }
 };
 </script>
+
+<style scoped>
+.contacts-lead {
+    margin: 0 0 20px;
+    font-size: 1.0625rem;
+    color: #4b5563;
+}
+.contacts-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.contacts-item {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 20px;
+    border-radius: 14px;
+    background-color: #f1f0fa;
+    font-size: 1.0625rem;
+    color: #2b2b3a;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+.contacts-item:hover {
+    background-color: #e6e3f5;
+}
+.contacts-item__icon {
+    flex: 0 0 auto;
+    font-size: 1.25rem;
+}
+.contacts-item__text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+</style>
