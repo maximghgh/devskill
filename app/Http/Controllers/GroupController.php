@@ -4,8 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Group;
+use App\Models\CourseApplication;
+use App\Models\Purchase;
+use App\Models\User;
+use App\Services\CourseAccessService;
 use App\Models\Topic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class GroupController extends Controller
 {
@@ -38,42 +44,30 @@ class GroupController extends Controller
         return response()->json($this->withTopicIds($group));
     }
 
+    public function students(Course $course)
+    {
+        $memberships = DB::table('group_students')
+            ->join('groups', 'groups.id', '=', 'group_students.group_id')
+            ->where('groups.course_id', $course->id)
+            ->select('group_students.user_id', 'groups.id', 'groups.name_group')
+            ->get()->groupBy('user_id');
+        $accessIds = Purchase::where('course_id', $course->id)->pluck('user_id')->flip();
+
+        $students = User::where(function ($query) use ($memberships) {
+            $query->where('role', 1)->orWhereIn('id', $memberships->keys());
+        })->orderBy('name')->orderBy('id')->get(['id', 'name', 'login', 'email'])
+            ->map(function (User $student) use ($memberships, $accessIds) {
+                $student->setAttribute('has_access', $accessIds->has($student->id));
+                $student->setAttribute('groups', $memberships->get($student->id, collect())->values());
+                return $student;
+            });
+
+        return response()->json($students);
+    }
+
     public function store(Request $request, Course $course)
     {
-        $validated = $request->validate([
-            'name_group' => 'required|string|max:255',
-            'student_ids' => 'array',
-            'student_ids.*' => 'integer|exists:users,id',
-            'topic_ids' => 'array',
-            'topic_ids.*' => 'integer',
-        ]);
-
-        $studentIds = $validated['student_ids'] ?? [];
-
-        $group = Group::create([
-            'name_group' => $validated['name_group'],
-            'course_id' => $course->id,
-            'students_count' => count($studentIds),
-        ]);
-
-        if (!empty($studentIds)) {
-            $group->students()->sync($studentIds);
-        }
-
-        // Набор не передан — открываем первую тему курса.
-        // Пустой набор означал бы, что зачисленный в группу ученик сразу
-        // теряет доступ ко всему курсу; явно переданный пустой массив уважаем.
-        $group->topics()->sync(
-            array_key_exists('topic_ids', $validated)
-                ? $this->courseTopicIds($course, $validated['topic_ids'])
-                : $this->firstTopicId($course)
-        );
-
-        $group->load('topics:id');
-
-        return response()->json([
-            'group' => $this->withTopicIds($group),
-        ], 201);
+        return $this->saveGroup($request, $course);
     }
 
     public function update(Request $request, Course $course, Group $group)
@@ -82,31 +76,112 @@ class GroupController extends Controller
             return response()->json(['message' => 'Group not found'], 404);
         }
 
+        return $this->saveGroup($request, $course, $group);
+    }
+
+    private function saveGroup(Request $request, Course $course, ?Group $group = null)
+    {
         $validated = $request->validate([
             'name_group' => 'required|string|max:255',
-            'student_ids' => 'array',
-            'student_ids.*' => 'integer|exists:users,id',
-            'topic_ids' => 'array',
+            'student_ids' => 'sometimes|array',
+            'student_ids.*' => 'integer|distinct|exists:users,id',
+            'expected_student_ids' => 'sometimes|array',
+            'expected_student_ids.*' => 'integer|distinct',
+            'topic_ids' => 'sometimes|array',
             'topic_ids.*' => 'integer',
         ]);
 
-        $studentIds = $validated['student_ids'] ?? [];
+        $isNew = !$group;
+        $notifications = [];
+        $access = app(CourseAccessService::class);
 
-        $group->name_group = $validated['name_group'];
-        $group->students_count = count($studentIds);
-        $group->save();
+        $group = DB::transaction(function () use ($course, $group, $validated, $access, &$notifications) {
+            Course::whereKey($course->id)->lockForUpdate()->firstOrFail();
+            if ($group) {
+                $group = Group::whereKey($group->id)->lockForUpdate()->firstOrFail();
+            }
+            $previousIds = $group ? $group->students()->pluck('users.id')->all() : [];
+            if ($group && array_key_exists('expected_student_ids', $validated)) {
+                $expectedIds = array_map('intval', $validated['expected_student_ids']);
+                $currentIds = array_map('intval', $previousIds);
+                sort($expectedIds);
+                sort($currentIds);
+                if ($expectedIds !== $currentIds) {
+                    throw ValidationException::withMessages([
+                        'student_ids' => 'Состав группы уже изменился. Закройте и откройте окно группы заново, чтобы не потерять изменения.',
+                    ]);
+                }
+            }
+            $studentIds = array_map('intval', $validated['student_ids'] ?? $previousIds);
+            $addedIds = array_values(array_diff($studentIds, $previousIds));
+            $users = User::whereIn('id', $addedIds)->orderBy('id')->lockForUpdate()->get();
 
-        $group->students()->sync($studentIds);
+            if ($users->contains(fn (User $user) => (int) $user->role !== 1)) {
+                throw ValidationException::withMessages(['student_ids' => 'Добавлять в группу можно только учеников.']);
+            }
 
-        if (array_key_exists('topic_ids', $validated)) {
-            $group->topics()->sync($this->courseTopicIds($course, $validated['topic_ids']));
+            $otherGroup = Group::where('course_id', $course->id)
+                ->when($group, fn ($query) => $query->where('id', '!=', $group->id))
+                ->whereHas('students', fn ($query) => $query->whereIn('users.id', $addedIds))
+                ->first();
+            if ($otherGroup) {
+                throw ValidationException::withMessages([
+                    'student_ids' => 'Один из выбранных учеников уже в группе «' . $otherGroup->name_group . '». Сначала измените состав этой группы.',
+                ]);
+            }
+
+            $group ??= new Group(['course_id' => $course->id]);
+            $group->name_group = $validated['name_group'];
+            $group->students_count = count($studentIds);
+            $group->save();
+            $group->students()->sync($studentIds);
+
+            if (array_key_exists('topic_ids', $validated)) {
+                $group->topics()->sync($this->courseTopicIds($course, $validated['topic_ids']));
+            } elseif ($group->wasRecentlyCreated) {
+                $group->topics()->sync($this->firstTopicId($course));
+            }
+
+            foreach ($users as $user) {
+                $application = CourseApplication::where('course_id', $course->id)
+                    ->where('user_id', $user->id)
+                    ->orderByDesc('id')->lockForUpdate()->first();
+                if (!$application && $user->email) {
+                    $application = CourseApplication::where('course_id', $course->id)
+                        ->whereNull('user_id')->where('email', $user->email)
+                        ->orderByDesc('id')->lockForUpdate()->first();
+                }
+                $application ??= new CourseApplication([
+                    'course_id' => $course->id,
+                    'full_name' => $user->name,
+                    'phone' => $user->phone ?? '',
+                    'email' => $user->email ?? '',
+                ]);
+                $alreadyIssued = $application->status === CourseApplication::STATUS_ISSUED;
+                $application->user_id = $user->id;
+                $application->status = CourseApplication::STATUS_ISSUED;
+                $application->save();
+                $access->openCourseAccess($application);
+                if (!$alreadyIssued) {
+                    $notifications[] = $application;
+                }
+            }
+
+            return $group->load(['students:id,name', 'topics:id']);
+        });
+
+        if ($notifications) {
+            app()->terminating(function () use (&$notifications) {
+                $pending = $notifications;
+                $notifications = [];
+                $access = app(CourseAccessService::class);
+                foreach ($pending as $application) {
+                    $access->notifyCourseIssued($application);
+                }
+            });
         }
 
-        $group->load(['students:id,name', 'topics:id']);
-
-        return response()->json([
-            'group' => $this->withTopicIds($group),
-        ]);
+        return response()->json(['group' => $this->withTopicIds($group)], $isNew ? 201 : 200);
     }
 
     /**

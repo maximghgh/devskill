@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\CourseIssuedMail;
 use App\Models\Course;
 use App\Models\CourseApplication;
-use App\Models\Purchase;
+use App\Services\CourseAccessService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class CourseApplicationController extends Controller
 {
+    public function __construct(private CourseAccessService $access)
+    {
+    }
+
     /**
      * Заявка с карточки курса. Доступна и гостю: пользователя к заявке
      * админ привязывает вручную, когда заведёт ему аккаунт.
@@ -88,15 +89,15 @@ class CourseApplicationController extends Controller
         $application->save();
 
         if ($nextStatus === CourseApplication::STATUS_ISSUED) {
-            $this->openCourseAccess($application);
+            $this->access->openCourseAccess($application);
 
             if ($previousStatus !== CourseApplication::STATUS_ISSUED) {
-                $this->notifyCourseIssued($application);
+                $this->access->notifyCourseIssued($application);
             }
         }
 
         if ($nextStatus === CourseApplication::STATUS_CLOSED) {
-            $this->closeCourseAccess($application);
+            $this->access->closeCourseAccess($application);
         }
 
         $application->load([
@@ -127,51 +128,5 @@ class CourseApplicationController extends Controller
         $application->delete();
 
         return response()->json(['success' => true]);
-    }
-
-    /**
-     * Доступ к курсу по-прежнему определяется записью в purchases —
-     * заявка лишь добавляет этап перед её появлением.
-     */
-    private function openCourseAccess(CourseApplication $application): void
-    {
-        Purchase::firstOrCreate(
-            [
-                'user_id' => $application->user_id,
-                'course_id' => $application->course_id,
-            ],
-            [
-                'payment_method' => 'contract',
-                'status' => 'completed',
-            ]
-        );
-    }
-
-    /**
-     * Закрытие только снимает доступ. Прогресс по главам не трогаем:
-     * если курс откроют снова, он останется на месте.
-     */
-    private function closeCourseAccess(CourseApplication $application): void
-    {
-        if (!$application->user_id) {
-            return;
-        }
-
-        Purchase::where('user_id', $application->user_id)
-            ->where('course_id', $application->course_id)
-            ->delete();
-    }
-
-    /** Письмо не должно ронять смену статуса, если почта недоступна. */
-    private function notifyCourseIssued(CourseApplication $application): void
-    {
-        try {
-            Mail::to($application->email)->send(new CourseIssuedMail($application));
-        } catch (\Throwable $e) {
-            Log::warning('Не удалось отправить письмо о выдаче курса', [
-                'application_id' => $application->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
     }
 }

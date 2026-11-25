@@ -4,32 +4,20 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
-/**
- * Проверка входа администратора под аккаунтом пользователя.
- *
- * Работаем на реальной sqlite-базе внутри транзакции, которая
- * откатывается после каждого теста — данные проекта не меняются.
- */
 class ImpersonationTest extends TestCase
 {
+    use RefreshDatabase;
+
     private User $admin;
     private User $student;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        config([
-            'database.default' => 'sqlite',
-            'database.connections.sqlite.database' => base_path('database/database.sqlite'),
-        ]);
-        DB::purge('sqlite');
-
-        DB::beginTransaction();
 
         $this->admin = User::create([
             'name' => 'Тест Админ',
@@ -44,13 +32,6 @@ class ImpersonationTest extends TestCase
             'password' => Hash::make('secret123'),
             'role' => 1,
         ]);
-    }
-
-    protected function tearDown(): void
-    {
-        DB::rollBack();
-
-        parent::tearDown();
     }
 
     public function test_admin_can_impersonate_user_and_return_back(): void

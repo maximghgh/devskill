@@ -201,6 +201,9 @@ function clearUserSearchRequest() {
 }
 
 watch(activeId, (nextId) => {
+    if (nextId === "applications") {
+        loadApplications();
+    }
     if (nextId !== "users" && usersSearchRequest.value.term) {
         clearUserSearchRequest();
     }
